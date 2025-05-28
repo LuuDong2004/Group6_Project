@@ -11,15 +11,15 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-@Table(name="Movie")
+
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String name;
     private String image;
     private int duration; // thời lượng tính bằng phút
+    @Column(name = "release_date")
     private Date releaseDate;
     private double rating;
     private String genre; // thể loại phim
@@ -39,5 +39,20 @@ public class Movie {
         this.genre = genre;
         this.language = language;
         this.trailer = trailer;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", image='" + image + '\'' +
+                ", duration=" + duration +
+                ", releaseDate=" + releaseDate +
+                ", rating=" + rating +
+                ", genre='" + genre + '\'' +
+                ", language='" + language + '\'' +
+                ", trailer='" + trailer + '\'' +
+                '}';
     }
 }

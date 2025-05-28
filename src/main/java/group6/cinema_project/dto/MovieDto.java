@@ -5,17 +5,13 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.Date;
-
-
 @Getter
 @Setter
 @Builder
-@Entity
 public class MovieDto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+
     private String name;
     private String image;
     private int duration; // thời lượng tính bằng phút
@@ -31,8 +27,8 @@ public class MovieDto {
 
     }
 
-    public MovieDto(int id, String name, String image, int duration, Date releaseDate, double rating, String genre, String language, String trailer) {
-        this.id = id;
+    public MovieDto(String name, String image, int duration, Date releaseDate, double rating, String genre, String language, String trailer) {
+
         this.name = name;
         this.image = image;
         this.duration = duration;
@@ -44,6 +40,15 @@ public class MovieDto {
     }
 
     public Movie convertToModel() {
-        return Movie.builder().build();
+        return Movie.builder()
+                .name(this.name)
+                .image(this.image)
+                .duration(this.duration)
+                .releaseDate(this.releaseDate)
+                .rating(this.rating)
+                .genre(this.genre)
+                .language(this.language)
+                .trailer(this.trailer)
+                .build();
     }
 }

@@ -11,20 +11,25 @@ import java.util.List;
 public class MovieService {
     @Autowired
     private MovieRepository movieReponsitory;
+
     public MovieService() {
     }
+
     @Autowired
     public MovieService(MovieRepository movieReponsitory) {
+
         this.movieReponsitory = movieReponsitory;
     }
+
     public List<Movie> getAllMovies() {
         return movieReponsitory.findAll();
     }
+
     public Movie saveMovie(Movie movie) {
         return movieReponsitory.save(movie);
     }
-    public void deleteMoive(int id){
+
+    public void deleteMoive(int id) {
         movieReponsitory.deleteById(id);
     }
-
 }
