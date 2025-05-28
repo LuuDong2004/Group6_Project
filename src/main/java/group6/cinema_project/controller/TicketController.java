@@ -3,7 +3,8 @@ package group6.cinema_project.controller;
 import group6.cinema_project.dto.TicketDto;
 import group6.cinema_project.entity.Ticket;
 import group6.cinema_project.repository.TicketRepository;
-import group6.cinema_project.service.TicketService;
+import group6.cinema_project.service.ITicketService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequestMapping("api/tickets")
 public class TicketController {
     @Autowired
-    private TicketService ticketService;
+    private ITicketService ticketService;
 
     @GetMapping("get/{id}")
     public ResponseEntity<List<TicketDto>> getTicketById(@PathVariable(name = "id") Integer CustomerId) {
