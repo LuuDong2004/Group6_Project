@@ -1,9 +1,14 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 // Đây là class thời gian chiếu trong ngày theo từng ngày
 @Entity
 @Table(name ="ScreeningTimeSlotInDate")
+@Data
+@NoArgsConstructor
 public class ScreeningTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

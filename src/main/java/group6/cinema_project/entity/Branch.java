@@ -1,10 +1,10 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+
 import lombok.NoArgsConstructor;
 
-@Data
+
 @Entity
 @Table(name = "Branch")
 @NoArgsConstructor

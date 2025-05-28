@@ -2,14 +2,11 @@ package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Setter
-@Getter
-@Builder
+@Data
+@NoArgsConstructor
 @Table(name = "Ticket")
 public class Ticket {
     @Id
@@ -19,30 +16,18 @@ public class Ticket {
     private String description;
     private double price;
 
-//    @ManyToOne
-    @Column(name = "SeatId")
-    private int seatId;
+    @ManyToOne
+    @JoinColumn(name = "SeatId")
+    private Seat seat;
 
-//    @ManyToOne
-    @Column(name = "ScreeningScheduleId")
-    private int screeningScheduleId;
+    @ManyToOne
+    @JoinColumn(name = "ScreeningScheduleId")
+    private Schedule screeningSchedule;
 
     @ManyToOne
     @JoinColumn(name = "InvoiceId", nullable = false)
     private Invoice invoice;
 
 
-    public Ticket() {
 
-    }
-
-    public Ticket(int id, String qrCode, String description, double price, int seatId, int screeningScheduleId, Invoice invoice) {
-        this.id = id;
-        this.qrCode = qrCode;
-        this.description = description;
-        this.price = price;
-        this.seatId = seatId;
-        this.screeningScheduleId = screeningScheduleId;
-        this.invoice = invoice;
-    }
 }

@@ -9,8 +9,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository <Ticket, Integer>{
-    List<Ticket> findTicketsByScreeningScheduleId(int screeningScheduleId);
-    List<Ticket> findTicketsByScreeningScheduleIdAndSeatId(int screeningScheduleId, int seatId);
+
+    @Query("SELECT t FROM Ticket t WHERE t.screeningSchedule.id = :scheduleId")
+    List<Ticket> findTicketsByScreeningScheduleId(@Param("scheduleId") int scheduleId);
+
+//    List<Ticket> findTicketsByScreeningScheduleIdAndSeatId(int screeningScheduleId, int seatId);
 
     @Query("SELECT t FROM Ticket t WHERE t.invoice.user.id = :customerId")
     List<Ticket> findTicketsByCustomerId(@Param("customerId") int customerId);

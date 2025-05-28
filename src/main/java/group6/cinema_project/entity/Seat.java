@@ -20,7 +20,7 @@ public class Seat {
     private int row;
     @ManyToOne
     @JoinColumn(name = "screeningRoomId")
-    private ScreeningRoom Room;
+    private ScreeningRoom room;
 
     public Seat() {
     }
@@ -29,6 +29,6 @@ public class Seat {
         this.id = id;
         this.name = name;
         this.row = row;
-        Room = room;
+        room = room;
     }
 }
