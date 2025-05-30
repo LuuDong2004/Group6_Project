@@ -49,9 +49,7 @@ public class SeatService implements ISeatService {
 //            }
 //            return seatDto;
 //        }).collect(Collectors.toList());
-//
 //        return filteredSeats;
-
         // Lấy lịch chiếu với kiểm tra null phù hợp
         var schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với id: " + scheduleId));
@@ -59,7 +57,7 @@ public class SeatService implements ISeatService {
         ScreeningRoom room = schedule.getScreeningRoom();
         List<Seat> listSeat = seatRepository.findSeatsByScreeningRoomId(room.getId());
 
-        // Lấy danh sách ID ghế đã được đặt một cách hiệu quả hơn
+        // Lấy danh sách ID ghế đã được đặt
         Set<Integer> occupiedSeatIds = ticketRepository.findTicketsByScreeningScheduleId(scheduleId)
                 .stream()
                 .map(ticket -> ticket.getSeat().getId())

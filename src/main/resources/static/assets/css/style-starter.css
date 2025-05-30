@@ -19686,4 +19686,87 @@ button.closebtn {
     content: "Loading...";
   }
 }
+
 /* Loading ends */
+/*thêm mới bởi đông*/
+/* Thẻ cha .box16 */
+.box16 {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+
+.box16 img {
+  width: 100%;
+  display: block;
+  border-radius: 5px; /* Tùy chọn nếu cần góc bo tròn cho ảnh */
+}
+
+/* Tên phim và thời gian luôn hiển thị */
+.box-content .title {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.box-content .post {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Nút mặc định ẩn */
+.action-buttons {
+  position: absolute; /* Định vị tuyệt đối bên trong cha .box16 */
+  inset: 0; /* Dùng inset để thiết lập toàn bộ vị trí trong cha, tự động căn giữa */
+  display: none; /* Nút mặc định ẩn */
+  flex-direction: column; /* Xếp nút theo hàng dọc */
+  justify-content: center; /* Căn giữa các nút theo chiều dọc */
+  align-items: center; /* Căn giữa chính xác nút theo chiều ngang */
+  gap: 15px; /* Khoảng cách giữa các nút */
+}
+
+
+/* Hiển thị nút khi di chuột */
+.box16:hover .action-buttons {
+  display: flex; /* Hiển thị khi hover */
+}
+
+/* Style cho nút */
+.action-buttons {
+  position: absolute; /* Định vị tuyệt đối trong vùng cha */
+  inset: 0; /* Chiếm toàn bộ không gian của .box16 */
+  display: none; /* Mặc định ẩn */
+  flex-direction: column; /* Xếp nút theo hàng dọc */
+  justify-content: flex-end; /* Đẩy nút lên trên */
+  align-items: center; /* Căn giữa chính xác theo chiều ngang */
+  transform: translateY(-60%); /* Dịch vùng nút lên trên */
+  gap: 15px; /* Khoảng cách giữa các nút */
+}
+
+
+/* Màu sắc Đặt vé */
+.action-buttons .btn-success {
+  background-color: #28a745; /* Màu xanh lá cây */
+  border: none;
+  color: white;
+}
+
+.action-buttons .btn-success:hover {
+  background-color: #218838; /* Xanh lá cây đậm hơn khi hover */
+  transform: scale(1.1); /* Phóng to nhẹ khi hover */
+}
+
+/* Màu sắc Chi tiết */
+.action-buttons .btn-danger {
+  background-color: #dc3545; /* Màu đỏ */
+  border: none;
+  color: white;
+}
+
+.action-buttons .btn-danger:hover {
+  background-color: #c82333; /* Đỏ đậm hơn khi hover */
+  transform: scale(1.1); /* Phóng to nhẹ khi hover */
+}

@@ -17,6 +17,7 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+    @Column(name = "image")
     private String image;
     private int duration; // thời lượng tính bằng phút
     @Column(name = "release_date")

@@ -16,5 +16,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
     List<LocalTime> getStartTimeByMovieIdAndBranchId(
             @Param("movieId") Integer movieId,
             @Param("branchId") Integer branchId);
-
 }

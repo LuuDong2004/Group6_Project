@@ -35,5 +35,4 @@ public class TicketService implements ITicketService {
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class))
                 .collect(Collectors.toList());
     }
-
 }

@@ -1,15 +1,20 @@
 <!doctype html>
 <html lang="zxx">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Home</title>
+	<link rel="stylesheet" th:href="@{/assets/css/style-starter.css}">
 
 	<link rel="stylesheet" href="assets/css/style-starter.css">
-	<link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
-		rel="stylesheet">
+<!--	<link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"-->
+<!--		rel="stylesheet">-->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
 </head>
 
 <body>
@@ -21,7 +26,7 @@
 			<div class="container">
 				<h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
 							aria-hidden="true"></span>
-						LVD</a></h1>
+						MyShowz</a></h1>
 				<!-- if logo is image enable this   
 						<a class="navbar-brand" href="#index.html">
 							<img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
@@ -40,7 +45,7 @@
 							<a class="nav-link" href="index.html">Home</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="movies.html">Movies</a>
+							<a class="nav-link" href="/movie/view">Movies</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="about.html">About</a>
@@ -489,7 +494,7 @@
 									<h3>Jumanji: The Next Level</h3>
 									<p>2019 ‧ Comedy/Action ‧ 2h 3m</p>
 									<a class="watch" href="movies.html"><span class="fa fa-play"
-																			  aria-hidden="true"></span>
+											aria-hidden="true"></span>
 										Watch Trailer</a>
 								</div>
 							</div>
@@ -505,7 +510,7 @@
 									<h3>Dolittle</h3>
 									<p>2020 ‧ Family/Adventure ‧ 1h 41m</p>
 									<a class="watch" href="movies.html"><span class="fa fa-play"
-																			  aria-hidden="true"></span>
+											aria-hidden="true"></span>
 										Watch Trailer</a>
 								</div>
 							</div>
@@ -521,7 +526,7 @@
 									<h3>Bad Boys for Life</h3>
 									<p>2020 ‧ Comedy/Action ‧ 2h 4m</p>
 									<a class="watch" href="movies.html"><span class="fa fa-play"
-																			  aria-hidden="true"></span>
+											aria-hidden="true"></span>
 										Watch Trailer</a>
 								</div>
 							</div>
@@ -541,19 +546,19 @@
 							<div class="row footer-about">
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
 									<a href="movies.html"><img class="img-fluid" src="assets/images/banner1.jpg"
-															   alt=""></a>
+											alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
 									<a href="movies.html"><img class="img-fluid" src="assets/images/banner2.jpg"
-															   alt=""></a>
+											alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
 									<a href="movies.html"><img class="img-fluid" src="assets/images/banner3.jpg"
-															   alt=""></a>
+											alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
 									<a href="movies.html"><img class="img-fluid" src="assets/images/banner4.jpg"
-															   alt=""></a>
+											alt=""></a>
 								</div>
 							</div>
 							<div class="row footer-links">
