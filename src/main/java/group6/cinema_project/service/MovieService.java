@@ -2,11 +2,19 @@ package group6.cinema_project.service;
 
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.entity.Movie;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+
 import org.springframework.stereotype.Service;
 import group6.cinema_project.repository.MovieRepository;
-import org.springframework.ui.Model;
+
+
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,11 +42,30 @@ public class MovieService implements IMovieService {
                 .map(movie -> modelMapper.map(movie , MovieDto.class))
                 .collect(Collectors.toList());
     }
+    @Override
     public List<MovieDto> getMoviesByGenre(String gener){
-        List<Movie> movies = movieReponsitory.getMoviesByGenre("Hoạt Hình");
+        List<Movie> movies = movieReponsitory.getMoviesByGenre(gener);
 
         return movies.stream()
                 .map(movie -> modelMapper.map(movie, MovieDto.class))
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<MovieDto> getMoviesByTop3Rating(){
+        Pageable top3 = PageRequest.of(0, 3);
+        List<Movie> movies = movieReponsitory.getMoviesByTop3Rating(top3);
+        return movies.stream()
+                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<MovieDto> getMoviesWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Movie> movies = movieReponsitory.findAll(pageable).getContent();
+        return movies.stream()
+                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
+
+
 }

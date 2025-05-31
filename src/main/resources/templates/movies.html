@@ -24,7 +24,7 @@
         <div class="container">
             <h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
                                                                 aria-hidden="true"></span>
-                MyShowz </a></h1>
+                Lưu Văn Đông</a></h1>
             <!-- if logo is image enable this
                         <a class="navbar-brand" href="#index.html">
                             <img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
@@ -43,7 +43,7 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="movies.html">Movies</a>
+                        <a class="nav-link" href="/movie/view">Movies</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="about.html">About</a>
@@ -129,115 +129,31 @@
 </div>
 <!--/movies -->
 <!--grids-sec1-->
+<!--Đông-topMovie-->
 <section class="w3l-grids">
     <div class="grids-main py-4">
         <div class="container py-lg-4">
             <div class="headerhny-title">
-                <h3 class="hny-title">Popular Movies</h3>
+                <h3 class="hny-title">Top Movies</h3>
             </div>
             <div class="owl-four owl-carousel owl-theme">
-                <div class="item vhny-grid">
+                <!-- Loop qua danh sách các bộ phim -->
+                <div th:each="movie : ${topMovies}" class="item vhny-grid">
                     <div class="box16">
-                        <a href="#">
+                        <a>
                             <figure>
-                                <img class="img-fluid" src="assets/images/banner1.jpg" alt="">
+                                <!-- Hiển thị hình ảnh của phim -->
+                                <img class="img-fluid" th:src="${movie.image}">
                             </figure>
                             <div class="box-content">
-                                <h3 class="title">End Game</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <div class="box16 mt-4">
-                        <a href="#">
-                            <figure>
-                                <img class="img-fluid" src="assets/images/banner2.jpg" alt="">
-                            </figure>
-                            <div class="box-content">
-                                <h3 class="title">Frozen 2</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-                <div class="item vhny-grid">
-                    <div class="box16">
-                        <a href="#">
-                            <figure>
-                                <img class="img-fluid" src="assets/images/banner3.jpg" alt="">
-                            </figure>
-                            <div class="box-content">
-                                <h3 class="title">Doctor Sleep</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <div class="box16 mt-4">
-                        <a href="#">
-                            <figure>
-                                <img class="img-fluid" src="assets/images/banner4.jpg" alt="">
-                            </figure>
-                            <div class="box-content">
-                                <h3 class="title">Toy story 4</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-                <div class="item vhny-grid">
-                    <div class="box16">
-                        <a href="#">
-                            <figure>
-                                <img class="img-fluid" src="assets/images/banner1.jpg" alt="">
-
-                            </figure>
-                            <div class="box-content">
-                                <h3 class="title">Rocketman</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <div class="box16 mt-4">
-                        <a href="#">
-                            <figure>
-                                <img class="img-fluid" src="assets/images/banner2.jpg" alt="">
-                            </figure>
-                            <div class="box-content">
-                                <h3 class="title">Frozen 2</h3>
-                                <h4> <span class="post"><span class="fa fa-clock-o"> </span> 1 Hr 4min
-
-										</span>
-
+                                <!-- Hiển thị tên của phim -->
+                                <h3 class="title" th:text="${movie.name}"></h3>
+                                <h4>
+                                    <span class="post">
+                                        <!-- Hiển thị thời lượng phim -->
+                                        <span class="fa fa-clock-o"></span>
+                                        <span th:text="${movie.duration + ' mins'}"></span>
+                                    </span>
                                     <span class="post fa fa-heart text-right"></span>
                                 </h4>
                             </div>
@@ -249,7 +165,9 @@
         </div>
     </div>
 </section>
+
 <!-- Đông_Tất cả phim-->
+<!-- Phần danh sách toàn bộ phim -->
 <section class="w3l-grids">
     <div class="grids-main py-5">
         <div class="container py-lg-4">
@@ -260,63 +178,68 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <!-- Loop qua từng movie -->
-                <div th:each="movie : ${movies}" class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div id="movie-list" class="row">
+                <!-- Loop danh sách phim: Movies -->
+                <div th:each="movie : ${Movies}" class="col-lg-3 col-md-4 col-sm-6 mb-4">
                     <div class="box16 mb-0">
                         <figure>
                             <img th:src="${movie.image}" class="img-fluid" alt="Movie Image">
                         </figure>
                         <div class="box-content">
-                            <!-- Thông tin hiển thị sẵn -->
                             <h3 th:text="${movie.name}" class="title"></h3>
                             <h4>
                                 <span th:text="${movie.duration + ' Phút'}" class="post">
                                     <span class="fa fa-clock-o"></span>
                                 </span>
                             </h4>
-
-                            <!-- Nút hiện khi di chuột -->
                             <div class="action-buttons">
-                                <a href="#" class="btn btn-success mb-2">
-                                    Đặt vé
-                                </a>
-                                <a href="#" class="btn btn-danger">
-                                    Chi tiết
-                                </a>
+                                <a href="#" class="btn btn-success mb-2">Đặt vé</a>
+                                <a href="#" class="btn btn-danger">Chi tiết</a>
                             </div>
                         </div>
                     </div>
-                </div> <!-- Đóng col-lg-3 -->
-            </div> <!-- Đóng row -->
-        </div> <!-- Đóng container -->
-    </div> <!-- Đóng grids-main -->
+                </div>
+            </div>
+            <!-- Nút More -->
+            <div class="text-center mt-4">
+                <button id="loadMore" class="btn btn-primary" data-page="1">More</button>
+            </div>
+        </div>
+    </div>
 </section>
 
-
-<!--Đông_Kid movie-->
+<!-- Phần danh sách phim theo thể loại -->
 <section class="w3l-albums py-5" id="projects">
     <div class="container py-lg-4">
         <div class="row">
             <div class="col-lg-12 mx-auto">
-                <!--Horizontal Tab-->
+                <!-- Tabs lựa chọn thể loại -->
                 <div id="parentHorizontalTab">
+
                     <ul class="resp-tabs-list hor_1">
-                        <li>Trend Movies</li>
-                        <li>Action Movies</li>
-                        <li>Kid Movies</li>
+                        <!-- Tab cho Kid Movies -->
+                        <li th:classappend="${selected == 'Kid'} ? 'resp-tab-active'">
+                            <a href="/movie/view?genre=Kid" style="color: black;">Kid Movies</a>
+                        </li>
+                        <!-- Tab cho Love Movies -->
+                        <li th:classappend="${selected == 'Love'} ? 'resp-tab-active'">
+                            <a href="/movie/view?genre=Love" style="color: black;">Love Movies</a>
+                        </li>
+                        <!-- Tab cho Action Movies -->
+                        <li th:classappend="${selected == 'Action'} ? 'resp-tab-active'">
+                            <a href="/movie/view?genre=Action" style="color: black;">Action Movies</a>
+                        </li>
                         <div class="clear"></div>
                     </ul>
-
                     <div class="resp-tabs-container hor_1">
                         <div class="albums-content">
                             <div class="row">
-                                <!--/set1-->
-                                <div th:each="movie : ${moviesKid}" class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
+                                <!-- Hiển thị danh sách phim theo thể loại -->
+                                <div th:each="movie : ${filteredMovies}"  class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
                                     <div class="slider-info">
                                         <div class="img-circle">
                                             <a href="movies.html">
-                                                <img th:src="${movie.image}" class="img-fluid"/>
+                                                <img th:src="${movie.image}" class="img-fluid" />
                                                 <div class="overlay-icon">
                                                     <span class="fa fa-play video-icon" aria-hidden="true"></span>
                                                 </div>
@@ -327,16 +250,16 @@
                                             <a th:text="${movie.name}" class="author-book-title" href="movies.html"></a>
                                             <br>
                                             <span class="post">
-                                                    <span th:text="${movie.duration}" class="fa fa-clock-o"></span>
+                                                <span th:text="${movie.duration}" class="fa fa-clock-o"></span>
                                                 <span class="post fa fa-heart text-right"></span>
-                                                </span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-
+                                <!-- Không hiển thị thông báo "Không tìm thấy phim nào" -->
                             </div>
                         </div>
-                    </div>
+                    </div> <!-- Đóng resp-tabs-container -->
                 </div>
             </div>
         </div>

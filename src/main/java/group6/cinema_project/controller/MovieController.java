@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -17,14 +18,26 @@ public class MovieController {
     IMovieService movieService;
 
     @GetMapping("view")
-    public String getAllMovies(Model model) {
-        List<MovieDto> movies = movieService.getAllMovie();
-        model.addAttribute("movies", movies);
+    public String getAllMoviesAndByGenre(@RequestParam(value = "genre", required = false) String genre, Model model) {
 
-        List<MovieDto> moviesKid = movieService.getMoviesByGenre("Hoạt Hình");
-        model.addAttribute("moviesKid", moviesKid);
+        List<MovieDto> moviesByRate = movieService.getMoviesByTop3Rating();
+        model.addAttribute("topMovies", moviesByRate);
+        moviesByRate.forEach(movie -> {
+            System.out.println("Movie: " + movie.getName());
+        });
+        // Lấy tất cả các phim
+        List<MovieDto> allMovies = movieService.getAllMovie();
+        model.addAttribute("Movies", allMovies);
+
+        // Lấy danh sách phim theo thể loại
+        List<MovieDto> filteredMovies = movieService.getMoviesByGenre(genre);
+        model.addAttribute("filteredMovies", filteredMovies);
+        model.addAttribute("selected", genre);
 
         return "movies";
     }
+
+
+
 
 }
