@@ -11,7 +11,7 @@ import group6.cinema_project.service.MovieService; // Thay thế bằng package 
 import java.util.List;
 
 @Controller
-@RequestMapping("/movies") // Tiền tố chung cho các request liên quan đến Movie
+@RequestMapping("/admin/movies") // Tiền tố chung cho các request liên quan đến Movie
 @RequiredArgsConstructor // Lombok inject MovieService
 public class MovieController {
 
@@ -22,11 +22,12 @@ public class MovieController {
      * @param model Đối tượng Model để truyền dữ liệu tới view.
      * @return Tên của view (Thymeleaf template), trong trường hợp này là "index".
      */
-    @GetMapping({"", "/", "/index"}) // Có thể truy cập qua /movies, /movies/, /movies/index
+    @GetMapping({"", "/", "/list"}) // Có thể truy cập qua /movies, /movies/, /movies/index
     public String getAllMovies(Model model) {
         List<Movie> movies = movieService.getAllMovies();
+        System.out.println("Movies: " + movies); // In ra danh sách phim để kiểm tra
         model.addAttribute("movies", movies); // Thêm danh sách phim vào model
-        return "index"; // Trả về tên file template: index.html
+        return "admin_dashboard"; // Trả về tên file template: index.html
     }
 
     // Các hàm khác cho CRUD sẽ được thêm vào đây (ví dụ: showMovieById, createMovieForm, ...)
