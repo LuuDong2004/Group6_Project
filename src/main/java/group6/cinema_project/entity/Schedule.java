@@ -37,7 +37,4 @@ public class Schedule {
     @ManyToOne
     @JoinColumn(name = "BranchId")
     private Branch branch;
-
-
-
 }

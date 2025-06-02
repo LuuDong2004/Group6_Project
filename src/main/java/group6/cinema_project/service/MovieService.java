@@ -67,5 +67,12 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
+    public List<MovieDto> findMovieById(Integer moiveId){
+        List<Movie> movies = movieReponsitory.findMovieById(moiveId);
+        return movies.stream()
+                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
+
 
 }

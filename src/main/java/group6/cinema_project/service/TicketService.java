@@ -35,4 +35,10 @@ public class TicketService implements ITicketService {
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class))
                 .collect(Collectors.toList());
     }
+
+//    public List<TicketDto> getTicketByMovieId(Integer movieId) {
+//        System.out.println("Searching tickets for Movie ID: " + movieId);
+////        List<Ticket> tickets =
+//                return null;
+//    }
 }

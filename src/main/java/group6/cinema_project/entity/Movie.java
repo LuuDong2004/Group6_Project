@@ -26,6 +26,7 @@ public class Movie {
     private String genre; // thể loại phim
     private String language;
     private String trailer;
+    
     public Movie() {
 
     }

@@ -16,6 +16,6 @@ public class Date {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private LocalDate date;
+    private String date;
     private String desciption;
 }

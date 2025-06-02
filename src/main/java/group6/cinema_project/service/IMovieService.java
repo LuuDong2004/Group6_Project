@@ -10,5 +10,5 @@ public interface IMovieService {
     List<MovieDto> getAllMovie();
     List<MovieDto> getMoviesByTop3Rating();
     List<MovieDto> getMoviesWithPagination(int page, int size);
-
+    List<MovieDto> findMovieById(Integer movieId);
 }

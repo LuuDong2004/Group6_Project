@@ -130,42 +130,75 @@
 <!--/movies -->
 <!--grids-sec1-->
 <!--Đông-topMovie-->
+<!--<section class="w3l-grids">-->
+<!--    <div class="grids-main py-4">-->
+<!--        <div class="container py-lg-4">-->
+<!--            <div class="headerhny-title">-->
+<!--                <h3 class="hny-title">Top Movies</h3>-->
+<!--            </div>-->
+<!--            <div class="owl-four owl-carousel owl-theme">-->
+<!--                &lt;!&ndash; Loop qua danh sách các bộ phim &ndash;&gt;-->
+<!--                <div th:each="movie : ${topMovies}" class="item vhny-grid">-->
+<!--                    <div class="box16">-->
+<!--                        <a>-->
+<!--                            <figure>-->
+<!--                                <img class="img-fluid" th:src="${movie.image}">-->
+<!--                            </figure>-->
+<!--                            <div class="box-content">-->
+<!--                                <h3 class="title" th:text="${movie.name}"></h3>-->
+<!--                                <h4>-->
+<!--                                    <span class="post">-->
+<!--                                        <span class="fa fa-clock-o"></span>-->
+<!--                                        <span th:text="${movie.duration + ' mins'}"></span>-->
+<!--                                    </span>-->
+<!--                                    <span class="post fa fa-heart text-right"></span>-->
+<!--                                </h4>-->
+<!--                            </div>-->
+<!--                            <span class="fa fa-play video-icon" aria-hidden="true"></span>-->
+<!--                        </a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
+
 <section class="w3l-grids">
-    <div class="grids-main py-4">
+    <div class="grids-main py-5">
         <div class="container py-lg-4">
             <div class="headerhny-title">
-                <h3 class="hny-title">Top Movies</h3>
-            </div>
-            <div class="owl-four owl-carousel owl-theme">
-                <!-- Loop qua danh sách các bộ phim -->
-                <div th:each="movie : ${topMovies}" class="item vhny-grid">
-                    <div class="box16">
-                        <a>
-                            <figure>
-                                <!-- Hiển thị hình ảnh của phim -->
-                                <img class="img-fluid" th:src="${movie.image}">
-                            </figure>
-                            <div class="box-content">
-                                <!-- Hiển thị tên của phim -->
-                                <h3 class="title" th:text="${movie.name}"></h3>
-                                <h4>
-                                    <span class="post">
-                                        <!-- Hiển thị thời lượng phim -->
-                                        <span class="fa fa-clock-o"></span>
-                                        <span th:text="${movie.duration + ' mins'}"></span>
-                                    </span>
-                                    <span class="post fa fa-heart text-right"></span>
-                                </h4>
-                            </div>
-                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
-                        </a>
+                <div class="w3l-title-grids">
+                    <div class="headerhny-left">
+                        <h3 class="hny-title">Top Movies</h3>
                     </div>
                 </div>
             </div>
+            <div id="movie" class="row">
+                <!-- Loop danh sách phim: Movies -->
+                <div th:each="movie : ${topMovies}" class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="box16 mb-0">
+                        <figure>
+                            <img th:src="${movie.image}" class="img-fluid" alt="Movie Image">
+                        </figure>
+                        <div class="box-content">
+                            <h3 th:text="${movie.name}" class="title"></h3>
+                            <h4>
+                                <span th:text="${movie.duration + ' Phút'}" class="post">
+                                    <span class="fa fa-clock-o"></span>
+                                </span>
+                            </h4>
+                            <div class="action-buttons">
+                                <a th:href="@{/schedule/movie/{id}(id=${movie.id})}" >Đặt vé</a>
+                                <a href="#" class="btn btn-danger">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
-
 <!-- Đông_Tất cả phim-->
 <!-- Phần danh sách toàn bộ phim -->
 <section class="w3l-grids">
@@ -193,7 +226,7 @@
                                 </span>
                             </h4>
                             <div class="action-buttons">
-                                <a href="#" class="btn btn-success mb-2">Đặt vé</a>
+                                <a th:href="@{/schedule/movie/{id}(id=${movie.id})}" class="btn btn-success mb-2">Đặt vé</a>
                                 <a href="#" class="btn btn-danger">Chi tiết</a>
                             </div>
                         </div>
@@ -247,7 +280,7 @@
                                         </div>
                                         <div class="message">
                                             <p th:text="${movie.language}"></p>
-                                            <a th:text="${movie.name}" class="author-book-title" href="movies.html"></a>
+                                            <a th:text="${movie.name}" class="author-book-title" href="#"></a>
                                             <br>
                                             <span class="post">
                                                 <span th:text="${movie.duration}" class="fa fa-clock-o"></span>
@@ -522,3 +555,127 @@
 </script>
 
 <script src="assets/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let isShowingAll = false;
+    const movieList = $('#movie-list');
+    const loadMoreButton = $('#loadMore');
+    
+    // Xử lý sự kiện khi click vào nút "More" hoặc "Ẩn bớt"
+    loadMoreButton.click(function() {
+        if (!isShowingAll) {
+            // Đang hiển thị 8 phim đầu, chuyển sang hiển thị tất cả
+            loadAllMovies();
+        } else {
+            // Đang hiển thị tất cả, chuyển về hiển thị 8 phim đầu
+            loadInitialMovies();
+        }
+    });
+    
+    // Hàm load tất cả phim
+    function loadAllMovies() {
+        $.ajax({
+            url: '/movie/loadAll',
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: function() {
+                loadMoreButton.prop('disabled', true).text('Loading...');
+            },
+            success: function(data) {
+                if (data && data.length > 0) {
+                    // Xóa danh sách hiện tại
+                    movieList.empty();
+                    
+                    // Thêm tất cả phim vào danh sách
+                    renderMovies(data);
+                    
+                    // Cập nhật trạng thái và nút
+                    isShowingAll = true;
+                    loadMoreButton.text('Ẩn bớt').removeClass('btn-primary').addClass('btn-secondary');
+                }
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi tải dữ liệu!');
+            },
+            complete: function() {
+                loadMoreButton.prop('disabled', false);
+            }
+        });
+    }
+    
+    // Hàm load 8 phim đầu tiên
+    function loadInitialMovies() {
+        $.ajax({
+            url: '/movie/loadMore',
+            type: 'GET',
+            data: {
+                page: 0,
+                size: 8
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                loadMoreButton.prop('disabled', true).text('Loading...');
+            },
+            success: function(data) {
+                if (data && data.length > 0) {
+                    // Xóa danh sách hiện tại
+                    movieList.empty();
+                    
+                    // Thêm 8 phim đầu vào danh sách
+                    renderMovies(data);
+                    
+                    // Cập nhật trạng thái và nút
+                    isShowingAll = false;
+                    loadMoreButton.attr('data-page', 1); // Reset page counter
+                    loadMoreButton.text('More').removeClass('btn-secondary').addClass('btn-primary');
+                }
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi tải dữ liệu!');
+            },
+            complete: function() {
+                loadMoreButton.prop('disabled', false);
+            }
+        });
+    }
+    // Hàm render danh sách phim
+    function renderMovies(movies) {
+        movies.forEach(function(movie) {
+            const movieHtml = `
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="box16 mb-0">
+                    <figure>
+                        <img src="${movie.image}" class="img-fluid" alt="${movie.name}">
+                    </figure>
+                    <div class="box-content">
+                        <h3 class="title">${movie.name}</h3>
+                        <h4>
+                            <span class="post">
+                                <span class="fa fa-clock-o"></span>
+                                ${movie.duration} Phút
+                            </span>
+                        </h4>
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-success mb-2" onclick="bookTicket(${movie.id})">Đặt vé</a>
+                            <a href="#" class="btn btn-danger" onclick="showDetails(${movie.id})">Chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            movieList.append(movieHtml);
+        });
+    }
+});
+
+// // Các hàm phụ trợ (placeholder - cần thực hiện sau)
+function bookTicket(movieId) {
+    window.location.href = '/schedule/movie/' + movieId;
+    // Thêm code xử lý đặt vé
+}
+//
+// function showDetails(movieId) {
+//     console.log("Xem chi tiết phim ID:", movieId);
+//     // Thêm code xử lý hiển thị chi tiết
+// }
+</script>

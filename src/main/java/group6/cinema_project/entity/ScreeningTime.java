@@ -21,4 +21,5 @@ public class ScreeningTime {
     @ManyToOne
     @JoinColumn(name = "DateId")
     private Date date;
+    private String startTime;
 }

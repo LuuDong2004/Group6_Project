@@ -12,7 +12,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 public class MovieDto {
-
+    private int id;
     private String name;
     private String image;
     private int duration; // thời lượng tính bằng phút

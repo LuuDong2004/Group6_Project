@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ITicketService {
     List<TicketDto> getTicketsByCustomerId(Integer userId);
+//    List<TicketDto> getTicketByMovieId(Integer movieId);
 }

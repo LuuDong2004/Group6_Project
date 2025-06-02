@@ -1,505 +1,740 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ticket Booking</title>
-  <link rel="stylesheet" type="text/css" href="assets/css/style-starter.css">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
   <link rel="stylesheet" href="https://npmcdn.com/flickity@2/dist/flickity.css">
-  <link rel="stylesheet" type="text/css" href="assets/css/progress.css">
-
-  <link rel="stylesheet" type="text/css" href="assets/css/ticket-booking.css">
-
-  <!-- ..............For progress-bar............... -->
-  <link rel="stylesheet" type="text/css" href="assets/css/e-ticket.css">
-
-  <link rel="stylesheet" type="text/css" href="assets/css/payment.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/progress.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/ticket-booking.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/e-ticket.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/payment.css}" />
   <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+  <style>
+    /* Date selection styles - đặt ở trên đầu */
+    .date-carousel-container {
+      margin-bottom: 30px;
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 80px; /* Thêm khoảng cách từ header */
+    }
+
+    #date-carousel {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center; /* Căn giữa các ngày */
+      min-height: 100px;
+    }
+
+    .carousel-cell {
+      width: 80px;
+      height: 80px;
+      margin-right: 10px;
+      background: rgb(243, 235, 235);
+      border-radius: 8px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-cell:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .carousel-cell.selected {
+      background-color: #df0e62;
+      color: white;
+    }
+
+    .date-numeric {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .date-day {
+      font-size: 12px;
+    }
+
+    .date-selection {
+      text-align: center;
+    }
+
+    /* Movie info styles */
+    .movie-info-container {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      background-color: #f8f8f8;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .movie-poster {
+      width: 160px;
+      border-radius: 6px;
+      margin-right: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .movie-details {
+      flex: 1;
+    }
+
+    .movie-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .movie-meta {
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .movie-meta span {
+      margin-right: 15px;
+    }
+
+    .movie-synopsis {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    /* Cinema selection styles */
+    .cinema-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: flex-start;
+      margin-bottom: 30px;
+    }
+
+    .cinema-card {
+      border-radius: 8px;
+      padding: 18px 20px;
+      background-color: rgb(243, 235, 235);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 240px; /* Increased size */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .cinema-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .cinema-card.selected {
+      background-color: #df0e62;
+      color: white;
+      box-shadow: 0 4px 12px rgba(223, 14, 98, 0.4);
+    }
+
+    .cinema-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .cinema-address {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .date-selection, .cinema-selection, .time-selection {
+      display: block; /* Show all sections by default */
+      margin-bottom: 30px;
+    }
+
+    .show-element {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-heading {
+      margin-bottom: 20px;
+      margin-top: 10px;
+      color: #333;
+      font-size: 20px;
+      font-weight: 600;
+      border-left: 4px solid #df0e62;
+      padding-left: 10px;
+      text-align: left;
+    }
+
+    /* Button styles */
+    .action-button {
+      background-color: #df0e62;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      width: 250px;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .action-button:hover {
+      background-color: #c20a54;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .action-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Screen-time button styles */
+    .screen-time {
+      background-color: rgb(243, 235, 235);
+      border: none;
+      border-radius: 4px;
+      color: #333;
+      padding: 8px 12px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .screen-time:hover {
+      background-color: #e0e0e0;
+    }
+
+    .screen-time.selected {
+      background-color: #df0e62;
+      color: white;
+    }
+
+    /* Time slot styles */
+    .time-ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .time-li {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .time-li:last-child {
+      border-bottom: none;
+    }
+
+    .screens {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .time-btn {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    /* Flickity overrides để đảm bảo hiển thị ngang */
+    .flickity-enabled {
+      position: relative;
+    }
+
+    .flickity-enabled:focus {
+      outline: none;
+    }
+
+    .flickity-viewport {
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    .flickity-slider {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .cinema-grid {
+        justify-content: space-between;
+      }
+
+      .cinema-card {
+        width: calc(50% - 10px);
+      }
+
+      .movie-info-container {
+        flex-direction: column;
+      }
+
+      .movie-poster {
+        width: 100%;
+        max-width: 240px;
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+
+      #date-carousel {
+        min-height: 85px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cinema-card {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <header id="site-header" class="w3l-header fixed-top">
+<header id="site-header" class="w3l-header fixed-top">
+  <!--/nav-->
+  <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+    <div class="container">
+      <h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log" aria-hidden="true"></span>
+        MyShowz </a></h1>
 
-    <!--/nav-->
-    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
-      <div class="container">
-        <h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log" aria-hidden="true"></span>
-            MyShowz </a></h1>
-        
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        </div>
-
-        <div class="Login_SignUp" id="login_s">
-          <!-- style="font-size: 2rem ; display: inline-block; position: relative;" -->
-          <!-- <li class="nav-item"> -->
-          <a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
-          <!-- </li> -->
-        </div>
-        <!-- toggle switch for light and dark theme -->
-        <div class="mobile-position">
-          <nav class="navigation">
-            <div class="theme-switch-wrapper">
-              <label class="theme-switch" for="checkbox">
-                <input type="checkbox" id="checkbox">
-                <div class="mode-container">
-                  <i class="gg-sun"></i>
-                  <i class="gg-moon"></i>
-                </div>
-              </label>
-            </div>
-          </nav>
-        </div>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
       </div>
-    </nav>
-  </header>
 
-  <div class="container" id="progress-container-id">
-    <div class="row">
-      <div class="col">
-        <div class="px-0 pt-4 pb-0 mt-3 mb-3">
-          <form id="form">
-            <ul id="progressbar" class="progressbar-class">
-              <li class="active" id="step1">Show timing selection</li>
-              <li id="step2" class="not_active">Seat Selection</li>
-              <li id="step3" class="not_active">Payment</li>
-              <li id="step4" class="not_active">E-Ticket</li>
+      <div class="Login_SignUp" id="login_s">
+        <a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
+      </div>
+      <!-- toggle switch for light and dark theme -->
+      <div class="mobile-position">
+        <nav class="navigation">
+          <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="checkbox">
+              <input type="checkbox" id="checkbox">
+              <div class="mode-container">
+                <i class="gg-sun"></i>
+                <i class="gg-moon"></i>
+              </div>
+            </label>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="container" id="progress-container-id">
+  <div class="row">
+    <div class="col">
+      <div class="px-0 pt-4 pb-0 mt-3 mb-3">
+        <form id="booking-form">
+          <!-- Date selection first -->
+          <div class="date-selection" id="date-selection">
+            <h3 class="section-heading"></h3>
+            <div class="date-carousel-container">
+              <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }' id="date-carousel">
+                <!-- Date cells will be generated here by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Movie information second -->
+          <div th:each="movie: ${movie}" class="movie-info-container" id="movie-info">
+            <!-- Use the first movie in the schedules list -->
+            <img  th:src="${movie.image}" class="movie-poster"/>
+            <div class="movie-details">
+              <div class="movie-meta">
+                <span>Thời Lượng: <span th:text="${movie.duration}"></span></span><br>
+                <span>Ngôn ngữ: <span th:text="${movie.language}"></span></span><br>
+                <span>Thể Loại: <span th:text="${movie.genre}"></span></span><br>
+                <span>Đánh Giá: <span th:text="${movie.rating}"></span></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="screen-select-div">
+            <!-- Cinema selection third -->
+            <div class="cinema-selection" id="cinema-selection">
+              <h3 class="section-heading">Select Cinema</h3>
+              <div class="cinema-grid" id="cinema-grid">
+                <!-- Cinema cards from Thymeleaf - keeping your original iteration -->
+                <div th:each="schedule : ${schedules}" class="cinema-card"
+                     th:id="'cinema-' + ${schedule.branch.id}"
+                     th:data-branch-id="${schedule.branch.id}"
+                     onclick="selectCinema(this)">
+                  <div class="cinema-name" th:text="${schedule.branch.name}"></div>
+                  <div class="cinema-address" th:text="${schedule.branch.address}"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time selection last -->
+          <div class="time-selection" id="time-selection">
+            <h3 class="section-heading">Select Show Time</h3>
+            <ul class="time-ul" id="time-slots">
+              <li th:each="schedule : ${schedules}" class="time-li" th:data-branch-id="${schedule.branch.id}">
+                <div class="screens" th:text="${schedule.screeningRoom != null ? schedule.screeningRoom.name : 'Unknown Room'}">Room Name</div>
+                <div class="time-btn">
+                  <button type="button" class="screen-time"
+                          th:attr="data-schedule-id=${schedule.id}"
+                          th:onclick="'selectTimeSlot(this, ' + ${schedule.id} + ')'">
+                    <span th:text="${schedule.screeningTimeSlot != null && schedule.screeningTimeSlot.slot != null ?
+                                 #strings.substring(schedule.screeningTimeSlot.slot.startTime, 0, 5) : 'N/A'}">
+                    </span>
+                  </button>
+                </div>
+              </li>
             </ul>
-            <br>
-            <fieldset>
-              <div id="screen-select-div">
-                <h2>Show time Selection</h2>
-                <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }'>
-                  <div class="carousel-cell" id="1" onclick="myFunction(1)">
-                    <div class="date-numeric">13</div>
-                    <div class="date-day">Today</div>
-                  </div>
+          </div>
 
-                  <div class="carousel-cell" id="2" onclick="myFunction(2)">
-                    <div class="date-numeric">14</div>
-                    <div class="date-day">Tomorrow</div>
-                  </div>
-                  <div class="carousel-cell" id="3" onclick="myFunction(3)">
-                    <div class="date-numeric">15</div>
-                    <div class="date-day">Monday</div>
-                  </div>
-                  <div class="carousel-cell" id="4" onclick="myFunction(4)">
-                    <div class="date-numeric">16</div>
-                    <div class="date-day">Tuesday</div>
-                  </div>
-                  <div class="carousel-cell" id="5" onclick="myFunction(5)">
-                    <div class="date-numeric">17</div>
-                    <div class="date-day">Wednesday</div>
-                  </div>
-                  <div class="carousel-cell" id="6" onclick="myFunction(6)">
-                    <div class="date-numeric">18</div>
-                    <div class="date-day">Thursday</div>
-                  </div>
-                  <div class="carousel-cell" id="7" onclick="myFunction(7)">
-                    <div class="date-numeric">19</div>
-                    <div class="date-day">Friday</div>
-                  </div>
-                </div>
-                <ul class="time-ul">
-                  <li class="time-li">
-                    <div class="screens">
-                      Screen 1
-                    </div>
-                    <div class="time-btn">
-                      <button class="screen-time" onclick="timeFunction()">
-                        1:05 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        4:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        9:00 PM
-                      </button>
-                    </div>
-                  </li>
-                  <li class="time-li">
-                    <div class="screens">
-                      Screen 2
-                    </div>
-                    <div class="time-btn">
-                      <button class="screen-time" onclick="timeFunction()">
-                        3:00 PM
-                      </button>
-                    </div>
-                  </li>
-                  <li class="time-li">
-                    <div class="screens">
-                      Screen 3
-                    </div>
-                    <div class="time-btn">
-                      <button class="screen-time" onclick="timeFunction()">
-                        9:05 AM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        10:00 PM
-                      </button>
-                    </div>
-                  </li>
-                  <li class="time-li">
-                    <div class="screens">
-                      Screen 4
-                    </div>
-                    <div class="time-btn">
-                      <button class="screen-time" onclick="timeFunction()">
-                        9:05 AM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        11:00 AM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        3:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        7:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        10:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        11:00 PM
-                      </button>
-                    </div>
-                  </li>
-                  <li class="time-li">
-                    <div class="screens">
-                      Screen 5
-                    </div>
-                    <div class="time-btn">
-                      <button class="screen-time" onclick="timeFunction()">
-                        9:05 AM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        12:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        1:00 PM
-                      </button>
-                      <button class="screen-time" onclick="timeFunction()">
-                        3:00 PM
-                      </button>
-                    </div>
-                  </li>
-
-                </ul>
-              </div>
-              <input id="screen-next-btn" type="button" name="next-step" class="next-step" value="Continue Booking"
-                disabled />
-            </fieldset>
-            <fieldset>
-
-              <div>
-                <iframe id="seat-sel-iframe"
-                  style="  box-shadow: 0 14px 12px 0 var(--theme-border), 0 10px 50px 0 var(--theme-border); width: 800px; height: 550px; display: block; margin-left: auto; margin-right: auto;"
-                  src="seat_selection/seat_sel.html"></iframe>
-              </div>
-              <br>
-              <input type="button" name="next-step" class="next-step" value="Proceed to Payment" />
-              <input type="button" name="previous-step" class="previous-step" value="Back" />
-            </fieldset>
-            <fieldset>
-              <!-- Payment Page -->
-              <div id="payment_div">
-                <div class="payment-row">
-                  <div class="col-75">
-                    <div class="payment-container">
-                      <div class="payment-row">
-                        <div class="col-50">
-                          <h3 id="payment-h3">Payment</h3>
-                          <div class="payment-row payment">
-                            <div class="col-50 payment">
-                              <label for="card" class="method card">
-                                <div class="icon-container">
-                                  <i class="fa fa-cc-visa" style="color: navy"></i>
-                                  <i class="fa fa-cc-amex" style="color: blue"></i>
-                                  <i class="fa fa-cc-mastercard" style="color: red"></i>
-                                  <i class="fa fa-cc-discover" style="color: orange"></i>
-                                </div>
-                                <div class="radio-input">
-                                  <input type="radio" id="card" />
-                                  Pay RS.200.00 with credit card
-                                </div>
-                              </label>
-                            </div>
-                            <div class="col-50 payment">
-                              <label for="paypal" class="method paypal">
-                                <div class="icon-container">
-                                  <i class="fa fa-paypal" style="color: navy"></i>
-                                </div>
-                                <div class="radio-input">
-                                  <input id="paypal" type="radio" checked>
-                                  Pay $30.00 with PayPal
-                                </div>
-                              </label>
-                            </div>
-                          </div>
-
-                          <div class="payment-row">
-                            <div class="col-50">
-                              <label for="cname">Cardholder's Name</label>
-                              <input type="text" id="cname" name="cardname" placeholder="Firstname Lastname" required />
-                            </div>
-                            <div class="col-50">
-                              <label for="ccnum">Credit card number</label>
-                              <input type="text" id="ccnum" name="cardnumber" placeholder="xxxx-xxxx-xxxx-xxxx"
-                                required />
-                            </div>
-                          </div>
-                          <div class="payment-row">
-                            <div class="col-50">
-                              <label for="expmonth">Exp Month</label>
-                              <input type="text" id="expmonth" name="expmonth" placeholder="September" required />
-                            </div>
-                            <div class="col-50">
-                              <div class="payment-row">
-                                <div class="col-50">
-                                  <label for="expyear">Exp Year</label>
-                                  <input type="text" id="expyear" name="expyear" placeholder="yyyy" required />
-                                </div>
-                                <div class="col-50">
-                                  <label for="cvv">CVV</label>
-                                  <input type="text" id="cvv" name="cvv" placeholder="xxx" required />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <input type="button" name="next-step" class="next-step pay-btn" value="Confirm Payment" />
-              <input type="button" name="previous-step" class="cancel-pay-btn" value="Cancel Payment"
-                onclick="location.href='index.html';" />
-            </fieldset>
-            <fieldset>
-              <h2>E-Ticket</h2>
-              <div class="ticket-body">
-                <div class="ticket">
-                  <div class="holes-top"></div>
-                  <div class="title">
-                    <p class="cinema">MyShowz Entertainment</p>
-                    <p class="movie-title">Movie Name</p>
-                  </div>
-                  <div class="poster">
-                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/25240/only-god-forgives.jpg"
-                      alt="Movie: Only God Forgives" />
-                  </div>
-                  <div class="info">
-                    <table class="info-table ticket-table">
-                      <tr>
-                        <th>SCREEN</th>
-                        <th>ROW</th>
-                        <th>SEAT</th>
-                      </tr>
-                      <tr>
-                        <td class="bigger">18</td>
-                        <td class="bigger">H</td>
-                        <td class="bigger">24</td>
-                      </tr>
-                    </table>
-                    <table class="info-table ticket-table">
-                      <tr>
-                        <th>PRICE</th>
-                        <th>DATE</th>
-                        <th>TIME</th>
-                      </tr>
-                      <tr>
-                        <td>RS.12.00</td>
-                        <td>4/13/21</td>
-                        <td>19:30</td>
-                      </tr>
-                    </table>
-                  </div>
-                  <div class="holes-lower"></div>
-                  <div class="serial">
-                    <table class="barcode ticket-table">
-                      <tr>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                        <td style="background-color:black;"></td>
-                        <td style="background-color:white;"></td>
-                      </tr>
-                    </table>
-                    <table class="numbers ticket-table">
-                      <tr>
-                        <td>9</td>
-                        <td>1</td>
-                        <td>7</td>
-                        <td>3</td>
-                        <td>7</td>
-                        <td>5</td>
-                        <td>4</td>
-                        <td>4</td>
-                        <td>4</td>
-                        <td>5</td>
-                        <td>4</td>
-                        <td>1</td>
-                        <td>4</td>
-                        <td>7</td>
-                        <td>8</td>
-                        <td>7</td>
-                        <td>3</td>
-                        <td>4</td>
-                        <td>1</td>
-                        <td>4</td>
-                        <td>5</td>
-                        <td>2</td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <input type="button" name="previous-step" class="home-page-btn" value="Browse to Home Page"
-                onclick="location.href='index.html';" />
-            </fieldset>
-          </form>
-        </div>
+          <button id="screen-next-btn" type="button" class="action-button" disabled onclick="continueToSeatSelection()">
+            Continue Booking
+          </button>
+        </form>
       </div>
     </div>
   </div>
-</body>
+</div>
+
+<!-- Thymeleaf data script -->
+<script th:inline="javascript">
+  // Pass data from Thymeleaf to JavaScript
+  const movieData = /*[[${movie}]]*/ {};
+  const branchesData = /*[[${branches}]]*/ [];
+  const schedulesData = /*[[${schedules}]]*/ [];
+  const movieId = /*[[${movieId}]]*/ null;
+</script>
+
 <script>
-  let prevId = "1";
+  /**
+   * Cinema Booking System with Thymeleaf Integration
+   */
 
-  window.onload = function () {
-    document.getElementById("screen-next-btn").disabled = true;
+          // App state
+  const bookingState = {
+            selectedCinema: null,
+            selectedDate: null,
+            selectedTime: null,
+            selectedSchedule: null,
+            prevDateId: null,
+            movieId: movieId,
+            movie: movieData
+          };
+
+  /**
+   * Prevents form submission and page reload
+   */
+  document.getElementById('booking-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    return false;
+  });
+
+  /**
+   * Generates date carousel from today to next Sunday
+   */
+  function generateDates() {
+    const dateCarousel = document.getElementById('date-carousel');
+    dateCarousel.innerHTML = '';
+
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const today = new Date();
+    const todayDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Calculate days until next Sunday (if today is Sunday, we need 7 days)
+    const daysUntilNextSunday = todayDay === 0 ? 7 : 7 - todayDay;
+
+    // Generate date cells
+    for (let i = 0; i <= daysUntilNextSunday; i++) {
+      const date = new Date();
+      date.setDate(today.getDate() + i);
+
+      const dayName = days[date.getDay()];
+      const dateNum = date.getDate();
+
+      let displayDay;
+      if (i === 0) {
+        displayDay = 'Today';
+      } else if (i === 1) {
+        displayDay = 'Tomorrow';
+      } else {
+        displayDay = dayName;
+      }
+
+      const dateCell = document.createElement('div');
+      dateCell.className = 'carousel-cell';
+      dateCell.id = 'date-' + i;
+
+      const dateNumDiv = document.createElement('div');
+      dateNumDiv.className = 'date-numeric';
+      dateNumDiv.textContent = dateNum;
+
+      const dateDayDiv = document.createElement('div');
+      dateDayDiv.className = 'date-day';
+      dateDayDiv.textContent = displayDay;
+
+      dateCell.appendChild(dateNumDiv);
+      dateCell.appendChild(dateDayDiv);
+
+      dateCell.addEventListener('click', function() {
+        selectDate(i, date);
+      });
+
+      dateCarousel.appendChild(dateCell);
+    }
+
+    // Auto-select today's date
+    setTimeout(() => {
+      selectDate(0, today);
+    }, 100);
   }
 
-  function timeFunction() {
-    document.getElementById("screen-next-btn").disabled = false;
+  /**
+   * Handles date selection
+   */
+  function selectDate(dateId, date) {
+    // Update selected date
+    bookingState.selectedDate = date;
+
+    // Update date cell styles
+    const dateCards = document.querySelectorAll('.carousel-cell');
+    dateCards.forEach(card => {
+      card.classList.remove('selected');
+    });
+
+    document.getElementById('date-' + dateId).classList.add('selected');
+    bookingState.prevDateId = dateId;
+
+    // If a cinema is already selected, update showtimes
+    if (bookingState.selectedCinema) {
+      filterTimeSlotsByCinema(bookingState.selectedCinema.id);
+    }
+
+    // Disable continue button until time is selected
+    document.getElementById('screen-next-btn').disabled = true;
   }
 
-  function myFunction(id) {
-    document.getElementById(prevId).style.background = "rgb(243, 235, 235)";
-    document.getElementById(id).style.background = "#df0e62";
-    prevId = id;
+  /**
+   * Handles cinema selection
+   */
+  function selectCinema(element) {
+    // Reset previous selections
+    const cinemaCards = document.querySelectorAll('.cinema-card');
+    cinemaCards.forEach(card => {
+      card.classList.remove('selected');
+    });
+
+    // Add selected class to clicked cinema card
+    element.classList.add('selected');
+
+    // Get branch ID
+    const branchId = element.getAttribute('data-branch-id');
+
+    // Find the branch in your data
+    const branch = branchesData.find(b => b.id == branchId);
+
+    // Select new cinema
+    bookingState.selectedCinema = branch || { id: branchId, name: element.querySelector('.cinema-name').textContent };
+
+    // Filter time slots based on selected cinema
+    filterTimeSlotsByCinema(branchId);
+
+    // Reset time selection
+    bookingState.selectedTime = null;
+    bookingState.selectedSchedule = null;
+
+    // Reset time button styles
+    document.querySelectorAll('.screen-time').forEach(btn => {
+      btn.classList.remove('selected');
+    });
+
+    // Disable continue button until time is selected
+    document.getElementById('screen-next-btn').disabled = true;
   }
+
+  /**
+   * Filter time slots by cinema branch ID
+   */
+  function filterTimeSlotsByCinema(branchId) {
+    // First show all time slots
+    const allTimeSlots = document.querySelectorAll('.time-li');
+    allTimeSlots.forEach(slot => {
+      slot.style.display = 'none';
+    });
+
+    // Then show only slots for the selected cinema
+    const matchingSlots = document.querySelectorAll(`.time-li[data-branch-id="${branchId}"]`);
+    matchingSlots.forEach(slot => {
+      slot.style.display = 'block';
+    });
+  }
+
+  /**
+   * Handle time slot selection
+   */
+  function selectTimeSlot(button, scheduleId) {
+    // Reset all time buttons to default style
+    const timeButtons = document.querySelectorAll('.screen-time');
+    timeButtons.forEach(btn => {
+      btn.classList.remove('selected');
+    });
+
+    // Highlight selected time button
+    button.classList.add('selected');
+
+    // Find the schedule in your schedulesData
+    const schedule = schedulesData.find(s => s.id === scheduleId);
+
+    if (schedule) {
+      // Update selected schedule in your booking state
+      bookingState.selectedSchedule = schedule;
+
+      // Format time for display
+      let timeDisplay = 'N/A';
+      if (schedule.screeningTimeSlot && schedule.screeningTimeSlot.slot) {
+        const startTime = schedule.screeningTimeSlot.slot.startTime;
+        if (startTime && startTime.length >= 5) {
+          timeDisplay = startTime.substring(0, 5);
+        }
+      }
+      bookingState.selectedTime = timeDisplay;
+
+      // Enable continue button
+      document.getElementById('screen-next-btn').disabled = false;
+    }
+  }
+
+  /**
+   * Redirects to seat selection page with booking data
+   */
+  function continueToSeatSelection() {
+    // Validate all required selections
+    if (!bookingState.selectedSchedule || !bookingState.selectedCinema || !bookingState.selectedDate || !bookingState.selectedTime) {
+      alert('Please complete all selections before continuing.');
+      return;
+    }
+
+    // Store booking information
+    const bookingData = {
+      scheduleId: bookingState.selectedSchedule.id,
+      movieId: bookingState.movieId,
+      movieTitle: bookingState.movie.title,
+      moviePoster: bookingState.movie.poster,
+      cinema: {
+        id: bookingState.selectedCinema.id,
+        name: bookingState.selectedCinema.name,
+        address: bookingState.selectedCinema.address
+      },
+      screeningRoom: {
+        id: bookingState.selectedSchedule.screeningRoom ? bookingState.selectedSchedule.screeningRoom.id : null,
+        name: bookingState.selectedSchedule.screeningRoom ? bookingState.selectedSchedule.screeningRoom.name : 'Unknown Room'
+      },
+      date: bookingState.selectedDate.toDateString(),
+      time: bookingState.selectedTime,
+      schedule: bookingState.selectedSchedule
+    };
+
+    // Store in sessionStorage for next page
+    sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+
+    // Redirect to seat selection page
+    window.location.href = 'seat_selection.html?scheduleId=' + bookingState.selectedSchedule.id;
+  }
+
+  /**
+   * Initialize the booking page
+   */
+  window.onload = function() {
+    // Prevent form submit
+    document.getElementById('booking-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    // Generate dates (today is selected by default)
+    generateDates();
+
+    // Disable continue button initially
+    document.getElementById('screen-next-btn').disabled = true;
+
+    // Hide all time slots initially
+    document.querySelectorAll('.time-li').forEach(slot => {
+      slot.style.display = 'none';
+    });
+  };
+
+  // Expose functions to the global scope
+  window.continueToSeatSelection = continueToSeatSelection;
+  window.selectTimeSlot = selectTimeSlot;
+  window.selectCinema = selectCinema;
+</script>
+
+<!-- Thay thế script theme-change.js -->
+<script>
+  // Chức năng chuyển đổi theme sáng/tối
+  document.addEventListener('DOMContentLoaded', function() {
+    // Lấy nút chuyển đổi theme
+    const toggleSwitch = document.querySelector('#checkbox');
+
+    // Hàm chuyển đổi theme
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // Kiểm tra theme được lưu trong localStorage
+    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+    if (currentTheme) {
+      document.documentElement.setAttribute('data-theme', currentTheme);
+
+      if (currentTheme === 'dark') {
+        toggleSwitch.checked = true;
+      }
+    }
+
+    // Đăng ký sự kiện change cho nút chuyển đổi
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  });
 </script>
 
 <script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
-<script type="text/javascript" src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'>
-</script>
+<script type="text/javascript" src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
 <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
-<script src="assets/js/theme-change.js"></script>
-
-<script type="text/javascript" src="assets/js/ticket-booking.js"></script>
-
+</body>
 </html>
