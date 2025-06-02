@@ -7,8 +7,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "Movie")
-@Getter // Tự động tạo getters cho tất cả các trường
-@Setter // Tự động tạo setters cho tất cả các trường
+@Getter 
+@Setter 
 @NoArgsConstructor // Tự động tạo constructor không tham số (cần thiết cho JPA)
 @AllArgsConstructor // Tự động tạo constructor với tất cả các trường
 @ToString(exclude = {"actors", "directors"}) // Tự động tạo toString(), loại trừ các collection để tránh vòng lặp vô hạn
@@ -30,7 +30,7 @@ public class Movie {
     private Integer duration;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "releaseDate")
+    @Column(name = "release_date")
     private Date releaseDate;
 
     @Column(name = "rating", length = 50)

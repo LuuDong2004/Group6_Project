@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-88">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaAdmin - Bảng điều khiển Quản lý Phim</title>
 
@@ -552,93 +552,118 @@
             Thao tác thành công!
         </div>
 
-        <div id="movieListView" class="movie-list-section">
-            <div class="page-header">
-                <h1 class="page-title">Danh sách Phim</h1>
-                <button class="add-movie-btn">
-                    <i class="fas fa-plus me-1"></i> Thêm Phim Mới
-                </button>
-            </div>
+        
+    <div id="movieListView" class="movie-list-section">
+    <div class="page-header">
+        <h1 class="page-title">Danh sách Phim</h1>
+        <button class="add-movie-btn">
+            <i class="fas fa-plus me-1" th:href="@{/admin/movies/add}" >
 
-            <div class="table-container">
-                <table class="movie-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Phim</th>
-                            <th>Thời lượng</th>
-                            <th>Rating</th>
-                            <th>Định dạng</th>
-                            <th>Ngày chiếu</th>
-                            <th>Ngôn ngữ</th>
-                            <th>Thể loại</th>
-                            <th>Đạo diễn</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#001</td>
-                            <td>
-                                <div class="movie-info">
-                                    <img src="https://image.tmdb.org/t/p/w92/orVFnHXq0gc5JgEO2xZ2N0g3s0" onerror="this.onerror=null;this.src='https://placehold.co/40x60/e2e8f0/94a3b8?text=Poster';" alt="Avengers: Endgame" class="movie-poster">
-                                    <div class="movie-details">
-                                        <h3>Avengers: Endgame</h3>
-                                        <p class="text-muted">Cuộc chiến vô cực kết thúc...</p>
-                                        <div class="rating">
-                                            <span class="star">⭐</span>
-                                            <span>8.4/10</span>
-                                            <a href="#" style="margin-left: 8px; color: #6366f1; font-size:11px; text-decoration:none;"><i class="fas fa-play-circle me-1"></i>Trailer</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>181 phút</td>
-                            <td><span class="rating-badge">PG-13</span></td>
-                            <td>
-                                <div class="format-tags">
-                                    <span class="format-tag">IMAX</span>
-                                    <span class="format-tag">3D</span>
-                                </div>
-                            </td>
-                            <td>26/04/2019</td>
-                            <td>Tiếng Anh</td>
-                            <td>
-                                <div class="genre-tags">
-                                    <span class="genre-tag genre-action">Hành động</span>
-                                    <span class="genre-tag genre-adventure">Phiêu lưu</span>
-                                    <span class="genre-tag genre-sci-fi">Viễn tưởng</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="director-info">Anthony Russo</div>
-                                <div class="director-info">Joe Russo</div>
-                                <div class="cast-info" title="Robert Downey Jr., Chris Evans, Mark Ruffalo">Robert Downey Jr., Chris Evans...</div>
-                            </td>
-                            <td>
-                                <div class="actions">
-                                    <button class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></button>
-                                    <button class="action-btn delete-btn" title="Xóa"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="pagination">
-                    <div class="pagination-info">
-                        Hiển thị 1 đến 3 của 248 phim
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn">Trước</button>
-                        <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn">2</button>
-                        <button class="pagination-btn">3</button>
-                        <button class="pagination-btn">Tiếp</button>
-                    </div>
-                </div>
+            </i> Thêm Phim Mới
+        </button>
+    </div>
+
+    <!-- Movie List Model -->
+    <div class="table-container">
+        <table class="movie-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Phim</th>
+                    <th>Thời lượng</th>
+                    <th>Rating</th> <th>Định dạng</th>
+                    <th>Ngày chiếu</th>
+                    <th>Ngôn ngữ</th>
+                    <th>Thể loại</th>
+                    <th>Đạo diễn & Diễn viên</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="movie : ${movies}">
+                    <td th:text="${movie.id}">#001</td>
+                    <td>
+                        <div class="movie-info">
+                            <img th:src="${movie.image}"
+                                 th:alt="${movie.name}"
+                                 onerror="this.onerror=null;this.src='https://placehold.co/40x60/e2e8f0/94a3b8?text=Poster';"
+                                 alt="Movie Poster" class="movie-poster"/>
+                            <div class="movie-details">
+                                <h3 th:text="${movie.name}"></h3>
+                               
+                                <div class="rating">
+                                    <span class="star">⭐</span>
+                                    <span>N/A</span>
+                                    <a th:if="${movie.trailer != null and !#strings.isEmpty(movie.trailer)}"
+                                       th:href="${movie.trailer}" target="_blank"
+                                       style="margin-left: 8px; color: #6366f1; font-size:11px; text-decoration:none;">
+                                        <i class="fas fa-play-circle me-1"></i>Trailer
+                                    </a>
+                                    <span th:if="${movie.trailer == null or #strings.isEmpty(movie.trailer)}"
+                                          style="margin-left: 8px; font-size:11px; color: #999;">  </span>
+                                </div>          
+                            </div>
+                        </div>
+                    </td>
+                    <td th:text="${movie.duration != null ? movie.duration + ' phút' : 'N/A'}"></td>
+                    <td><span class="rating-badge" th:text="${movie.rating != null ? movie.rating : 'N/A'}"></span></td>
+                    <td>
+                        <div class="format-tags">
+                            <span class="format-tag">N/A</span>
+                        </div>
+                    </td>
+                    <td th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'N/A'}">26/04/2019</td>
+                    <td th:text="${movie.language != null ? movie.language : 'N/A'}">Tiếng Anh</td>
+                    <td>
+                        <div class="genre-tags">
+                            <th:block th:if="${movie.genre != null and !#strings.isEmpty(movie.genre)}">
+                                <span th:each="genreItem : ${#strings.arraySplit(movie.genre, ',')}"
+                                      class="genre-tag" th:text="${#strings.trim(genreItem)}">Hành động</span>
+                            </th:block>
+                            <span th:if="${movie.genre == null or #strings.isEmpty(movie.genre)}" class="genre-tag text-muted">Không có</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div th:each="director : ${movie.directors}" class="director-info" th:text="${director.name != null ? director.name : 'N/A'}">
+                            Anthony Russo
+                        </div>
+                        <div class="cast-info"
+                             th:if="${not #lists.isEmpty(movie.actors)}"
+                             th:title="${#strings.listJoin(movie.actors.![name], ', ')}"
+                             th:text="${#strings.abbreviate(#strings.listJoin(movie.actors.![name], ', '), 30) + '...'}">
+                            Robert Downey Jr., Chris Evans...
+                        </div>
+                        <div class="cast-info" th:if="${#lists.isEmpty(movie.actors)}">
+                            (Không có thông tin diễn viên)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/admin/movies/edit/{id}(id=${movie.id})}" class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></a>
+                            <a th:href="@{/admin/movies/delete/{id}(id=${movie.id})}" class="action-btn delete-btn" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa phim này không?');"><i class="fas fa-trash-alt"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(movies)}">
+                    <td colspan="10" style="text-align: center;">Không có phim nào để hiển thị.</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <div class="pagination-info"
+                 th:text="|Hiển thị ${#lists.size(movies)} của ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
+                Hiển thị 1 đến 3 của 248 phim
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" disabled>Trước</button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn" disabled>Tiếp</button>
             </div>
         </div>
+    </div>
+</div>
 
+<!-- Add New Movie Modal -->
         <div id="addMovieFormView" class="d-none">
             <form id="movieForm">
                  <div class="row">
