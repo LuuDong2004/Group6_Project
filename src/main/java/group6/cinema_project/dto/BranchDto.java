@@ -14,4 +14,5 @@ public class BranchDto {
     private String name;
     private String description;
     private String address;
+    private boolean selected;
 }

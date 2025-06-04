@@ -13,6 +13,7 @@ import java.util.List;
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     List<Movie> getMoviesByGenre(String genre);
+
     @Query("SELECT m FROM Movie m ORDER BY m.rating DESC")
     List<Movie> getMoviesByTop3Rating(Pageable pageable);
 

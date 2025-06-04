@@ -1,15 +1,16 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
+
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.sql.Time;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "ScreeningSchedule")
@@ -19,16 +20,11 @@ public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-//    private LocalDate startDate;
-//    private LocalTime startTime;
+
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "MovieId", nullable = false)
     private Movie movie;
-
-    @ManyToOne
-    @JoinColumn(name = "screeningTimeSlotInDateId")
-    private ScreeningTime screeningTimeSlot;
 
     @ManyToOne
     @JoinColumn(name = "ScreeningRoomId")
@@ -37,4 +33,10 @@ public class Schedule {
     @ManyToOne
     @JoinColumn(name = "BranchId")
     private Branch branch;
+
+    private Date screeningDate;
+
+    private Time startTime;
+
+    private Time endTime;
 }

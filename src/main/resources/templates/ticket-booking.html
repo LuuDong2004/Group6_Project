@@ -131,6 +131,8 @@
       transition: all 0.3s ease;
       width: 240px; /* Increased size */
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: inherit;
     }
 
     .cinema-card:hover {
@@ -222,6 +224,8 @@
       cursor: pointer;
       transition: all 0.2s ease;
       font-size: 14px;
+      display: inline-block;
+      text-decoration: none;
     }
 
     .screen-time:hover {
@@ -287,6 +291,42 @@
       justify-content: center;
     }
 
+    /* Loading overlay styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .loading-overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #df0e62;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
       .cinema-grid {
@@ -322,6 +362,10 @@
 </head>
 
 <body>
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
 <header id="site-header" class="w3l-header fixed-top">
   <!--/nav-->
   <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
@@ -357,21 +401,28 @@
   <div class="row">
     <div class="col">
       <div class="px-0 pt-4 pb-0 mt-3 mb-3">
-        <form id="booking-form">
+        <div id="booking-content">
           <!-- Date selection first -->
           <div class="date-selection" id="date-selection">
             <h3 class="section-heading"></h3>
             <div class="date-carousel-container">
               <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }' id="date-carousel">
-                <!-- Date cells will be generated here by JavaScript -->
+                <!-- Date cells using Thymeleaf -->
+                <div th:each="dateInfo : ${dateList}"
+                     class="carousel-cell date-selector"
+                     th:classappend="${dateInfo.selected} ? 'selected' : ''"
+                     th:data-date="${dateInfo.formattedDate}"
+                     th:data-movie-id="${movieId}">
+                  <div class="date-numeric" th:text="${dateInfo.dayNum}">25</div>
+                  <div class="date-day" th:text="${dateInfo.dayName}">Today</div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Movie information second -->
           <div th:each="movie: ${movie}" class="movie-info-container" id="movie-info">
-            <!-- Use the first movie in the schedules list -->
-            <img  th:src="${movie.image}" class="movie-poster"/>
+            <img th:src="${movie.image}" class="movie-poster"/>
             <div class="movie-details">
               <div class="movie-meta">
                 <span>Thời Lượng: <span th:text="${movie.duration}"></span></span><br>
@@ -387,13 +438,15 @@
             <div class="cinema-selection" id="cinema-selection">
               <h3 class="section-heading">Select Cinema</h3>
               <div class="cinema-grid" id="cinema-grid">
-                <!-- Cinema cards from Thymeleaf - keeping your original iteration -->
-                <div th:each="schedule : ${schedules}" class="cinema-card"
-                     th:id="'cinema-' + ${schedule.branch.id}"
-                     th:data-branch-id="${schedule.branch.id}"
-                     onclick="selectCinema(this)">
-                  <div class="cinema-name" th:text="${schedule.branch.name}"></div>
-                  <div class="cinema-address" th:text="${schedule.branch.address}"></div>
+                <!-- Cinema cards with data attributes -->
+                <div th:each="branch : ${branches}"
+                     class="cinema-card branch-selector"
+                     th:classappend="${selectedBranchId != null && branch.id == selectedBranchId} ? 'selected' : ''"
+                     th:data-branch-id="${branch.id}"
+                     th:data-movie-id="${movieId}"
+                     th:data-date="${dateParam}">
+                  <div class="cinema-name" th:text="${branch.name}">Cinema Name</div>
+                  <div class="cinema-address" th:text="${branch.address}">Cinema Address</div>
                 </div>
               </div>
             </div>
@@ -402,311 +455,80 @@
           <!-- Time selection last -->
           <div class="time-selection" id="time-selection">
             <h3 class="section-heading">Select Show Time</h3>
-            <ul class="time-ul" id="time-slots">
-              <li th:each="schedule : ${schedules}" class="time-li" th:data-branch-id="${schedule.branch.id}">
-                <div class="screens" th:text="${schedule.screeningRoom != null ? schedule.screeningRoom.name : 'Unknown Room'}">Room Name</div>
+
+            <!-- Hiển thị thông báo nếu không có rạp nào được chọn -->
+            <div th:if="${selectedBranchId == null}" class="alert alert-info text-center">
+              Please select a cinema to view available showtimes.
+            </div>
+
+            <!-- Hiển thị thông báo nếu không có suất chiếu -->
+            <div th:if="${selectedBranchId != null && (schedulesByBranchAndRoom == null || schedulesByBranchAndRoom.isEmpty() || !schedulesByBranchAndRoom.containsKey(selectedBranchId))}"
+                 class="alert alert-info text-center">
+              No available showtimes for this cinema on the selected date.
+            </div>
+
+            <!-- Hiển thị các suất chiếu theo phòng -->
+            <ul class="time-ul" id="time-slots" th:if="${selectedBranchId != null && schedulesByBranchAndRoom != null && schedulesByBranchAndRoom.containsKey(selectedBranchId)}">
+              <li th:each="roomEntry : ${schedulesByBranchAndRoom.get(selectedBranchId)}" class="time-li">
+                <div class="screens" th:text="${roomEntry.key}">Room Name</div>
                 <div class="time-btn">
-                  <button type="button" class="screen-time"
-                          th:attr="data-schedule-id=${schedule.id}"
-                          th:onclick="'selectTimeSlot(this, ' + ${schedule.id} + ')'">
-                    <span th:text="${schedule.screeningTimeSlot != null && schedule.screeningTimeSlot.slot != null ?
-                                 #strings.substring(schedule.screeningTimeSlot.slot.startTime, 0, 5) : 'N/A'}">
-                    </span>
-                  </button>
+                  <div th:each="schedule : ${roomEntry.value}"
+                       class="screen-time schedule-selector"
+                       th:classappend="${selectedSchedule != null && selectedSchedule.id == schedule.id} ? 'selected' : ''"
+                       th:data-schedule-id="${schedule.id}"
+                       th:data-movie-id="${movieId}"
+                       th:data-date="${dateParam}"
+                       th:data-branch-id="${selectedBranchId}">
+                    <span th:text="${#dates.format(schedule.startTime, 'HH:mm')}"></span>
+                    <span th:if="${schedule.endTime != null}" th:text="${' - ' + #dates.format(schedule.endTime, 'HH:mm')}"></span>
+                  </div>
                 </div>
               </li>
             </ul>
           </div>
 
-          <button id="screen-next-btn" type="button" class="action-button" disabled onclick="continueToSeatSelection()">
+          <!-- Nút tiếp tục -->
+          <a th:if="${selectedSchedule != null}"
+             th:href="@{'/seat_selection.html?scheduleId=' + ${selectedSchedule.id}}"
+             class="action-button">
+            Continue Booking
+          </a>
+
+          <button th:unless="${selectedSchedule != null}"
+                  type="button"
+                  class="action-button"
+                  disabled="disabled">
             Continue Booking
           </button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Thymeleaf data script -->
-<script th:inline="javascript">
-  // Pass data from Thymeleaf to JavaScript
-  const movieData = /*[[${movie}]]*/ {};
-  const branchesData = /*[[${branches}]]*/ [];
-  const schedulesData = /*[[${schedules}]]*/ [];
-  const movieId = /*[[${movieId}]]*/ null;
-</script>
-
+<!-- Scripts -->
 <script>
-  /**
-   * Cinema Booking System with Thymeleaf Integration
-   */
-
-          // App state
-  const bookingState = {
-            selectedCinema: null,
-            selectedDate: null,
-            selectedTime: null,
-            selectedSchedule: null,
-            prevDateId: null,
-            movieId: movieId,
-            movie: movieData
-          };
-
-  /**
-   * Prevents form submission and page reload
-   */
-  document.getElementById('booking-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    return false;
-  });
-
-  /**
-   * Generates date carousel from today to next Sunday
-   */
-  function generateDates() {
-    const dateCarousel = document.getElementById('date-carousel');
-    dateCarousel.innerHTML = '';
-
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const today = new Date();
-    const todayDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-    // Calculate days until next Sunday (if today is Sunday, we need 7 days)
-    const daysUntilNextSunday = todayDay === 0 ? 7 : 7 - todayDay;
-
-    // Generate date cells
-    for (let i = 0; i <= daysUntilNextSunday; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-
-      const dayName = days[date.getDay()];
-      const dateNum = date.getDate();
-
-      let displayDay;
-      if (i === 0) {
-        displayDay = 'Today';
-      } else if (i === 1) {
-        displayDay = 'Tomorrow';
-      } else {
-        displayDay = dayName;
-      }
-
-      const dateCell = document.createElement('div');
-      dateCell.className = 'carousel-cell';
-      dateCell.id = 'date-' + i;
-
-      const dateNumDiv = document.createElement('div');
-      dateNumDiv.className = 'date-numeric';
-      dateNumDiv.textContent = dateNum;
-
-      const dateDayDiv = document.createElement('div');
-      dateDayDiv.className = 'date-day';
-      dateDayDiv.textContent = displayDay;
-
-      dateCell.appendChild(dateNumDiv);
-      dateCell.appendChild(dateDayDiv);
-
-      dateCell.addEventListener('click', function() {
-        selectDate(i, date);
-      });
-
-      dateCarousel.appendChild(dateCell);
-    }
-
-    // Auto-select today's date
-    setTimeout(() => {
-      selectDate(0, today);
-    }, 100);
-  }
-
-  /**
-   * Handles date selection
-   */
-  function selectDate(dateId, date) {
-    // Update selected date
-    bookingState.selectedDate = date;
-
-    // Update date cell styles
-    const dateCards = document.querySelectorAll('.carousel-cell');
-    dateCards.forEach(card => {
-      card.classList.remove('selected');
-    });
-
-    document.getElementById('date-' + dateId).classList.add('selected');
-    bookingState.prevDateId = dateId;
-
-    // If a cinema is already selected, update showtimes
-    if (bookingState.selectedCinema) {
-      filterTimeSlotsByCinema(bookingState.selectedCinema.id);
-    }
-
-    // Disable continue button until time is selected
-    document.getElementById('screen-next-btn').disabled = true;
-  }
-
-  /**
-   * Handles cinema selection
-   */
-  function selectCinema(element) {
-    // Reset previous selections
-    const cinemaCards = document.querySelectorAll('.cinema-card');
-    cinemaCards.forEach(card => {
-      card.classList.remove('selected');
-    });
-
-    // Add selected class to clicked cinema card
-    element.classList.add('selected');
-
-    // Get branch ID
-    const branchId = element.getAttribute('data-branch-id');
-
-    // Find the branch in your data
-    const branch = branchesData.find(b => b.id == branchId);
-
-    // Select new cinema
-    bookingState.selectedCinema = branch || { id: branchId, name: element.querySelector('.cinema-name').textContent };
-
-    // Filter time slots based on selected cinema
-    filterTimeSlotsByCinema(branchId);
-
-    // Reset time selection
-    bookingState.selectedTime = null;
-    bookingState.selectedSchedule = null;
-
-    // Reset time button styles
-    document.querySelectorAll('.screen-time').forEach(btn => {
-      btn.classList.remove('selected');
-    });
-
-    // Disable continue button until time is selected
-    document.getElementById('screen-next-btn').disabled = true;
-  }
-
-  /**
-   * Filter time slots by cinema branch ID
-   */
-  function filterTimeSlotsByCinema(branchId) {
-    // First show all time slots
-    const allTimeSlots = document.querySelectorAll('.time-li');
-    allTimeSlots.forEach(slot => {
-      slot.style.display = 'none';
-    });
-
-    // Then show only slots for the selected cinema
-    const matchingSlots = document.querySelectorAll(`.time-li[data-branch-id="${branchId}"]`);
-    matchingSlots.forEach(slot => {
-      slot.style.display = 'block';
-    });
-  }
-
-  /**
-   * Handle time slot selection
-   */
-  function selectTimeSlot(button, scheduleId) {
-    // Reset all time buttons to default style
-    const timeButtons = document.querySelectorAll('.screen-time');
-    timeButtons.forEach(btn => {
-      btn.classList.remove('selected');
-    });
-
-    // Highlight selected time button
-    button.classList.add('selected');
-
-    // Find the schedule in your schedulesData
-    const schedule = schedulesData.find(s => s.id === scheduleId);
-
-    if (schedule) {
-      // Update selected schedule in your booking state
-      bookingState.selectedSchedule = schedule;
-
-      // Format time for display
-      let timeDisplay = 'N/A';
-      if (schedule.screeningTimeSlot && schedule.screeningTimeSlot.slot) {
-        const startTime = schedule.screeningTimeSlot.slot.startTime;
-        if (startTime && startTime.length >= 5) {
-          timeDisplay = startTime.substring(0, 5);
-        }
-      }
-      bookingState.selectedTime = timeDisplay;
-
-      // Enable continue button
-      document.getElementById('screen-next-btn').disabled = false;
-    }
-  }
-
-  /**
-   * Redirects to seat selection page with booking data
-   */
-  function continueToSeatSelection() {
-    // Validate all required selections
-    if (!bookingState.selectedSchedule || !bookingState.selectedCinema || !bookingState.selectedDate || !bookingState.selectedTime) {
-      alert('Please complete all selections before continuing.');
-      return;
-    }
-
-    // Store booking information
-    const bookingData = {
-      scheduleId: bookingState.selectedSchedule.id,
-      movieId: bookingState.movieId,
-      movieTitle: bookingState.movie.title,
-      moviePoster: bookingState.movie.poster,
-      cinema: {
-        id: bookingState.selectedCinema.id,
-        name: bookingState.selectedCinema.name,
-        address: bookingState.selectedCinema.address
-      },
-      screeningRoom: {
-        id: bookingState.selectedSchedule.screeningRoom ? bookingState.selectedSchedule.screeningRoom.id : null,
-        name: bookingState.selectedSchedule.screeningRoom ? bookingState.selectedSchedule.screeningRoom.name : 'Unknown Room'
-      },
-      date: bookingState.selectedDate.toDateString(),
-      time: bookingState.selectedTime,
-      schedule: bookingState.selectedSchedule
-    };
-
-    // Store in sessionStorage for next page
-    sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-
-    // Redirect to seat selection page
-    window.location.href = 'seat_selection.html?scheduleId=' + bookingState.selectedSchedule.id;
-  }
-
-  /**
-   * Initialize the booking page
-   */
-  window.onload = function() {
-    // Prevent form submit
-    document.getElementById('booking-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      return false;
-    });
-
-    // Generate dates (today is selected by default)
-    generateDates();
-
-    // Disable continue button initially
-    document.getElementById('screen-next-btn').disabled = true;
-
-    // Hide all time slots initially
-    document.querySelectorAll('.time-li').forEach(slot => {
-      slot.style.display = 'none';
-    });
-  };
-
-  // Expose functions to the global scope
-  window.continueToSeatSelection = continueToSeatSelection;
-  window.selectTimeSlot = selectTimeSlot;
-  window.selectCinema = selectCinema;
-</script>
-
-<!-- Thay thế script theme-change.js -->
-<script>
-  // Chức năng chuyển đổi theme sáng/tối
   document.addEventListener('DOMContentLoaded', function() {
-    // Lấy nút chuyển đổi theme
+    // Tham chiếu đến các phần tử DOM
+    const loadingOverlay = document.getElementById('loading-overlay');
     const toggleSwitch = document.querySelector('#checkbox');
 
-    // Hàm chuyển đổi theme
+    // Biến lưu trữ trạng thái hiện tại
+    let currentState = {
+      movieId: null,
+      date: null,
+      branchId: null,
+      scheduleId: null
+    };
+
+    // Lấy các giá trị ban đầu từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentState.movieId = document.querySelector('[data-movie-id]')?.getAttribute('data-movie-id');
+    currentState.date = urlParams.get('date') || document.querySelector('[data-date]')?.getAttribute('data-date');
+    currentState.branchId = urlParams.get('branchId');
+    currentState.scheduleId = urlParams.get('scheduleId');
+
+    // Chức năng chuyển đổi theme
     function switchTheme(e) {
       if (e.target.checked) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -717,19 +539,194 @@
       }
     }
 
-    // Kiểm tra theme được lưu trong localStorage
+    // Khôi phục theme từ localStorage
     const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-
     if (currentTheme) {
       document.documentElement.setAttribute('data-theme', currentTheme);
-
       if (currentTheme === 'dark') {
         toggleSwitch.checked = true;
       }
     }
 
-    // Đăng ký sự kiện change cho nút chuyển đổi
+    // Đăng ký sự kiện change cho theme switcher
     toggleSwitch.addEventListener('change', switchTheme, false);
+
+    // === Xử lý các sự kiện click không làm mới trang ===
+
+    // 1. Xử lý click cho ngày
+    function attachDateEvents() {
+      document.querySelectorAll('.date-selector').forEach(dateCell => {
+        dateCell.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const date = this.getAttribute('data-date');
+          const movieId = this.getAttribute('data-movie-id');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.date = date;
+          currentState.movieId = movieId;
+          // Reset branch và schedule khi chọn ngày mới
+          currentState.branchId = null;
+          currentState.scheduleId = null;
+
+          // FIXED: Gỡ bỏ selected từ tất cả date cells trước khi thêm vào cell được chọn
+          document.querySelectorAll('.date-selector').forEach(cell => {
+            cell.classList.remove('selected');
+          });
+
+          // Thêm selected vào cell được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // 2. Xử lý click cho rạp chiếu
+    function attachBranchEvents() {
+      document.querySelectorAll('.branch-selector').forEach(branchCard => {
+        branchCard.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const branchId = this.getAttribute('data-branch-id');
+          const movieId = this.getAttribute('data-movie-id');
+          const date = this.getAttribute('data-date');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.branchId = branchId;
+          currentState.movieId = movieId;
+          currentState.date = date;
+          // Reset schedule khi chọn rạp mới
+          currentState.scheduleId = null;
+
+          // Gỡ bỏ selected từ tất cả branch cards
+          document.querySelectorAll('.branch-selector').forEach(card => {
+            card.classList.remove('selected');
+          });
+
+          // Thêm selected vào card được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // Hàm gắn sự kiện click cho các suất chiếu
+    function attachScheduleEvents() {
+      document.querySelectorAll('.schedule-selector').forEach(scheduleBtn => {
+        scheduleBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const scheduleId = this.getAttribute('data-schedule-id');
+          const movieId = this.getAttribute('data-movie-id');
+          const date = this.getAttribute('data-date');
+          const branchId = this.getAttribute('data-branch-id');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.scheduleId = scheduleId;
+          currentState.movieId = movieId;
+          currentState.date = date;
+          currentState.branchId = branchId;
+
+          // Gỡ bỏ selected từ tất cả schedule buttons
+          document.querySelectorAll('.schedule-selector').forEach(btn => {
+            btn.classList.remove('selected');
+          });
+
+          // Thêm selected vào button được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // Gắn sự kiện ban đầu
+    attachDateEvents();
+    attachBranchEvents();
+    attachScheduleEvents();
+
+    // Hàm tải nội dung thông qua AJAX
+    function loadContent() {
+      // Xây dựng URL dựa trên trạng thái hiện tại
+      let url = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
+      if (currentState.branchId) url += `&branchId=${currentState.branchId}`;
+      if (currentState.scheduleId) url += `&scheduleId=${currentState.scheduleId}`;
+
+      // Thêm tham số AJAX để phân biệt
+      url += '&ajax=true';
+
+      // Sử dụng Fetch API để gọi AJAX
+      fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.text();
+              })
+              .then(html => {
+                // Parse HTML response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // FIXED: Cập nhật phần date selection để đảm bảo trạng thái selected được cập nhật chính xác
+                const newDateSelection = doc.querySelector('#date-selection');
+                if (newDateSelection) {
+                  document.querySelector('#date-selection').outerHTML = newDateSelection.outerHTML;
+                  attachDateEvents(); // Gắn lại sự kiện cho các ngày mới
+                }
+
+                // Cập nhật phần cinema selection
+                const newCinemaSelection = doc.querySelector('#cinema-selection');
+                if (newCinemaSelection) {
+                  document.querySelector('#cinema-selection').outerHTML = newCinemaSelection.outerHTML;
+                  attachBranchEvents(); // Gắn lại sự kiện cho các rạp chiếu mới
+                }
+
+                // Cập nhật phần time selection
+                const newTimeSelection = doc.querySelector('#time-selection');
+                if (newTimeSelection) {
+                  document.querySelector('#time-selection').outerHTML = newTimeSelection.outerHTML;
+                  attachScheduleEvents(); // Gắn lại sự kiện cho các suất chiếu mới
+                }
+
+                // Cập nhật nút continue
+                const newActionButton = doc.querySelector('.action-button');
+                if (newActionButton) {
+                  document.querySelector('.action-button').outerHTML = newActionButton.outerHTML;
+                }
+
+                // Ẩn loading overlay
+                loadingOverlay.classList.remove('show');
+
+                // Cập nhật URL chỉ khi chọn ngày
+                const baseUrl = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
+                history.replaceState({}, '', baseUrl);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                // Ẩn loading và hiển thị thông báo lỗi
+                loadingOverlay.classList.remove('show');
+                alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
+              });
+    }
   });
 </script>
 
