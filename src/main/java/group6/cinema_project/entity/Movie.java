@@ -1,66 +1,83 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-import lombok.*; // Import chính của Lombok
-import java.util.Date;
-import java.util.Set;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "Movie")
-@Getter 
-@Setter 
-@NoArgsConstructor // Tự động tạo constructor không tham số (cần thiết cho JPA)
-@AllArgsConstructor // Tự động tạo constructor với tất cả các trường
-@ToString(exclude = {"actors", "directors"}) // Tự động tạo toString(), loại trừ các collection để tránh vòng lặp vô hạn
-@EqualsAndHashCode(exclude = {"actors", "directors"}) // Tự động tạo equals() và hashCode(), loại trừ các collection
+@Table(name = "movies")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"moviePeople", "showtimes", "reviews"})
 public class Movie {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
-
-    @Column(name = "name", nullable = false, length = 255)
-    private String name;
-
-    @Column(name = "image", length = 255)
-    private String image;
-
-    @Column(name = "duration")
-    private Integer duration;
-
-    @Temporal(TemporalType.DATE)
+    
+    @Column(name = "title", nullable = false)
+    private String title;
+    
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+    
     @Column(name = "release_date")
-    private Date releaseDate;
-
-    @Column(name = "rating", length = 50)
-    private String rating;
-
-    @Column(name = "genre", length = 255)
-    private String genre;
-
-    @Column(name = "language", length = 50)
-    private String language;
-
-    @Column(name = "trailer", length = 255)
+    private LocalDate releaseDate;
+    
+    @Column(name = "duration", nullable = false)
+    private Integer duration;
+    
+    @Column(name = "image", length = 500)
+    private String image;
+    
+    @Column(name = "trailer", length = 500)
     private String trailer;
-
-    @ManyToMany
-    @JoinTable(
-        name = "Actor_Movie",
-        joinColumns = @JoinColumn(name = "MovieId"),
-        inverseJoinColumns = @JoinColumn(name = "ActorId")
-    )
-    private Set<Actor> actors;
-
-    @ManyToMany
-    @JoinTable(
-        name = "Director_Movie",
-        joinColumns = @JoinColumn(name = "MovieId"),
-        inverseJoinColumns = @JoinColumn(name = "DirectorId")
-    )
-    private Set<Director> directors;
-
-    // @OneToMany(mappedBy = "movie")
-    // private Set<ScreeningSchedule> screeningSchedules;
-}
+    
+    @Column(name = "format", length = 50)
+    private String format;
+    
+    @Column(name = "age_rating", length = 10)
+    private String ageRating;
+    
+    @Column(name = "status", length = 50)
+    private String status = "Coming Soon";
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "movie_genres",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    private List<Genre> genres;
+    
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MoviePerson> moviePeople;
+    
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Showtime> showtimes;
+    
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviews;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+} 
