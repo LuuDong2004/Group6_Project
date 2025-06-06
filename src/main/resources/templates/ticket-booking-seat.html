@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ticket Booking</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
+    <link rel="stylesheet" href="@{https://npmcdn.com/flickity@2/dist/flickity.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/progress.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/ticket-booking.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/e-ticket.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/payment.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        /* Header styles - Updated to match ticket-booking.html exactly */
+        #site-header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        .navbar {
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: #df0e62 !important;
+            text-decoration: none;
+        }
+
+        .fa-play {
+            color: #df0e62;
+            margin-right: 8px;
+            font-size: 24px;
+        }
+
+        /* Navigation container */
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Theme switcher styles - matching ticket-booking.html exactly */
+        .mobile-position {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .mode-container {
+            background-color: #f39c12;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .mode-container:before {
+            background-color: #ffd43b;
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+            border-radius: 50%;
+        }
+
+        input:checked + .mode-container {
+            background-color: #2196F3;
+        }
+
+        input:checked + .mode-container:before {
+            transform: translateX(26px);
+        }
+
+        .gg-sun, .gg-moon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+
+        .gg-sun {
+            left: 8px;
+            color: #ffd43b;
+        }
+
+        .gg-moon {
+            right: 8px;
+            color: #74c0fc;
+        }
+
+        /* Login/User icon styles */
+        .Login_SignUp {
+            display: flex;
+            align-items: center;
+        }
+
+        .Login_SignUp .nav-link {
+            color: #df0e62;
+            font-size: 24px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .Login_SignUp .nav-link:hover {
+            color: #c20a54;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 100px; /* Increased to account for fixed header */
+        }
+
+        /* Movie info section */
+        .movie-info-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .movie-poster {
+            width: 120px;
+            border-radius: 6px;
+            margin-right: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .movie-details {
+            flex: 1;
+        }
+
+        .movie-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .movie-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .showtime-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .showtime-info h4 {
+            margin: 0 0 10px 0;
+            color: #df0e62;
+            font-size: 18px;
+        }
+
+        /* Cinema layout section */
+        .cinema-layout {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-heading {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+            border-left: 4px solid #df0e62;
+            padding-left: 10px;
+        }
+
+        /* Screen */
+        .screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 4px;
+            border-radius: 10px;
+            margin: 20px auto 40px;
+            width: 80%;
+            position: relative;
+        }
+
+        .screen::before {
+            content: "SCREEN";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Seat map */
+        .seat-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .row-label {
+            width: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px 8px 20px 20px;
+            border: 2px solid #ddd;
+            background-color: #f8f8f8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .seat.available {
+            background-color: #e8f5e8;
+            border-color: #4caf50;
+            color: #2e7d2e;
+        }
+
+        .seat.selected {
+            background-color: #df0e62;
+            border-color: #c20a54;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .seat.occupied {
+            background-color: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+            cursor: not-allowed;
+        }
+
+        .seat.occupied:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Seat legend */
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-seat {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px 6px 12px 12px;
+            border: 2px solid;
+        }
+
+        .legend-available {
+            background-color: #e8f5e8;
+            border-color: #4caf50;
+        }
+
+        .legend-selected {
+            background-color: #df0e62;
+            border-color: #c20a54;
+        }
+
+        .legend-occupied {
+            background-color: #ffebee;
+            border-color: #f44336;
+        }
+
+        /* Action buttons */
+        .action-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .selected-seats-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .selected-seats-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .seat-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .seat-tag {
+            background-color: #df0e62;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .total-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #df0e62;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            background-color: #df0e62;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .action-button:hover {
+            background-color: #c20a54;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .action-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .food-button {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .food-button:hover {
+            background-color: #f57c00;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #df0e62;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Gap for aisles */
+        .aisle-gap {
+            width: 20px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin-top: 80px;
+            }
+
+            .movie-info-container {
+                flex-direction: column;
+            }
+
+            .movie-poster {
+                width: 100%;
+                max-width: 200px;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .seat {
+                width: 28px;
+                height: 28px;
+                font-size: 9px;
+            }
+
+            .seat-row {
+                gap: 6px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-button {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .seat-legend {
+                gap: 15px;
+            }
+
+            .theme-switch-wrapper {
+                margin-right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .seat {
+                width: 24px;
+                height: 24px;
+                font-size: 8px;
+            }
+
+            .seat-row {
+                gap: 4px;
+            }
+
+            .row-label {
+                width: 25px;
+                font-size: 14px;
+            }
+
+            .navbar-brand {
+                font-size: 24px;
+            }
+
+            .fa-play {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+</div>
+
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+
+<div class="container">
+    <!-- Movie Information -->
+    <div th:each="movie: ${movies}" class="movie-info-container">
+        <img th:src="${movie.image}" class="movie-poster" id="movie-poster"/>
+        <div class="movie-details">
+            <div class="movie-title" id="movie-title" th:src="${movie.name}" ></div>
+            <div class="movie-meta">Duration: <span id="movie-duration" th:text="${movie.duration}" ></span></div>
+            <div class="movie-meta">Language: <span id="movie-language" th:text="${movie.language}" ></span></div>
+            <div class="movie-meta">Genre: <span id="movie-genre" th:text="${movie.genre}"></span></div>
+            <div class="movie-meta">Rating: <span id="movie-rating" th:text="${movie.rating}"></span></div>
+
+<!--            <div th:each="schedule: ${schedule}" class="showtime-info">-->
+<!--                <h4>Show Details</h4>-->
+<!--                <div>Cinema: <span id="cinema-name" th:text="${schedule.branch.name}"></span></div>-->
+<!--                <div><span id="room-name" th:text="${schedule.screeningRoom.name}" ></span></div>-->
+<!--                <div>Date: <span id="show-date" th:text="${schedule.screeningDate}"></span></div>-->
+<!--                <div>Time: <span id="show-time"  th:text="${schedule.startTime} + '-' ${schedule.endTime}" ></span></div>-->
+<!--            </div>-->
+        </div>
+    </div>
+
+    <!-- Seat Selection -->
+    <div class="cinema-layout">
+        <h3 class="section-heading">Select Your Seats</h3>
+
+        <!-- Screen -->
+        <div class="screen"></div>
+
+        <!-- Seat Map -->
+        <div class="seat-map" id="seat-map">
+            <!-- Seats will be generated by JavaScript -->
+        </div>
+
+        <!-- Seat Legend -->
+        <div class="seat-legend">
+            <div class="legend-item">
+                <div class="legend-seat legend-available"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-seat legend-selected"></div>
+                <span>Selected</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-seat legend-occupied"></div>
+                <span>Occupied</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Section -->
+    <div class="action-section">
+        <div class="selected-seats-info" id="selected-seats-info" style="display: none;">
+            <h4>Selected Seats</h4>
+            <div class="seat-tags" id="selected-seat-tags">
+                <!-- Selected seat tags will be added here -->
+            </div>
+            <div class="total-price">
+                Total: <span id="total-price">$0</span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="action-button food-button" id="food-button" onclick="selectFood()">
+                <i class="fa fa-cutlery"></i> Select Food & Drinks
+            </button>
+            <button class="action-button" id="continue-button" onclick="proceedToPayment()" disabled>
+                Continue to Payment
+            </button>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme switcher
+        const toggleSwitch = document.querySelector('#checkbox');
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
+        // Seat selection logic
+        const seatPrice = 12; // Price per seat in USD
+        let selectedSeats = [];
+
+        // Generate seat map
+        function generateSeatMap() {
+            const seatMap = document.getElementById('seat-map');
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+            const seatsPerRow = 16;
+
+            // Sample occupied seats
+            const occupiedSeats = ['A3', 'A4', 'B7', 'B8', 'C1', 'C2', 'F9', 'F10', 'H5', 'H6', 'I12', 'I13'];
+
+            rows.forEach(row => {
+                const seatRow = document.createElement('div');
+                seatRow.className = 'seat-row';
+
+                // Row label
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-label';
+                rowLabel.textContent = row;
+                seatRow.appendChild(rowLabel);
+
+                // Generate seats
+                for (let i = 1; i <= seatsPerRow; i++) {
+                    const seatId = row + i;
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.setAttribute('data-seat-id', seatId);
+                    seat.textContent = i;
+
+                    // Add aisle gaps
+                    if (i === 5 || i === 13) {
+                        const aisleGap = document.createElement('div');
+                        aisleGap.className = 'aisle-gap';
+                        seatRow.appendChild(aisleGap);
+                    }
+
+                    // Set seat status
+                    if (occupiedSeats.includes(seatId)) {
+                        seat.classList.add('occupied');
+                    } else {
+                        seat.classList.add('available');
+                        seat.addEventListener('click', () => toggleSeat(seatId, seat));
+                    }
+
+                    seatRow.appendChild(seat);
+                }
+
+                seatMap.appendChild(seatRow);
+            });
+        }
+
+        // Toggle seat selection
+        function toggleSeat(seatId, seatElement) {
+            if (seatElement.classList.contains('selected')) {
+                // Deselect seat
+                seatElement.classList.remove('selected');
+                seatElement.classList.add('available');
+                selectedSeats = selectedSeats.filter(seat => seat !== seatId);
+            } else {
+                // Select seat (limit to 8 seats)
+                if (selectedSeats.length < 8) {
+                    seatElement.classList.remove('available');
+                    seatElement.classList.add('selected');
+                    selectedSeats.push(seatId);
+                } else {
+                    alert('You can select maximum 8 seats at a time.');
+                    return;
+                }
+            }
+
+            updateSelectedSeatsInfo();
+        }
+
+        // Update selected seats information
+        function updateSelectedSeatsInfo() {
+            const selectedSeatsInfo = document.getElementById('selected-seats-info');
+            const selectedSeatTags = document.getElementById('selected-seat-tags');
+            const totalPrice = document.getElementById('total-price');
+            const continueButton = document.getElementById('continue-button');
+
+            if (selectedSeats.length > 0) {
+                selectedSeatsInfo.style.display = 'block';
+
+                // Update seat tags
+                selectedSeatTags.innerHTML = '';
+                selectedSeats.forEach(seatId => {
+                    const seatTag = document.createElement('div');
+                    seatTag.className = 'seat-tag';
+                    seatTag.textContent = seatId;
+                    selectedSeatTags.appendChild(seatTag);
+                });
+
+                // Update total price
+                const total = selectedSeats.length * seatPrice;
+                totalPrice.textContent = `$${total}`;
+
+                // Enable continue button
+                continueButton.disabled = false;
+            } else {
+                selectedSeatsInfo.style.display = 'none';
+                continueButton.disabled = true;
+            }
+        }
+
+        // Generate seat map on page load
+        generateSeatMap();
+
+        // Global functions for buttons
+        window.selectFood = function() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.classList.add('show');
+
+            // Simulate loading
+            setTimeout(() => {
+                loadingOverlay.classList.remove('show');
+                alert('Food & Drinks selection feature coming soon!\n\nSelected seats: ' + selectedSeats.join(', '));
+            }, 1000);
+        };
+
+        window.proceedToPayment = function() {
+            if (selectedSeats.length === 0) {
+                alert('Please select at least one seat before proceeding.');
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.classList.add('show');
+
+            // Simulate navigation to payment
+            setTimeout(() => {
+                loadingOverlay.classList.remove('show');
+                const total = selectedSeats.length * seatPrice;
+                alert(`Proceeding to payment...\n\nSelected seats: ${selectedSeats.join(', ')}\nTotal amount: $${total}`);
+                // In real app: window.location.href = '/payment?seats=' + selectedSeats.join(',');
+            }, 1500);
+        };
+    });
+</script>
+
+</body>
+</html>

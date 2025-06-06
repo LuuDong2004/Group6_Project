@@ -14,8 +14,8 @@ public class ScreeningRoomDto {
 
     private String name;
     private int capacity; // sức chứa
-    private String area;
+
     private String row;
-    private String description;
+
     private BranchDto branch;
 }

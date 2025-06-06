@@ -18,10 +18,7 @@ public class ScreeningRoom {
 
     private String name;
     private int capacity; // sức chứa
-    private String area;
-    private String row;
     private String description;
-
     @ManyToOne
     @JoinColumn(name = "BranchId")
     @OnDelete(action = OnDeleteAction.CASCADE)

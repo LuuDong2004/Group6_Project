@@ -35,39 +35,39 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
     // Lấy các ngày có lịch chiếu từ ngày hiện tại trở đi
     @Query("SELECT DISTINCT s.screeningDate FROM Schedule s WHERE s.movie.id = :movieId AND s.screeningDate >= :currentDate ORDER BY s.screeningDate")
     List<Date> findDistinctScreeningDatesByMovieIdFromDate(@Param("movieId") Integer movieId, @Param("currentDate") Date currentDate);
-
-    // Query mới: Lấy lịch chiếu từ thời điểm hiện tại trở đi (bao gồm cả ngày và giờ)
-    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND " +
-            "(s.screeningDate > :currentDate OR " +
-            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
-    List<Schedule> findFutureSchedulesByMovieId(@Param("movieId") Integer movieId,
-                                                @Param("currentDate") Date currentDate,
-                                                @Param("currentTime") java.sql.Time currentTime);
-
-    // Query mới: Lấy lịch chiếu theo ngày từ thời điểm hiện tại trở đi
-    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND s.screeningDate = :screeningDate AND " +
-            "(s.screeningDate > :currentDate OR " +
-            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
-    List<Schedule> findFutureSchedulesByMovieIdAndDate(@Param("movieId") Integer movieId,
-                                                       @Param("screeningDate") Date screeningDate,
-                                                       @Param("currentDate") Date currentDate,
-                                                       @Param("currentTime") java.sql.Time currentTime);
-
-    // Query mới: Lấy lịch chiếu theo rạp và ngày từ thời điểm hiện tại trở đi
-    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND s.branch.id = :branchId AND s.screeningDate = :screeningDate AND " +
-            "(s.screeningDate > :currentDate OR " +
-            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
-    List<Schedule> findFutureSchedulesByMovieIdAndBranchIdAndDate(@Param("movieId") Integer movieId,
-                                                                  @Param("branchId") Integer branchId,
-                                                                  @Param("screeningDate") Date screeningDate,
-                                                                  @Param("currentDate") Date currentDate,
-                                                                  @Param("currentTime") java.sql.Time currentTime);
-
-    // Query mới: Lấy các rạp có lịch chiếu trong tương lai
-    @Query("SELECT DISTINCT s.branch FROM Schedule s WHERE s.movie.id = :movieId AND " +
-            "(s.screeningDate > :currentDate OR " +
-            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
-    List<Object> findDistinctBranchesByMovieIdForFutureSchedules(@Param("movieId") Integer movieId,
-                                                                 @Param("currentDate") Date currentDate,
-                                                                 @Param("currentTime") java.sql.Time currentTime);
+//
+//    // Query mới: Lấy lịch chiếu từ thời điểm hiện tại trở đi (bao gồm cả ngày và giờ)
+//    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND " +
+//            "(s.screeningDate > :currentDate OR " +
+//            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
+//    List<Schedule> findFutureSchedulesByMovieId(@Param("movieId") Integer movieId,
+//                                                @Param("currentDate") Date currentDate,
+//                                                @Param("currentTime") java.sql.Time currentTime);
+//
+//    // Query mới: Lấy lịch chiếu theo ngày từ thời điểm hiện tại trở đi
+//    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND s.screeningDate = :screeningDate AND " +
+//            "(s.screeningDate > :currentDate OR " +
+//            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
+//    List<Schedule> findFutureSchedulesByMovieIdAndDate(@Param("movieId") Integer movieId,
+//                                                       @Param("screeningDate") Date screeningDate,
+//                                                       @Param("currentDate") Date currentDate,
+//                                                       @Param("currentTime") java.sql.Time currentTime);
+//
+//    // Query mới: Lấy lịch chiếu theo rạp và ngày từ thời điểm hiện tại trở đi
+//    @Query("SELECT s FROM Schedule s WHERE s.movie.id = :movieId AND s.branch.id = :branchId AND s.screeningDate = :screeningDate AND " +
+//            "(s.screeningDate > :currentDate OR " +
+//            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
+//    List<Schedule> findFutureSchedulesByMovieIdAndBranchIdAndDate(@Param("movieId") Integer movieId,
+//                                                                  @Param("branchId") Integer branchId,
+//                                                                  @Param("screeningDate") Date screeningDate,
+//                                                                  @Param("currentDate") Date currentDate,
+//                                                                  @Param("currentTime") java.sql.Time currentTime);
+//
+//    // Query mới: Lấy các rạp có lịch chiếu trong tương lai
+//    @Query("SELECT DISTINCT s.branch FROM Schedule s WHERE s.movie.id = :movieId AND " +
+//            "(s.screeningDate > :currentDate OR " +
+//            "(s.screeningDate = :currentDate AND s.startTime >= :currentTime))")
+//    List<Object> findDistinctBranchesByMovieIdForFutureSchedules(@Param("movieId") Integer movieId,
+//                                                                 @Param("currentDate") Date currentDate,
+//                                                                 @Param("currentTime") java.sql.Time currentTime);
 }

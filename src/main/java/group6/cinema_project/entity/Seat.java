@@ -9,7 +9,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Builder
+
 @Table(name = "Seat")
 public class Seat {
     @Id
@@ -17,18 +17,11 @@ public class Seat {
     private int id;
 
     private String name;
-    private int row;
+    private String row;
+    private int status;
     @ManyToOne
     @JoinColumn(name = "screeningRoomId")
     private ScreeningRoom room;
 
-    public Seat() {
-    }
 
-    public Seat(int id, String name, int row, ScreeningRoom room) {
-        this.id = id;
-        this.name = name;
-        this.row = row;
-        room = room;
-    }
 }

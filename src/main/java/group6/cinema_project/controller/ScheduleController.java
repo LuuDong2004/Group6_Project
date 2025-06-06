@@ -128,7 +128,7 @@ public class ScheduleController {
                 }
             }
 
-            // Truyền dữ liệu vào Model
+
             model.addAttribute("movie", movies);
             model.addAttribute("dateList", dateList);
             model.addAttribute("branches", branches);

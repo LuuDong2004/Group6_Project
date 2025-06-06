@@ -2,7 +2,6 @@ package group6.cinema_project.dto;
 
 import lombok.Data;
 
-import java.util.Date;
 @Data
 public class TicketDto {
     private int id;

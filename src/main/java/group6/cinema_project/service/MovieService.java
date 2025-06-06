@@ -74,5 +74,4 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
-
 }

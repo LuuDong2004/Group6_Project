@@ -366,36 +366,7 @@
   <div class="spinner"></div>
 </div>
 
-<header id="site-header" class="w3l-header fixed-top">
-  <!--/nav-->
-  <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
-    <div class="container">
-      <h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log" aria-hidden="true"></span>
-        MyShowz </a></h1>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      </div>
-
-      <div class="Login_SignUp" id="login_s">
-        <a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
-      </div>
-      <!-- toggle switch for light and dark theme -->
-      <div class="mobile-position">
-        <nav class="navigation">
-          <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="checkbox">
-              <input type="checkbox" id="checkbox">
-              <div class="mode-container">
-                <i class="gg-sun"></i>
-                <i class="gg-moon"></i>
-              </div>
-            </label>
-          </div>
-        </nav>
-      </div>
-    </div>
-  </nav>
-</header>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <div class="container" id="progress-container-id">
   <div class="row">
@@ -488,8 +459,14 @@
           </div>
 
           <!-- Nút tiếp tục -->
-          <a th:if="${selectedSchedule != null}"
-             th:href="@{'/seat_selection.html?scheduleId=' + ${selectedSchedule.id}}"
+<!--          <a th:if="${selectedSchedule != null}"-->
+<!--             th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${movieId}, scheduleId=${selectedSchedule.id}, roomId=${selectedSchedule.screeningRoom.id})}"-->
+<!--             class="action-button">-->
+<!--            Continue Booking-->
+<!--          </a>-->
+
+          <a th:if="${selectedSchedule != null and selectedSchedule.screeningRoom != null and selectedSchedule.screeningRoom.id != null}"
+             th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${movieId}, scheduleId=${selectedSchedule.id}, roomId=${selectedSchedule.screeningRoom.id})}"
              class="action-button">
             Continue Booking
           </a>
@@ -505,7 +482,7 @@
     </div>
   </div>
 </div>
-
+<div th:replace="~{fragments/footer :: footer}"></div>
 <!-- Scripts -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
