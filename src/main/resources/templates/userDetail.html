@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin tài khoản - Cinemas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+        .container {
+            margin-top: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .tab-content {
+            margin-top: 20px;
+        }
+        .form-label.required::after {
+            content: " *";
+            color: red;
+        }
+        .alert {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Thông Tin Tài Khoản</h3>
+        <a href="/dashboard" class="btn btn-secondary">Quay lại trang chủ</a>
+    </div>
+
+    <ul class="nav nav-tabs" id="memberTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Thông Tin Tài Khoản</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">Đổi Mật Khẩu</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">Lịch Sử Vé</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Tab Thông tin tài khoản -->
+        <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <div id="accountAlert"></div>
+            <form id="accountForm">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <!-- ✅ SỬA ID VÀ THYMELEAF FIELD -->
+                        <label class="form-label required" for="userName">Họ tên</label>
+                        <input type="text" class="form-control" id="userName" th:value="${user?.userName}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label required" for="phone">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="phone" th:value="${user?.phone}" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <!-- ✅ SỬA ID VÀ THYMELEAF FIELD -->
+                        <label class="form-label required" for="dateOfBirth">Ngày sinh</label>
+                        <input type="date" class="form-control" id="dateOfBirth" th:value="${user?.dateOfBirth}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label required" for="email">Email</label>
+                        <input type="email" class="form-control" id="email" th:value="${user?.email}" disabled>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="address">Địa chỉ</label>
+                    <input type="text" class="form-control" id="address" th:value="${user?.address}" placeholder="Nhập địa chỉ">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tab Đổi mật khẩu -->
+        <div class="tab-pane fade" id="password" role="tabpanel">
+            <div id="passwordAlert"></div>
+            <form id="changePasswordForm">
+                <div class="mb-3">
+                    <label class="form-label required" for="oldPassword">Mật khẩu hiện tại</label>
+                    <input type="password" class="form-control" id="oldPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required" for="newPassword">Mật khẩu mới</label>
+                    <input type="password" class="form-control" id="newPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required" for="confirmPassword">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">Đổi mật khẩu</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tab Lịch sử vé -->
+        <div class="tab-pane fade" id="history" role="tabpanel">
+            <div class="alert alert-info">
+                <strong>Thông báo:</strong> Tính năng lịch sử vé sẽ được triển khai sau khi hoàn thành module đặt vé.
+            </div>
+            <table class="table table-bordered mt-3">
+                <thead class="table-light">
+                <tr>
+                    <th>Ngày đặt</th>
+                    <th>Phim</th>
+                    <th>Rạp</th>
+                    <th>Ghế</th>
+                    <th>Giá</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Chưa có lịch sử đặt vé</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div></div>
+        <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Hàm hiển thị alert
+    function showAlert(containerId, type, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+    }
+
+    // Xử lý form cập nhật thông tin
+    document.getElementById("accountForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = {
+            userName: document.getElementById("userName").value,
+            phone: document.getElementById("phone").value,
+            dateOfBirth: document.getElementById("dateOfBirth").value,
+            address: document.getElementById("address").value
+        };
+
+        fetch('/update-profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('accountAlert', 'success', data.message);
+                } else {
+                    showAlert('accountAlert', 'danger', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('accountAlert', 'danger', 'Có lỗi xảy ra khi cập nhật thông tin!');
+            });
+    });
+
+    // Xử lý form đổi mật khẩu
+    document.getElementById("changePasswordForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const newPass = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+
+        if (newPass !== confirmPass) {
+            showAlert('passwordAlert', 'danger', 'Mật khẩu xác nhận không khớp!');
+            return;
+        }
+
+        const formData = {
+            oldPassword: document.getElementById("oldPassword").value,
+            newPassword: newPass,
+            confirmPassword: confirmPass
+        };
+
+        fetch('/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('passwordAlert', 'success', data.message);
+                    // Reset form
+                    document.getElementById("changePasswordForm").reset();
+                } else {
+                    showAlert('passwordAlert', 'danger', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('passwordAlert', 'danger', 'Có lỗi xảy ra khi đổi mật khẩu!');
+            });
+    });
+
+    // Xử lý đăng xuất
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+            window.location.href = "/login";
+        }
+    });
+</script>
+</body>
+</html>

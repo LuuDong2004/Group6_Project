@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticket Booking</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
+  <link rel="stylesheet" href="https://npmcdn.com/flickity@2/dist/flickity.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/progress.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/ticket-booking.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/e-ticket.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/payment.css}" />
+  <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+  <style>
+    /* Date selection styles - đặt ở trên đầu */
+    .date-carousel-container {
+      margin-bottom: 30px;
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 80px; /* Thêm khoảng cách từ header */
+    }
+
+    #date-carousel {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center; /* Căn giữa các ngày */
+      min-height: 100px;
+    }
+
+    .carousel-cell {
+      width: 80px;
+      height: 80px;
+      margin-right: 10px;
+      background: rgb(243, 235, 235);
+      border-radius: 8px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-cell:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .carousel-cell.selected {
+      background-color: #df0e62;
+      color: white;
+    }
+
+    .date-numeric {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .date-day {
+      font-size: 12px;
+    }
+
+    .date-selection {
+      text-align: center;
+    }
+
+    /* Movie info styles */
+    .movie-info-container {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      background-color: #f8f8f8;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .movie-poster {
+      width: 160px;
+      border-radius: 6px;
+      margin-right: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .movie-details {
+      flex: 1;
+    }
+
+    .movie-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .movie-meta {
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .movie-meta span {
+      margin-right: 15px;
+    }
+
+    .movie-synopsis {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    /* Cinema selection styles */
+    .cinema-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: flex-start;
+      margin-bottom: 30px;
+    }
+
+    .cinema-card {
+      border-radius: 8px;
+      padding: 18px 20px;
+      background-color: rgb(243, 235, 235);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 240px; /* Increased size */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .cinema-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .cinema-card.selected {
+      background-color: #df0e62;
+      color: white;
+      box-shadow: 0 4px 12px rgba(223, 14, 98, 0.4);
+    }
+
+    .cinema-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .cinema-address {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .date-selection, .cinema-selection, .time-selection {
+      display: block; /* Show all sections by default */
+      margin-bottom: 30px;
+    }
+
+    .show-element {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-heading {
+      margin-bottom: 20px;
+      margin-top: 10px;
+      color: #333;
+      font-size: 20px;
+      font-weight: 600;
+      border-left: 4px solid #df0e62;
+      padding-left: 10px;
+      text-align: left;
+    }
+
+    /* Button styles */
+    .action-button {
+      background-color: #df0e62;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      width: 250px;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .action-button:hover {
+      background-color: #c20a54;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .action-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Screen-time button styles */
+    .screen-time {
+      background-color: rgb(243, 235, 235);
+      border: none;
+      border-radius: 4px;
+      color: #333;
+      padding: 8px 12px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .screen-time:hover {
+      background-color: #e0e0e0;
+    }
+
+    .screen-time.selected {
+      background-color: #df0e62;
+      color: white;
+    }
+
+    /* Time slot styles */
+    .time-ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .time-li {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .time-li:last-child {
+      border-bottom: none;
+    }
+
+    .screens {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .time-btn {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    /* Flickity overrides để đảm bảo hiển thị ngang */
+    .flickity-enabled {
+      position: relative;
+    }
+
+    .flickity-enabled:focus {
+      outline: none;
+    }
+
+    .flickity-viewport {
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    .flickity-slider {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Loading overlay styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .loading-overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #df0e62;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .cinema-grid {
+        justify-content: space-between;
+      }
+
+      .cinema-card {
+        width: calc(50% - 10px);
+      }
+
+      .movie-info-container {
+        flex-direction: column;
+      }
+
+      .movie-poster {
+        width: 100%;
+        max-width: 240px;
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+
+      #date-carousel {
+        min-height: 85px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cinema-card {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+<header id="site-header" class="w3l-header fixed-top">
+  <!--/nav-->
+  <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+    <div class="container">
+      <h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log" aria-hidden="true"></span>
+        MyShowz </a></h1>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      </div>
+
+      <div class="Login_SignUp" id="login_s">
+        <a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
+      </div>
+      <!-- toggle switch for light and dark theme -->
+      <div class="mobile-position">
+        <nav class="navigation">
+          <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="checkbox">
+              <input type="checkbox" id="checkbox">
+              <div class="mode-container">
+                <i class="gg-sun"></i>
+                <i class="gg-moon"></i>
+              </div>
+            </label>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="container" id="progress-container-id">
+  <div class="row">
+    <div class="col">
+      <div class="px-0 pt-4 pb-0 mt-3 mb-3">
+        <div id="booking-content">
+          <!-- Date selection first -->
+          <div class="date-selection" id="date-selection">
+            <h3 class="section-heading"></h3>
+            <div class="date-carousel-container">
+              <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }' id="date-carousel">
+                <!-- Date cells using Thymeleaf -->
+                <div th:each="dateInfo : ${dateList}"
+                     class="carousel-cell date-selector"
+                     th:classappend="${dateInfo.selected} ? 'selected' : ''"
+                     th:data-date="${dateInfo.formattedDate}"
+                     th:data-movie-id="${movieId}">
+                  <div class="date-numeric" th:text="${dateInfo.dayNum}">25</div>
+                  <div class="date-day" th:text="${dateInfo.dayName}">Today</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Movie information second -->
+          <div th:each="movie: ${movie}" class="movie-info-container" id="movie-info">
+            <img th:src="${movie.image}" class="movie-poster"/>
+            <div class="movie-details">
+              <div class="movie-meta">
+                <span>Thời Lượng: <span th:text="${movie.duration}"></span></span><br>
+                <span>Ngôn ngữ: <span th:text="${movie.language}"></span></span><br>
+                <span>Thể Loại: <span th:text="${movie.genre}"></span></span><br>
+                <span>Đánh Giá: <span th:text="${movie.rating}"></span></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="screen-select-div">
+            <!-- Cinema selection third -->
+            <div class="cinema-selection" id="cinema-selection">
+              <h3 class="section-heading">Select Cinema</h3>
+              <div class="cinema-grid" id="cinema-grid">
+                <!-- Cinema cards with data attributes -->
+                <div th:each="branch : ${branches}"
+                     class="cinema-card branch-selector"
+                     th:classappend="${selectedBranchId != null && branch.id == selectedBranchId} ? 'selected' : ''"
+                     th:data-branch-id="${branch.id}"
+                     th:data-movie-id="${movieId}"
+                     th:data-date="${dateParam}">
+                  <div class="cinema-name" th:text="${branch.name}">Cinema Name</div>
+                  <div class="cinema-address" th:text="${branch.address}">Cinema Address</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time selection last -->
+          <div class="time-selection" id="time-selection">
+            <h3 class="section-heading">Select Show Time</h3>
+
+            <!-- Hiển thị thông báo nếu không có rạp nào được chọn -->
+            <div th:if="${selectedBranchId == null}" class="alert alert-info text-center">
+              Please select a cinema to view available showtimes.
+            </div>
+
+            <!-- Hiển thị thông báo nếu không có suất chiếu -->
+            <div th:if="${selectedBranchId != null && (schedulesByBranchAndRoom == null || schedulesByBranchAndRoom.isEmpty() || !schedulesByBranchAndRoom.containsKey(selectedBranchId))}"
+                 class="alert alert-info text-center">
+              No available showtimes for this cinema on the selected date.
+            </div>
+
+            <!-- Hiển thị các suất chiếu theo phòng -->
+            <ul class="time-ul" id="time-slots" th:if="${selectedBranchId != null && schedulesByBranchAndRoom != null && schedulesByBranchAndRoom.containsKey(selectedBranchId)}">
+              <li th:each="roomEntry : ${schedulesByBranchAndRoom.get(selectedBranchId)}" class="time-li">
+                <div class="screens" th:text="${roomEntry.key}">Room Name</div>
+                <div class="time-btn">
+                  <div th:each="schedule : ${roomEntry.value}"
+                       class="screen-time schedule-selector"
+                       th:classappend="${selectedSchedule != null && selectedSchedule.id == schedule.id} ? 'selected' : ''"
+                       th:data-schedule-id="${schedule.id}"
+                       th:data-movie-id="${movieId}"
+                       th:data-date="${dateParam}"
+                       th:data-branch-id="${selectedBranchId}">
+                    <span th:text="${#dates.format(schedule.startTime, 'HH:mm')}"></span>
+                    <span th:if="${schedule.endTime != null}" th:text="${' - ' + #dates.format(schedule.endTime, 'HH:mm')}"></span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Nút tiếp tục -->
+          <a th:if="${selectedSchedule != null}"
+             th:href="@{'/seat_selection.html?scheduleId=' + ${selectedSchedule.id}}"
+             class="action-button">
+            Continue Booking
+          </a>
+
+          <button th:unless="${selectedSchedule != null}"
+                  type="button"
+                  class="action-button"
+                  disabled="disabled">
+            Continue Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tham chiếu đến các phần tử DOM
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const toggleSwitch = document.querySelector('#checkbox');
+
+    // Biến lưu trữ trạng thái hiện tại
+    let currentState = {
+      movieId: null,
+      date: null,
+      branchId: null,
+      scheduleId: null
+    };
+
+    // Lấy các giá trị ban đầu từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentState.movieId = document.querySelector('[data-movie-id]')?.getAttribute('data-movie-id');
+    currentState.date = urlParams.get('date') || document.querySelector('[data-date]')?.getAttribute('data-date');
+    currentState.branchId = urlParams.get('branchId');
+    currentState.scheduleId = urlParams.get('scheduleId');
+
+    // Chức năng chuyển đổi theme
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // Khôi phục theme từ localStorage
+    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+    if (currentTheme) {
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      if (currentTheme === 'dark') {
+        toggleSwitch.checked = true;
+      }
+    }
+
+    // Đăng ký sự kiện change cho theme switcher
+    toggleSwitch.addEventListener('change', switchTheme, false);
+
+    // === Xử lý các sự kiện click không làm mới trang ===
+
+    // 1. Xử lý click cho ngày
+    function attachDateEvents() {
+      document.querySelectorAll('.date-selector').forEach(dateCell => {
+        dateCell.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const date = this.getAttribute('data-date');
+          const movieId = this.getAttribute('data-movie-id');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.date = date;
+          currentState.movieId = movieId;
+          // Reset branch và schedule khi chọn ngày mới
+          currentState.branchId = null;
+          currentState.scheduleId = null;
+
+          // FIXED: Gỡ bỏ selected từ tất cả date cells trước khi thêm vào cell được chọn
+          document.querySelectorAll('.date-selector').forEach(cell => {
+            cell.classList.remove('selected');
+          });
+
+          // Thêm selected vào cell được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // 2. Xử lý click cho rạp chiếu
+    function attachBranchEvents() {
+      document.querySelectorAll('.branch-selector').forEach(branchCard => {
+        branchCard.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const branchId = this.getAttribute('data-branch-id');
+          const movieId = this.getAttribute('data-movie-id');
+          const date = this.getAttribute('data-date');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.branchId = branchId;
+          currentState.movieId = movieId;
+          currentState.date = date;
+          // Reset schedule khi chọn rạp mới
+          currentState.scheduleId = null;
+
+          // Gỡ bỏ selected từ tất cả branch cards
+          document.querySelectorAll('.branch-selector').forEach(card => {
+            card.classList.remove('selected');
+          });
+
+          // Thêm selected vào card được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // Hàm gắn sự kiện click cho các suất chiếu
+    function attachScheduleEvents() {
+      document.querySelectorAll('.schedule-selector').forEach(scheduleBtn => {
+        scheduleBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Hiển thị loading
+          loadingOverlay.classList.add('show');
+
+          const scheduleId = this.getAttribute('data-schedule-id');
+          const movieId = this.getAttribute('data-movie-id');
+          const date = this.getAttribute('data-date');
+          const branchId = this.getAttribute('data-branch-id');
+
+          // Cập nhật trạng thái hiện tại
+          currentState.scheduleId = scheduleId;
+          currentState.movieId = movieId;
+          currentState.date = date;
+          currentState.branchId = branchId;
+
+          // Gỡ bỏ selected từ tất cả schedule buttons
+          document.querySelectorAll('.schedule-selector').forEach(btn => {
+            btn.classList.remove('selected');
+          });
+
+          // Thêm selected vào button được chọn
+          this.classList.add('selected');
+
+          // Tải nội dung mới không làm mới trang
+          loadContent();
+        });
+      });
+    }
+
+    // Gắn sự kiện ban đầu
+    attachDateEvents();
+    attachBranchEvents();
+    attachScheduleEvents();
+
+    // Hàm tải nội dung thông qua AJAX
+    function loadContent() {
+      // Xây dựng URL dựa trên trạng thái hiện tại
+      let url = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
+      if (currentState.branchId) url += `&branchId=${currentState.branchId}`;
+      if (currentState.scheduleId) url += `&scheduleId=${currentState.scheduleId}`;
+
+      // Thêm tham số AJAX để phân biệt
+      url += '&ajax=true';
+
+      // Sử dụng Fetch API để gọi AJAX
+      fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.text();
+              })
+              .then(html => {
+                // Parse HTML response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // FIXED: Cập nhật phần date selection để đảm bảo trạng thái selected được cập nhật chính xác
+                const newDateSelection = doc.querySelector('#date-selection');
+                if (newDateSelection) {
+                  document.querySelector('#date-selection').outerHTML = newDateSelection.outerHTML;
+                  attachDateEvents(); // Gắn lại sự kiện cho các ngày mới
+                }
+
+                // Cập nhật phần cinema selection
+                const newCinemaSelection = doc.querySelector('#cinema-selection');
+                if (newCinemaSelection) {
+                  document.querySelector('#cinema-selection').outerHTML = newCinemaSelection.outerHTML;
+                  attachBranchEvents(); // Gắn lại sự kiện cho các rạp chiếu mới
+                }
+
+                // Cập nhật phần time selection
+                const newTimeSelection = doc.querySelector('#time-selection');
+                if (newTimeSelection) {
+                  document.querySelector('#time-selection').outerHTML = newTimeSelection.outerHTML;
+                  attachScheduleEvents(); // Gắn lại sự kiện cho các suất chiếu mới
+                }
+
+                // Cập nhật nút continue
+                const newActionButton = doc.querySelector('.action-button');
+                if (newActionButton) {
+                  document.querySelector('.action-button').outerHTML = newActionButton.outerHTML;
+                }
+
+                // Ẩn loading overlay
+                loadingOverlay.classList.remove('show');
+
+                // Cập nhật URL chỉ khi chọn ngày
+                const baseUrl = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
+                history.replaceState({}, '', baseUrl);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                // Ẩn loading và hiển thị thông báo lỗi
+                loadingOverlay.classList.remove('show');
+                alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
+              });
+    }
+  });
+</script>
+
+<script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
+<script type="text/javascript" src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
+<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+</body>
+</html>

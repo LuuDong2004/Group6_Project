@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error - MyShowz</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .error-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-top: 80px;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-icon {
+            font-size: 80px;
+            color: #df0e62;
+            margin-bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .error-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #df0e62;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #df0e62, #ff6b9d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(223, 14, 98, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(223, 14, 98, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #df0e62;
+            color: #df0e62;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .error-details {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .error-code {
+            font-size: 14px;
+            color: #999;
+            font-family: monospace;
+        }
+
+        /* Header styles */
+        #site-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: #df0e62 !important;
+        }
+
+        .icon-log {
+            color: #df0e62;
+        }
+
+        /* Theme switch styles */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 50px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .mode-container {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .mode-container:before {
+            background-color: #fff;
+            bottom: 2px;
+            content: "";
+            height: 20px;
+            left: 2px;
+            position: absolute;
+            transition: .4s;
+            width: 20px;
+            border-radius: 50%;
+        }
+
+        input:checked + .mode-container {
+            background-color: #df0e62;
+        }
+
+        input:checked + .mode-container:before {
+            transform: translateX(26px);
+        }
+
+        .gg-sun, .gg-moon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+
+        .gg-sun {
+            left: 6px;
+            color: #ffa500;
+        }
+
+        .gg-moon {
+            right: 6px;
+            color: #fff;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        [data-theme="dark"] .error-card {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .error-title {
+            color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .error-message {
+            background-color: #34495e;
+            color: #bdc3c7;
+        }
+
+        [data-theme="dark"] .btn-secondary {
+            color: #bdc3c7;
+            border-color: #7f8c8d;
+        }
+
+        [data-theme="dark"] .btn-secondary:hover {
+            background: #34495e;
+            color: #df0e62;
+        }
+
+        [data-theme="dark"] #site-header {
+            background: rgba(44, 62, 80, 0.95);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .error-card {
+                margin: 20px;
+                padding: 40px 30px;
+            }
+
+            .error-title {
+                font-size: 28px;
+            }
+
+            .error-message {
+                font-size: 16px;
+            }
+
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-card {
+                padding: 30px 20px;
+            }
+
+            .error-icon {
+                font-size: 60px;
+            }
+
+            .error-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Header -->
+<header id="site-header" class="w3l-header fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+        <div class="container">
+            <h1><a class="navbar-brand" href="/"><span class="fa fa-play icon-log" aria-hidden="true"></span>
+                MyShowz </a></h1>
+
+            <div class="Login_SignUp" id="login_s">
+                <a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
+            </div>
+
+            <!-- Theme switch -->
+            <div class="mobile-position">
+                <nav class="navigation">
+                    <div class="theme-switch-wrapper">
+                        <label class="theme-switch" for="checkbox">
+                            <input type="checkbox" id="checkbox">
+                            <div class="mode-container">
+                                <i class="gg-sun">☀</i>
+                                <i class="gg-moon">🌙</i>
+                            </div>
+                        </label>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Error Content -->
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fa fa-exclamation-triangle"></i>
+        </div>
+
+        <h1 class="error-title">Oops! Something went wrong</h1>
+
+        <!-- Error message from controller -->
+        <div class="error-message" th:if="${error}">
+            <i class="fa fa-info-circle" style="margin-right: 8px;"></i>
+            <span th:text="${error}">An error occurred while processing your request.</span>
+        </div>
+
+        <!-- Default message if no specific error -->
+        <div class="error-message" th:unless="${error}">
+            <i class="fa fa-info-circle" style="margin-right: 8px;"></i>
+            We're sorry, but something went wrong while processing your request. Please try again later.
+        </div>
+
+        <!-- Action buttons -->
+        <div class="error-actions">
+            <!-- Back to movie selection with movieId if available -->
+            <a th:if="${movieId}"
+               th:href="@{'/schedule/movie/' + ${movieId} + '/date'}"
+               class="btn btn-primary">
+                <i class="fa fa-arrow-left"></i>
+                Try Again
+            </a>
+
+            <!-- Back to home if no movieId -->
+            <a th:unless="${movieId}"
+               href="/"
+               class="btn btn-primary">
+                <i class="fa fa-home"></i>
+                Go Home
+            </a>
+
+            <!-- Back button using JavaScript -->
+            <button onclick="history.back()" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i>
+                Go Back
+            </button>
+        </div>
+
+        <!-- Error details for debugging (optional) -->
+        <div class="error-details" th:if="${timestamp}">
+            <div class="error-code">
+                Error occurred at: <span th:text="${timestamp}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme switch functionality
+        const toggleSwitch = document.querySelector('#checkbox');
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Restore theme from localStorage
+        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        // Add event listener for theme switch
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
+        // Auto-hide error message after 10 seconds (optional)
+        const errorMessage = document.querySelector('.error-message');
+        if (errorMessage) {
+            setTimeout(() => {
+                errorMessage.style.opacity = '0.7';
+            }, 10000);
+        }
+    });
+
+    // Add some interactivity to error icon
+    document.querySelector('.error-icon').addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1) rotate(5deg)';
+    });
+
+    document.querySelector('.error-icon').addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1) rotate(0deg)';
+    });
+</script>
+
+<script type="text/javascript" src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
+<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+</body>
+</html>
