@@ -1,0 +1,29 @@
+package group6.cinema_project.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+@Data
+@Entity
+@Table(name = "ScreeningRoom")
+@NoArgsConstructor
+@Getter
+@Setter
+public class ScreeningRoom {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private Integer capacity; // sức chứa
+    private String description;
+    @ManyToOne
+    @JoinColumn(name = "BranchId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Branch branch;
+}

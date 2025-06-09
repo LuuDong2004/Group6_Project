@@ -608,14 +608,15 @@
                     <tr>
                         <th>ID</th>
                         <th>Phim</th>
+                        <th>Mô tả</th>
                         <th>Thời lượng</th>
                         <th>Rating</th>
                         <th>Định dạng</th>
-                        <th>Ngày chiếu</th>
+                        <th>Ngày chiếu</th>                      
                         <th>Ngôn ngữ</th>
                         <th>Thể loại</th>
                         <th>Đạo diễn & Diễn viên</th>
-                        <th>Hành động</th>
+                        <th>Hành động</th>                       
                     </tr>
                     </thead>
                     <tbody>
@@ -644,6 +645,7 @@
                                 </div>
                             </div>
                         </td>
+                        <td  th:text="${movie.description != null ? movie.description : 'N/A'}"> </td>
                         <td th:text="${movie.duration != null ? movie.duration + ' phút' : 'N/A'}"></td>
                         <td><span class="rating-badge" th:text="${movie.rating != null ? movie.rating : 'N/A'}"></span>
                         </td>
@@ -666,21 +668,25 @@
                                       class="genre-tag text-muted">Không có</span>
                             </div>
                         </td>
-                        <td>
-                            <div th:each="director : ${movie.directors}" class="director-info"
-                                 th:text="${director.name != null ? director.name : 'N/A'}">
-                                Anthony Russo
-                            </div>
-                            <div class="cast-info"
-                                 th:if="${not #lists.isEmpty(movie.actors)}"
-                                 th:title="${#strings.listJoin(movie.actors.![name], ', ')}"
-                                 th:text="${#strings.abbreviate(#strings.listJoin(movie.actors.![name], ', '), 30) + '...'}">
-                                Robert Downey Jr., Chris Evans...
-                            </div>
-                            <div class="cast-info" th:if="${#lists.isEmpty(movie.actors)}">
-                                (Không có thông tin diễn viên)
-                            </div>
-                        </td>
+                       <td>
+    <div th:if="${not #lists.isEmpty(movie.directors)}">
+        <strong>Đạo diễn:</strong>
+        <span th:each="directorName, iterStat : ${movie.directors}"
+              th:text="${directorName} + (${iterStat.last} ? '' : ', ')">Anthony Russo</span>
+    </div>
+
+    <div class="cast-info" th:if="${not #lists.isEmpty(movie.actors)}">
+        <strong>Diễn viên:</strong>
+        <span th:title="${#strings.listJoin(movie.actors, ', ')}"
+              th:text="${#strings.abbreviate(#strings.listJoin(movie.actors, ', '), 30)}">
+            Robert Downey Jr., Chris Evans...
+        </span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(movie.actors) and #lists.isEmpty(movie.directors)}">
+        (Không có thông tin)
+    </div>
+</td>
                         <td>
                             <div class="actions">
                                 <a th:href="@{/admin/movies/edit/{id}(id=${movie.id})}" class="action-btn edit-btn"

@@ -516,7 +516,12 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-semibold" for="duration">Thời lượng (phút)
+                                            <label class="form-label fw-semibold" for="duration" type="number" 
+                                                  id="duration" 
+                                                  name="duration" 
+                                                  min="1"
+                                                  required
+                                                  oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : null">Thời lượng (phút)
                                                 *</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="fas fa-clock"></i></span>

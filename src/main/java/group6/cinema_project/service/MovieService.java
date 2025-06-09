@@ -1,17 +1,19 @@
 package group6.cinema_project.service;
 
-import java.util.List;
+import group6.cinema_project.dto.MovieDto;
 
-import group6.cinema_project.entity.Movie;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface MovieService {
-  List<Movie> findAll();
+    Optional<MovieDto> getMovieById(Integer id);
 
-  Movie findById(Long id);
+    MovieDto saveOrUpdate(MovieDto movieDto);
 
-  Movie saveOrUpdate(Movie movie);
+    void  deleteMovie (Integer id);
 
-  void delete(Movie movie);
+    List<MovieDto> getAllMovie ();
 
-  
-} 
+    
+}

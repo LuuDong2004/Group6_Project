@@ -4,23 +4,22 @@ import jakarta.persistence.*;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "Users")
-@Data
 @Getter
 @Setter
-public class User {
+@Entity
+@Table(name = "Branch")
+@NoArgsConstructor
+@Data
+
+public class Branch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String username;
-    private String password;
-    private String fullName;
-    private String dateOfBrith;
-    private String email;
-    private String phone;
+    private String name;
+    private String description;
     private String address;
-    private String role;
+
 }
