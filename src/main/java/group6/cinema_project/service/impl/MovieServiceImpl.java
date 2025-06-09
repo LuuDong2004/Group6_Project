@@ -45,11 +45,19 @@ public class MovieServiceImpl implements MovieService {
         if (movieDto.getDirectors() != null && !movieDto.getDirectors().isEmpty()) {
             Set<Director> directors = new HashSet<>();
             for (String directorName : movieDto.getDirectors()) {
-                Director director = directorRepository.findByName(directorName);
+                Director director = directorRepository.findFirstByName(directorName).orElse(null);
                 if (director == null) {
-                    director = new Director();
-                    director.setName(directorName);
-                    director = directorRepository.save(director);
+                    try {
+                        director = new Director();
+                        director.setName(directorName);
+                        director = directorRepository.save(director);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        director = directorRepository.findFirstByName(directorName).orElse(null);
+                        if (director == null) {
+                            throw new RuntimeException("Failed to create or find director: " + directorName, e);
+                        }
+                    }
                 }
                 directors.add(director);
             }
@@ -60,11 +68,19 @@ public class MovieServiceImpl implements MovieService {
         if (movieDto.getActors() != null && !movieDto.getActors().isEmpty()) {
             Set<Actor> actors = new HashSet<>();
             for (String actorName : movieDto.getActors()) {
-                Actor actor = actorRepository.findByName(actorName);
+                Actor actor = actorRepository.findFirstByName(actorName).orElse(null);
                 if (actor == null) {
-                    actor = new Actor();
-                    actor.setName(actorName);
-                    actor = actorRepository.save(actor);
+                    try {
+                        actor = new Actor();
+                        actor.setName(actorName);
+                        actor = actorRepository.save(actor);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        actor = actorRepository.findFirstByName(actorName).orElse(null);
+                        if (actor == null) {
+                            throw new RuntimeException("Failed to create or find actor: " + actorName, e);
+                        }
+                    }
                 }
                 actors.add(actor);
             }

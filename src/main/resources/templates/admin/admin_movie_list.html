@@ -581,6 +581,19 @@
     </header>
 
     <div class="container-fluid p-4">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- Custom Confirmation Modal HTML -->
         <div id="customConfirmModal" class="fixed inset-0 d-none" style="background-color: rgba(0, 0, 0, 0.5);">
             <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">

@@ -30,7 +30,7 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director getDirectorByName(String name) {
-        return directorRepository.findByName(name);
+        return directorRepository.findFirstByName(name).orElse(null);
     }
 
     @Override
@@ -55,11 +55,19 @@ public class DirectorServiceImpl implements DirectorService {
         for (String name : directorNames) {
             String trimmedName = name.trim();
             if (!trimmedName.isEmpty()) {
-                Director director = directorRepository.findByName(trimmedName);
+                Director director = directorRepository.findFirstByName(trimmedName).orElse(null);
                 if (director == null) {
-                    director = new Director();
-                    director.setName(trimmedName);
-                    directorRepository.save(director);
+                    try {
+                        director = new Director();
+                        director.setName(trimmedName);
+                        director = directorRepository.save(director);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        director = directorRepository.findFirstByName(trimmedName).orElse(null);
+                        if (director == null) {
+                            throw new RuntimeException("Failed to create or find director: " + trimmedName, e);
+                        }
+                    }
                 }
                 directors.add(director);
             }

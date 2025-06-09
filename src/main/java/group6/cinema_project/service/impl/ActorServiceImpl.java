@@ -31,7 +31,7 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public Actor getActorByName(String name) {
-        return actorRepository.findByName(name);
+        return actorRepository.findFirstByName(name).orElse(null);
     }
 
     @Override
@@ -43,23 +43,31 @@ public class ActorServiceImpl implements ActorService {
     public void deleteActor(Integer id) {
         actorRepository.deleteById(id);
     }
-    
+
     // Phương thức để tìm hoặc tạo mới actors từ danh sách tên
     public Set<Actor> findOrCreateActors(String actorsString) {
         Set<Actor> actors = new HashSet<>();
         if (actorsString == null || actorsString.trim().isEmpty()) {
             return actors;
         }
-        
+
         String[] actorNames = actorsString.split(",");
         for (String name : actorNames) {
             String trimmedName = name.trim();
             if (!trimmedName.isEmpty()) {
-                Actor actor = actorRepository.findByName(trimmedName);
+                Actor actor = actorRepository.findFirstByName(trimmedName).orElse(null);
                 if (actor == null) {
-                    actor = new Actor();
-                    actor.setName(trimmedName);
-                    actorRepository.save(actor);
+                    try {
+                        actor = new Actor();
+                        actor.setName(trimmedName);
+                        actor = actorRepository.save(actor);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        actor = actorRepository.findFirstByName(trimmedName).orElse(null);
+                        if (actor == null) {
+                            throw new RuntimeException("Failed to create or find actor: " + trimmedName, e);
+                        }
+                    }
                 }
                 actors.add(actor);
             }

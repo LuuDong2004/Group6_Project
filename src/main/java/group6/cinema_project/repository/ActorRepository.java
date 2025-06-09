@@ -5,11 +5,15 @@ import org.springframework.stereotype.Repository;
 import group6.cinema_project.entity.Actor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ActorRepository extends JpaRepository<Actor, Integer> {
 
     Actor findByName(String name);
-    
+
     List<Actor> findByNameIn(List<String> names);
+
+    // Add method to find first actor by name to handle duplicates
+    Optional<Actor> findFirstByName(String name);
 }
