@@ -695,3 +695,8 @@ ul.book-left li {
 		font-size: 13px;
 	}
 }
+
+.w3l-grids {
+    background: var(--theme-bg) !important;
+    padding-bottom: 40px;
+}
