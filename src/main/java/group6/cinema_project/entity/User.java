@@ -24,8 +24,8 @@ public class User {
     @Email(message = "Email không hợp lệ")
     @Column(name = "email", nullable = false, unique = true, length = 50, columnDefinition = "VARCHAR(50)")
     private String email;
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    //@NotBlank(message = "Mật khẩu không được để trống")
+    //@Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     @Column(name = "password", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
     private String password;
 
@@ -35,12 +35,25 @@ public class User {
     @Column(name = "address", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
     private String address;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
-    private String role;
+    private Role role;
+
+    @Column(name = "provider", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
+    private AuthProvider provider = AuthProvider.LOCAL;
 
     public User() {
     }
-    public User(String userName, String phone, String email, String password, String dateOfBirth, String address, String role) {
+
+    public AuthProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(AuthProvider provider) {
+        this.provider = provider;
+    }
+
+    public User(String userName, String phone, String email, String password, String dateOfBirth, String address, Role role) {
         this.userName = userName;
         this.phone = phone;
         this.email = email;
@@ -48,6 +61,7 @@ public class User {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.role = role;
+        this.provider = AuthProvider.LOCAL;
     }
 
     public int getId() {
@@ -106,11 +120,11 @@ public class User {
         this.address = address;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

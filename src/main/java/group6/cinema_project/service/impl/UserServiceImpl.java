@@ -4,6 +4,7 @@ import group6.cinema_project.dto.ChangePasswordDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
 import group6.cinema_project.dto.UserRegistrationDto;
+import group6.cinema_project.entity.Role;
 import group6.cinema_project.entity.User;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.service.UserService;
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
                 passwordEncoder.encode(registrationDto.getPassword()),// In production, hash this password
                 registrationDto.getDateOfBirth(),
                 registrationDto.getAddress(),
-                "USER" // Default role
+                Role.USER // Default role
         );
 
         User savedUser = userRepository.save(user);
@@ -293,4 +294,5 @@ public class UserServiceImpl implements UserService {
         user.setRole(userDto.getRole());
         return user;
     }
+
 }

@@ -1,5 +1,7 @@
 package group6.cinema_project.dto;
 
+import group6.cinema_project.entity.Role;
+
 public class UserDto {
     private int id;
     private String userName;
@@ -11,12 +13,14 @@ public class UserDto {
     private String dateOfBirth;
 
     private String address;
-    private String role;
+    private Role role;
+
+    private String provider = "LOCAL"; // Default provider
 
     public UserDto() {
     }
 
-    public UserDto(int id, String userName, String email, String phone, String password, String dateOfBirth, String address, String role) {
+    public UserDto(int id, String userName, String email, String phone, String password, String dateOfBirth, String address, Role role) {
         this.id = id;
         this.userName = userName;
         this.email = email;
@@ -83,11 +87,20 @@ public class UserDto {
         this.address = address;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
 }

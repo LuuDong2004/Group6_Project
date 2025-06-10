@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="/assets/css/as-alert-message.min.css">
 	<link rel="stylesheet" type="text/css"
 		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="/assets/css/style-starter.css">
 	<link rel="stylesheet" type="text/css" href="/assets/css/sign-in.css">
 </head>
@@ -49,11 +50,11 @@
 	<div class="form-container sign-up-container">
 		<form th:action="@{/register}" th:object="${user}" method="post">
 			<h1>Create Account</h1>
-			<div class="social-container">
-				<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-				<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
-				<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
-			</div>
+<!--			<div class="social-container">-->
+<!--				<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>-->
+<!--				<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>-->
+<!--				<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>-->
+<!--			</div>-->
 			<span>or use your email for registration</span>
 
 			<!-- Hiển thị thông báo lỗi -->
@@ -66,7 +67,7 @@
 			<input th:field="*{email}" type="email" placeholder="Email" required />
 			<span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
 
-			<input th:field="*{dateOfBirth}" type="date" placeholder="Date of Birth" required />
+			<input th:field="*{dateOfBirth}" type="date" placeholder="Date of Birth"  required />
 			<span th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" class="error"></span>
 			<input th:field="*{phone}" type="tel" placeholder="Phone" required />
 			<span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
@@ -87,7 +88,7 @@
 			<h1>Sign in</h1>
 			<div class="social-container">
 				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
-				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
+				<a href="/oauth2/authorization/google" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
 				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-linkedin-in"></i></a>
 			</div>
 			<span>or use your account</span>
