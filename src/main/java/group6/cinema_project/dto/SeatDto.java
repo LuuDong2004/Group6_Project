@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SeatDto {
-    private int id;
+    private Integer id;
     private String name;
     private String row;
-    private int status;
+    private Integer status;
 }

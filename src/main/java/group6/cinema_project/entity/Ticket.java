@@ -17,15 +17,15 @@ public class Ticket {
     private double price;
 
     @ManyToOne
-    @JoinColumn(name = "SeatId")
+    @JoinColumn(name = "seat_id")
     private Seat seat;
 
     @ManyToOne
-    @JoinColumn(name = "ScreeningScheduleId")
+    @JoinColumn(name = "screening_schedule_id")
     private Schedule schedule;
 
     @ManyToOne
-    @JoinColumn(name = "InvoiceId", nullable = false)
+    @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
 

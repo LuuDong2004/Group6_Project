@@ -1,7 +1,6 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +17,6 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    @Column(name = "image")
     private String image;
     private int duration; // thời lượng tính bằng phút
     @Column(name = "release_date")

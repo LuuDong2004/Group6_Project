@@ -12,16 +12,10 @@ import java.util.List;
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Integer> {
 
-    // Sửa lỗi tên method - thiếu phần cuối
-    List<Seat> findSeatsByRoomId(Integer roomId);
+    @Query("SELECT s FROM Seat s " +
+           "JOIN s.room r " +
+           "JOIN Schedule sch ON sch.screeningRoom.id = r.id " +
+           "WHERE sch.id = :scheduleId")
+    List<Seat> findSeatsByRoomId(@Param("scheduleId") Integer scheduleId);
 
-    // Hoặc có thể dùng custom query để có thêm thông tin về trạng thái ghế
-    @Query("SELECT s FROM Seat s WHERE s.room.id = :roomId ORDER BY s.row, s.name")
-    List<Seat> findSeatsByRoomIdOrderByRowAndNumber(@Param("roomId") Integer roomId);
-
-    // Query để kiểm tra ghế đã đặt cho một lịch chiếu cụ thể
-    @Query("SELECT s FROM Seat s WHERE s.room.id = :roomId AND s.id IN " +
-            "(SELECT t.seat.id FROM Ticket t WHERE t.schedule.id = :scheduleId)")
-    List<Seat> findOccupiedSeatsByRoomAndSchedule(@Param("roomId") Integer roomId,
-                                                  @Param("scheduleId") Integer scheduleId);
 }

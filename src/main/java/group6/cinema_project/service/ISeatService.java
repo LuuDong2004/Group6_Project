@@ -8,5 +8,5 @@ public interface ISeatService {
     List<SeatDto> getSeatsByRoomId(Integer roomId);
 
     // Thêm method mới để lấy ghế với trạng thái đã đặt/chưa đặt
-    List<SeatDto> getSeatsWithStatusByRoomAndSchedule(Integer roomId, Integer scheduleId);
+//    List<SeatDto> getSeatsWithStatusByRoomAndSchedule(Integer roomId, Integer scheduleId);
 }

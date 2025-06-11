@@ -14,14 +14,14 @@ import lombok.Setter;
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     private String name;
     private String row;
-    private int status;
-    @ManyToOne
-    @JoinColumn(name = "screeningRoomId")
-    private ScreeningRoom room;
 
+    @ManyToOne
+    @JoinColumn(name = "screening_room_id")
+    private ScreeningRoom room;
+    private Integer status;
 
 }

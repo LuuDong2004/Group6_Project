@@ -20,7 +20,7 @@ public class ScreeningRoom {
     private int capacity; // sức chứa
     private String description;
     @ManyToOne
-    @JoinColumn(name = "BranchId")
+    @JoinColumn(name = "branch_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Branch branch;
 }

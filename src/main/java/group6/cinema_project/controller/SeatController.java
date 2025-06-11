@@ -2,16 +2,14 @@ package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleDto;
-import group6.cinema_project.dto.SeatDto;
-import group6.cinema_project.service.IMovieService;
-import group6.cinema_project.service.IScheduleService;
-import group6.cinema_project.service.ISeatService;
+import group6.cinema_project.dto.SeatReservationDto;
+import group6.cinema_project.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,8 +18,13 @@ import java.util.List;
 public class SeatController {
     @Autowired
     private ISeatService seatService;
+    
+    @Autowired
+    private ISeatReservationService seatReservationService;
+    
     @Autowired
     private IMovieService movieService;
+    
     @Autowired
     private IScheduleService scheduleService;
 
@@ -38,7 +41,7 @@ public class SeatController {
             ScheduleDto selectedSchedule = scheduleService.getScheduleById(scheduleId);
 
             // Lấy danh sách ghế với trạng thái
-            List<SeatDto> seats = seatService.getSeatsWithStatusByRoomAndSchedule(roomId, scheduleId);
+            List<SeatReservationDto> seats = seatReservationService.getSeatsWithStatus(scheduleId);
 
             // Thêm dữ liệu vào model
             model.addAttribute("movies", movies);
@@ -54,6 +57,22 @@ public class SeatController {
             // Log error và redirect về trang lỗi
             model.addAttribute("error", "Không thể tải thông tin ghế: " + e.getMessage());
             return "error";
+        }
+    }
+
+    @PostMapping("/reserve")
+    @ResponseBody
+    public ResponseEntity<?> reserveSeat(@RequestParam Integer seatId,
+                                       @RequestParam Integer scheduleId,
+                                       @RequestParam Integer userId) {
+        try {
+            boolean success = seatReservationService.reserveSeat(seatId, scheduleId, userId);
+            return success ? 
+                ResponseEntity.ok().build() : 
+                ResponseEntity.badRequest().body("Ghế đã được đặt");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Lỗi khi đặt ghế: " + e.getMessage());
         }
     }
 }
