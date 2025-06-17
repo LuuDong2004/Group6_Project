@@ -4,16 +4,47 @@ const maxSeats = 8;
 function initializeSeatSelection(scheduleId, userId) {
     this.scheduleId = scheduleId;
     this.userId = userId;
+    this.reservedSeats = [];
 
-    // Initialize seat map
-    const seats = document.querySelectorAll('.seat');
-    seats.forEach(seat => {
-        const status = seat.getAttribute('data-status');
-        if (status === 'RESERVED') {
-            seat.classList.add('reserved');
-            seat.classList.remove('available');
-        }
+    // Load seat status from server
+    loadSeatStatus(scheduleId).then(() => {
+        // Initialize seat map after loading status
+        const seats = document.querySelectorAll('.seat');
+        seats.forEach(seat => {
+            const seatId = parseInt(seat.getAttribute('data-seat-id'));
+            const status = getSeatStatus(seatId);
+            
+            if (status === 'RESERVED') {
+                seat.classList.add('reserved');
+                seat.classList.remove('available');
+            } else if (status === 'PENDING') {
+                seat.classList.add('pending');
+                seat.classList.remove('available');
+            }
+        });
     });
+}
+
+async function loadSeatStatus(scheduleId) {
+    try {
+        const response = await fetch(`/api/seats/status?scheduleId=${scheduleId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load seat status');
+        }
+        const data = await response.json();
+        this.reservedSeats = data;
+        console.log('Loaded seat status:', data); // Debug log
+        return data;
+    } catch (error) {
+        console.error('Error loading seat status:', error);
+        return [];
+    }
+}
+
+function getSeatStatus(seatId) {
+    const seat = this.reservedSeats.find(s => s.seatId === seatId);
+    console.log('Getting status for seat', seatId, ':', seat); // Debug log
+    return seat ? seat.status : 'AVAILABLE';
 }
 
 function renderSeats() {
@@ -40,15 +71,14 @@ function renderSeats() {
             seatElement.dataset.seatName = seatName;
 
             // Kiểm tra trạng thái ghế
-            const isReserved = this.reservedSeats.some(seat => 
-                seat.seatId === seatId && seat.status === 'RESERVED');
-            const isPending = this.reservedSeats.some(seat => 
-                seat.seatId === seatId && seat.status === 'PENDING');
+            const seatStatus = getSeatStatus(seatId);
             
-            if (isReserved) {
+            if (seatStatus === 'RESERVED') {
                 seatElement.classList.add('reserved');
-            } else if (isPending) {
+                seatElement.classList.remove('available');
+            } else if (seatStatus === 'PENDING') {
                 seatElement.classList.add('pending');
+                seatElement.classList.remove('available');
             } else {
                 seatElement.classList.add('available');
                 seatElement.addEventListener('click', () => this.toggleSeat(seatId, seatName, seatElement));

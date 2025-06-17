@@ -651,23 +651,22 @@
         </div>
 
         <!-- Seat Legend -->
-            <div class="legend">
+        <div class="legend">
             <div class="legend-item">
-                    <div class="legend-color" style="background-color: #4CAF50;"></div>
+                <div class="legend-color" style="background-color: #4CAF50;"></div>
                 <span>Available</span>
             </div>
             <div class="legend-item">
-                    <div class="legend-color" style="background-color: #f44336;"></div>
-                    <span>Reserved</span>
+                <div class="legend-color" style="background-color: #f44336;"></div>
+                <span>Reserved</span>
             </div>
             <div class="legend-item">
-                    <div class="legend-color" style="background-color: #2196F3;"></div>
-                    <span>Selected</span>
-                </div>
+                <div class="legend-color" style="background-color: #2196F3;"></div>
+                <span>Selected</span>
+            </div>
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #9c27b0;"></div>
                 <span>Pending</span>
-            </div>
             </div>
         </div>
     </div>
@@ -1050,12 +1049,35 @@
 
             // FIXED: Add error handling for redirect
             try {
+                // Create booking first
+                const response = await fetch('/booking/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: 1, // TODO: Get from session/auth
+                        scheduleId: bookingData.scheduleId,
+                        seatIds: bookingData.seats.map(seat => seat.seatId),
+                        foodItems: bookingData.food,
+                        totalAmount: bookingData.total + bookingData.foodTotal,
+                        notes: ''
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create booking');
+                }
+
+                const booking = await response.json();
+                
+                // Redirect to payment page with booking ID
                 setTimeout(() => {
-                    window.location.href = '/payment';
+                    window.location.href = `/payment?bookingId=${booking[0].id}`;
                 }, 1000);
             } catch (error) {
-                console.error('Redirect error:', error);
-                seatBooking.showAlert('Error redirecting to payment page', 'error');
+                console.error('Error:', error);
+                seatBooking.showAlert('Error creating booking: ' + error.message, 'error');
             }
         }
     }

@@ -1,7 +1,8 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-
+@Data
 @Table(name = "Seat")
 public class Seat {
     @Id

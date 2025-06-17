@@ -26,14 +26,14 @@ public class MovieService implements IMovieService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public MovieService() {
-    }
-
-    @Autowired
-    public MovieService(MovieRepository movieReponsitory) {
-
-        this.movieReponsitory = movieReponsitory;
-    }
+//    public MovieService() {
+//    }
+//
+//    @Autowired
+//    public MovieService(MovieRepository movieReponsitory) {
+//
+//        this.movieReponsitory = movieReponsitory;
+//    }
 
     @Override
     public List<MovieDto> getAllMovie() {
