@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CinemaAdmin - Thêm Phim Mới</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+    />
+
+    <style>
+        /* CSS cho Admin Dashboard */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f8fafc;
+            /* Tailwind bg-slate-50 */
+            color: #334155;
+            /* Tailwind slate-700 for default text */
+        }
+
+        /* CSS cho Form thêm phim */
+        .form-section {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section .card-header {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            background: linear-gradient(
+                    135deg,
+                    #6366f1 0%,
+                    #8b5cf6 100%
+            ) !important;
+            /* Gradient from indigo to purple */
+            color: white;
+            /* Ensure text is white on gradient */
+        }
+
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            /* Tailwind slate-200 */
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            background-color: #f8fafc;
+            /* Light background for upload area */
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #6366f1;
+            /* Tailwind indigo-500 */
+            background-color: #f0f9ff;
+            /* Lighter blue on hover */
+        }
+
+        .upload-area .fa-cloud-upload-alt {
+            color: #94a3b8;
+            /* Tailwind slate-400 */
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area h6 {
+            font-weight: 600;
+            color: #334155;
+            /* Tailwind slate-700 */
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-area p {
+            font-size: 0.875rem;
+            color: #64748b;
+            /* Tailwind slate-500 */
+        }
+
+        .upload-area p .text-primary {
+            color: #6366f1 !important;
+            /* Tailwind indigo-500 */
+            font-weight: 500;
+        }
+
+        .upload-area small {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            /* Tailwind slate-400 */
+        }
+
+        #imagePreview img {
+            max-width: 100%;
+            /* Ensure preview image is responsive */
+            max-height: 200px;
+            /* Adjust max height as needed */
+            border: 1px solid #e2e8f0;
+            /* Border for the preview image */
+            border-radius: 4px;
+        }
+
+        #removeImageBtn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Styling for selectable tags in the form */
+        .selectable-tag-form {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            margin: 0.25rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background-color: #f8fafc;
+            color: #475569;
+        }
+
+        .selectable-tag-form:hover {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
+        }
+
+        .selectable-tag-form.selected {
+            background-color: #6366f1;
+            color: white;
+            border-color: #6366f1;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* CSS để hiển thị genre và format tags theo hàng ngang */
+        #genreContainerForm,
+        #formatContainerForm {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        #genreContainerForm > div,
+        #formatContainerForm > div {
+            display: inline-block;
+        }
+
+        /* Success message styling */
+        .success-message {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Error message styling for general form errors */
+        /* Removed as per user request */
+
+        /* General form control styling improvements */
+        .form-label.fw-semibold {
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        /* CSS cho label khi field required không được nhập */
+        .form-label.required-error {
+            color: #ef4444 !important;
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 0.375rem;
+            border-color: #cbd5e1;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+        }
+
+        .input-group-text {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        /* Styling for form action buttons */
+        .form-actions {
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .form-actions .btn {
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+
+        .btn-primary:hover {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .btn-outline-danger {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .btn-outline-danger:hover {
+            color: white;
+            background-color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .btn-outline-secondary {
+            color: #64748b;
+            border-color: #cbd5e1;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f1f5f9;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed .sidebar-header h5,
+        .sidebar.collapsed .sidebar-header small,
+        .sidebar.collapsed .sidebar-menu span,
+        .sidebar.collapsed .mt-auto .text-white,
+        .sidebar.collapsed .mt-auto small {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-menu .menu-item {
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+            margin-right: 0 !important;
+        }
+
+        .sidebar.collapsed .mt-auto img.rounded-circle.me-3 {
+            margin-right: 0 !important;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header .fa-film {
+            color: #6366f1;
+        }
+
+        .sidebar-menu {
+            flex-grow: 1;
+            padding-top: 1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid white;
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .sidebar.collapsed .menu-item:hover,
+        .sidebar.collapsed .menu-item.active {
+            border-left: none;
+            padding-left: 1.5rem;
+        }
+
+        .sidebar.collapsed .menu-item.active {
+            background-color: #4f46e5;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+
+        .main-content-wrapper {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            padding-top: 70px;
+        }
+
+        .main-content-wrapper.expanded {
+            margin-left: 80px;
+        }
+
+        .header-custom {
+            position: fixed;
+            top: 0;
+            left: 260px;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 999;
+            transition: left 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+
+        .main-content-wrapper.expanded .header-custom {
+            left: 80px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar .sidebar-header h5,
+            .sidebar .sidebar-header small,
+            .sidebar .sidebar-menu span,
+            .sidebar .mt-auto .text-white,
+            .sidebar .mt-auto small {
+                display: none;
+            }
+
+            .sidebar .sidebar-menu .menu-item {
+                justify-content: center;
+            }
+
+            .sidebar .sidebar-menu .menu-item i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+
+            .main-content-wrapper {
+                margin-left: 80px;
+            }
+
+            .header-custom {
+                left: 80px;
+                padding: 0 1rem;
+            }
+
+            .header-custom .flex-grow-1 {
+                display: none;
+            }
+        }
+
+        /* Autocomplete Multi-Select Styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item.selected {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .selected-items-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 20px;
+        }
+
+        .selected-item-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            border: 1px solid #bbdefb;
+        }
+
+        .selected-item-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            margin-left: 6px;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.75rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .selected-item-badge .remove-btn:hover {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .autocomplete-no-results {
+            padding: 8px 12px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+            <div class="bg-white rounded-circle p-2 me-3">
+                <i class="fas fa-film"></i>
+            </div>
+            <div>
+                <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
+                <small class="text-white-50">Quản lý Phim</small>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-menu">
+        <a href="#" class="menu-item">
+            <i class="fas fa-home"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+        <a href="#" class="menu-item active">
+            <i class="fas fa-film"></i>
+            <span>Phim</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-calendar-alt"></i> <span>Lịch chiếu</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-pie"></i> <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+    </nav>
+
+    <div
+            class="mt-auto p-4 border-top border-white-50"
+            style="border-color: rgba(255, 255, 255, 0.1) !important"
+    >
+        <div class="d-flex align-items-center">
+            <img
+                    src="https://via.placeholder.com/40"
+                    alt="User Avatar"
+                    width="40"
+                    height="40"
+                    class="rounded-circle me-3"
+            />
+            <div>
+                <div class="text-white fw-semibold">Admin User</div>
+                <small class="text-white-50">admin@cinema.com</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-content-wrapper" id="mainContentWrapper">
+    <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+                <i class="fas fa-bars fs-5"></i>
+            </button>
+            <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+                Thêm Phim Mới
+            </h4>
+        </div>
+
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-1 position-relative">
+                <i class="fas fa-bell fs-5"></i>
+                <span
+                        class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                        style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+                >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+            </button>
+            <button class="btn btn-link text-secondary me-2">
+                <i class="fas fa-cog fs-5"></i>
+            </button>
+            <div class="dropdown">
+                <a
+                        href="#"
+                        class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                        id="dropdownUser"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                >
+                    <img
+                            src="https://via.placeholder.com/32"
+                            alt="User Avatar"
+                            width="32"
+                            height="32"
+                            class="rounded-circle me-2"
+                    />
+                    <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                    >Admin User</span
+                    >
+                </a>
+                <ul
+                        class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+                        aria-labelledby="dropdownUser"
+                >
+                    <li>
+                        <a class="dropdown-item" href="#"
+                        ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                        >
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"
+                        ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                        >
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider" />
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="#"
+                        ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                        >
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid p-4">
+        <div id="addMovieFormView" class="container py-4">
+            <header class="mb-4"></header>
+            <form
+                    id="movieForm"
+                    th:action="@{/admin/movies/add}"
+                    method="post"
+                    enctype="multipart/form-data"
+            >
+                <!-- Hidden inputs for selected directors and actors -->
+                <div id="hiddenInputsContainer"></div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-section">
+                            <div class="card-header p-3">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Thông tin cơ bản
+                                </h5>
+                            </div>
+                            <div class="card-body p-3 p-md-4">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label fw-semibold" for="name"
+                                        >Tên phim *</label
+                                        >
+                                        <input
+                                                type="text"
+                                                class="form-control"
+                                                id="name"
+                                                name="name"
+                                                placeholder="Nhập tên phim"
+                                                required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="description"
+                                    >Mô tả *</label
+                                    >
+                                    <textarea
+                                            class="form-control"
+                                            id="description"
+                                            name="description"
+                                            rows="3"
+                                            placeholder="Nhập mô tả và tóm tắt phim"
+                                            required
+                                    ></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label
+                                                class="form-label fw-semibold"
+                                                for="duration"
+                                                type="number"
+                                                id="duration"
+                                                name="duration"
+                                                min="1"
+                                                required
+                                                oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : null"
+                                        >Thời lượng (phút) *</label
+                                        >
+                                        <div class="input-group">
+                          <span class="input-group-text"
+                          ><i class="fas fa-clock"></i
+                          ></span>
+                                            <input
+                                                    type="number"
+                                                    class="form-control"
+                                                    id="duration"
+                                                    name="duration"
+                                                    placeholder="120"
+                                                    required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-semibold" for="rating"
+                                        >Rating *</label
+                                        >
+                                        <select
+                                                class="form-select"
+                                                id="rating"
+                                                name="rating"
+                                                required
+                                        >
+                                            <option value="0">Chọn rating</option>
+                                            <option value="G">G - Mọi lứa tuổi</option>
+                                            <option value="K">
+                                                K - Dành cho trẻ em dưới 13 tuổi
+                                            </option>
+                                            <option value="T13">T13 - Từ 13 tuổi trở lên</option>
+                                            <option value="T16">T16 - Từ 16 tuổi trở lên</option>
+                                            <option value="T18">T18 - Từ 18 tuổi trở lên</option>
+                                            <option value="C">C - Cấm chiếu</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-semibold" for="releaseDate"
+                                        >Ngày phát hành *</label
+                                        >
+                                        <input
+                                                type="date"
+                                                class="form-control"
+                                                id="releaseDate"
+                                                name="releaseDate"
+                                                required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="card-header p-3">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-tags me-2"></i>
+                                    Thể loại *
+                                </h5>
+                            </div>
+                            <div class="card-body p-3 p-md-4">
+                                <p class="text-muted mb-2 small">
+                                    Chọn tất cả thể loại phù hợp cho phim này
+                                </p>
+                                <div id="genreContainerForm">
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_action"
+                                                name="genres"
+                                                value="Hành động"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_action" class="selectable-tag-form"
+                                        >Hành động</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_comedy"
+                                                name="genres"
+                                                value="Hài kịch"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_comedy" class="selectable-tag-form"
+                                        >Hài kịch</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_horror"
+                                                name="genres"
+                                                value="Kinh dị"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_horror" class="selectable-tag-form"
+                                        >Kinh dị</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_romance"
+                                                name="genres"
+                                                value="Lãng mạn"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_romance" class="selectable-tag-form"
+                                        >Lãng mạn</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_scifi"
+                                                name="genres"
+                                                value="Khoa học viễn tưởng"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_scifi" class="selectable-tag-form"
+                                        >Khoa học viễn tưởng</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_thriller"
+                                                name="genres"
+                                                value="Tâm lý"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_thriller" class="selectable-tag-form"
+                                        >Tâm lý</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_adventure"
+                                                name="genres"
+                                                value="Phiêu lưu"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_adventure" class="selectable-tag-form"
+                                        >Phiêu lưu</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_animation"
+                                                name="genres"
+                                                value="Hoạt hình"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_animation" class="selectable-tag-form"
+                                        >Hoạt hình</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_drama"
+                                                name="genres"
+                                                value="Chính kịch"
+                                                class="d-none"
+                                        />
+                                        <label for="genre_drama" class="selectable-tag-form"
+                                        >Chính kịch</label
+                                        >
+                                    </div>
+                                    <div>
+                                        <input
+                                                type="checkbox"
+                                                id="genre_documentary"
+                                                name="genres"
+                                                value="Tài liệu"
+                                                class="d-none"
+                                        />
+                                        <label
+                                                for="genre_documentary"
+                                                class="selectable-tag-form"
+                                        >Tài liệu</label
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="card-header p-3">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-image me-2"></i>
+                                    Media & Liên kết
+                                </h5>
+                            </div>
+                            <div class="card-body p-3 p-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="image"
+                                    >Poster phim *</label
+                                    >
+                                    <div class="upload-area" id="uploadArea">
+                                        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                                        <h6>Kéo & Thả poster vào đây</h6>
+                                        <p class="mb-1">
+                                            hoặc <span class="text-primary">chọn tệp</span>
+                                        </p>
+                                        <small>PNG, JPG tối đa 5MB. Đề xuất: 300x450px</small>
+                                        <input
+                                                type="file"
+                                                id="image"
+                                                name="image"
+                                                class="d-none"
+                                                accept="image/png, image/jpeg"
+                                                required
+                                        />
+                                    </div>
+                                    <div
+                                            id="imagePreview"
+                                            class="mt-3 d-none text-center position-relative"
+                                            style="
+                          max-width: 200px;
+                          margin-left: auto;
+                          margin-right: auto;
+                        "
+                                    >
+                                        <img
+                                                id="previewImg"
+                                                class="img-fluid rounded"
+                                                alt="Xem trước poster"
+                                        />
+                                        <button
+                                                type="button"
+                                                id="removeImageBtn"
+                                                class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 d-none"
+                                                title="Xóa ảnh"
+                                        >
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="trailerUrl"
+                                    >Link Trailer</label
+                                    >
+                                    <div class="input-group">
+                        <span class="input-group-text"
+                        ><i class="fab fa-youtube"></i
+                        ></span>
+                                        <input
+                                                type="url"
+                                                class="form-control"
+                                                id="trailerUrl"
+                                                name="trailerUrl"
+                                                placeholder="https://www.youtube.com/watch?v=..."
+                                                required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="card-header p-3">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    Thông tin thêm
+                                </h5>
+                            </div>
+                            <div class="card-body p-3 p-md-4">
+                                <!-- Directors Multi-Select -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="directorSearch"
+                                    >Đạo diễn</label
+                                    >
+                                    <div class="autocomplete-container">
+                                        <div class="input-group">
+                                            <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="directorSearch"
+                                                    placeholder="Tìm kiếm đạo diễn..."
+                                            />
+                                            <button
+                                                    type="button"
+                                                    class="btn btn-outline-primary"
+                                                    id="addDirectorBtn"
+                                            >
+                                                <i class="fas fa-plus"></i> Thêm
+                                            </button>
+                                        </div>
+                                        <div
+                                                class="autocomplete-dropdown"
+                                                id="directorDropdown"
+                                                style="display: none"
+                                        >
+                                            <div
+                                                    th:each="director : ${allDirectors}"
+                                                    class="autocomplete-item"
+                                                    th:data-id="${director.id}"
+                                                    th:data-name="${director.name}"
+                                                    th:text="${director.name}"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <!-- Selected Directors Badges -->
+                                    <div
+                                            class="selected-items-container mt-2"
+                                            id="selectedDirectors"
+                                    >
+                                        <!-- Selected director badges will appear here -->
+                                    </div>
+                                </div>
+
+                                <!-- Actors Multi-Select -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="actorSearch"
+                                    >Diễn viên chính</label
+                                    >
+                                    <div class="autocomplete-container">
+                                        <div class="input-group">
+                                            <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="actorSearch"
+                                                    placeholder="Tìm kiếm diễn viên..."
+                                            />
+                                            <button
+                                                    type="button"
+                                                    class="btn btn-outline-primary"
+                                                    id="addActorBtn"
+                                            >
+                                                <i class="fas fa-plus"></i> Thêm
+                                            </button>
+                                        </div>
+                                        <div
+                                                class="autocomplete-dropdown"
+                                                id="actorDropdown"
+                                                style="display: none"
+                                        >
+                                            <div
+                                                    th:each="actor : ${allActors}"
+                                                    class="autocomplete-item"
+                                                    th:data-id="${actor.id}"
+                                                    th:data-name="${actor.name}"
+                                                    th:text="${actor.name}"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <!-- Selected Actors Badges -->
+                                    <div
+                                            class="selected-items-container mt-2"
+                                            id="selectedActors"
+                                    >
+                                        <!-- Selected actor badges will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                        class="d-flex justify-content-end align-items-center form-actions"
+                >
+                    <button type="button" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-save me-2"></i>
+                        Lưu nháp
+                    </button>
+                    <a th:href="@{/admin/movies}" class="btn btn-outline-danger me-2">
+                        <i class="fas fa-times me-2"></i>
+                        Hủy
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-plus me-2"></i>
+                        Thêm Phim
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Set header title on load
+        const headerTitle = document.getElementById("main-header-title");
+        if (headerTitle) {
+            headerTitle.textContent = "Thêm Phim Mới";
+        }
+
+        // Initialize sidebar behavior
+        initializeDashboardBehavior();
+
+        // Initialize file upload (image preview)
+        initializeFileUpload();
+
+        // Initialize selectable tags (genres and formats) visual state
+        initializeSelectableTagsVisuals();
+
+        // Initialize autocomplete multi-select for directors and actors
+        initializeAutocomplete();
+
+        // Add form validation on submit
+        const movieForm = document.getElementById("movieForm");
+        if (movieForm) {
+            movieForm.addEventListener("submit", function (event) {
+                let isValid = true;
+
+                // Validate genres first
+                if (!validateGenres()) {
+                    isValid = false;
+                }
+
+                // Validate all required fields
+                if (!validateAllRequiredFields()) {
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    event.preventDefault(); // Prevent form submission
+                    return false;
+                }
+            });
+        }
+
+        // Initialize required field validation
+        initializeRequiredFieldValidation();
+    });
+
+    function initializeDashboardBehavior() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const mainContentWrapper =
+            document.getElementById("mainContentWrapper");
+
+        if (!sidebarToggle || !sidebar || !mainContentWrapper) {
+            console.error(
+                "Sidebar toggle, sidebar, or main content wrapper not found."
+            );
+            return;
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle("collapsed");
+            mainContentWrapper.classList.toggle("expanded");
+        }
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        function checkViewport() {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.classList.contains("collapsed")) {
+                    toggleSidebar();
+                }
+            }
+        }
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
+    }
+
+    function initializeFileUpload() {
+        const uploadArea = document.getElementById("uploadArea");
+        const fileInput = document.getElementById("image");
+        const imagePreview = document.getElementById("imagePreview");
+        const previewImg = document.getElementById("previewImg");
+        const removeImageBtn = document.getElementById("removeImageBtn");
+
+        if (
+            !uploadArea ||
+            !fileInput ||
+            !imagePreview ||
+            !previewImg ||
+            !removeImageBtn
+        ) {
+            console.error(
+                "One or more file upload elements are missing for file upload."
+            );
+            return;
+        }
+
+        uploadArea.addEventListener("click", () => fileInput.click());
+        uploadArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadArea.classList.add("dragover");
+        });
+        uploadArea.addEventListener("dragleave", (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove("dragover");
+        });
+        uploadArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove("dragover");
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFileSelect(files[0]);
+        });
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (file && file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove("d-none");
+                    removeImageBtn.classList.remove("d-none");
+                    imagePreview.style.opacity = "0";
+                    setTimeout(() => {
+                        imagePreview.style.transition = "opacity 0.3s ease";
+                        imagePreview.style.opacity = "1";
+                    }, 50);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.warn(
+                    "Invalid file type or no file selected. Please select a PNG or JPG image."
+                );
+                if (previewImg) previewImg.src = "";
+                if (imagePreview) imagePreview.classList.add("d-none");
+                if (removeImageBtn) removeImageBtn.classList.add("d-none");
+                if (fileInput) fileInput.value = "";
+            }
+        }
+
+        removeImageBtn.addEventListener("click", function () {
+            if (previewImg) previewImg.src = "";
+            if (imagePreview) imagePreview.classList.add("d-none");
+            this.classList.add("d-none");
+            if (fileInput) fileInput.value = "";
+        });
+    }
+
+    // New function to handle visual state of selectable tags (checkboxes)
+    function initializeSelectableTagsVisuals() {
+        document.querySelectorAll(".selectable-tag-form").forEach((label) => {
+            const checkboxId = label.getAttribute("for");
+            const checkbox = document.getElementById(checkboxId);
+
+            if (checkbox) {
+                // Set initial state based on checkbox checked status
+                if (checkbox.checked) {
+                    label.classList.add("selected");
+                }
+
+                // Add event listener to toggle 'selected' class when checkbox changes
+                checkbox.addEventListener("change", function () {
+                    if (this.checked) {
+                        label.classList.add("selected");
+                    } else {
+                        label.classList.remove("selected");
+                    }
+                    // Optional: Add animation on visual change
+                    label.style.transform = "scale(0.97)";
+                    setTimeout(() => {
+                        label.style.transform = "scale(1)";
+                    }, 150);
+                });
+
+                // Also listen to label click to ensure visual update if checkbox is clicked directly
+                label.addEventListener("click", function (event) {
+                    // Prevent default label behavior from double-toggling if checkbox click also fires
+                    event.preventDefault();
+                    checkbox.checked = !checkbox.checked; // Manually toggle checkbox
+                    checkbox.dispatchEvent(new Event("change")); // Trigger change event to update label class
+                });
+            }
+        });
+    }
+
+    // Function to validate genres (at least one must be selected)
+    function validateGenres() {
+        const genreCheckboxes = document.querySelectorAll(
+            'input[name="genres"]'
+        );
+        const checkedGenres = Array.from(genreCheckboxes).filter(
+            (checkbox) => checkbox.checked
+        );
+
+        if (checkedGenres.length === 0) {
+            alert("Vui lòng chọn ít nhất một thể loại cho phim!");
+            return false;
+        }
+        return true;
+    }
+
+    // Function to validate required fields and change label color
+    function initializeRequiredFieldValidation() {
+        const requiredFields = document.querySelectorAll(
+            "input[required], textarea[required], select[required]"
+        );
+
+        requiredFields.forEach((field) => {
+            // Find the associated label
+            const label = document.querySelector(`label[for="${field.id}"]`);
+
+            // Add validation on blur (when user leaves the field)
+            field.addEventListener("blur", function () {
+                validateRequiredField(field, label);
+            });
+
+            // Add validation on input (real-time as user types)
+            field.addEventListener("input", function () {
+                validateRequiredField(field, label);
+            });
+
+            // Add validation on change (for select boxes)
+            if (field.tagName === "SELECT") {
+                field.addEventListener("change", function () {
+                    validateRequiredField(field, label);
+                });
+            }
+        });
+    }
+
+    function validateRequiredField(field, label) {
+        if (!label) return;
+
+        let isEmpty = false;
+
+        if (field.type === "file") {
+            isEmpty = !field.files || field.files.length === 0;
+        } else if (field.tagName === "SELECT") {
+            isEmpty = !field.value || field.value === "0" || field.value === "";
+        } else {
+            isEmpty = !field.value.trim();
+        }
+
+        if (isEmpty) {
+            label.classList.add("required-error");
+        } else {
+            label.classList.remove("required-error");
+        }
+    }
+
+    // Function to validate all required fields at once (for submit)
+    function validateAllRequiredFields() {
+        const requiredFields = document.querySelectorAll(
+            "input[required], textarea[required], select[required]"
+        );
+        let allValid = true;
+
+        requiredFields.forEach((field) => {
+            const label = document.querySelector(`label[for="${field.id}"]`);
+
+            let isEmpty = false;
+            if (field.type === "file") {
+                isEmpty = !field.files || field.files.length === 0;
+            } else if (field.tagName === "SELECT") {
+                isEmpty = !field.value || field.value === "0" || field.value === "";
+            } else {
+                isEmpty = !field.value.trim();
+            }
+
+            if (isEmpty) {
+                if (label) label.classList.add("required-error");
+                allValid = false;
+            } else {
+                if (label) label.classList.remove("required-error");
+            }
+        });
+
+        return allValid;
+    }
+
+    // Autocomplete Multi-Select Functionality
+    function initializeAutocomplete() {
+        // Initialize Directors Autocomplete
+        initializeAutocompleteForType("director", "selectedDirectors");
+
+        // Initialize Actors Autocomplete
+        initializeAutocompleteForType("actor", "selectedActors");
+    }
+
+    function initializeAutocompleteForType(type, hiddenInputName) {
+        const searchInput = document.getElementById(type + "Search");
+        const dropdown = document.getElementById(type + "Dropdown");
+        const selectedContainer = document.getElementById(
+            type === "director" ? "selectedDirectors" : "selectedActors"
+        );
+        const addBtn = document.getElementById(
+            "add" + type.charAt(0).toUpperCase() + type.slice(1) + "Btn"
+        );
+
+        let selectedItems = new Set();
+        let filteredItems = [];
+        let selectedIndex = -1;
+
+        // Get all items from dropdown
+        const allItems = Array.from(
+            dropdown.querySelectorAll(".autocomplete-item")
+        ).map((item) => ({
+            id: parseInt(item.dataset.id),
+            name: item.dataset.name,
+        }));
+
+        // Search functionality
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+
+            if (query === "") {
+                dropdown.style.display = "none";
+                return;
+            }
+
+            // Filter items based on search query
+            filteredItems = allItems.filter(
+                (item) =>
+                    item.name.toLowerCase().includes(query) &&
+                    !selectedItems.has(item.id)
+            );
+
+            updateDropdown();
+            selectedIndex = -1;
+        });
+
+        // Keyboard navigation
+        searchInput.addEventListener("keydown", function (e) {
+            if (dropdown.style.display === "none") return;
+
+            switch (e.key) {
+                case "ArrowDown":
+                    e.preventDefault();
+                    selectedIndex = Math.min(
+                        selectedIndex + 1,
+                        filteredItems.length - 1
+                    );
+                    updateDropdownSelection();
+                    break;
+                case "ArrowUp":
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateDropdownSelection();
+                    break;
+                case "Enter":
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && filteredItems[selectedIndex]) {
+                        addSelectedItem(filteredItems[selectedIndex]);
+                    }
+                    break;
+                case "Escape":
+                    dropdown.style.display = "none";
+                    selectedIndex = -1;
+                    break;
+            }
+        });
+
+        // Add button functionality
+        addBtn.addEventListener("click", function () {
+            const query = searchInput.value.trim();
+            if (query && selectedIndex >= 0 && filteredItems[selectedIndex]) {
+                addSelectedItem(filteredItems[selectedIndex]);
+            }
+        });
+
+        // Click outside to close dropdown
+        document.addEventListener("click", function (e) {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = "none";
+                selectedIndex = -1;
+            }
+        });
+
+        function updateDropdown() {
+            dropdown.innerHTML = "";
+
+            if (filteredItems.length === 0) {
+                const noResults = document.createElement("div");
+                noResults.className = "autocomplete-no-results";
+                noResults.textContent = "Không tìm thấy kết quả";
+                dropdown.appendChild(noResults);
+            } else {
+                filteredItems.forEach((item, index) => {
+                    const itemElement = document.createElement("div");
+                    itemElement.className = "autocomplete-item";
+                    itemElement.textContent = item.name;
+                    itemElement.addEventListener("click", () =>
+                        addSelectedItem(item)
+                    );
+                    dropdown.appendChild(itemElement);
+                });
+            }
+
+            dropdown.style.display = "block";
+        }
+
+        function updateDropdownSelection() {
+            const items = dropdown.querySelectorAll(
+                ".autocomplete-item:not(.autocomplete-no-results)"
+            );
+            items.forEach((item, index) => {
+                item.classList.toggle("selected", index === selectedIndex);
+            });
+        }
+
+        function addSelectedItem(item) {
+            if (selectedItems.has(item.id)) return;
+
+            selectedItems.add(item.id);
+
+            // Create badge
+            const badge = document.createElement("div");
+            badge.className = "selected-item-badge";
+            badge.innerHTML = `
+            ${item.name}
+            <button type="button" class="remove-btn" data-id="${item.id}">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+
+            // Add remove functionality
+            badge
+                .querySelector(".remove-btn")
+                .addEventListener("click", function () {
+                    selectedItems.delete(item.id);
+                    badge.remove();
+                    updateHiddenInputs();
+                });
+
+            selectedContainer.appendChild(badge);
+
+            // Clear search and hide dropdown
+            searchInput.value = "";
+            dropdown.style.display = "none";
+            selectedIndex = -1;
+
+            updateHiddenInputs();
+        }
+
+        function updateHiddenInputs() {
+            const container = document.getElementById("hiddenInputsContainer");
+
+            // Remove existing hidden inputs for this type
+            container
+                .querySelectorAll(`input[name="${hiddenInputName}"]`)
+                .forEach((input) => input.remove());
+
+            // Add new hidden inputs
+            selectedItems.forEach((id) => {
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = hiddenInputName;
+                hiddenInput.value = id;
+                container.appendChild(hiddenInput);
+            });
+        }
+    }
+</script>
+</body>
+</html>

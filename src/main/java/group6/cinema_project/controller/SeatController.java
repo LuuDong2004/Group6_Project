@@ -6,6 +6,7 @@ import group6.cinema_project.dto.SeatDto;
 import group6.cinema_project.service.IMovieService;
 import group6.cinema_project.service.IScheduleService;
 import group6.cinema_project.service.ISeatService;
+import group6.cinema_project.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,7 @@ public class SeatController {
     @Autowired
     private ISeatService seatService;
     @Autowired
-    private IMovieService movieService;
+    private MovieService movieService;
     @Autowired
     private IScheduleService scheduleService;
 

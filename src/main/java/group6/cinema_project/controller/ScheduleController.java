@@ -5,6 +5,7 @@ import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleDto;
 import group6.cinema_project.service.IMovieService;
 import group6.cinema_project.service.IScheduleService;
+import group6.cinema_project.service.MovieService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,7 +24,7 @@ public class ScheduleController {
     @Autowired
     private IScheduleService scheduleService;
     @Autowired
-    private IMovieService movieService;
+    private MovieService movieService;
     @Autowired
     private ModelMapper modelMapper;
 

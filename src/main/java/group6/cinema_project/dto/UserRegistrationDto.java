@@ -13,6 +13,8 @@ public class UserRegistrationDto {
 
     private String address;
 
+    private String role ; // Default role
+
     public UserRegistrationDto() {
     }
 
@@ -70,6 +72,13 @@ public class UserRegistrationDto {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     // Password validation method

@@ -107,29 +107,47 @@
 
         <!-- Tab Lịch sử vé -->
         <div class="tab-pane fade" id="history" role="tabpanel">
-            <div class="alert alert-info">
-                <strong>Thông báo:</strong> Tính năng lịch sử vé sẽ được triển khai sau khi hoàn thành module đặt vé.
-            </div>
-            <table class="table table-bordered mt-3">
-                <thead class="table-light">
+            <h5 class="mt-3">Lịch sử đặt vé</h5>
+
+            <table class="table table-bordered table-striped mt-3 text-center align-middle">
+                <thead class="table-dark">
                 <tr>
-                    <th>Ngày đặt</th>
-                    <th>Phim</th>
-                    <th>Rạp</th>
-                    <th>Ghế</th>
-                    <th>Giá</th>
+                    <th>MÃ HÓA ĐƠN</th>
+                    <th>PHIM</th>
+                    <th>RẠP CHIẾU</th>
+                    <th>SUẤT CHIẾU</th>
+                    <th>GHẾ ĐÃ ĐẶT</th>
+                    <th>COMBO/PACKAGE</th>
+                    <th>NGÀY ĐẶT</th>
+                    <th>ĐIỂM</th>
+                    <th>GIÁ TIỀN</th>
+                    <th>QR CODE</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Chưa có lịch sử đặt vé</td>
+                <tr th:each="booking : ${bookings}">
+                    <td th:text="${booking.code}">HD12345</td>
+                    <td th:text="${booking.movie.title}">Avengers</td>
+                    <td th:text="${booking.showtime.cinema.name}">Beta Quang Trung</td>
+                    <td th:text="${#dates.format(booking.showtime.time, 'dd/MM/yyyy HH:mm')}">12/06/2025 19:00</td>
+                    <td th:text="${booking.seat}">A1, A2</td>
+                    <td th:text="${booking.comboName ?: 'Không'}">Combo 2 bắp + 2 nước</td>
+                    <td th:text="${#dates.format(booking.bookingTime, 'dd/MM/yyyy')}">12/06/2025</td>
+                    <td th:text="${booking.point ?: 0}">10</td>
+                    <td th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 2, 'POINT')} + ' ₫'">200,000 ₫</td>
+                    <td>
+                        <img th:src="@{'/qr/' + ${booking.code}}" alt="QR" width="60" height="60"/>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(bookings)}">
+                    <td colspan="10" class="text-center text-muted">Chưa có lịch sử đặt vé</td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-4">
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
         <div></div>
         <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
     </div>

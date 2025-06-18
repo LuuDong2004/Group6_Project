@@ -3,7 +3,9 @@ package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -12,6 +14,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "ScreeningRoom")
 @NoArgsConstructor
+@Getter
+@Setter
 public class ScreeningRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

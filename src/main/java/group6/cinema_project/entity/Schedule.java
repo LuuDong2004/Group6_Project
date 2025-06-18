@@ -3,8 +3,10 @@ package group6.cinema_project.entity;
 import jakarta.persistence.*;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -16,6 +18,8 @@ import java.util.Date;
 @Table(name = "ScreeningSchedule")
 @NoArgsConstructor
 @Data
+@Getter
+@Setter
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

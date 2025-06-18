@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .userDetailsService(userDetailsService)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/home", "/register", "/login", "/css/**", "/js/**", "/images/**", "/assets/**"
+                        .requestMatchers("/", "/home", "/register", "/login", "/admin/","/css/**", "/js/**", "/images/**", "/assets/**"
                         ).permitAll()
                         .requestMatchers("/user/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

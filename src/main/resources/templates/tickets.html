@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff - Danh sách vé</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+<h3>🎟️ Vé đã đặt cho suất chiếu: <span th:text="${showtime.movieTitle}">Inside Out 2</span> - <span th:text="${showtime.startTime}">20:00</span></h3>
+<a href="/staff/showtimes" class="btn btn-secondary my-2">⬅ Quay lại</a>
+
+<table class="table table-striped">
+    <thead class="table-light">
+    <tr>
+        <th>Khách</th>
+        <th>Ghế</th>
+        <th>Trạng thái</th>
+        <th>Thanh toán</th>
+        <th>Mã vé</th>
+        <th>Thao tác</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="ticket : ${tickets}">
+        <td th:text="${ticket.username}">Nguyễn Văn A</td>
+        <td th:text="${ticket.seatNumber}">A05</td>
+        <td th:text="${ticket.status}">PAID </td>
+        <td th:text="${ticket.paymentMethod}">Online</td>
+        <td th:text="${ticket.code}">ABC123</td>
+        <td>
+            <form th:action="@{'/staff/ticket/' + ${ticket.id} + '/checkin'}" method="post" th:if="${ticket.status == 'PAID'}">
+                <button class="btn btn-info btn-sm">🎫 Check-in</button>
+
+            </form>
+            <form th:action="@{'/staff/ticket/' + ${ticket.id} + '/confirm'}" method="post" th:if="${ticket.status == 'PENDING'}">
+                <button class="btn btn-success btn-sm">✔ Xác nhận thanh toán</button>
+            </form>
+
+
+
+        </td>
+    </tr>
+    <tr th:each="ticket : ${tickets}">
+        <td th:text="${ticket.username}">Nguyễn Văn C</td>
+        <td th:text="${ticket.seatNumber}">C01</td>
+        <td th:text="${ticket.status}">PENDING</td>
+        <td th:text="${ticket.paymentMethod}">Tại quầy</td>
+        <td th:text="${ticket.code}">DFC642</td>
+        <td>
+            <form th:action="@{'/staff/ticket/' + ${ticket.id} + '/checkin'}" method="post" th:if="${ticket.status == 'PAID'}">
+                <button class="btn btn-info btn-sm">🎫 BOOKED</button>
+            </form>
+
+
+        </td>
+    </tr>
+    <tr th:each="ticket : ${tickets}">
+        <td th:text="${ticket.username}">Nguyễn Văn B</td>
+        <td th:text="${ticket.seatNumber}">D09</td>
+        <td th:text="${ticket.status}">PENDING</td>
+        <td th:text="${ticket.paymentMethod}">Tại quầy</td>
+        <td th:text="${ticket.code}">BCT456</td>
+        <td>
+            <form th:action="@{'/staff/ticket/' + ${ticket.id} + '/checkin'}" method="post" th:if="${ticket.status == 'PAID'}">
+                <button class="btn btn-info btn-sm"> X CANCELLED</button>
+            </form>
+
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
