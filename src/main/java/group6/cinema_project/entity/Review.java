@@ -10,8 +10,9 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "movie_id", nullable = false)
-    private Long movieId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie_id", nullable = false)
+    private Movie movie;
     
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -31,8 +32,8 @@ public class Review {
     }
 
     // Constructor với tham số
-    public Review(Long movieId, Long userId, int rating, String comment) {
-        this.movieId = movieId;
+    public Review(Movie movie, Long userId, int rating, String comment) {
+        this.movie = movie;
         this.userId = userId;
         this.rating = rating;
         this.comment = comment;
@@ -48,12 +49,12 @@ public class Review {
         this.id = id;
     }
 
-    public Long getMovieId() {
-        return movieId;
+    public Movie getMovie() {
+        return movie;
     }
 
-    public void setMovieId(Long movieId) {
-        this.movieId = movieId;
+    public void setMovie(Movie movie) {
+        this.movie = movie;
     }
 
     public Long getUserId() {

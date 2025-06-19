@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         document.getElementById('movieReleaseDate').textContent = '';
     }
-    document.getElementById('movieRating').textContent = movie.rating || '';
+    // Hiển thị rating
+    const ratingValue = movie.rating && !isNaN(movie.rating) && Number(movie.rating) > 0 ? Number(movie.rating).toFixed(1) + '/10' : 'Chưa có';
+    document.getElementById('movieRating').textContent = ratingValue;
     document.getElementById('movieTrailer').src = movie.trailer || '';
     // Hiển thị bình luận từ database
     const commentsDiv = document.getElementById('movieComments');
@@ -138,7 +140,9 @@ async function showMovieDetails(movieId) {
         document.getElementById('movieLanguage').innerText = movie.language;
         document.getElementById('movieReleaseDate').innerText = movie.release_date;
         document.getElementById('movieFormat').innerText = movie.format;
-        document.getElementById('movieRating').innerText = movie.rating ? `${movie.rating}/10` : 'Chưa có đánh giá';
+        // Hiển thị rating
+        const ratingValue = movie.rating && !isNaN(movie.rating) && Number(movie.rating) > 0 ? Number(movie.rating).toFixed(1) + '/10' : 'Chưa có';
+        document.getElementById('movieRating').innerText = ratingValue;
         
         // Update trailer if available
         const trailerFrame = document.getElementById('movieTrailer');
@@ -181,3 +185,5 @@ async function showMovieDetails(movieId) {
 }
 
 // Đã xóa đoạn gán onclick cho closePopupBtn vì không còn nút đóng popup 
+
+document.getElementById('user-name').textContent = user.userName; 

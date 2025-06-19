@@ -8746,6 +8746,7 @@ button.bg-dark:focus {
 
 .pb-5,
 .py-5 {
+  background-color: var(--theme-bg) !important;
   padding-bottom: 3rem !important;
 }
 
@@ -14145,6 +14146,7 @@ ul {
 
 @media (min-width: 1200px) {
   .container {
+    background-color: var(--theme-bg) !important;
     max-width: 100%;
     padding-right: 25px;
     padding-left: 25px;
@@ -15705,7 +15707,6 @@ button.owl-next {
 /*--/grids--*/
 /*--/popular-grids--*/
 .w3l-grids .w3l-populohny-grids {
-  display: grid;
   align-items: center;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-gap: 10px 30px;
@@ -16516,7 +16517,7 @@ h2.resp-accordion:first-child {
 
 nav#breadcrumbs {
   padding: 10px 20px;
-  background: var(--theme-lite);
+  background: var(--theme-bg) !important;
 }
 
 .page-wrapper {
@@ -19167,7 +19168,7 @@ div#small-dialog6 iframe {
 }
 
 .w3l-footer h6 {
-  color: var(--theme-white);
+  color: var(--theme-title);
   font-size: 20px;
   line-height: 20px;
   text-transform: capitalize;
@@ -19297,7 +19298,7 @@ div#small-dialog6 iframe {
 }
 
 .w3l-footer .below-section {
-  background: #222;
+  background: var(--theme-bg) !important;
   padding: 16px 0;
   justify-content: space-between;
 }

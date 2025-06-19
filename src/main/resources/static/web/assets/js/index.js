@@ -1,65 +1,65 @@
 // index.js
-$(document).ready(function () {
+
+document.addEventListener('DOMContentLoaded', function () {
     // Load featured movies
     loadFeaturedMovies();
-    // Load upcoming movies
-    loadUpcomingMovies();
 });
 
 // Function to load featured movies
 function loadFeaturedMovies() {
-    $.ajax({
-        url: '/api/movies/featured', // API endpoint for featured movies
-        method: 'GET',
-        success: function(movies) {
-            displayMovies(movies, '#featured-movies');
-        },
-        error: function(error) {
+    fetch('/api/movies')
+        .then(res => res.json())
+        .then(movies => {
+            // Sắp xếp giảm dần theo rating, lấy 10 phim đầu
+            movies.sort(function(a, b) {
+                const ratingA = (a.rating && !isNaN(a.rating)) ? Number(a.rating) : 0;
+                const ratingB = (b.rating && !isNaN(b.rating)) ? Number(b.rating) : 0;
+                return ratingB - ratingA;
+            });
+            const top8 = movies.slice(0, 8);
+            displayMovies(top8, '#featured-movies');
+        })
+        .catch(error => {
             console.error('Error loading featured movies:', error);
-        }
-    });
+        });
 }
 
-// Function to load upcoming movies
-function loadUpcomingMovies() {
-    $.ajax({
-        url: '/api/movies/upcoming', // API endpoint for upcoming movies
-        method: 'GET',
-        success: function(movies) {
-            displayMovies(movies, '#upcoming-movies');
-        },
-        error: function(error) {
-            console.error('Error loading upcoming movies:', error);
-        }
-    });
+// Function to create a movie card
+function createMovieCard(movie) {
+    const imageUrl = 'assets/images/' + movie.image;
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.innerHTML = `
+        <div class="box16">
+            <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
+            <div class="box-content">
+                <h3 class="title">${movie.name}</h3>
+                <h4>
+                    <span class="post"><span class="fa fa-clock-o"></span> ${movie.duration} phút</span>
+                    <span class="post fa fa-heart text-right"></span>
+                </h4>
+            </div>
+        </div>
+    `;
+    // Click vào ảnh
+    card.querySelector('.movie-poster-img').onclick = function() {
+        window.location.href = `movie_detail.html?id=${movie.id}`;
+    };
+    // Click vào overlay
+    card.querySelector('.box-content').onclick = function() {
+        window.location.href = `movie_detail.html?id=${movie.id}`;
+    };
+    return card;
 }
 
 // Function to display movies in the grid
 function displayMovies(movies, containerId) {
-    let html = '';
+    console.log('Rendering movies:', movies, 'to', containerId);
+    const container = document.querySelector(containerId);
+    container.innerHTML = '';
     movies.forEach(function(movie) {
-        const imageUrl = 'assets/images/' + movie.image;
-        html += `
-        <div class="movie-card">
-            <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
-            <div class="movie-info">
-                <div class="movie-title">${movie.name}</div>
-                <div class="movie-meta">
-                    <span><b>Thể loại:</b> ${movie.genre}</span><br>
-                    <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
-                    <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
-                </div>
-                <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
-            </div>
-        </div>
-        `;
-    });
-    $(containerId).html(html);
-
-    // Add click event listeners
-    $(containerId + ' .movie-poster-img, ' + containerId + ' .btn-detail').on('click', function() {
-        const movieId = $(this).data('id');
-        window.location.href = `movie_detail.html?id=${movieId}`;
+        const card = createMovieCard(movie);
+        container.appendChild(card);
     });
 }
 

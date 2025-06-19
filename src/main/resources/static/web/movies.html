@@ -65,23 +65,8 @@
 								</form>
 								<div class="browse-items">
 									<h3 class="hny-title two mt-md-5 mt-4">Browse all:</h3>
-									<ul class="search-items">
-										<li><a href="movies.html">Action</a></li>
-										<li><a href="movies.html">Drama</a></li>
-										<li><a href="movies.html">Family</a></li>
-										<li><a href="movies.html">Thriller</a></li>
-										<li><a href="movies.html">Commedy</a></li>
-										<li><a href="movies.html">Romantic</a></li>
-										<li><a href="movies.html">Tv-Series</a></li>
-										<li><a href="movies.html">Horror</a></li>
-										<li><a href="movies.html">Action</a></li>
-										<li><a href="movies.html">Drama</a></li>
-										<li><a href="movies.html">Family</a></li>
-										<li><a href="movies.html">Thriller</a></li>
-										<li><a href="movies.html">Commedy</a></li>
-										<li><a href="movies.html">Romantic</a></li>
-										<li><a href="movies.html">Tv-Series</a></li>
-										<li><a href="movies.html">Horror</a></li>
+									<ul class="search-items" id="genre-list">
+										<!-- Sẽ render động bằng JS -->
 									</ul>
 								</div>
 							</div>
@@ -132,26 +117,13 @@
 				<div class="headerhny-title">
 					<h3 class="hny-title">Phim Đang Chiếu</h3>
 				</div>
-				<div class="movie-grid" id="movie-list">
+				<div id="movie-list">
 					<!-- Movies will be dynamically loaded here -->
 				</div>
 			</div>
 		</div>
 	</section>
-	
-							<!-- modal end -->
-						</div>
-					</div>
 
-				</div>
-
-			</div>
-			<div class="button-center text-center mt-3">
-				<a href="#" class="btn view-button">View all <span class="fa fa-angle-double-right ml-2"
-						aria-hidden="true"></span></a>
-			</div>
-		</div>
-	</section>
 
 	<section class="w3l-albums py-5" id="projects">
 		<div class="container py-lg-4">
@@ -563,6 +535,26 @@
 					localStorage.setItem('theme', 'light');
 				}
 			}, false);
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Lấy danh sách thể loại từ API và render ra popup
+			fetch('/api/genres')
+				.then(res => res.json())
+				.then(genres => {
+					const genreList = document.getElementById('genre-list');
+					if (!genreList) return;
+					genreList.innerHTML = '';
+					genres.forEach(genre => {
+						const li = document.createElement('li');
+						const a = document.createElement('a');
+						a.href = `movies.html?genre=${encodeURIComponent(genre)}`;
+						a.textContent = genre;
+						li.appendChild(a);
+						genreList.appendChild(li);
+					});
+				});
 		});
 	</script>
 </body>

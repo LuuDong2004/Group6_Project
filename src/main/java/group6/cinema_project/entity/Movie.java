@@ -20,6 +20,8 @@ public class Movie {
     // private String description; // Loại bỏ hoặc comment nếu không có trong DB
     @ElementCollection
     private List<String> directorNames;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviews;
 
     public Long getId() {
         return id;

@@ -1,36 +1,77 @@
 // movies.js
 $(document).ready(function () {
-    $.ajax({
-        url: '/api/movies', // API trả về danh sách phim
-        method: 'GET',
-        success: function(movies) {
-            let html = '';
-            movies.forEach(function(movie) {
-                const imageUrl = 'assets/images/' + movie.image;
-                html += `
-                <div class="movie-card">
-                    <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
-                    <div class="movie-info">
-                        <div class="movie-title">${movie.name}</div>
-                        <div class="movie-meta">
-                            <span><b>Thể loại:</b> ${movie.genre}</span><br>
-                            <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
-                            <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
-                        </div>
-                        <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
-                    </div>
-                </div>
-                `;
+    const genre = getGenreFromUrl();
+    if (genre) {
+        $.get(`/api/movies/genre/${encodeURIComponent(genre)}`, function(movies) {
+            // Lọc chính xác genre (không phân biệt hoa thường, loại bỏ khoảng trắng thừa, hỗ trợ nhiều thể loại)
+            const genreNorm = genre.trim().toLowerCase();
+            const filtered = movies.filter(function(movie) {
+                if (!movie.genre) return false;
+                // Nếu genre là chuỗi nhiều thể loại, tách ra và so sánh từng thể loại con
+                return movie.genre.split(',').map(g => g.trim().toLowerCase()).includes(genreNorm);
             });
+            let html = '';
+            if (filtered.length === 0) {
+                html = '<div style="color:#fff;text-align:center;margin:40px 0;">Không có phim nào thuộc thể loại này.</div>';
+            } else {
+                filtered.forEach(function(movie) {
+                    const imageUrl = 'assets/images/' + movie.image;
+                    html += `
+                    <div class="movie-card">
+                        <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.name}</div>
+                            <div class="movie-meta">
+                                <span><b>Thể loại:</b> ${movie.genre}</span><br>
+                                <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
+                                <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
+                            </div>
+                            <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
+                        </div>
+                    </div>
+                    `;
+                });
+            }
             $('#movie-list').html(html);
-
-            // Sự kiện click vào poster hoặc nút chi tiết
-            $('.movie-poster-img, .btn-detail').on('click', function() {
+            $('.movie-poster-img').on('click', function() {
                 const movieId = $(this).data('id');
                 window.location.href = `movie_detail.html?id=${movieId}`;
             });
-        }
-    });
+        });
+    } else {
+        $.ajax({
+            url: '/api/movies', // API trả về danh sách phim
+            method: 'GET',
+            success: function(movies) {
+                movies.sort((a, b) => a.id - b.id); // Sắp xếp theo id tăng dần
+                let html = '';
+                movies.forEach(function(movie) {
+                    const imageUrl = 'assets/images/' + movie.image;
+                    html += `
+                    <div class="movie-card">
+                        <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.name}</div>
+                            <div class="movie-meta">
+                                <span><b>Thể loại:</b> ${movie.genre}</span><br>
+                                <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
+                                <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
+                            </div>
+                            <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
+                        </div>
+                    </div>
+                    `;
+                });
+                $('#movie-list').html(html);
+
+                // Sự kiện click vào poster hoặc nút chi tiết
+                $('.movie-poster-img').on('click', function() {
+                    const movieId = $(this).data('id');
+                    window.location.href = `movie_detail.html?id=${movieId}`;
+                });
+            }
+        });
+    }
 });
 
 // Function to fetch all movies from the API
@@ -65,7 +106,7 @@ function createMovieCard(movie) {
         <div class="item vhny-grid">
             <div class="box16 mb-0">
                 <figure>
-                    <img class="img-fluid" src="${imgSrc}" alt="${movie.name}">
+                    <img class="img-fluid movie-poster-img" src="${imgSrc}" alt="${movie.name}" data-id="${movie.id}">
                 </figure>
                 <a href="#" class="movie-link" data-movie-id="${movie.id}">
                     <div class="box-content">
@@ -82,7 +123,13 @@ function createMovieCard(movie) {
         </div>
     `;
 
-    // Add click event listener to show movie details
+    // Click vào ảnh
+    const posterImg = movieGrid.querySelector('.movie-poster-img');
+    posterImg.addEventListener('click', () => {
+        window.location.href = `movie_detail.html?id=${movie.id}`;
+    });
+
+    // Click vào overlay
     const movieLink = movieGrid.querySelector('.movie-link');
     movieLink.addEventListener('click', (e) => {
         e.preventDefault();
@@ -136,4 +183,9 @@ window.addEventListener('click', (e) => {
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     fetchMovies();
-}); 
+});
+
+function getGenreFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('genre');
+} 

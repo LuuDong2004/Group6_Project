@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.stream.Collectors;
 
 import java.util.List;
+import java.util.Comparator;
 
 @RestController
 @RequestMapping("/api")
@@ -35,8 +36,24 @@ public class MovieController {
     private ReviewRepository reviewRepository;
 
     @GetMapping("/movies")
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public List<MovieDetailDTO> getAllMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        return movies.stream().map(movie -> {
+            MovieDetailDTO dto = new MovieDetailDTO();
+            dto.id = movie.getId();
+            dto.name = movie.getName();
+            dto.image = movie.getImage();
+            dto.duration = movie.getDuration();
+            dto.release_date = movie.getReleaseDate() != null ? movie.getReleaseDate().toString() : null;
+            Double avgRating = reviewRepository.findAverageRatingByMovieId(movie.getId());
+            dto.rating = avgRating != null ? avgRating : 0;
+            dto.genre = movie.getGenre();
+            dto.language = movie.getLanguage();
+            dto.format = "3D";
+            dto.trailer = movie.getTrailer();
+            dto.summary = "";
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @GetMapping("/movies/{id}")
@@ -122,5 +139,63 @@ public class MovieController {
             return rv;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/movies/featured")
+    public List<MovieDetailDTO> getFeaturedMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        // Sort movies by id ascending
+        movies.sort(Comparator.comparing(Movie::getId));
+        // Calculate average rating for each movie
+        List<MovieDetailDTO> dtos = movies.stream().map(movie -> {
+            MovieDetailDTO dto = new MovieDetailDTO();
+            dto.id = movie.getId();
+            dto.name = movie.getName();
+            dto.image = movie.getImage();
+            dto.duration = movie.getDuration();
+            dto.release_date = movie.getReleaseDate() != null ? movie.getReleaseDate().toString() : null;
+            Double avgRating = reviewRepository.findAverageRatingByMovieId(movie.getId());
+            dto.rating = avgRating != null ? avgRating : 0;
+            dto.genre = movie.getGenre();
+            dto.language = movie.getLanguage();
+            dto.format = "3D";
+            dto.trailer = movie.getTrailer();
+            dto.summary = "";
+            return dto;
+        })
+        // Filter out movies with invalid ratings
+        .filter(dto -> dto.rating >= 0 && dto.rating <= 10)
+        // Sort by rating in descending order
+        .sorted((a, b) -> Double.compare(b.rating, a.rating))
+        .collect(Collectors.toList());
+        
+        // Return top 6 movies
+        return dtos.size() > 6 ? dtos.subList(0, 6) : dtos;
+    }
+
+    @GetMapping("/genres")
+    public List<String> getAllGenres() {
+        return movieRepository.findAllGenres();
+    }
+
+    @GetMapping("/movies/genre/{genre}")
+    public List<MovieDetailDTO> getMoviesByGenre(@PathVariable String genre) {
+        List<Movie> movies = movieRepository.findByGenre(genre);
+        return movies.stream().map(movie -> {
+            MovieDetailDTO dto = new MovieDetailDTO();
+            dto.id = movie.getId();
+            dto.name = movie.getName();
+            dto.image = movie.getImage();
+            dto.duration = movie.getDuration();
+            dto.release_date = movie.getReleaseDate() != null ? movie.getReleaseDate().toString() : null;
+            Double avgRating = reviewRepository.findAverageRatingByMovieId(movie.getId());
+            dto.rating = avgRating != null ? avgRating : 0;
+            dto.genre = movie.getGenre();
+            dto.language = movie.getLanguage();
+            dto.format = "3D";
+            dto.trailer = movie.getTrailer();
+            dto.summary = "";
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

@@ -59,15 +59,8 @@
                                 </form>
                                 <div class="browse-items">
                                     <h3 class="hny-title two mt-md-5 mt-4">Browse all:</h3>
-                                    <ul class="search-items">
-                                        <li><a href="movies.html">Action</a></li>
-                                        <li><a href="movies.html">Drama</a></li>
-                                        <li><a href="movies.html">Family</a></li>
-                                        <li><a href="movies.html">Thriller</a></li>
-                                        <li><a href="movies.html">Commedy</a></li>
-                                        <li><a href="movies.html">Romantic</a></li>
-                                        <li><a href="movies.html">Tv-Series</a></li>
-                                        <li><a href="movies.html">Horror</a></li>
+                                    <ul class="search-items" id="genre-list">
+                                        <!-- Sẽ render động bằng JS -->
                                     </ul>
                                 </div>
                             </div>
@@ -115,22 +108,11 @@
                 <div class="headerhny-title">
                     <h3 class="hny-title">Phim Nổi Bật</h3>
                 </div>
-                <div class="movie-grid" id="featured-movies">
-                    <!-- Featured movies will be dynamically loaded here -->
+                <div class="featured-movies-wrapper">
+                    <div id="featured-movies"></div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Upcoming Movies Section -->
-    <section class="w3l-grids">
-        <div class="grids-main py-4">
-            <div class="container py-lg-4">
-                <div class="headerhny-title">
-                    <h3 class="hny-title">Phim Sắp Chiếu</h3>
-                </div>
-                <div class="movie-grid" id="upcoming-movies">
-                    <!-- Upcoming movies will be dynamically loaded here -->
+                <div class="button-center text-center mt-3">
+                    <a href="#" class="btn view-button" id="all-movies-btn">Tất cả phim <span class="fa fa-angle-double-right ml-2" aria-hidden="true"></span></a>
                 </div>
             </div>
         </div>
@@ -239,6 +221,34 @@
     <!--/theme-change-->
     <script src="assets/js/theme-change.js"></script>
     <script src="assets/js/index.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var allMoviesBtn = document.getElementById('all-movies-btn');
+        if (allMoviesBtn) {
+            allMoviesBtn.onclick = function(e) {
+                e.preventDefault();
+                window.location.href = 'movies.html';
+            };
+        }
+
+        // Lấy danh sách thể loại từ API và render ra popup
+        fetch('/api/genres')
+            .then(res => res.json())
+            .then(genres => {
+                const genreList = document.getElementById('genre-list');
+                if (!genreList) return;
+                genreList.innerHTML = '';
+                genres.forEach(genre => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = `movies.html?genre=${encodeURIComponent(genre)}`;
+                    a.textContent = genre;
+                    li.appendChild(a);
+                    genreList.appendChild(li);
+                });
+            });
+    });
+    </script>
 </body>
 
 </html> 
