@@ -96,7 +96,7 @@
                     <div class="mb-3">
                         <h5 class="mb-2">Selected Seats</h5>
                         <div class="d-flex flex-wrap">
-                            <span th:each="seat : ${booking.seats}" th:text="${seat.seatName}" class="seat-tag mb-2">A1</span>
+                            <span th:each="seat : ${booking.seatNames}" th:text="${seat}" class="seat-tag mb-2"></span>
                         </div>
                     </div>
 
@@ -109,11 +109,6 @@
                                 <span class="badge bg-primary" th:text="${food.value}">Quantity</span>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Booking Code -->
-                    <div class="mt-4">
-                        <span class="badge bg-success fs-6">Booking Code: <span th:text="${booking.code}">ABC12345</span></span>
                     </div>
                 </div>
             </div>
@@ -131,62 +126,60 @@
                     <!-- Payment Form -->
                     <form id="payment-form" th:action="@{/payment/process}" method="POST">
                         <input type="hidden" name="bookingId" th:value="${booking.id}">
+                        <input type="hidden" id="merchantCode" value="[[${merchantCode}]]" />
                         
                         <!-- Payment Methods -->
                         <div class="mb-4">
                             <h5 class="mb-3">Chọn phương thức thanh toán</h5>
                             <div class="payment-methods">
-                                <!-- VNPay -->
-                                <div class="payment-method-option mb-3">
-                                    <input type="radio" class="btn-check" name="paymentMethod" id="vnpay" value="vnpay" autocomplete="off">
-                                    <label class="btn btn-outline-primary w-100" for="vnpay">
-                                        <img src="/images/vnpay.png" alt="VNPay" height="30" class="me-2">
-                                        VNPay
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="vietqr" value="vietqr" checked>
+                                    <label class="form-check-label" for="vietqr">
+                                        <i class="fas fa-qrcode me-2"></i>VietQR
                                     </label>
                                 </div>
-
-                                <!-- MoMo -->
-                                <div class="payment-method-option mb-3">
-                                    <input type="radio" class="btn-check" name="paymentMethod" id="momo" value="momo" autocomplete="off">
-                                    <label class="btn btn-outline-primary w-100" for="momo">
-                                        <img src="/images/momo.png" alt="MoMo" height="30" class="me-2">
-                                        MoMo
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="momo" value="momo">
+                                    <label class="form-check-label" for="momo">
+                                        <i class="fas fa-wallet me-2"></i>MoMo
                                     </label>
                                 </div>
-
-                                <!-- ZaloPay -->
-                                <div class="payment-method-option mb-3">
-                                    <input type="radio" class="btn-check" name="paymentMethod" id="zalopay" value="zalopay" autocomplete="off">
-                                    <label class="btn btn-outline-primary w-100" for="zalopay">
-                                        <img src="/images/zalopay.png" alt="ZaloPay" height="30" class="me-2">
-                                        ZaloPay
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="zalopay" value="zalopay">
+                                    <label class="form-check-label" for="zalopay">
+                                        <i class="fas fa-mobile-alt me-2"></i>ZaloPay
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="sepay" value="sepay">
+                                    <label class="form-check-label" for="sepay">
+                                        <i class="fas fa-qrcode me-2"></i>Sepay QR (MB Bank)
                                     </label>
                                 </div>
                             </div>
                         </div>
 
                         <!-- QR Code Display Area -->
-                        <div class="qr-code-container">
-                            <h3>Quét mã QR để thanh toán</h3>
-                            <div id="qrcode" class="text-center">
-                                <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 300px;">
-                            </div>
-                            <div class="merchant-info mt-3">
-                                <h4>Thông tin tài khoản</h4>
-                                <p><strong>Tên tài khoản:</strong> CINEMA PROJECT</p>
-                                <p><strong>Số tài khoản:</strong> 1234567890</p>
-                                <p><strong>Ngân hàng:</strong> Vietcombank</p>
-                                <p><strong>Chi nhánh:</strong> Hà Nội</p>
-                                <p class="text-muted">Mã QR có hiệu lực trong 15 phút</p>
-                                <button id="refreshQR" class="btn btn-primary">Làm mới mã QR</button>
-                            </div>
-                        </div>
+<!--                        <div class="qr-code-container">-->
+<!--                            <h3>Quét mã QR để thanh toán</h3>-->
+<!--                            <div id="qrcode" class="text-center">-->
+<!--                                <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 300px;">-->
+<!--                            </div>-->
+<!--                            <div class="merchant-info mt-3">-->
+<!--                                <h4>Thông tin tài khoản</h4>-->
+<!--                                <p><strong>Tên tài khoản:</strong> CINEMA PROJECT</p>-->
+<!--                                <p><strong>Số tài khoản:</strong> 1234567890</p>-->
+<!--                                <p><strong>Ngân hàng:</strong> Vietcombank</p>-->
+<!--                                <p><strong>Chi nhánh:</strong> Hà Nội</p>-->
+<!--                                <p class="text-muted">Mã QR có hiệu lực trong 15 phút</p>-->
+<!--                                <button id="refreshQR" class="btn btn-primary">Làm mới mã QR</button>-->
+<!--                            </div>-->
+<!--                        </div>-->
 
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-lock me-2"></i>Thanh toán
-                            </button>
-                        </div>
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100" id="paymentButton">
+                            <i class="fas fa-lock me-2"></i>Thanh toán
+                        </button>
                     </form>
                 </div>
             </div>
@@ -206,8 +199,63 @@
                 alert('Không tìm thấy bookingId!');
                 return;
             }
-            if (paymentMethod === 'vnpay') {
-                fetch('/payment/vnpay/create-qr', {
+            if (paymentMethod === 'sepay') {
+                // Gọi API Sepay
+                const request = {
+                    amount: parseInt(document.getElementById('amount').value),
+                    orderId: bookingId,
+                    description: 'Thanh toán vé xem phim',
+                    merchantCode: document.getElementById('merchantCode').value || 'YOUR_MERCHANT_CODE',
+                    callbackUrl: window.location.origin + '/payment/success?bookingId=' + bookingId
+                };
+                fetch('/payment/sepay/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(request)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.qrCodeUrl) {
+                        document.getElementById('qrCodeImage').src = data.qrCodeUrl;
+                    } else if (data.qrCodeBase64) {
+                        document.getElementById('qrCodeImage').src = data.qrCodeBase64;
+                    } else {
+                        alert('Có lỗi xảy ra khi tạo mã QR: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi tạo mã QR');
+                });
+            } else if (paymentMethod === 'momo') {
+                fetch('/payment/momo/create-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookingId: bookingId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('QR API response:', data); // Debug log
+                    if (data.qrCodeUrl) {
+                        document.getElementById('qrCodeImage').src = data.qrCodeUrl;
+                        setTimeout(() => {
+                            document.getElementById('qrCodeImage').src = '';
+                            alert('Mã QR đã hết hạn. Vui lòng làm mới để thanh toán.');
+                        }, 15 * 60 * 1000);
+                    } else {
+                        alert('Có lỗi xảy ra khi tạo mã QR: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi tạo mã QR');
+                });
+            } else if (paymentMethod === 'zalopay') {
+                fetch('/payment/zalopay/create-qr', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -242,7 +290,7 @@
         // Handle payment method selection
         document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                if (this.value === 'vnpay') {
+                if (this.value === 'momo' || this.value === 'zalopay' || this.value === 'sepay') {
                     createPaymentUrl();
                 }
             });
@@ -250,6 +298,24 @@
 
         // Initial QR code generation
         createPaymentUrl();
+
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            const bookingId = document.querySelector('input[name="bookingId"]').value;
+            
+            if (paymentMethod === 'vietqr') {
+                window.location.href = `/payment/vietqr/create?bookingId=${bookingId}`;
+            } else if (paymentMethod === 'momo') {
+                createPaymentUrl();
+            } else if (paymentMethod === 'zalopay') {
+                createPaymentUrl();
+            } else if (paymentMethod === 'sepay') {
+                createPaymentUrl();
+            } else {
+                alert('Phương thức thanh toán này chưa được hỗ trợ');
+            }
+        });
     </script>
 </body>
 </html>

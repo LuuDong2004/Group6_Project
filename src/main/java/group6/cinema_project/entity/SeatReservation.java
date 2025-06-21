@@ -27,6 +27,10 @@ public class SeatReservation {
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
     @Column(name = "reservation_status")
     private String status;
 

@@ -5,10 +5,12 @@ import group6.cinema_project.entity.Seat;
 import group6.cinema_project.entity.SeatReservation;
 import group6.cinema_project.entity.Schedule;
 import group6.cinema_project.entity.Ticket;
+import group6.cinema_project.entity.Booking;
 import group6.cinema_project.repository.ScheduleRepository;
 import group6.cinema_project.repository.SeatRepository;
 import group6.cinema_project.repository.SeatReservationRepository;
 import group6.cinema_project.repository.TicketRepository;
+import group6.cinema_project.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class SeatReservationService implements ISeatReservationService {
     private static final Logger logger = LoggerFactory.getLogger(SeatReservationService.class);
-    private static final long PENDING_TIMEOUT_MINUTES = 5;
+    private static final long PENDING_TIMEOUT_MINUTES = 15;
 
     @Autowired
     private SeatRepository seatRepository;
@@ -39,6 +41,9 @@ public class SeatReservationService implements ISeatReservationService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private BookingRepository bookingRepository;
+
     @Scheduled(fixedRate = 60000) // Chạy mỗi phút
     public void cleanupPendingReservations() {
         try {
@@ -51,7 +56,23 @@ public class SeatReservationService implements ISeatReservationService {
             for (SeatReservation reservation : expiredReservations) {
                 logger.info("Removing expired pending reservation for seat {} in schedule {}", 
                     reservation.getSeat().getId(), reservation.getSchedule().getId());
+                
+                // Nếu có booking, cập nhật trạng thái booking thành CANCELLED
+                if (reservation.getBooking() != null) {
+                    Booking booking = reservation.getBooking();
+                    if ("PENDING".equals(booking.getStatus())) {
+                        booking.setStatus("CANCELLED");
+                        bookingRepository.save(booking);
+                        logger.info("Updated booking {} status to CANCELLED", booking.getId());
+                    }
+                }
+                
+                // Xóa reservation
                 seatReservationRepository.delete(reservation);
+            }
+            
+            if (!expiredReservations.isEmpty()) {
+                logger.info("Cleaned up {} expired pending reservations", expiredReservations.size());
             }
         } catch (Exception e) {
             logger.error("Error cleaning up pending reservations: {}", e.getMessage(), e);
@@ -96,6 +117,7 @@ public class SeatReservationService implements ISeatReservationService {
                     
                     if (reservation.isPresent()) {
                         dto.setStatus(reservation.get().getStatus());
+                        dto.setCreateTime(reservation.get().getCreateDate());
                     } else {
                         dto.setStatus("AVAILABLE");
                     }
@@ -111,10 +133,10 @@ public class SeatReservationService implements ISeatReservationService {
 
     @Override
     @Transactional
-    public boolean reserveSeat(Integer seatId, Integer scheduleId, Integer userId) {
+    public boolean reserveSeat(Integer seatId, Integer scheduleId, Integer userId, Integer bookingId) {
         try {
-            logger.info("Attempting to reserve seat {} for schedule {} by user {}", 
-                seatId, scheduleId, userId);
+            logger.info("Attempting to reserve seat {} for schedule {} by user {} for booking {}", 
+                seatId, scheduleId, userId, bookingId);
             
             // Kiểm tra ghế có đang được giữ chỗ hoặc pending không
             if (seatReservationRepository.isSeatReserved(seatId, scheduleId) || 
@@ -129,15 +151,23 @@ public class SeatReservationService implements ISeatReservationService {
             Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + scheduleId));
 
+            // Tìm booking
+            Booking booking = null;
+            if (bookingId != null) {
+                booking = bookingRepository.findById(bookingId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với ID: " + bookingId));
+            }
+
             // Tạo bản ghi giữ chỗ mới với trạng thái PENDING
             SeatReservation reservation = new SeatReservation();
             reservation.setSeat(seat);
             reservation.setSchedule(schedule);
             reservation.setStatus("PENDING");
+            reservation.setBooking(booking);
             reservation.setCreateDate(new Date());
 
             seatReservationRepository.save(reservation);
-            logger.info("Successfully created pending reservation for seat {} for schedule {}", seatId, scheduleId);
+            logger.info("Successfully created pending reservation for seat {} for schedule {} with booking {}", seatId, scheduleId, bookingId);
             return true;
         } catch (Exception e) {
             logger.error("Error creating pending reservation: {}", e.getMessage(), e);
@@ -166,6 +196,46 @@ public class SeatReservationService implements ISeatReservationService {
         } catch (Exception e) {
             logger.error("Error confirming reservation: {}", e.getMessage(), e);
             throw new RuntimeException("Lỗi khi xác nhận đặt chỗ: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    @Transactional
+    public boolean cancelPendingReservation(Integer seatId, Integer scheduleId, Integer userId) {
+        try {
+            logger.info("Cancelling pending reservation for seat {} in schedule {} by user {}", 
+                seatId, scheduleId, userId);
+            
+            // Tìm reservation PENDING
+            List<SeatReservation> pendingReservations = seatReservationRepository.findAll();
+            for (SeatReservation reservation : pendingReservations) {
+                if (reservation.getStatus().equals("PENDING")
+                        && reservation.getSeat().getId().equals(seatId)
+                        && reservation.getSchedule().getId().equals(scheduleId)) {
+                    
+                    // Nếu có booking, cập nhật trạng thái booking thành CANCELLED
+                    if (reservation.getBooking() != null) {
+                        Booking booking = reservation.getBooking();
+                        if ("PENDING".equals(booking.getStatus())) {
+                            booking.setStatus("CANCELLED");
+                            bookingRepository.save(booking);
+                            logger.info("Updated booking {} status to CANCELLED", booking.getId());
+                        }
+                    }
+                    
+                    // Xóa reservation
+                    seatReservationRepository.delete(reservation);
+                    logger.info("Successfully cancelled pending reservation for seat {} in schedule {}", 
+                        seatId, scheduleId);
+                    return true;
+                }
+            }
+            
+            logger.warn("No pending reservation found for seat {} in schedule {}", seatId, scheduleId);
+            return false;
+        } catch (Exception e) {
+            logger.error("Error cancelling pending reservation: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi hủy đặt chỗ: " + e.getMessage());
         }
     }
 } 

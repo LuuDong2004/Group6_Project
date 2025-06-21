@@ -19,7 +19,7 @@ import java.util.Date;
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

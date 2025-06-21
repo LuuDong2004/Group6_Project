@@ -12,4 +12,5 @@ public interface IBookingService {
     boolean cancelBooking(Integer bookingId);
     BookingDto getBookingById(Integer bookingId);
     boolean updateBookingStatus(Integer bookingId, String status);
+    void confirmBookingPaid(int bookingId);
 }

@@ -39,6 +39,11 @@ public interface SeatReservationRepository extends JpaRepository<SeatReservation
     @Query("SELECT sr FROM SeatReservation sr " +
            "WHERE sr.status = :status " +
            "AND sr.createDate < :date")
-    List<SeatReservation> findByStatusAndCreateDateBefore(@Param("status") String status, 
+    List<SeatReservation> findByStatusAndCreateDateBefore(@Param("status") String status,
                                                          @Param("date") Date date);
+
+
+
+    @Query("SELECT sr FROM SeatReservation sr WHERE sr.booking.id = :bookingId")
+    List<SeatReservation> findByBookingId(@Param("bookingId") Integer bookingId);
 }

@@ -1,5 +1,7 @@
 let selectedSeats = [];
 const maxSeats = 8;
+let refreshInterval;
+let pendingStartTime;
 
 function initializeSeatSelection(scheduleId, userId) {
     this.scheduleId = scheduleId;
@@ -22,6 +24,12 @@ function initializeSeatSelection(scheduleId, userId) {
                 seat.classList.remove('available');
             }
         });
+        
+        // Start auto refresh every 30 seconds
+        startAutoRefresh();
+        
+        // Start countdown timer for pending seats
+        startCountdownTimer();
     });
 }
 
@@ -170,10 +178,134 @@ function proceedToPayment() {
     window.location.href = `/payment?scheduleId=${this.scheduleId}&seatIds=${seatIds}&seatNames=${seatNames}&total=${total}`;
 }
 
+async function cancelTransaction() {
+    if (selectedSeats.length === 0) {
+        alert('Không có giao dịch nào để hủy');
+        return;
+    }
+
+    if (!confirm('Bạn có chắc chắn muốn hủy giao dịch này?')) {
+        return;
+    }
+
+    try {
+        // Hủy từng ghế đã chọn
+        for (const seat of selectedSeats) {
+            const response = await fetch('/seat/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    seatId: seat.id,
+                    scheduleId: this.scheduleId,
+                    userId: this.userId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Lỗi khi hủy ghế ' + seat.name);
+            }
+        }
+
+        // Reset selected seats
+        selectedSeats = [];
+        updateSelectedSeatsInfo();
+
+        // Refresh seat status
+        await loadSeatStatus(this.scheduleId);
+        updateSeatDisplay();
+
+        alert('Đã hủy giao dịch thành công');
+    } catch (error) {
+        console.error('Error cancelling transaction:', error);
+        alert('Lỗi khi hủy giao dịch: ' + error.message);
+    }
+}
+
+function startAutoRefresh() {
+    // Clear existing interval
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    
+    // Refresh every 30 seconds
+    refreshInterval = setInterval(() => {
+        loadSeatStatus(this.scheduleId).then(() => {
+            updateSeatDisplay();
+        });
+    }, 30000); // 30 seconds
+}
+
+function startCountdownTimer() {
+    // Update countdown every second
+    setInterval(() => {
+        updateCountdown();
+    }, 1000);
+}
+
+function updateCountdown() {
+    const pendingSeats = document.querySelectorAll('.seat.pending');
+    pendingSeats.forEach(seat => {
+        const seatId = parseInt(seat.getAttribute('data-seat-id'));
+        const seatData = this.reservedSeats.find(s => s.seatId === seatId);
+        
+        if (seatData && seatData.createTime) {
+            const createTime = new Date(seatData.createTime);
+            const now = new Date();
+            const elapsed = Math.floor((now - createTime) / 1000); // seconds
+            const remaining = 15 * 60 - elapsed; // 15 minutes in seconds
+            
+            if (remaining <= 0) {
+                // Time expired, refresh status
+                loadSeatStatus(this.scheduleId).then(() => {
+                    updateSeatDisplay();
+                });
+            } else {
+                // Update countdown display
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                const countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update the countdown element
+                let countdownElement = seat.querySelector('.countdown');
+                if (!countdownElement) {
+                    countdownElement = document.createElement('div');
+                    countdownElement.className = 'countdown';
+                    seat.appendChild(countdownElement);
+                }
+                countdownElement.textContent = countdownText;
+            }
+        }
+    });
+}
+
+function updateSeatDisplay() {
+    const seats = document.querySelectorAll('.seat');
+    seats.forEach(seat => {
+        const seatId = parseInt(seat.getAttribute('data-seat-id'));
+        const status = getSeatStatus(seatId);
+        
+        // Remove all status classes
+        seat.classList.remove('reserved', 'pending', 'available');
+        
+        if (status === 'RESERVED') {
+            seat.classList.add('reserved');
+        } else if (status === 'PENDING') {
+            seat.classList.add('pending');
+        } else {
+            seat.classList.add('available');
+            // Re-add click event for available seats
+            seat.addEventListener('click', () => this.toggleSeat(seatId, seat.getAttribute('data-seat-name'), seat));
+        }
+    });
+}
+
 // Export functions
 window.seatSelection = {
     initialize: initializeSeatSelection,
     toggleSeat: toggleSeat,
     updateSelectedSeatsInfo: updateSelectedSeatsInfo,
-    proceedToPayment: proceedToPayment
+    proceedToPayment: proceedToPayment,
+    cancelTransaction: cancelTransaction
 }; 

@@ -16,7 +16,7 @@ public class BookingDto {
     private int id;
     private UserDto user;
     private String code;
-    private double amount;
+    private long amount;
     private String status;
     private LocalDate date;
     private Date expiryDate; // ngày hiệu lực của booking
@@ -24,4 +24,5 @@ public class BookingDto {
     private ScheduleDto schedule; // Thông tin lịch chiếu
     private List<SeatReservationDto> seats; // Danh sách ghế đã đặt
     private Map<String, Integer> foodItems; // Danh sách đồ ăn và số lượng
+    private List<String> seatNames;
 }

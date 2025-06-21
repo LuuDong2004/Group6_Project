@@ -3,9 +3,11 @@ package group6.cinema_project.service;
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
 import group6.cinema_project.entity.Booking;
+import group6.cinema_project.entity.SeatReservation;
 import group6.cinema_project.entity.User;
 import group6.cinema_project.entity.Schedule;
 import group6.cinema_project.repository.BookingRepository;
+import group6.cinema_project.repository.SeatReservationRepository;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.repository.ScheduleRepository;
 import jakarta.persistence.Id;
@@ -39,6 +41,9 @@ public class BookingService implements IBookingService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private SeatReservationRepository seatReservationRepository;
+
     @Override
     public List<BookingDto> createBooking(BookingRequest request) {
         try {
@@ -68,7 +73,20 @@ public class BookingService implements IBookingService {
 
             // Đặt các ghế đã chọn
             for (Integer seatId : request.getSeatIds()) {
-                seatReservationService.reserveSeat(seatId, request.getScheduleId(), 1); // Sử dụng userId = 1
+                seatReservationService.reserveSeat(seatId, request.getScheduleId(), 1, booking.getId());
+            }
+
+            // ĐẢM BẢO: Gán bookingId cho các reservation PENDING vừa giữ chỗ (nếu có)
+            List<SeatReservation> pendingReservations = seatReservationRepository.findAll();
+            for (SeatReservation reservation : pendingReservations) {
+                if (reservation.getStatus().equals("PENDING")
+                        && reservation.getSchedule().getId().equals(request.getScheduleId())
+                        && reservation.getBooking() == null
+                        && reservation.getSeat() != null
+                        && request.getSeatIds().contains(reservation.getSeat().getId())) {
+                    reservation.setBooking(booking);
+                    seatReservationRepository.save(reservation);
+                }
             }
 
             // Chuyển đổi sang DTO và trả về
@@ -120,7 +138,14 @@ public class BookingService implements IBookingService {
     public BookingDto getBookingById(Integer bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với ID: " + bookingId));
-        return modelMapper.map(booking, BookingDto.class);
+        BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+        // Map danh sách ghế
+        List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
+        List<String> seatNames = reservations.stream()
+            .map(r -> r.getSeat().getName())
+            .collect(Collectors.toList());
+        bookingDto.setSeatNames(seatNames);
+        return bookingDto;
     }
 
     @Override
@@ -137,6 +162,20 @@ public class BookingService implements IBookingService {
             return true;
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi cập nhật trạng thái booking: " + e.getMessage());
+        }
+    }
+    @Override
+    public void confirmBookingPaid(int bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+        // Cập nhật trạng thái booking
+        booking.setStatus("PAID");
+        bookingRepository.save(booking);
+        // Cập nhật trạng thái các SeatReservation liên quan
+        List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
+        for (SeatReservation reservation : reservations) {
+            reservation.setStatus("RESERVED");
+            seatReservationRepository.save(reservation);
         }
     }
 }

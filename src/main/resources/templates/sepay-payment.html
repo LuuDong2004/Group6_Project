@@ -3,64 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán VietQR</title>
+    <title>Thanh toán Sepay</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .payment-container {
-            max-width: 800px;
-            margin: 2rem auto;
-        }
-        .qr-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-        .bank-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-        .countdown {
-            font-size: 1.2rem;
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .status-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        .status-pending {
-            background-color: #ffc107;
-        }
-        .status-success {
-            background-color: #28a745;
-        }
-        .status-failed {
-            background-color: #dc3545;
-        }
-        .copy-btn {
-            cursor: pointer;
-            color: #0d6efd;
-        }
-        .copy-btn:hover {
-            color: #0a58ca;
-        }
+        body { background-color: #f8f9fa; }
+        .payment-container { max-width: 800px; margin: 2rem auto; }
+        .qr-container { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .bank-info { background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .countdown { font-size: 1.2rem; color: #dc3545; font-weight: bold; }
+        .status-indicator { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 10px; }
+        .status-pending { background-color: #ffc107; }
+        .status-success { background-color: #28a745; }
+        .status-failed { background-color: #dc3545; }
+        .copy-btn { cursor: pointer; color: #0d6efd; }
+        .copy-btn:hover { color: #0a58ca; }
     </style>
 </head>
 <body>
     <div class="container payment-container">
         <div class="qr-container">
             <h2 class="text-center mb-4">
-                <i class="fas fa-qrcode me-2"></i>Thanh toán qua VietQR
+                <i class="fas fa-qrcode me-2"></i>Thanh toán qua Sepay QR
             </h2>
 
             <!-- Payment Status -->
@@ -77,35 +41,22 @@
 
             <!-- QR Code -->
             <div class="text-center mb-4">
-                <img th:src="${qrCodeBase64 != null and #strings.length(qrCodeBase64) > 0 ? qrCodeBase64 : qrCodeUrl}" alt="VietQR Code" class="img-fluid" style="max-width: 300px;">
+                <img id="sepay-qr" th:src="${qrCodeBase64 != null and #strings.length(qrCodeBase64) > 0 ? qrCodeBase64 : qrCodeUrl}" alt="Sepay QR Code" class="img-fluid" style="max-width: 300px;">
             </div>
 
-            <!-- Bank Information -->
+            <!-- Thông tin giao dịch -->
             <div class="bank-info">
-                <h5 class="mb-3">Thông tin chuyển khoản</h5>
+                <h5 class="mb-3">Thông tin giao dịch</h5>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Số tài khoản:</strong> 
-                            <span th:text="${accountNo}"></span>
-                            <i class="fas fa-copy copy-btn ms-2" onclick="copyToClipboard(this.previousElementSibling.textContent)"></i>
-                        </p>
-                        <p><strong>Chủ tài khoản:</strong> 
-                            <span th:text="${accountName}"></span>
-                            <i class="fas fa-copy copy-btn ms-2" onclick="copyToClipboard(this.previousElementSibling.textContent)"></i>
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Ngân hàng:</strong> <span th:text="${bankId}"></span></p>
-                        <p><strong>Số tiền:</strong> <span th:text="${amount}"></span></p>
+                        <p><strong>Mã booking:</strong> <span th:text="${bookingId}"></span></p>
+                        <p><strong>Mã merchant:</strong> <span th:text="${merchantCode}"></span></p>
                     </div>
                 </div>
             </div>
 
             <!-- Manual Confirmation Button -->
             <div class="text-center mt-4">
-                <button class="btn btn-primary me-3" onclick="confirmPayment()">
-                    <i class="fas fa-check-circle me-2"></i>Xác nhận đã thanh toán
-                </button>
                 <button class="btn btn-danger" onclick="cancelPayment()">
                     <i class="fas fa-times-circle me-2"></i>Hủy thanh toán
                 </button>
@@ -117,8 +68,6 @@
         // Get transaction reference and expiry time from server
         const transactionRef = /*[[${transactionRef}]]*/ '';
         const expiryTime = new Date(/*[[${expiryTime}]]*/ '');
-        
-        // Initialize countdown timer
         let countdownInterval = setInterval(updateCountdown, 1000);
         let checkInterval = setInterval(() => checkPaymentStatus(), 5000);
 
@@ -126,7 +75,6 @@
             try {
                 const now = new Date();
                 const diff = expiryTime - now;
-                
                 if (diff <= 0) {
                     clearInterval(countdownInterval);
                     clearInterval(checkInterval);
@@ -134,11 +82,9 @@
                     updatePaymentStatus('failed', 'Hết thời gian thanh toán!');
                     return;
                 }
-                
                 const minutes = Math.floor(diff / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
-                document.getElementById('countdown').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('countdown').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             } catch (error) {
                 console.error('Error updating countdown:', error);
                 clearInterval(countdownInterval);
@@ -152,8 +98,7 @@
                 console.error('Transaction reference is missing');
                 return;
             }
-
-            fetch(`/payment/vietqr/check-status?transactionRef=${encodeURIComponent(transactionRef)}`)
+            fetch(`/payment/sepay/check-status?transactionId=${encodeURIComponent(transactionRef)}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -166,9 +111,8 @@
                             updatePaymentStatus('success', 'Thanh toán thành công!');
                             clearInterval(checkInterval);
                             clearInterval(countdownInterval);
-                            
                             setTimeout(() => {
-                                const successUrl = `/payment/success?bookingId=${data.bookingId}&transactionId=${encodeURIComponent(transactionRef)}&paymentMethod=vietqr&amount=${encodeURIComponent(data.amount)}`;
+                                const successUrl = `/payment/success?bookingId=${data.bookingId}&transactionId=${encodeURIComponent(transactionRef)}&paymentMethod=sepay&amount=${encodeURIComponent(data.amount)}`;
                                 window.location.href = successUrl;
                             }, 2000);
                         } else if (showAlert) {
@@ -187,60 +131,16 @@
                 });
         }
 
-        function confirmPayment() {
-            if (!transactionRef) {
-                alert('Lỗi: Không tìm thấy thông tin giao dịch!');
-                return;
-            }
-
-            if (confirm('Bạn có chắc chắn đã thực hiện thanh toán thành công?')) {
-                fetch(`/api/vietqr/confirm-payment/${encodeURIComponent(transactionRef)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        updatePaymentStatus('success', 'Xác nhận thanh toán thành công!');
-                        clearInterval(checkInterval);
-                        clearInterval(countdownInterval);
-
-                        // Chuyển hướng sang trang thành công sau 2 giây
-                        setTimeout(() => {
-                            const successUrl = `/payment/success?bookingId=${data.bookingId}&transactionId=${encodeURIComponent(transactionRef)}&paymentMethod=vietqr&amount=${encodeURIComponent(data.amount)}`;
-                            window.location.href = successUrl;
-                        }, 2000);
-                    } else {
-                        throw new Error(data.message || 'Lỗi xác nhận thanh toán');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error confirming payment:', error);
-                    alert('Có lỗi xảy ra khi xác nhận thanh toán. Vui lòng thử lại sau.');
-                });
-            }
-        }
-
         function updatePaymentStatus(status, message) {
             try {
                 const statusIndicator = document.getElementById('status-indicator');
                 const statusText = document.getElementById('status-text');
                 const statusAlert = document.getElementById('payment-status');
-                
                 if (!statusIndicator || !statusText || !statusAlert) {
                     throw new Error('Status elements not found');
                 }
-
                 statusIndicator.className = `status-indicator status-${status}`;
                 statusText.textContent = message;
-                
                 if (status === 'success') {
                     statusAlert.className = 'alert alert-success text-center';
                 } else if (status === 'failed') {
@@ -251,53 +151,17 @@
             }
         }
 
-        function copyToClipboard(text) {
-            if (!text) {
-                console.error('No text to copy');
-                return;
-            }
-
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    const toast = document.createElement('div');
-                    toast.className = 'position-fixed bottom-0 end-0 p-3';
-                    toast.style.zIndex = '5';
-                    toast.innerHTML = `
-                        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="toast-header">
-                                <strong class="me-auto">Thông báo</strong>
-                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                Đã sao chép vào clipboard!
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy text: ', err);
-                    alert('Không thể sao chép. Vui lòng thử lại.');
-                });
-        }
-
         function cancelPayment() {
             if (!transactionRef) {
                 alert('Lỗi: Không tìm thấy thông tin giao dịch!');
                 return;
             }
-
             if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Giao dịch này sẽ bị hủy và ghế sẽ được giải phóng.')) {
-                // Dừng các interval
                 clearInterval(checkInterval);
                 clearInterval(countdownInterval);
-                
-                fetch(`/payment/vietqr/cancel?transactionRef=${encodeURIComponent(transactionRef)}`, {
+                fetch(`/payment/sepay/cancel?transactionId=${encodeURIComponent(transactionRef)}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -308,8 +172,6 @@
                 .then(data => {
                     if (data.success) {
                         updatePaymentStatus('failed', 'Đã hủy thanh toán thành công!');
-                        
-                        // Chuyển hướng về trang chọn ghế sau 2 giây
                         setTimeout(() => {
                             const cancelUrl = `/payment/failed?message=Đã hủy thanh toán&bookingId=${data.bookingId}`;
                             window.location.href = cancelUrl;
@@ -330,7 +192,7 @@
     window.addEventListener('beforeunload', function (e) {
         const statusText = document.getElementById('status-text');
         if (statusText && statusText.textContent.includes('chờ thanh toán')) {
-            fetch('/payment/vietqr/cancel?transactionRef=' + encodeURIComponent(transactionRef), {
+            fetch('/payment/sepay/cancel?transactionId=' + encodeURIComponent(transactionRef), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 keepalive: true
@@ -339,4 +201,4 @@
     });
     </script>
 </body>
-</html>
+</html> 

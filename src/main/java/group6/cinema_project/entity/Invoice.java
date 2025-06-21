@@ -24,5 +24,8 @@ public class Invoice {
     @JoinColumn(name = "EmployeeId")
     private Employee employee;
 
+    @OneToOne
+    @JoinColumn(name = "BookingId")
+    private Booking booking;
 
 }
