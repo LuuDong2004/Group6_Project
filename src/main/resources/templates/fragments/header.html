@@ -11,9 +11,9 @@
         <!--/nav-->
         <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
             <div class="container">
-                <h1><a class="navbar-brand" href="../index.html"><span class="fa fa-play icon-log"
+                <h1><a class="navbar-brand" href="/dashboard"><span class="fa fa-play icon-log"
                                                                        aria-hidden="true"></span>
-                    Lưu Văn Đông</a></h1>
+                    ZEN Booking Ticket</a></h1>
                 <!-- if logo is image enable this
                         <a class="navbar-brand" href="#index.html">
                             <img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
@@ -88,12 +88,12 @@
                     </div>
                     
 
-                    <!-- Only show for admin users -->
-                    <div th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" >
-                        <a class="nav-link" href="/admin">
-                            <img src="assets/images/adminController.jpg" alt="Admin Icon" style="width: 40px; height: 40px;">
-                        </a>
-                    </div>
+<!--                    &lt;!&ndash; Only show for admin users &ndash;&gt;-->
+<!--                    <div th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" >-->
+<!--                        <a class="nav-link" href="/admin">-->
+<!--                            <img src="assets/images/adminController.jpg" alt="Admin Icon" style="width: 40px; height: 40px;">-->
+<!--                        </a>-->
+<!--                    </div>-->
 
                     <div class="Login_SignUp" id="login"
                          style="font-size: 2rem ; display: inline-block; position: relative;">

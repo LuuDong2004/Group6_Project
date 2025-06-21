@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - Cinema Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #28a745 0%, #20c997 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .sidebar-menu {
+            flex-grow: 1;
+            padding-top: 1rem;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 3px solid white;
+            padding-left: calc(1.5rem - 3px);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-card.tickets .icon {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .stats-card.showtimes .icon {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+        
+        .stats-card.revenue .icon {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+        
+        .quick-actions {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .action-btn:hover {
+            border-color: #28a745;
+            background-color: #f8f9fa;
+            color: #28a745;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-user-tie fa-2x mb-2"></i>
+            <h5>Staff Portal</h5>
+            <small>Cinema Management</small>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <a href="/staff" class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/staff/tickets" class="menu-item">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Quản lý vé</span>
+            </a>
+            <a href="/staff/showtimes" class="menu-item">
+                <i class="fas fa-clock"></i>
+                <span>Lịch chiếu</span>
+            </a>
+            <a href="/staff/customers" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Khách hàng</span>
+            </a>
+            <a href="/staff/reports" class="menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo cáo</span>
+            </a>
+        </nav>
+        
+        <div class="mt-auto p-3">
+            <a href="/admin/login" class="btn btn-outline-light btn-sm w-100">
+                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Staff Dashboard</h2>
+                    <p class="text-muted mb-0">Chào mừng bạn đến với hệ thống quản lý rạp chiếu phim</p>
+                </div>
+                <div class="text-end">
+                    <p class="mb-0"><strong>Staff User</strong></p>
+                    <small class="text-muted">staff@cinema.com</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stats-card tickets">
+                    <div class="icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h3>156</h3>
+                    <p class="text-muted mb-0">Vé đã bán hôm nay</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card showtimes">
+                    <div class="icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>8</h3>
+                    <p class="text-muted mb-0">Suất chiếu hôm nay</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card revenue">
+                    <div class="icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>2.5M</h3>
+                    <p class="text-muted mb-0">Doanh thu hôm nay</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h4 class="mb-3">Thao tác nhanh</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="/staff/tickets" class="action-btn">
+                        <i class="fas fa-ticket-alt"></i>
+                        <div>
+                            <h6 class="mb-1">Bán vé</h6>
+                            <small class="text-muted">Tạo vé mới cho khách hàng</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="/staff/showtimes" class="action-btn">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h6 class="mb-1">Xem lịch chiếu</h6>
+                            <small class="text-muted">Kiểm tra lịch chiếu hôm nay</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="/staff/customers" class="action-btn">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h6 class="mb-1">Quản lý khách hàng</h6>
+                            <small class="text-muted">Xem thông tin khách hàng</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="/staff/reports" class="action-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h6 class="mb-1">Báo cáo</h6>
+                            <small class="text-muted">Xem báo cáo doanh thu</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

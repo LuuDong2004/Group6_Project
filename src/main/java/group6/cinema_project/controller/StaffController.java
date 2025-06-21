@@ -1,11 +1,30 @@
 package group6.cinema_project.controller;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import lombok.RequiredArgsConstructor;
+@Controller
+@RequestMapping("/staff")
+@RequiredArgsConstructor
 public class StaffController {
+
+    @GetMapping("/login")
+    public String staffLoginPage() {
+        return "redirect:/admin/login";
+
+    }
+
+    @GetMapping("")
+    public String staffDashboard() {
+        return "staff_dashboard";
+    }
+
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String rawPassword = "admin1";
+        String rawPassword = "123456";
         String hashedPassword = encoder.encode(rawPassword);
         System.out.println(hashedPassword);
     }

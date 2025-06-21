@@ -5,30 +5,53 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Signin</title>
+	<title> Login - Cinema Booking</title>
 	<link rel="stylesheet" type="text/css" href="/assets/css/as-alert-message.min.css">
 	<link rel="stylesheet" type="text/css"
 		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="/assets/css/style-starter.css">
 	<link rel="stylesheet" type="text/css" href="/assets/css/sign-in.css">
+	<style>
+		.admin-link {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+		}
+		
+		.admin-link a {
+			background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+			color: white;
+			padding: 10px 20px;
+			border-radius: 25px;
+			text-decoration: none;
+			font-weight: 500;
+			box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+			transition: all 0.3s ease;
+		}
+		
+		.admin-link a:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+			color: white;
+		}
+		
+		.admin-link i {
+			margin-right: 8px;
+		}
+	</style>
 </head>
 
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
-
 
 <div class="container_signup_signin" id="container_signup_signin">
 	<!-- Register Form -->
 	<div class="form-container sign-up-container">
 		<form th:action="@{/register}" th:object="${user}" method="post">
 			<h1>Create Account</h1>
-<!--			<div class="social-container">-->
-<!--				<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>-->
-<!--				<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>-->
-<!--				<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>-->
-<!--			</div>-->
-			<span>or use your email for registration</span>
+			<span>Đăng ký tài khoản để đặt vé xem phim</span>
 
 			<!-- Hiển thị thông báo lỗi -->
 			<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -59,6 +82,8 @@
 	<div class="form-container sign-in-container">
 		<form th:action="@{/login}" method="post" style="color: var(--theme-title);">
 			<h1>Sign in</h1>
+			<span>Đăng nhập để đặt vé xem phim</span>
+			
 			<div class="social-container">
 				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
 				<a href="/oauth2/authorization/google" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
@@ -84,12 +109,12 @@
 		<div class="overlay">
 			<div class="overlay-panel overlay-left">
 				<h1>Welcome Back!</h1>
-				<p>To keep connected with us please login with your login details</p>
+				<p>Đăng nhập để tiếp tục đặt vé xem phim</p>
 				<button class="ghost" id="signIn">Sign In</button>
 			</div>
 			<div class="overlay-panel overlay-right">
 				<h1>Hello, Friend!</h1>
-				<p>Register and book your tickets now!!!</p>
+				<p>Đăng ký tài khoản và đặt vé xem phim ngay hôm nay!</p>
 				<button class="ghost" id="signUp">Sign Up</button>
 			</div>
 		</div>

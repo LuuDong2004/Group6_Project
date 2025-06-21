@@ -1,6 +1,13 @@
 package group6.cinema_project.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -39,6 +46,7 @@ public class User {
     @Column(name = "role", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private Role role;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private AuthProvider provider = AuthProvider.LOCAL;
 

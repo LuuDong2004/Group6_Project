@@ -47,6 +47,28 @@ public class AdminController {
     private final String FOOD_UPLOAD_DIR = "src/main/resources/static/food/";
     private final FoodService foodService;
 
+
+    @GetMapping("/login")
+    public String adminLoginPage(@RequestParam(value = "error", required = false) String error,
+                                @RequestParam(value = "logout", required = false) String logout,
+                                Model model) {
+
+        if (error != null) {
+            model.addAttribute("error", "Email hoặc mật khẩu không đúng!");
+        }
+
+        if (logout != null) {
+            model.addAttribute("message", "Đăng xuất thành công!");
+        }
+
+        return "admin_login";
+    }
+
+    @GetMapping("/staff/login")
+    public String staffLoginPage() {
+        return "redirect:/admin/login";
+    }
+
     @GetMapping
     public String adminDashboard() {
         return "admin_dashboard";
