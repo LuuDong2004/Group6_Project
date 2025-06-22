@@ -62,12 +62,11 @@ public class MovieController {
             @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy) {
         List<MovieDto> movies;
 
-        // If search parameters are provided, use filtered search; otherwise get all
-        // movies
+        // Use the new service methods that include directors and actors for display
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            movies = movieService.getFilteredMovies(searchTerm, filterBy);
+            movies = movieService.getFilteredMoviesForDisplay(searchTerm, filterBy);
         } else {
-            movies = movieService.getAllMovie();
+            movies = movieService.getAllMoviesForDisplay();
         }
 
         model.addAttribute("movies", movies);

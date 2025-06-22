@@ -52,6 +52,40 @@ public class AppConfig {
             mapper.skip(Movie::setActors);
         });
 
+        // Configure ScreeningSchedule to ScreeningScheduleDto mapping to skip related
+        // entity fields
+        modelMapper.typeMap(group6.cinema_project.entity.ScreeningSchedule.class,
+                group6.cinema_project.dto.ScreeningScheduleDto.class).addMappings(mapper -> {
+                    // Skip all related entity fields to avoid cascade loading issues
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieName);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieImage);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieDuration);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieRating);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieGenre);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomName);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomCapacity);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchName);
+                    mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchAddress);
+                });
+
+        // Configure ScreeningRoom to ScreeningRoomDto mapping to skip collections
+        modelMapper.typeMap(group6.cinema_project.entity.ScreeningRoom.class,
+                group6.cinema_project.dto.ScreeningRoomDto.class).addMappings(mapper -> {
+                    // Skip all collection fields to avoid cascade loading issues
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setSeats);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setScreeningSchedules);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchName);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchAddress);
+                });
+
+        // Configure Movie to MovieDto mapping to skip collections
+        modelMapper.typeMap(group6.cinema_project.entity.Movie.class,
+                group6.cinema_project.dto.MovieDto.class).addMappings(mapper -> {
+                    // Skip all collection fields to avoid cascade loading issues
+                    mapper.skip(group6.cinema_project.dto.MovieDto::setDirectors);
+                    mapper.skip(group6.cinema_project.dto.MovieDto::setActors);
+                });
+
         return modelMapper;
     }
 }

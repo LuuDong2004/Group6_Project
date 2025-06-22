@@ -37,13 +37,21 @@
       </div>
 
       <nav class="sidebar-menu">
-        <a href="#" class="menu-item">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
           <i class="fas fa-home"></i>
           <span>Bảng điều khiển</span>
         </a>
-        <a href="#" class="menu-item active">
+        <a th:href="@{/admin/movies/list}" class="menu-item active">
           <i class="fas fa-film"></i>
           <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu</span>
         </a>
         <a href="#" class="menu-item">
           <i class="fas fa-ticket-alt"></i>
@@ -54,10 +62,8 @@
           <span>Người dùng</span>
         </a>
         <a href="#" class="menu-item">
-          <i class="fas fa-calendar-alt"></i> <span>Lịch chiếu</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i> <span>Phân tích</span>
+          <i class="fas fa-chart-pie"></i>
+          <span>Phân tích</span>
         </a>
         <a href="#" class="menu-item">
           <i class="fas fa-cog"></i>

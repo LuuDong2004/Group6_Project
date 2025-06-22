@@ -103,7 +103,7 @@ public class MovieServiceImpl implements MovieService {
     @Transactional(readOnly = true)
     public List<MovieDto> getAllMovie() {
         return movieRepository.findAll().stream()
-                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
     }
 
@@ -157,8 +157,137 @@ public class MovieServiceImpl implements MovieService {
         }
 
         return movies.stream()
-                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getAllMoviesForDisplay() {
+        return movieRepository.findAllWithDirectorsAndActors().stream()
+                .map(this::convertToDisplayDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy) {
+        List<Movie> movies;
+
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            movies = movieRepository.findAllWithDirectorsAndActors();
+        } else {
+            switch (filterBy.toLowerCase()) {
+                case "name":
+                case "title":
+                    movies = movieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "description":
+                    movies = movieRepository
+                            .findByDescriptionContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "genre":
+                    movies = movieRepository.findByGenreContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "rating":
+                    movies = movieRepository.findByRatingContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "language":
+                    movies = movieRepository
+                            .findByLanguageContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "releaseyear":
+                case "release_year":
+                    try {
+                        Integer year = Integer.parseInt(searchTerm.trim());
+                        movies = movieRepository.findByReleaseYearWithDirectorsAndActors(year);
+                    } catch (NumberFormatException e) {
+                        movies = List.of(); // Return empty list if year is not a valid number
+                    }
+                    break;
+                case "director":
+                case "directors":
+                    movies = movieRepository
+                            .findByDirectorNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                case "actor":
+                case "actors":
+                    movies = movieRepository
+                            .findByActorNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+                default:
+                    // Default to searching by name if filterBy is not recognized
+                    movies = movieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    break;
+            }
+        }
+
+        return movies.stream()
+                .map(this::convertToDisplayDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert Movie entity to DTO without triggering relationship loading
+     * This method manually maps only the basic fields to avoid ModelMapper cascade
+     * issues
+     */
+    private MovieDto convertToBasicDto(Movie movie) {
+        MovieDto dto = new MovieDto();
+
+        // Map only basic fields that exist in Movie entity
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        dto.setDescription(movie.getDescription());
+        dto.setDuration(movie.getDuration());
+        dto.setRating(movie.getRating());
+        dto.setGenre(movie.getGenre());
+        dto.setLanguage(movie.getLanguage());
+        dto.setImage(movie.getImage());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setTrailer(movie.getTrailer()); // Note: entity has 'trailer', DTO has 'trailer'
+
+        // Don't map any relationships or collections to avoid cascade loading
+        // Directors and actors will remain empty, which is fine for dropdown purposes
+
+        return dto;
+    }
+
+    /**
+     * Convert Movie entity to DTO with directors and actors for display purposes
+     * This method assumes directors and actors are already loaded (via JOIN FETCH)
+     */
+    private MovieDto convertToDisplayDto(Movie movie) {
+        MovieDto dto = new MovieDto();
+
+        // Map basic fields
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        dto.setDescription(movie.getDescription());
+        dto.setDuration(movie.getDuration());
+        dto.setRating(movie.getRating());
+        dto.setGenre(movie.getGenre());
+        dto.setLanguage(movie.getLanguage());
+        dto.setImage(movie.getImage());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setTrailer(movie.getTrailer());
+
+        // Map directors and actors (these should be loaded via JOIN FETCH)
+        if (movie.getDirectors() != null) {
+            Set<String> directorNames = movie.getDirectors().stream()
+                    .map(Director::getName)
+                    .collect(Collectors.toSet());
+            dto.setDirectors(directorNames);
+        }
+
+        if (movie.getActors() != null) {
+            Set<String> actorNames = movie.getActors().stream()
+                    .map(Actor::getName)
+                    .collect(Collectors.toSet());
+            dto.setActors(actorNames);
+        }
+
+        return dto;
     }
 
 }

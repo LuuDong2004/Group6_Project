@@ -439,108 +439,44 @@
             text-align: center;
         }
 
-        /* Filter Interface Styles */
-        .filter-section {
+        /* Movie Filter Form Styling */
+        .movie-filter-form {
             background: white;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 24px;
+            margin-bottom: 1.5rem;
         }
 
-        .filter-form {
-            display: flex;
-            gap: 12px;
-            align-items: end;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .filter-group label {
+        .movie-filter-form .form-label {
             font-size: 13px;
             font-weight: 600;
-            color: #374151; /* Tailwind gray-700 */
+            color: #64748b;
+            margin-bottom: 6px;
         }
 
-        .filter-input {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+        .movie-filter-form .form-control,
+        .movie-filter-form .form-select {
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 14px;
-            min-width: 200px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .filter-input:focus {
-            outline: none;
-            border-color: #6366f1; /* Tailwind indigo-500 */
+        .movie-filter-form .form-control:focus,
+        .movie-filter-form .form-select:focus {
+            border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .filter-select {
+        .filter-status {
+            background: #f1f5f9;
+            border-radius: 8px;
             padding: 8px 12px;
-            border: 1px solid #d1d5db; /* Tailwind gray-300 */
-            border-radius: 6px;
-            font-size: 14px;
-            min-width: 160px;
-            background-color: white;
-            cursor: pointer;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 13px;
         }
 
-        .filter-select:focus {
-            outline: none;
-            border-color: #6366f1; /* Tailwind indigo-500 */
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .filter-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            height: fit-content;
-        }
-
-        .filter-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .clear-filter-btn {
-            background: #f3f4f6; /* Tailwind gray-100 */
-            color: #6b7280; /* Tailwind gray-500 */
-            border: 1px solid #d1d5db; /* Tailwind gray-300 */
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background-color 0.2s, color 0.2s;
-            height: fit-content;
-            text-decoration: none;
-        }
-
-        .clear-filter-btn:hover {
-            background: #e5e7eb; /* Tailwind gray-200 */
-            color: #4b5563; /* Tailwind gray-600 */
+        .filter-status strong {
+            color: #1e293b;
         }
 
         /* Responsive adjustments */
@@ -585,15 +521,15 @@
                 gap: 1rem;
             }
 
-            .filter-form {
-                flex-direction: column;
-                align-items: stretch;
+            .movie-filter-form .row {
+                margin: 0;
             }
 
-            .filter-input,
-            .filter-select {
-                min-width: auto;
-                width: 100%;
+            .movie-filter-form .col-md-6,
+            .movie-filter-form .col-md-4,
+            .movie-filter-form .col-md-2 {
+                padding: 0 0.5rem;
+                margin-bottom: 1rem;
             }
         }
 
@@ -613,13 +549,21 @@
     </div>
 
     <nav class="sidebar-menu">
-        <a href="#" class="menu-item">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
             <i class="fas fa-home"></i>
             <span>Bảng điều khiển</span>
         </a>
-        <a href="#" class="menu-item active">
+        <a th:href="@{/admin/movies/list}" class="menu-item active">
             <i class="fas fa-film"></i>
             <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+            <i class="fas fa-user-friends"></i>
+            <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Lịch chiếu</span>
         </a>
         <a href="#" class="menu-item">
             <i class="fas fa-ticket-alt"></i>
@@ -630,10 +574,8 @@
             <span>Người dùng</span>
         </a>
         <a href="#" class="menu-item">
-            <i class="fas fa-calendar-alt"></i> <span>Lịch chiếu</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-chart-pie"></i> <span>Phân tích</span>
+            <i class="fas fa-chart-pie"></i>
+            <span>Phân tích</span>
         </a>
         <a href="#" class="menu-item">
             <i class="fas fa-cog"></i>
@@ -660,7 +602,6 @@
             </button>
             <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Phim</h4>
         </div>
-
 
         <div class="d-flex align-items-center">
             <button class="btn btn-link text-secondary me-1 position-relative">
@@ -729,45 +670,63 @@
                 </a>
             </div>
 
-            <!-- Filter Interface -->
-            <div class="filter-section">
-                <form th:action="@{/admin/movies/list}" method="get" class="filter-form">
-                    <div class="filter-group">
-                        <label for="searchTerm">Từ khóa tìm kiếm</label>
-                        <input type="text"
-                               id="searchTerm"
-                               name="searchTerm"
-                               class="filter-input"
-                               placeholder="Nhập từ khóa..."
-                               th:value="${searchTerm}">
+            <!-- Movie Filter Form -->
+            <div class="movie-filter-form mb-4 p-4">
+                <form th:action="@{/admin/movies/list}" method="get">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label for="searchTerm" class="form-label">Tìm kiếm</label>
+                            <input type="text"
+                                   id="searchTerm"
+                                   name="searchTerm"
+                                   class="form-control form-control-sm"
+                                   placeholder="Nhập từ khóa tìm kiếm..."
+                                   th:value="${searchTerm}"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterBy" class="form-label">Tìm kiếm theo</label>
+                            <select id="filterBy"
+                                    name="filterBy"
+                                    class="form-select form-select-sm">
+                                <option value="name" th:selected="${filterBy == 'name' or filterBy == 'title'}">Tên phim</option>
+                                <option value="description" th:selected="${filterBy == 'description'}">Mô tả</option>
+                                <option value="genre" th:selected="${filterBy == 'genre'}">Thể loại</option>
+                                <option value="rating" th:selected="${filterBy == 'rating'}">Rating</option>
+                                <option value="language" th:selected="${filterBy == 'language'}">Ngôn ngữ</option>
+                                <option value="releaseyear" th:selected="${filterBy == 'releaseyear' or filterBy == 'release_year'}">Năm phát hành</option>
+                                <option value="director" th:selected="${filterBy == 'director' or filterBy == 'directors'}">Đạo diễn</option>
+                                <option value="actor" th:selected="${filterBy == 'actor' or filterBy == 'actors'}">Diễn viên</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm w-100"
+                                    style="background-color: #4f46e5; border-color: #4f46e5;">
+                                <i class="fas fa-search me-1"></i> Tìm kiếm
+                            </button>
+                        </div>
                     </div>
-
-                    <div class="filter-group">
-                        <label for="filterBy">Tìm kiếm theo</label>
-                        <select id="filterBy" name="filterBy" class="filter-select">
-                            <option value="name" th:selected="${filterBy == 'name'}">Tên phim</option>
-                            <option value="description" th:selected="${filterBy == 'description'}">Mô tả</option>
-                            <option value="genre" th:selected="${filterBy == 'genre'}">Thể loại</option>
-                            <option value="rating" th:selected="${filterBy == 'rating'}">Rating</option>
-                            <option value="language" th:selected="${filterBy == 'language'}">Ngôn ngữ</option>
-                            <option value="releaseyear" th:selected="${filterBy == 'releaseyear'}">Năm phát hành</option>
-                            <option value="directors" th:selected="${filterBy == 'directors'}">Đạo diễn</option>
-                            <option value="actors" th:selected="${filterBy == 'actors'}">Diễn viên</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <button type="submit" class="filter-btn">
-                            <i class="fas fa-search"></i>
-                            Lọc
-                        </button>
-                    </div>
-
-                    <div class="filter-group" th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}">
-                        <a th:href="@{/admin/movies/list}" class="clear-filter-btn">
-                            <i class="fas fa-times"></i>
-                            Xóa bộ lọc
-                        </a>
+                    <!-- Clear filter row -->
+                    <div class="row mt-2" th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <small class="text-muted">
+                                    <i class="fas fa-filter me-1"></i>
+                                    Đang lọc theo "<strong th:text="${filterBy == 'name' or filterBy == 'title' ? 'Tên phim' :
+                                                                      filterBy == 'description' ? 'Mô tả' :
+                                                                      filterBy == 'genre' ? 'Thể loại' :
+                                                                      filterBy == 'rating' ? 'Rating' :
+                                                                      filterBy == 'language' ? 'Ngôn ngữ' :
+                                                                      filterBy == 'releaseyear' or filterBy == 'release_year' ? 'Năm phát hành' :
+                                                                      filterBy == 'director' or filterBy == 'directors' ? 'Đạo diễn' :
+                                                                      filterBy == 'actor' or filterBy == 'actors' ? 'Diễn viên' : 'Tên phim'}">Tên phim</strong>":
+                                    "<span th:text="${searchTerm}"></span>"
+                                </small>
+                                <a th:href="@{/admin/movies/list}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times me-1"></i> Xóa bộ lọc
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -781,8 +740,7 @@
                         <th>Phim</th>
                         <th>Mô tả</th>
                         <th>Thời lượng</th>
-                        <th>Rating</th>
-                        <th>Định dạng</th>
+                        <th>Rating</th>                       
                         <th>Ngày chiếu</th>                      
                         <th>Ngôn ngữ</th>
                         <th>Thể loại</th>
@@ -819,11 +777,6 @@
                         <td  th:text="${movie.description != null ? movie.description : 'N/A'}"> </td>
                         <td th:text="${movie.duration != null ? movie.duration + ' phút' : 'N/A'}"></td>
                         <td><span class="rating-badge" th:text="${movie.rating != null ? movie.rating : 'N/A'}"></span>
-                        </td>
-                        <td>
-                            <div class="format-tags">
-                                <span class="format-tag">N/A</span>
-                            </div>
                         </td>
                         <td th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'N/A'}">
                             26/04/2019
@@ -871,29 +824,19 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(movies)}">
-                        <td colspan="11" style="text-align: center; padding: 40px;">
-                            <div th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}">
-                                <i class="fas fa-search" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
-                                <p style="margin: 0; color: #6b7280;">Không tìm thấy phim nào với từ khóa "<span th:text="${searchTerm}"></span>"</p>
-                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af;">Thử thay đổi từ khóa hoặc tiêu chí tìm kiếm</p>
-                            </div>
-                            <div th:if="${searchTerm == null or #strings.isEmpty(searchTerm)}">
-                                <i class="fas fa-film" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
-                                <p style="margin: 0; color: #6b7280;">Không có phim nào để hiển thị.</p>
-                            </div>
-                        </td>
+                        <td colspan="9" style="text-align: center;">Không có phim nào để hiển thị.</td>
                     </tr>
                     </tbody>
                 </table>
                 <div class="pagination">
                     <div class="pagination-info">
                         <span th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}"
-                              th:text="|Tìm thấy ${#lists.size(movies)} phim với từ khóa '${searchTerm}'|">
-                            Tìm thấy 5 phim với từ khóa 'action'
+                              th:text="|Tìm thấy ${#lists.size(movies)} phim phù hợp với từ khóa '${searchTerm}'|">
+                            Tìm thấy 5 phim phù hợp với từ khóa 'action'
                         </span>
                         <span th:if="${searchTerm == null or #strings.isEmpty(searchTerm)}"
-                              th:text="|Hiển thị ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
-                            Hiển thị 10 phim (Tổng cộng 10 phim)
+                              th:text="|Hiển thị ${#lists.size(movies)} của ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
+                            Hiển thị 1 đến 3 của 248 phim
                         </span>
                     </div>
                     <div class="pagination-controls">

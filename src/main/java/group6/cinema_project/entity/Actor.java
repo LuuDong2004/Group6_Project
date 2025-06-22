@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "actor") // Cập nhật tên bảng
+@Table(name = "Actor")
 @Getter
 @Setter
 @NoArgsConstructor

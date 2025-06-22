@@ -37,13 +37,13 @@ public class Movie {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     @ManyToMany
-    @JoinTable(name = "actor_movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
+    @JoinTable(name = "Actor_Movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
     private Set<Actor> actors;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     @ManyToMany
-    @JoinTable(name = "director_movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "director_id"))
+    @JoinTable(name = "Director_Movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "director_id"))
     private Set<Director> directors;
 }
