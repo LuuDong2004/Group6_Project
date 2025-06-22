@@ -57,10 +57,23 @@ public class MovieController {
     }
 
     @GetMapping("/list")
-    public String listMovies(Model model) {
-        List<MovieDto> movies = movieService.getAllMovie();
-        model.addAttribute("movies", movies); // Thêm dòng này
-        return "admin/admin_movie_list"; // Nếu dùng Thymeleaf, chỉ cần trả về "index"
+    public String listMovies(Model model,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy) {
+        List<MovieDto> movies;
+
+        // If search parameters are provided, use filtered search; otherwise get all
+        // movies
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            movies = movieService.getFilteredMovies(searchTerm, filterBy);
+        } else {
+            movies = movieService.getAllMovie();
+        }
+
+        model.addAttribute("movies", movies);
+        model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
+        model.addAttribute("filterBy", filterBy);
+        return "admin/admin_movie_list";
     }
 
     @GetMapping("/add")
@@ -298,7 +311,6 @@ public class MovieController {
             redirectAttributes.addFlashAttribute("error",
                     "Có lỗi xảy ra khi xóa phim. Phim có thể đang được sử dụng trong hệ thống.");
         }
-
         return "redirect:/admin/movies/list";
     }
 }

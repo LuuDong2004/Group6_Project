@@ -439,6 +439,110 @@
             text-align: center;
         }
 
+        /* Filter Interface Styles */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151; /* Tailwind gray-700 */
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #6366f1; /* Tailwind indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 160px;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #6366f1; /* Tailwind indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .clear-filter-btn {
+            background: #f3f4f6; /* Tailwind gray-100 */
+            color: #6b7280; /* Tailwind gray-500 */
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s, color 0.2s;
+            height: fit-content;
+            text-decoration: none;
+        }
+
+        .clear-filter-btn:hover {
+            background: #e5e7eb; /* Tailwind gray-200 */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar {
@@ -479,6 +583,17 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-input,
+            .filter-select {
+                min-width: auto;
+                width: 100%;
             }
         }
 
@@ -614,6 +729,49 @@
                 </a>
             </div>
 
+            <!-- Filter Interface -->
+            <div class="filter-section">
+                <form th:action="@{/admin/movies/list}" method="get" class="filter-form">
+                    <div class="filter-group">
+                        <label for="searchTerm">Từ khóa tìm kiếm</label>
+                        <input type="text"
+                               id="searchTerm"
+                               name="searchTerm"
+                               class="filter-input"
+                               placeholder="Nhập từ khóa..."
+                               th:value="${searchTerm}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterBy">Tìm kiếm theo</label>
+                        <select id="filterBy" name="filterBy" class="filter-select">
+                            <option value="name" th:selected="${filterBy == 'name'}">Tên phim</option>
+                            <option value="description" th:selected="${filterBy == 'description'}">Mô tả</option>
+                            <option value="genre" th:selected="${filterBy == 'genre'}">Thể loại</option>
+                            <option value="rating" th:selected="${filterBy == 'rating'}">Rating</option>
+                            <option value="language" th:selected="${filterBy == 'language'}">Ngôn ngữ</option>
+                            <option value="releaseyear" th:selected="${filterBy == 'releaseyear'}">Năm phát hành</option>
+                            <option value="directors" th:selected="${filterBy == 'directors'}">Đạo diễn</option>
+                            <option value="actors" th:selected="${filterBy == 'actors'}">Diễn viên</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <button type="submit" class="filter-btn">
+                            <i class="fas fa-search"></i>
+                            Lọc
+                        </button>
+                    </div>
+
+                    <div class="filter-group" th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}">
+                        <a th:href="@{/admin/movies/list}" class="clear-filter-btn">
+                            <i class="fas fa-times"></i>
+                            Xóa bộ lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+
             <!-- Movie List Table -->
             <div class="table-container">
                 <table class="movie-table">
@@ -713,14 +871,30 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(movies)}">
-                        <td colspan="10" style="text-align: center;">Không có phim nào để hiển thị.</td>
+                        <td colspan="11" style="text-align: center; padding: 40px;">
+                            <div th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}">
+                                <i class="fas fa-search" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
+                                <p style="margin: 0; color: #6b7280;">Không tìm thấy phim nào với từ khóa "<span th:text="${searchTerm}"></span>"</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af;">Thử thay đổi từ khóa hoặc tiêu chí tìm kiếm</p>
+                            </div>
+                            <div th:if="${searchTerm == null or #strings.isEmpty(searchTerm)}">
+                                <i class="fas fa-film" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
+                                <p style="margin: 0; color: #6b7280;">Không có phim nào để hiển thị.</p>
+                            </div>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
                 <div class="pagination">
-                    <div class="pagination-info"
-                         th:text="|Hiển thị ${#lists.size(movies)} của ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
-                        Hiển thị 1 đến 3 của 248 phim
+                    <div class="pagination-info">
+                        <span th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}"
+                              th:text="|Tìm thấy ${#lists.size(movies)} phim với từ khóa '${searchTerm}'|">
+                            Tìm thấy 5 phim với từ khóa 'action'
+                        </span>
+                        <span th:if="${searchTerm == null or #strings.isEmpty(searchTerm)}"
+                              th:text="|Hiển thị ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
+                            Hiển thị 10 phim (Tổng cộng 10 phim)
+                        </span>
                     </div>
                     <div class="pagination-controls">
                         <button class="pagination-btn" disabled>Trước</button>
