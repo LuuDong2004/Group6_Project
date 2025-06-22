@@ -1,0 +1,399 @@
+package group6.cinema_project.controller;
+
+import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.service.MovieScheduleService;
+import group6.cinema_project.service.MovieService;
+import group6.cinema_project.service.ScreeningRoomService;
+import group6.cinema_project.service.BranchService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Controller for handling admin schedule management operations.
+ * Handles the display of movie schedules in the admin interface.
+ */
+@Controller
+@RequestMapping("/admin/schedules")
+@RequiredArgsConstructor
+@Slf4j
+public class AdminScheduleController {
+
+    private final MovieScheduleService movieScheduleService;
+    private final MovieService movieService;
+    private final ScreeningRoomService screeningRoomService;
+    private final BranchService branchService;
+
+    /**
+     * Display the schedule list page with optional filtering
+     */
+    @GetMapping("/list")
+    public String listSchedules(Model model,
+            @RequestParam(value = "movieId", required = false) Integer movieId,
+            @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
+            @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
+
+        log.info("Loading schedule list with filters - movieId: {}, screeningDate: {}, screeningRoomId: {}",
+                movieId, screeningDate, screeningRoomId);
+
+        try {
+            // Load schedule data
+            List<ScreeningScheduleDto> schedules;
+
+            // If any filter parameters are provided, use filtered search; otherwise get all
+            // schedules
+            if (movieId != null || screeningDate != null || screeningRoomId != null) {
+                log.info("Using filtered search for schedules");
+                schedules = movieScheduleService.getFilteredScreeningSchedulesForDisplay(
+                        movieId, screeningDate, screeningRoomId);
+            } else {
+                log.info("Loading all schedules");
+                schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
+            }
+
+            log.info("Successfully loaded {} schedules", schedules.size());
+
+            // Add schedules to model
+            model.addAttribute("schedules", schedules);
+
+            // Add success message if filtering was applied
+            if (movieId != null || screeningDate != null || screeningRoomId != null) {
+                model.addAttribute("message", "Tìm thấy " + schedules.size() + " lịch chiếu phù hợp");
+            }
+
+        } catch (Exception e) {
+            // Handle schedule loading errors
+            log.error("Error loading schedule data", e);
+            model.addAttribute("error", "Lỗi khi tải dữ liệu lịch chiếu: " + e.getMessage());
+            model.addAttribute("schedules", java.util.Collections.emptyList());
+        }
+
+        try {
+            // Load dropdown data for filters
+            model.addAttribute("movies", movieService.getAllMovie());
+        } catch (Exception e) {
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            if (!model.containsAttribute("error")) {
+                model.addAttribute("error", "Lỗi khi tải danh sách phim: " + e.getMessage());
+            }
+        }
+
+        try {
+            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+        } catch (Exception e) {
+            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
+            if (!model.containsAttribute("error")) {
+                model.addAttribute("error", "Lỗi khi tải danh sách phòng chiếu: " + e.getMessage());
+            }
+        }
+
+        // Add current filter values to model to maintain state (always safe to add)
+        model.addAttribute("selectedMovieId", movieId);
+        model.addAttribute("selectedScreeningDate", screeningDate);
+        model.addAttribute("selectedScreeningRoomId", screeningRoomId);
+
+        return "admin/admin_schedule_list";
+    }
+
+    /**
+     * Default redirect to list page
+     */
+    @GetMapping
+    public String defaultSchedulePage() {
+        return "redirect:/admin/schedules/list";
+    }
+
+    /**
+     * Test endpoint to verify the service works without Invoice issues
+     */
+    @GetMapping("/test")
+    public String testSchedules(Model model) {
+        try {
+            List<ScreeningScheduleDto> schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
+            model.addAttribute("schedules", schedules);
+            model.addAttribute("message", "Successfully loaded " + schedules.size() + " schedules");
+
+            // Add empty collections for dropdowns to prevent template errors
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
+            model.addAttribute("selectedMovieId", null);
+            model.addAttribute("selectedScreeningDate", null);
+            model.addAttribute("selectedScreeningRoomId", null);
+
+            return "admin/admin_schedule_list";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error loading schedules: " + e.getMessage());
+            model.addAttribute("schedules", java.util.Collections.emptyList());
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
+            model.addAttribute("selectedMovieId", null);
+            model.addAttribute("selectedScreeningDate", null);
+            model.addAttribute("selectedScreeningRoomId", null);
+            return "admin/admin_schedule_list";
+        }
+    }
+
+    /**
+     * Debug endpoint to check what data is available
+     */
+    @GetMapping("/debug")
+    public String debugSchedules(Model model) {
+        StringBuilder debugInfo = new StringBuilder();
+
+        try {
+            List<ScreeningScheduleDto> schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
+            debugInfo.append("Schedules loaded: ").append(schedules.size()).append("<br>");
+
+            if (!schedules.isEmpty()) {
+                ScreeningScheduleDto firstSchedule = schedules.get(0);
+                debugInfo.append("First schedule ID: ").append(firstSchedule.getId()).append("<br>");
+                debugInfo.append("Movie name: ").append(firstSchedule.getMovieName()).append("<br>");
+                debugInfo.append("Room name: ").append(firstSchedule.getScreeningRoomName()).append("<br>");
+            }
+
+            model.addAttribute("schedules", schedules);
+        } catch (Exception e) {
+            debugInfo.append("Schedule error: ").append(e.getMessage()).append("<br>");
+            model.addAttribute("schedules", java.util.Collections.emptyList());
+        }
+
+        try {
+            var movies = movieService.getAllMovie();
+            debugInfo.append("Movies loaded: ").append(movies.size()).append("<br>");
+            model.addAttribute("movies", movies);
+        } catch (Exception e) {
+            debugInfo.append("Movies error: ").append(e.getMessage()).append("<br>");
+            model.addAttribute("movies", java.util.Collections.emptyList());
+        }
+
+        try {
+            var rooms = screeningRoomService.getAllScreeningRooms();
+            debugInfo.append("Screening rooms loaded: ").append(rooms.size()).append("<br>");
+            model.addAttribute("screeningRooms", rooms);
+        } catch (Exception e) {
+            debugInfo.append("Screening rooms error: ").append(e.getMessage()).append("<br>");
+            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
+        }
+
+        model.addAttribute("message", debugInfo.toString());
+        model.addAttribute("selectedMovieId", null);
+        model.addAttribute("selectedScreeningDate", null);
+        model.addAttribute("selectedScreeningRoomId", null);
+
+        return "admin/admin_schedule_list";
+    }
+
+    /**
+     * Display the add schedule form
+     */
+    @GetMapping("/add")
+    public String showAddScheduleForm(Model model) {
+        log.info("Loading add schedule form");
+
+        try {
+            // Add empty DTO for form binding
+            model.addAttribute("schedule", new ScreeningScheduleDto());
+
+            // Load dropdown data
+            model.addAttribute("movies", movieService.getAllMovie());
+            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+            model.addAttribute("branches", branchService.getAllBranches());
+
+            log.info("Successfully loaded add schedule form");
+            return "admin/admin_schedule_add";
+
+        } catch (Exception e) {
+            log.error("Error loading add schedule form", e);
+            model.addAttribute("error", "Lỗi khi tải form thêm lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/list";
+        }
+    }
+
+    @PostMapping("/add")
+    public String addSchedule(@Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        log.info("Processing add schedule request for movie ID: {}", scheduleDto.getMovieId());
+
+        if (bindingResult.hasErrors()) {
+            log.warn("Validation errors in add schedule form");
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception e) {
+                log.error("Error reloading dropdown data", e);
+            }
+            return "admin/admin_schedule_add";
+        }
+
+        try {
+            ScreeningScheduleDto savedSchedule = movieScheduleService
+                    .saveOrUpdateScreeningScheduleWithValidation(scheduleDto);
+            log.info("Successfully added schedule with ID: {}", savedSchedule.getId());
+
+            redirectAttributes.addFlashAttribute("success", "Thêm lịch chiếu thành công!");
+            return "redirect:/admin/schedules/list";
+
+        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+            log.warn("Schedule conflict detected: {}", e.getDetailedMessage());
+
+            // Add specific conflict error to binding result
+            bindingResult.rejectValue("startTime", "error.schedule.conflict", e.getDetailedMessage());
+
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception ex) {
+                log.error("Error reloading dropdown data", ex);
+            }
+            return "admin/admin_schedule_add";
+
+        } catch (Exception e) {
+            log.error("Error adding schedule", e);
+            model.addAttribute("error", "Lỗi khi thêm lịch chiếu: " + e.getMessage());
+
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception ex) {
+                log.error("Error reloading dropdown data", ex);
+            }
+            return "admin/admin_schedule_add";
+        }
+    }
+
+    /**
+     * Display the edit schedule form
+     */
+    @GetMapping("/edit/{id}")
+    public String showEditScheduleForm(@PathVariable("id") Integer id, Model model) {
+        log.info("Loading edit schedule form for ID: {}", id);
+
+        try {
+            Optional<ScreeningScheduleDto> scheduleOpt = movieScheduleService.getScreeningScheduleById(id);
+            if (scheduleOpt.isEmpty()) {
+                log.warn("Schedule not found with ID: {}", id);
+                model.addAttribute("error", "Không tìm thấy lịch chiếu với ID: " + id);
+                return "redirect:/admin/schedules/list";
+            }
+
+            model.addAttribute("schedule", scheduleOpt.get());
+            model.addAttribute("movies", movieService.getAllMovie());
+            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+            model.addAttribute("branches", branchService.getAllBranches());
+
+            log.info("Successfully loaded edit schedule form for ID: {}", id);
+            return "admin/admin_schedule_edit";
+
+        } catch (Exception e) {
+            log.error("Error loading edit schedule form for ID: {}", id, e);
+            model.addAttribute("error", "Lỗi khi tải form chỉnh sửa lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/list";
+        }
+    }
+
+    /**
+     * Handle edit schedule form submission
+     */
+    @PostMapping("/edit/{id}")
+    public String editSchedule(@PathVariable("id") Integer id,
+            @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        log.info("Processing edit schedule request for ID: {}", id);
+
+        // Set the ID to ensure we're updating the correct record
+        scheduleDto.setId(id);
+
+        if (bindingResult.hasErrors()) {
+            log.warn("Validation errors in edit schedule form for ID: {}", id);
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception e) {
+                log.error("Error reloading dropdown data", e);
+            }
+            return "admin/admin_schedule_edit";
+        }
+
+        try {
+            ScreeningScheduleDto updatedSchedule = movieScheduleService
+                    .saveOrUpdateScreeningScheduleWithValidation(scheduleDto);
+            log.info("Successfully updated schedule with ID: {}", updatedSchedule.getId());
+
+            redirectAttributes.addFlashAttribute("success", "Cập nhật lịch chiếu thành công!");
+            return "redirect:/admin/schedules/list";
+
+        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+            log.warn("Schedule conflict detected during update: {}", e.getDetailedMessage());
+
+            // Add specific conflict error to binding result
+            bindingResult.rejectValue("startTime", "error.schedule.conflict", e.getDetailedMessage());
+
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception ex) {
+                log.error("Error reloading dropdown data", ex);
+            }
+            return "admin/admin_schedule_edit";
+
+        } catch (Exception e) {
+            log.error("Error updating schedule with ID: {}", id, e);
+            model.addAttribute("error", "Lỗi khi cập nhật lịch chiếu: " + e.getMessage());
+
+            // Reload dropdown data for form
+            try {
+                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("branches", branchService.getAllBranches());
+            } catch (Exception ex) {
+                log.error("Error reloading dropdown data", ex);
+            }
+            return "admin/admin_schedule_edit";
+        }
+    }
+
+    /**
+     * Handle delete schedule request
+     */
+    @PostMapping("/delete/{id}")
+    public String deleteSchedule(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        log.info("Processing delete schedule request for ID: {}", id);
+
+        try {
+            movieScheduleService.deleteScreeningSchedule(id);
+            log.info("Successfully deleted schedule with ID: {}", id);
+
+            redirectAttributes.addFlashAttribute("success", "Xóa lịch chiếu thành công!");
+            return "redirect:/admin/schedules/list";
+
+        } catch (Exception e) {
+            log.error("Error deleting schedule with ID: {}", id, e);
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/list";
+        }
+    }
+}
