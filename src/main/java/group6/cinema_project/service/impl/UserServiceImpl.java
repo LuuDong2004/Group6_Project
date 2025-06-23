@@ -1,5 +1,6 @@
 package group6.cinema_project.service.impl;
 
+<<<<<<< Updated upstream
 import group6.cinema_project.dto.ChangePasswordDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
@@ -9,12 +10,23 @@ import group6.cinema_project.entity.User;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+=======
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+>>>>>>> Stashed changes
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+<<<<<<< Updated upstream
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +34,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+=======
+import org.springframework.transaction.annotation.Transactional;
+
+import group6.cinema_project.dto.AdminPasswordResetDto;
+import group6.cinema_project.dto.ChangePasswordDto;
+import group6.cinema_project.dto.PasswordResetConfirmDto;
+import group6.cinema_project.dto.PasswordResetRequestDto;
+import group6.cinema_project.dto.UserDto;
+import group6.cinema_project.dto.UserLoginDto;
+import group6.cinema_project.dto.UserRegistrationDto;
+import group6.cinema_project.entity.PasswordResetToken;
+import group6.cinema_project.entity.Role;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.PasswordResetTokenRepository;
+import group6.cinema_project.repository.UserRepository;
+import group6.cinema_project.service.EmailService;
+import group6.cinema_project.service.UserService;
+
+@Service
+@Transactional
+>>>>>>> Stashed changes
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -29,7 +62,19 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+<<<<<<< Updated upstream
 
+=======
+    
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+    
+    @Autowired
+    private EmailService emailService;
+    
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
+>>>>>>> Stashed changes
 
     @Override
     public UserDto registerUser(UserRegistrationDto registrationDto) {
@@ -267,6 +312,148 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByPhone(phone).isPresent();
     }
 
+<<<<<<< Updated upstream
+=======
+    @Override
+    public void deleteUserById(int id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean requestPasswordReset(PasswordResetRequestDto requestDto) {
+        Optional<User> userOpt = userRepository.findByEmail(requestDto.getEmail());
+        if (userOpt.isEmpty()) {
+            // Don't reveal if email exists or not for security
+            return true;
+        }
+        
+        User user = userOpt.get();
+        
+        // Delete any existing tokens for this user
+        passwordResetTokenRepository.deleteByUserEmail(user.getEmail());
+        
+        // Generate new token
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken(token, user);
+        passwordResetTokenRepository.save(resetToken);
+        
+        // Send email
+        String resetLink = baseUrl + "/reset-password/confirm?token=" + token;
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink, user.getUserName());
+        
+        return true;
+    }
+    
+    @Override
+    public boolean validateResetToken(String token) {
+        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(token);
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
+        
+        PasswordResetToken resetToken = tokenOpt.get();
+        return !resetToken.isExpired() && !resetToken.isUsed();
+    }
+    
+    @Override
+    public boolean confirmPasswordReset(PasswordResetConfirmDto confirmDto) {
+        if (!confirmDto.isPasswordsMatching()) {
+            throw new IllegalArgumentException("Mật khẩu mới và xác nhận mật khẩu không khớp");
+        }
+        
+        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(confirmDto.getToken());
+        if (tokenOpt.isEmpty()) {
+            throw new IllegalArgumentException("Token không hợp lệ");
+        }
+        
+        PasswordResetToken resetToken = tokenOpt.get();
+        
+        if (resetToken.isExpired()) {
+            throw new IllegalArgumentException("Token đã hết hạn");
+        }
+        
+        if (resetToken.isUsed()) {
+            throw new IllegalArgumentException("Token đã được sử dụng");
+        }
+        
+        // Update password
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(confirmDto.getNewPassword()));
+        userRepository.save(user);
+        
+        // Mark token as used
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+        
+        // Send success email
+        emailService.sendPasswordResetSuccessEmail(user.getEmail(), user.getUserName());
+        
+        return true;
+    }
+
+    @Override
+    public String resetPassword(int userId) {
+        var userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) throw new RuntimeException("Không tìm thấy người dùng!");
+        var user = userOpt.get();
+        // Sinh mật khẩu mới
+        String newPassword = generateRandomPassword(8);
+        // Mã hóa mật khẩu
+        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+        String encoded = encoder.encode(newPassword);
+        user.setPassword(encoded);
+        userRepository.save(user);
+        // TODO: Gửi email chứa mật khẩu mới cho user.getEmail()
+        return newPassword;
+    }
+    
+    @Override
+    public boolean adminResetPassword(AdminPasswordResetDto adminPasswordResetDto) {
+        Optional<User> userOpt = userRepository.findById(adminPasswordResetDto.getUserId());
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng với ID: " + adminPasswordResetDto.getUserId());
+        }
+        
+        User user = userOpt.get();
+        String newPassword;
+        
+        // Xác định mật khẩu mới
+        if (adminPasswordResetDto.hasCustomPassword()) {
+            newPassword = adminPasswordResetDto.getCustomPassword();
+        } else {
+            newPassword = generateRandomPassword(8);
+        }
+        
+        // Mã hóa mật khẩu
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+        
+        // Gửi email nếu được yêu cầu
+        if (adminPasswordResetDto.isSendEmail()) {
+            try {
+                // Lấy thông tin admin hiện tại (có thể lấy từ SecurityContext)
+                String adminName = "Quản trị viên";
+                emailService.sendAdminPasswordResetEmail(user.getEmail(), user.getUserName(), newPassword, adminName);
+            } catch (Exception e) {
+                System.err.println("Error sending admin reset email: " + e.getMessage());
+                // Không throw exception vì reset password đã thành công
+            }
+        }
+        
+        return true;
+    }
+
+    private String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        java.util.Random rnd = new java.util.Random();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++)
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        return sb.toString();
+    }
+
+>>>>>>> Stashed changes
     // Helper method to convert User entity to UserDto
     private UserDto convertToDto(User user) {
         return new UserDto(

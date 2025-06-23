@@ -63,11 +63,14 @@
             <version>12.4.2.jre11</version>
         </dependency>
 
+<<<<<<< Updated upstream
         <!-- Spring Boot Starter Web (nếu cần) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+=======
+>>>>>>> Stashed changes
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -121,6 +124,13 @@
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
         </dependency>
+<<<<<<< Updated upstream
+=======
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+>>>>>>> Stashed changes
     </dependencies>
     <build>
         <plugins>

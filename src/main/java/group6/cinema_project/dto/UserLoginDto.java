@@ -24,4 +24,8 @@ public class UserLoginDto {
         this.password = password;
     }
 
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

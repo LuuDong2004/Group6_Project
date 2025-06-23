@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.ChangePasswordDto;
+<<<<<<< Updated upstream
+=======
+import group6.cinema_project.dto.PasswordResetConfirmDto;
+import group6.cinema_project.dto.PasswordResetRequestDto;
+>>>>>>> Stashed changes
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
 import group6.cinema_project.dto.UserRegistrationDto;
@@ -166,8 +171,104 @@ public class AuthController {
         }
     }
 
+<<<<<<< Updated upstream
 
 
+=======
+    // Password Reset Endpoints
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage(Model model) {
+        model.addAttribute("resetRequest", new PasswordResetRequestDto());
+        return "forgot_password";
+    }
+    
+    @PostMapping("/forgot-password")
+    public String requestPasswordReset(@Valid @ModelAttribute("resetRequest") PasswordResetRequestDto requestDto,
+                                      BindingResult result,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "forgot_password";
+        }
+        
+        try {
+            userService.requestPasswordReset(requestDto);
+            redirectAttributes.addFlashAttribute("success", 
+                "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
+            return "redirect:/login";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "forgot_password";
+        }
+    }
+    
+    @GetMapping("/reset-password/confirm")
+    public String resetPasswordConfirmPage(@RequestParam("token") String token, Model model) {
+        if (!userService.validateResetToken(token)) {
+            model.addAttribute("error", "Token không hợp lệ hoặc đã hết hạn");
+            return "error";
+        }
+        
+        PasswordResetConfirmDto confirmDto = new PasswordResetConfirmDto();
+        confirmDto.setToken(token);
+        model.addAttribute("resetConfirm", confirmDto);
+        return "reset_password";
+    }
+    
+    @PostMapping("/reset-password/confirm")
+    public String confirmPasswordReset(@Valid @ModelAttribute("resetConfirm") PasswordResetConfirmDto confirmDto,
+                                      BindingResult result,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "reset_password";
+        }
+        
+        try {
+            userService.confirmPasswordReset(confirmDto);
+            redirectAttributes.addFlashAttribute("success", "Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập.");
+            return "redirect:/login";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "reset_password";
+        }
+    }
+    
+    // API endpoints for AJAX calls
+    @PostMapping("/api/forgot-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> requestPasswordResetApi(@RequestBody PasswordResetRequestDto requestDto) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            userService.requestPasswordReset(requestDto);
+            response.put("success", true);
+            response.put("message", "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PostMapping("/api/reset-password/confirm")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> confirmPasswordResetApi(@RequestBody PasswordResetConfirmDto confirmDto) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            userService.confirmPasswordReset(confirmDto);
+            response.put("success", true);
+            response.put("message", "Mật khẩu đã được đặt lại thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+>>>>>>> Stashed changes
 
     @GetMapping("/dashboard")
     public String dashboard() {

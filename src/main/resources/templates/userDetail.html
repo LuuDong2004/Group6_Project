@@ -148,6 +148,7 @@
 
 
         <div class="d-flex justify-content-between align-items-center mt-4">
+<<<<<<< Updated upstream
         <div></div>
         <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
     </div>
@@ -242,5 +243,101 @@
         }
     });
 </script>
+=======
+            <div></div>
+            <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Hàm hiển thị alert
+        function showAlert(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+        }
+
+        // Xử lý form cập nhật thông tin
+        document.getElementById("accountForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const formData = {
+                userName: document.getElementById("userName").value,
+                phone: document.getElementById("phone").value,
+                dateOfBirth: document.getElementById("dateOfBirth").value,
+                address: document.getElementById("address").value
+            };
+
+            fetch('/update-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('accountAlert', 'success', data.message);
+                    } else {
+                        showAlert('accountAlert', 'danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('accountAlert', 'danger', 'Có lỗi xảy ra khi cập nhật thông tin!');
+                });
+        });
+
+        // Xử lý form đổi mật khẩu
+        document.getElementById("changePasswordForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const newPass = document.getElementById("newPassword").value;
+            const confirmPass = document.getElementById("confirmPassword").value;
+
+            if (newPass !== confirmPass) {
+                showAlert('passwordAlert', 'danger', 'Mật khẩu xác nhận không khớp!');
+                return;
+            }
+
+            const formData = {
+                oldPassword: document.getElementById("oldPassword").value,
+                newPassword: newPass,
+                confirmPassword: confirmPass
+            };
+
+            fetch('/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('passwordAlert', 'success', data.message);
+                        // Reset form
+                        document.getElementById("changePasswordForm").reset();
+                    } else {
+                        showAlert('passwordAlert', 'danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('passwordAlert', 'danger', data.message ||"Có lỗi xảy ra!");
+                });
+        });
+
+        // Xử lý đăng xuất
+        document.getElementById("logoutBtn").addEventListener("click", function() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = "/login";
+            }
+        });
+    </script>
+>>>>>>> Stashed changes
 </body>
 </html>
