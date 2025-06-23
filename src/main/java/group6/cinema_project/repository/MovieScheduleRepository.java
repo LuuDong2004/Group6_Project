@@ -32,6 +32,34 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                   @Param("screeningDate") LocalDate screeningDate,
                   @Param("screeningRoomId") Integer screeningRoomId);
 
+      @Query("SELECT DISTINCT m FROM ScreeningSchedule ss " +
+                  "JOIN ss.movie m " +
+                  "WHERE ss.status = :status " +
+                  "ORDER BY m.name")
+      List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatus(@Param("status") String status);
+
+      // Alternative native SQL query as fallback
+      @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                  "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+                  "WHERE ss.status = :status " +
+                  "ORDER BY m.name", nativeQuery = true)
+      List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatusNative(@Param("status") String status);
+
+      // Additional backup query with explicit JOIN FETCH for better performance
+      @Query("SELECT DISTINCT ss FROM ScreeningSchedule ss " +
+                  "LEFT JOIN FETCH ss.movie m " +
+                  "WHERE ss.status = :status " +
+                  "ORDER BY m.name")
+      List<ScreeningSchedule> findSchedulesByStatusWithMovie(@Param("status") String status);
+
+      @Query("SELECT ss FROM ScreeningSchedule ss " +
+                  "LEFT JOIN FETCH ss.movie m " +
+                  "LEFT JOIN FETCH ss.screeningRoom sr " +
+                  "LEFT JOIN FETCH ss.branch b " +
+                  "WHERE ss.movieId = :movieId " +
+                  "ORDER BY ss.screeningDate, ss.startTime")
+      List<ScreeningSchedule> findByMovieIdWithRelatedEntities(@Param("movieId") Integer movieId);
+
       /**
        * Find all screening schedules in the same screening room on the same date
        * excluding the current schedule (for updates)
@@ -61,4 +89,77 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                   @Param("startTime") String startTime,
                   @Param("endTime") String endTime,
                   @Param("excludeId") Integer excludeId);
+
+      /**
+       * Find movies that are currently playing using hybrid logic (manual status +
+       * dynamic calculation)
+       * A movie is currently playing if it has at least one schedule where:
+       * - Manual status is 'ACTIVE' OR
+       * - Status is null/AUTO and dynamically calculated as active (started but not
+       * ended)
+       */
+      @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                  "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+                  "WHERE (ss.status = 'ACTIVE') " +
+                  "OR (ss.status IS NULL OR ss.status = 'AUTO') AND (" +
+                  "(ss.screening_date < CAST(GETDATE() AS DATE)) " +
+                  "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.start_time <= CAST(GETDATE() AS TIME)) " +
+                  ") AND (" +
+                  "(ss.screening_date > CAST(GETDATE() AS DATE)) " +
+                  "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.end_time >= CAST(GETDATE() AS TIME))" +
+                  ") " +
+                  "ORDER BY m.name", nativeQuery = true)
+      List<group6.cinema_project.entity.Movie> findCurrentlyPlayingMovies();
+
+      /**
+       * Find movies that are coming soon using hybrid logic (manual status + dynamic
+       * calculation)
+       * A movie is coming soon if it has at least one schedule where:
+       * - Manual status is 'UPCOMING' OR
+       * - Status is null/AUTO and dynamically calculated as upcoming (not started
+       * yet)
+       * AND the movie is not currently playing
+       */
+      @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                  "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+                  "WHERE ((ss.status = 'UPCOMING') " +
+                  "OR (ss.status IS NULL OR ss.status = 'AUTO') AND (" +
+                  "(ss.screening_date > CAST(GETDATE() AS DATE)) " +
+                  "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.start_time > CAST(GETDATE() AS TIME))" +
+                  ")) " +
+                  "AND m.id NOT IN (" +
+                  "SELECT DISTINCT m2.id FROM Movie m2 " +
+                  "INNER JOIN screening_schedule ss2 ON m2.id = ss2.movie_id " +
+                  "WHERE (ss2.status = 'ACTIVE') " +
+                  "OR (ss2.status IS NULL OR ss2.status = 'AUTO') AND (" +
+                  "(ss2.screening_date < CAST(GETDATE() AS DATE)) " +
+                  "OR (ss2.screening_date = CAST(GETDATE() AS DATE) AND ss2.start_time <= CAST(GETDATE() AS TIME)) " +
+                  ") AND (" +
+                  "(ss2.screening_date > CAST(GETDATE() AS DATE)) " +
+                  "OR (ss2.screening_date = CAST(GETDATE() AS DATE) AND ss2.end_time >= CAST(GETDATE() AS TIME))" +
+                  ")" +
+                  ") " +
+                  "ORDER BY m.name", nativeQuery = true)
+      List<group6.cinema_project.entity.Movie> findComingSoonMovies();
+
+      /**
+       * Find movies that have stopped showing using hybrid logic (manual status +
+       * dynamic calculation)
+       * A movie has stopped showing if ALL its schedules are:
+       * - Manual status is 'ENDED' or 'CANCELLED' OR
+       * - Status is null/AUTO and dynamically calculated as ended (all screenings
+       * finished)
+       */
+      @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                  "WHERE m.id IN (SELECT DISTINCT ss.movie_id FROM screening_schedule ss) " +
+                  "AND m.id NOT IN (" +
+                  "SELECT DISTINCT ss.movie_id FROM screening_schedule ss " +
+                  "WHERE (ss.status = 'ACTIVE' OR ss.status = 'UPCOMING') " +
+                  "OR (ss.status IS NULL OR ss.status = 'AUTO') AND (" +
+                  "(ss.screening_date > CAST(GETDATE() AS DATE)) " +
+                  "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.end_time >= CAST(GETDATE() AS TIME))" +
+                  ")" +
+                  ") " +
+                  "ORDER BY m.name", nativeQuery = true)
+      List<group6.cinema_project.entity.Movie> findStoppedShowingMovies();
 }

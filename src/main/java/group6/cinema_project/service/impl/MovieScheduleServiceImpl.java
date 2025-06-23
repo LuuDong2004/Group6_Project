@@ -1,5 +1,6 @@
 package group6.cinema_project.service.impl;
 
+import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningRoom;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MovieScheduleServiceImpl implements MovieScheduleService {
 
     private final MovieScheduleRepository movieScheduleRepository;
@@ -39,6 +39,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     }
 
     @Override
+    @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto) {
         // Calculate and set the correct end time based on movie duration
         calculateAndSetEndTime(screeningScheduleDto);
@@ -49,6 +50,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     }
 
     @Override
+    @Transactional
     public void deleteScreeningSchedule(Integer id) {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
@@ -94,7 +96,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     /**
      * Convert ScreeningSchedule entity to DTO without related entity data
      */
-    
+
     private ScreeningScheduleDto convertToDto(ScreeningSchedule screeningSchedule) {
         return modelMapper.map(screeningSchedule, ScreeningScheduleDto.class);
     }
@@ -267,6 +269,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     }
 
     @Override
+    @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningScheduleWithValidation(ScreeningScheduleDto screeningScheduleDto)
             throws ScheduleConflictException {
         // Validate date and time are not in the past
@@ -277,5 +280,228 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
 
         // If no conflicts, proceed with save
         return saveOrUpdateScreeningSchedule(screeningScheduleDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getMoviesByScheduleStatus(String status) {
+        // Use dynamic date-based categorization instead of static status field
+        switch (status.toUpperCase()) {
+            case "ACTIVE":
+            case "CURRENTLY_PLAYING":
+            case "PLAYING":
+                return getCurrentlyPlayingMovies();
+
+            case "UPCOMING":
+            case "COMING_SOON":
+            case "COMINGSOON":
+                return getComingSoonMovies();
+
+            case "ENDED":
+            case "STOPPED":
+            case "STOPPED_SHOWING":
+                return getStoppedShowingMovies();
+
+            default:
+                // For backward compatibility, try the old static status approach as fallback
+                System.err.println("Unknown status: " + status + ". Using fallback to static status query.");
+                try {
+                    List<Movie> movies = movieScheduleRepository.findMoviesByScheduleStatus(status);
+                    return movies.stream()
+                            .map(this::convertMovieToBasicDto)
+                            .collect(Collectors.toList());
+                } catch (Exception e) {
+                    System.err.println(
+                            "Fallback static status query failed for status " + status + ": " + e.getMessage());
+                    e.printStackTrace();
+                    return new ArrayList<>();
+                }
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScreeningScheduleDto> getSchedulesByMovieId(Integer movieId) {
+        try {
+            List<ScreeningSchedule> schedules = movieScheduleRepository.findByMovieIdWithRelatedEntities(movieId);
+            return schedules.stream()
+                    .map(this::convertToDtoWithRelatedData)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching schedules for movie " + movieId + ": " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Convert Movie entity to basic MovieDto without triggering lazy loading
+     * This method manually maps only the basic fields to avoid lazy loading issues
+     */
+    private MovieDto convertMovieToBasicDto(Movie movie) {
+        MovieDto dto = new MovieDto();
+
+        // Map only basic fields that exist in Movie entity
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        dto.setDescription(movie.getDescription());
+        dto.setDuration(movie.getDuration());
+        dto.setRating(movie.getRating());
+        dto.setGenre(movie.getGenre());
+        dto.setLanguage(movie.getLanguage());
+        dto.setImage(movie.getImage());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setTrailer(movie.getTrailer());
+
+        return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getCurrentlyPlayingMovies() {
+        try {
+            List<Movie> movies = movieScheduleRepository.findCurrentlyPlayingMovies();
+            return movies.stream()
+                    .map(this::convertMovieToBasicDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching currently playing movies: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getComingSoonMovies() {
+        try {
+            List<Movie> movies = movieScheduleRepository.findComingSoonMovies();
+            return movies.stream()
+                    .map(this::convertMovieToBasicDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching coming soon movies: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getStoppedShowingMovies() {
+        try {
+            List<Movie> movies = movieScheduleRepository.findStoppedShowingMovies();
+            return movies.stream()
+                    .map(this::convertMovieToBasicDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching stopped showing movies: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<String, Object> getCategorizationDebugInfo() {
+        java.util.Map<String, Object> debugInfo = new java.util.HashMap<>();
+
+        try {
+            // Get counts for each category
+            List<MovieDto> currentlyPlaying = getCurrentlyPlayingMovies();
+            List<MovieDto> comingSoon = getComingSoonMovies();
+            List<MovieDto> stoppedShowing = getStoppedShowingMovies();
+
+            debugInfo.put("currentlyPlayingCount", currentlyPlaying.size());
+            debugInfo.put("comingSoonCount", comingSoon.size());
+            debugInfo.put("stoppedShowingCount", stoppedShowing.size());
+            debugInfo.put("totalMoviesWithSchedules",
+                    currentlyPlaying.size() + comingSoon.size() + stoppedShowing.size());
+
+            // Get detailed movie lists
+            debugInfo.put("currentlyPlayingMovies", currentlyPlaying.stream()
+                    .map(m -> m.getName() + " (ID: " + m.getId() + ")")
+                    .collect(Collectors.toList()));
+            debugInfo.put("comingSoonMovies", comingSoon.stream()
+                    .map(m -> m.getName() + " (ID: " + m.getId() + ")")
+                    .collect(Collectors.toList()));
+            debugInfo.put("stoppedShowingMovies", stoppedShowing.stream()
+                    .map(m -> m.getName() + " (ID: " + m.getId() + ")")
+                    .collect(Collectors.toList()));
+
+            // Check for overlaps (should be none)
+            java.util.Set<Integer> currentlyPlayingIds = currentlyPlaying.stream()
+                    .map(MovieDto::getId).collect(Collectors.toSet());
+            java.util.Set<Integer> comingSoonIds = comingSoon.stream()
+                    .map(MovieDto::getId).collect(Collectors.toSet());
+            java.util.Set<Integer> stoppedShowingIds = stoppedShowing.stream()
+                    .map(MovieDto::getId).collect(Collectors.toSet());
+
+            java.util.List<String> overlaps = new ArrayList<>();
+            currentlyPlayingIds.retainAll(comingSoonIds);
+            if (!currentlyPlayingIds.isEmpty()) {
+                overlaps.add("Currently Playing & Coming Soon: " + currentlyPlayingIds);
+            }
+
+            currentlyPlayingIds = currentlyPlaying.stream().map(MovieDto::getId).collect(Collectors.toSet());
+            currentlyPlayingIds.retainAll(stoppedShowingIds);
+            if (!currentlyPlayingIds.isEmpty()) {
+                overlaps.add("Currently Playing & Stopped Showing: " + currentlyPlayingIds);
+            }
+
+            comingSoonIds.retainAll(stoppedShowingIds);
+            if (!comingSoonIds.isEmpty()) {
+                overlaps.add("Coming Soon & Stopped Showing: " + comingSoonIds);
+            }
+
+            debugInfo.put("overlaps", overlaps);
+            debugInfo.put("hasOverlaps", !overlaps.isEmpty());
+
+            // Get schedule status distribution
+            List<ScreeningSchedule> allSchedules = movieScheduleRepository.findAllWithRelatedEntities();
+            java.util.Map<String, Long> statusDistribution = allSchedules.stream()
+                    .collect(Collectors.groupingBy(
+                            schedule -> schedule.getStatus() != null ? schedule.getStatus() : "NULL",
+                            Collectors.counting()));
+            debugInfo.put("scheduleStatusDistribution", statusDistribution);
+
+            debugInfo.put("timestamp", java.time.LocalDateTime.now().toString());
+
+        } catch (Exception e) {
+            debugInfo.put("error", "Error generating debug info: " + e.getMessage());
+            System.err.println("Error generating categorization debug info: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return debugInfo;
+    }
+
+    @Override
+    @Transactional
+    public int updateNullStatusesToAuto() {
+        try {
+            // Find all schedules with null status
+            List<ScreeningSchedule> allSchedules = movieScheduleRepository.findAll();
+            int updatedCount = 0;
+
+            for (ScreeningSchedule schedule : allSchedules) {
+                if (schedule.getStatus() == null || schedule.getStatus().trim().isEmpty()) {
+                    schedule.setStatus("AUTO");
+                    movieScheduleRepository.save(schedule);
+                    updatedCount++;
+                }
+            }
+
+            System.out.println("Updated " + updatedCount + " schedules from null status to AUTO");
+            return updatedCount;
+
+        } catch (Exception e) {
+            System.err.println("Error updating null statuses to AUTO: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

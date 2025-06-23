@@ -1,5 +1,6 @@
 package group6.cinema_project.controller;
 
+import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.service.MovieScheduleService;
 import group6.cinema_project.service.MovieService;
@@ -394,6 +395,110 @@ public class AdminScheduleController {
             log.error("Error deleting schedule with ID: {}", id, e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/list";
+        }
+    }
+
+    /**
+     * Display movies currently playing (ACTIVE status)
+     */
+    @GetMapping("/list/playing")
+    public String listPlayingMovies(Model model) {
+        log.info("Loading currently playing movies");
+
+        try {
+            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ACTIVE");
+            model.addAttribute("movies", movies);
+            model.addAttribute("currentTab", "playing");
+            model.addAttribute("tabTitle", "Đang chiếu");
+
+            log.info("Successfully loaded {} currently playing movies", movies.size());
+            return "admin/admin_schedules_list_playing";
+
+        } catch (Exception e) {
+            log.error("Error loading currently playing movies", e);
+            model.addAttribute("error", "Lỗi khi tải danh sách phim đang chiếu: " + e.getMessage());
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            return "admin/admin_schedules_list_playing";
+        }
+    }
+
+    /**
+     * Display movies coming soon (UPCOMING status)
+     */
+    @GetMapping("/list/comingsoon")
+    public String listComingSoonMovies(Model model) {
+        log.info("Loading coming soon movies");
+
+        try {
+            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("UPCOMING");
+            model.addAttribute("movies", movies);
+            model.addAttribute("currentTab", "comingsoon");
+            model.addAttribute("tabTitle", "Sắp chiếu");
+
+            log.info("Successfully loaded {} coming soon movies", movies.size());
+            return "admin/admin_schedules_list_comingsoon";
+
+        } catch (Exception e) {
+            log.error("Error loading coming soon movies", e);
+            model.addAttribute("error", "Lỗi khi tải danh sách phim sắp chiếu: " + e.getMessage());
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            return "admin/admin_schedules_list_comingsoon";
+        }
+    }
+
+    /**
+     * Display movies that have stopped showing (ENDED status)
+     */
+    @GetMapping("/list/stopped")
+    public String listStoppedMovies(Model model) {
+        log.info("Loading stopped showing movies");
+
+        try {
+            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ENDED");
+            model.addAttribute("movies", movies);
+            model.addAttribute("currentTab", "stopped");
+            model.addAttribute("tabTitle", "Ngừng chiếu");
+
+            log.info("Successfully loaded {} stopped showing movies", movies.size());
+            return "admin/admin_schedules_list_stopped";
+
+        } catch (Exception e) {
+            log.error("Error loading stopped showing movies", e);
+            model.addAttribute("error", "Lỗi khi tải danh sách phim ngừng chiếu: " + e.getMessage());
+            model.addAttribute("movies", java.util.Collections.emptyList());
+            return "admin/admin_schedules_list_stopped";
+        }
+    }
+
+    /**
+     * Display detailed schedules for a specific movie
+     */
+    @GetMapping("/detail/{movieId}")
+    public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId, Model model) {
+        log.info("Loading schedule details for movie ID: {}", movieId);
+
+        try {
+            List<ScreeningScheduleDto> schedules = movieScheduleService.getSchedulesByMovieId(movieId);
+
+            if (schedules.isEmpty()) {
+                model.addAttribute("error", "Không tìm thấy lịch chiếu cho phim này");
+                return "redirect:/admin/schedules/list/playing";
+            }
+
+            // Get movie information from the first schedule
+            ScreeningScheduleDto firstSchedule = schedules.get(0);
+            model.addAttribute("movieName", firstSchedule.getMovieName());
+            model.addAttribute("movieImage", firstSchedule.getMovieImage());
+            model.addAttribute("movieId", movieId);
+            model.addAttribute("schedules", schedules);
+
+            log.info("Successfully loaded {} schedules for movie: {}", schedules.size(), firstSchedule.getMovieName());
+            return "admin/admin_detail_schedules_list";
+
+        } catch (Exception e) {
+            log.error("Error loading schedule details for movie ID: {}", movieId, e);
+            model.addAttribute("error", "Lỗi khi tải chi tiết lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/list/playing";
         }
     }
 }

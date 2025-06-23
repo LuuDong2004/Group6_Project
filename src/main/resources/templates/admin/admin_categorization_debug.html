@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Categorization Debug - Cinema Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Debug Tools</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" th:href="@{/admin/debug/categorization}">
+                                <i class="fas fa-bug me-2"></i>
+                                Categorization Debug
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" th:href="@{/admin/schedules/list}">
+                                <i class="fas fa-calendar me-2"></i>
+                                Back to Schedules
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Movie Categorization Debug</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshDebugInfo()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span th:text="${info}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Debug Information -->
+                <div th:if="${debugInfo}" class="row">
+                    <!-- Summary Cards -->
+                    <div class="col-md-12 mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card text-white bg-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Currently Playing</h5>
+                                        <h2 th:text="${debugInfo.currentlyPlayingCount}">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-warning">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Coming Soon</h5>
+                                        <h2 th:text="${debugInfo.comingSoonCount}">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-secondary">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Stopped Showing</h5>
+                                        <h2 th:text="${debugInfo.stoppedShowingCount}">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-info">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Movies</h5>
+                                        <h2 th:text="${debugInfo.totalMoviesWithSchedules}">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overlap Check -->
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Overlap Check
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${debugInfo.hasOverlaps}" class="alert alert-danger">
+                                    <strong>Warning:</strong> Movies appearing in multiple categories detected!
+                                    <ul class="mb-0 mt-2">
+                                        <li th:each="overlap : ${debugInfo.overlaps}" th:text="${overlap}"></li>
+                                    </ul>
+                                </div>
+                                <div th:unless="${debugInfo.hasOverlaps}" class="alert alert-success">
+                                    <i class="fas fa-check me-2"></i>
+                                    No overlaps detected. Each movie appears in only one category.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Status Distribution -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Schedule Status Distribution
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${debugInfo.scheduleStatusDistribution}">
+                                    <div th:each="entry : ${debugInfo.scheduleStatusDistribution}" class="d-flex justify-content-between">
+                                        <span th:text="${entry.key}">Status</span>
+                                        <span class="badge bg-primary" th:text="${entry.value}">Count</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tools me-2"></i>
+                                    Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/admin/debug/categorization/update-null-statuses}" method="post" class="mb-3">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-sync me-2"></i>
+                                        Update NULL Statuses to AUTO
+                                    </button>
+                                    <small class="form-text text-muted">
+                                        This will set all schedules with null status to "AUTO" for dynamic calculation.
+                                    </small>
+                                </form>
+                                
+                                <a th:href="@{/admin/debug/categorization/test}" class="btn btn-info" target="_blank">
+                                    <i class="fas fa-flask me-2"></i>
+                                    Test API (JSON)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movie Lists -->
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Movie Lists by Category
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6 class="text-success">Currently Playing</h6>
+                                        <ul class="list-unstyled">
+                                            <li th:each="movie : ${debugInfo.currentlyPlayingMovies}" 
+                                                th:text="${movie}" class="small"></li>
+                                            <li th:if="${#lists.isEmpty(debugInfo.currentlyPlayingMovies)}" 
+                                                class="text-muted small">No movies</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-warning">Coming Soon</h6>
+                                        <ul class="list-unstyled">
+                                            <li th:each="movie : ${debugInfo.comingSoonMovies}" 
+                                                th:text="${movie}" class="small"></li>
+                                            <li th:if="${#lists.isEmpty(debugInfo.comingSoonMovies)}" 
+                                                class="text-muted small">No movies</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-secondary">Stopped Showing</h6>
+                                        <ul class="list-unstyled">
+                                            <li th:each="movie : ${debugInfo.stoppedShowingMovies}" 
+                                                th:text="${movie}" class="small"></li>
+                                            <li th:if="${#lists.isEmpty(debugInfo.stoppedShowingMovies)}" 
+                                                class="text-muted small">No movies</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <div class="col-md-12 mt-3">
+                        <small class="text-muted">
+                            Last updated: <span th:text="${debugInfo.timestamp}"></span>
+                        </small>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function refreshDebugInfo() {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

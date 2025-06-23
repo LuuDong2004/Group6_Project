@@ -540,9 +540,7 @@
                             th:text="${error}"
                           ></div>
                         </div>
-                        <small class="form-text text-muted">
-                        
-                        </small>
+                        <small class="form-text text-muted"> </small>
                       </div>
                       <div class="col-md-4 mb-3">
                         <label for="endTime" class="form-label fw-semibold"
@@ -563,9 +561,7 @@
                         >
                           <span th:errors="*{endTime}"></span>
                         </div>
-                        <small class="form-text text-muted">
-                         
-                        </small>
+                        <small class="form-text text-muted"> </small>
                       </div>
                     </div>
                     <div class="row">
@@ -611,9 +607,12 @@
                           class="form-select"
                           required
                         >
-                          <option value="ACTIVE">Đang chiếu</option>
-                          <option value="UPCOMING">Sắp chiếu</option>
-                          <option value="ENDED">Đã kết thúc</option>
+                          <option value="AUTO">
+                            Tự động (dựa trên ngày/giờ)
+                          </option>
+                          <option value="ACTIVE">Đang chiếu (thủ công)</option>
+                          <option value="UPCOMING">Sắp chiếu (thủ công)</option>
+                          <option value="ENDED">Đã kết thúc (thủ công)</option>
                           <option value="CANCELLED">Đã hủy</option>
                         </select>
                         <div

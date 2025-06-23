@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
@@ -38,6 +37,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
+    @Transactional
     public MovieDto saveOrUpdate(MovieDto movieDto) {
         Movie movie = modelMapper.map(movieDto, Movie.class);
 
@@ -92,6 +92,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
+    @Transactional
     public void deleteMovie(Integer id) {
         if (!movieRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Movie not found with ID: " + id);
@@ -219,7 +220,7 @@ public class MovieServiceImpl implements MovieService {
                     // Default to searching by name if filterBy is not recognized
                     movies = movieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
-            }
+            }    
         }
 
         return movies.stream()
