@@ -38,6 +38,7 @@ public class AdminScheduleController {
     /**
      * Display the schedule list page with optional filtering
      */
+    
     @GetMapping("/list")
     public String listSchedules(Model model,
             @RequestParam(value = "movieId", required = false) Integer movieId,
@@ -345,7 +346,11 @@ public class AdminScheduleController {
             redirectAttributes.addFlashAttribute("success", "Cập nhật lịch chiếu thành công!");
             return "redirect:/admin/schedules/list";
 
-        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+        }  catch (IllegalStateException e) {
+            log.warn("Cannot update a movie schedule is currently playing");
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/schedules/list";
+         } catch (group6.cinema_project.exception.ScheduleConflictException e) {
             log.warn("Schedule conflict detected during update: {}", e.getDetailedMessage());
 
             // Add specific conflict error to binding result
@@ -391,7 +396,12 @@ public class AdminScheduleController {
             redirectAttributes.addFlashAttribute("success", "Xóa lịch chiếu thành công!");
             return "redirect:/admin/schedules/list";
 
-        } catch (Exception e) {
+        }  catch (IllegalStateException e) {
+            log.warn("Cannot delete a movie schedule is currently playing");
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/schedules/list";
+        }
+        catch (Exception e) {
             log.error("Error deleting schedule with ID: {}", id, e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/list";

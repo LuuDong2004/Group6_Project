@@ -220,7 +220,7 @@ public class MovieServiceImpl implements MovieService {
                     // Default to searching by name if filterBy is not recognized
                     movies = movieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
-            }    
+            }
         }
 
         return movies.stream()

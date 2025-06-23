@@ -20,6 +20,7 @@
     />
 
     <style>
+      
       /* CSS cho Admin Dashboard */
       body {
         font-family: "Inter", sans-serif;
@@ -658,21 +659,22 @@
                 </div>
               </div>
 
-              <div class="schedule-actions">
-                <a
-                  th:href="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
-                  class="btn-edit"
-                >
-                  <i class="fas fa-edit me-1"></i>Sửa
-                </a>
-                <button
-                  type="button"
-                  class="btn-delete"
-                  th:onclick="'deleteSchedule(' + ${schedule.id} + ')'"
-                >
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
-              </div>
+             <div class="schedule-actions">
+    <!-- Chỉ hiển thị nút Sửa khi KHÔNG phải ACTIVE -->
+    <a th:if="${schedule.status != 'ACTIVE'}" 
+       th:href="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
+       class="btn-edit">
+        <i class="fas fa-edit me-1"></i>Sửa
+    </a>
+
+    <!-- Chỉ hiển thị nút Xóa khi KHÔNG phải ACTIVE -->
+    <button th:if="${schedule.status != 'ACTIVE'}" 
+            type="button"
+            class="btn-delete"
+            th:onclick="'deleteSchedule(' + ${schedule.id} + ')'">
+        <i class="fas fa-trash me-1"></i>Xóa
+    </button>
+</div>
             </div>
           </div>
 

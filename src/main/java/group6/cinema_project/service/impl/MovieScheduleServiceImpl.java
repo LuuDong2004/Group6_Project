@@ -41,6 +41,8 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     @Override
     @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto) {
+        validateScheduleIsNotCurrentlyShowing(screeningScheduleDto.getId());
+        
         // Calculate and set the correct end time based on movie duration
         calculateAndSetEndTime(screeningScheduleDto);
 
@@ -55,6 +57,9 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
         }
+        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho xóa
+        validateScheduleIsNotCurrentlyShowing(id);
+
         movieScheduleRepository.deleteById(id);
     }
 
@@ -504,4 +509,23 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
             return 0;
         }
     }
+
+     private void validateScheduleIsNotCurrentlyShowing(Integer id) {
+        
+        if (id == null) {
+            return; // New schedule, no need to validate
+        }
+        
+        Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(id);
+        if (scheduleOpt.isPresent()) {
+            ScreeningSchedule schedule = scheduleOpt.get();
+                       
+            // Also check English status variants
+            if ("ACTIVE".equalsIgnoreCase(schedule.getStatus())) {
+                throw new IllegalStateException("Cannot modify or delete a schedule that is currently showing");
+            }
+        }
+    }
+
+   
 }
