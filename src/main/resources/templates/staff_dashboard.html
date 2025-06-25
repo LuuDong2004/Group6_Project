@@ -266,5 +266,41 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showAlert(id, type, message) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.role = 'alert';
+            alert.innerHTML = `
+                <strong>${message}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.getElementById(id).appendChild(alert);
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateProfileForm = document.getElementById('updateProfileForm');
+            if (updateProfileForm) {
+                updateProfileForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const formData = new FormData(this);
+                    fetch('/update-profile', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showAlert('accountAlert', data.success ? 'success' : 'danger', data.message || "Có lỗi xảy ra!");
+                    })
+                    .catch(error => {
+                        showAlert('accountAlert', 'danger', 'Có lỗi xảy ra khi cập nhật thông tin!');
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

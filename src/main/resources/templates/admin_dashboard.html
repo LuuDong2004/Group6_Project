@@ -1,39 +1,12 @@
 <!DOCTYPE html>
-<<<<<<< Updated upstream
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<!DOCTYPE html>
-=======
->>>>>>> Stashed changes
+
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaAdmin - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<<<<<<< Updated upstream
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <style>
-        body { font-family: "Inter", sans-serif; background-color: #f8fafc; color: #334155; }
-        .sidebar { width: 260px; background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%); color: white; position: fixed; top: 0; left: 0; height: 100vh; display: flex; flex-direction: column; z-index: 1000; }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo-icon-wrapper { background-color: white; border-radius: 50%; padding: 0.5rem; margin-right: 0.75rem; }
-        .sidebar-menu { flex-grow: 1; padding-top: 1rem; }
-        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: rgba(255,255,255,0.8); text-decoration: none; transition: background-color 0.2s, color 0.2s; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(255,255,255,0.1); color: white; border-left: 3px solid white; padding-left: calc(1.5rem - 3px); }
-        .menu-item i { width: 20px; margin-right: 0.75rem; text-align: center; }
-        .main-content-wrapper { margin-left: 260px; padding-top: 70px; }
-        .header-custom { position: fixed; top: 0; left: 260px; right: 0; height: 70px; background-color: white; border-bottom: 1px solid #e5e7eb; z-index: 999; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
-        .dashboard-actions { margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
-        .dashboard-action-btn { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; padding: 1.25rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 2px 8px rgba(99,102,241,0.08); transition: transform 0.15s; }
-        .dashboard-action-btn:hover { transform: translateY(-2px) scale(1.03); }
-        @media (max-width: 992px) { .sidebar { width: 80px !important; } .main-content-wrapper { margin-left: 80px !important; } .header-custom { left: 80px !important; } }
-=======
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -262,20 +235,18 @@
                 justify-content: center;
             }
         }
->>>>>>> Stashed changes
+
     </style>
 </head>
 <body>
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="d-flex align-items-center">
-<<<<<<< Updated upstream
-            <div class="logo-icon-wrapper"><i class="fas fa-film text-2xl"></i></div>
-=======
+
             <div class="bg-white rounded-circle p-2 me-3">
                 <i class="fas fa-film"></i>
             </div>
->>>>>>> Stashed changes
+
             <div>
                 <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
                 <small class="text-white-50">Dashboard</small>
@@ -283,28 +254,7 @@
         </div>
     </div>
     <nav class="sidebar-menu">
-<<<<<<< Updated upstream
-        <a href="#" class="menu-item active"><i class="fas fa-home"></i><span>Bảng điều khiển</span></a>
-        <a href="admin/movies/list" class="menu-item"><i class="fas fa-film"></i><span>Phim</span></a>
-        <a href="admin_schedule_list.html" class="menu-item"><i class="fas fa-calendar-alt"></i><span>Lịch chiếu</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-users"></i><span>Rạp</span></a>
-        <a href="admin/foods/list" class="menu-item"><i class="fas fa-hamburger"></i><span>Food</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i><span>Vé</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i><span>Tích Điểm</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-chart-line"></i><span>Doanh thu</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-comments"></i><span>Phản hồi</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i><span>Đặt vé</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-users"></i><span>Người dùng</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-chart-pie"></i><span>Phân tích</span></a>
-        <a href="#" class="menu-item"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
-    </nav>
-    <div class="mt-auto p-4 border-top border-white-50">
-        <div class="d-flex align-items-center">
-            <img src="https://placehold.co/40x40/E0E7FF/4338CA?text=A" alt="User Avatar" width="40" height="40" class="rounded-circle user-avatar-wrapper" />
-            <div>
-                <div class="text-white fw-semibold user-info-text">Admin User</div>
-                <small class="text-white-50 user-info-email">admin@cinema.com</small>
-=======
+
         <a href="/admin" class="menu-item active">
             <i class="fas fa-home"></i>
             <span>Bảng điều khiển</span>
@@ -356,26 +306,7 @@
 </div>
 <div class="main-content-wrapper" id="mainContentWrapper">
     <header class="header-custom shadow-sm">
-<<<<<<< Updated upstream
-        <h4 class="mb-0 fw-semibold text-slate-700">Bảng điều khiển quản trị</h4>
-    </header>
-    <div class="container-fluid p-4">
-        <h2 class="fw-bold mb-4">Chào mừng, Admin!</h2>
-        <div class="dashboard-actions">
 
-            <a href="admin_movie_list.html" class="dashboard-action-btn text-decoration-none">
-                <i class="fas fa-film"></i> Danh sách Phim
-            </a>
-
-            <a href="admin_schedule_list.html" class="dashboard-action-btn text-decoration-none">
-                <i class="fas fa-calendar-alt"></i> Danh sách Lịch Chiếu
-            </a>
-
-            <a href="admin/foods/list" class="dashboard-action-btn text-decoration-none">
-                <i class="fas fa-hamburger"></i> Danh sách Món Ăn
-            </a>
-            <!-- Add more action buttons as needed -->
-=======
         <div class="d-flex align-items-center">
             <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
                 <i class="fas fa-bars fs-5"></i>
@@ -500,15 +431,12 @@
                     <span>Báo cáo</span>
                 </a>
             </div>
->>>>>>> Stashed changes
+
         </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<<<<<<< Updated upstream
-</body>
-</html>
-=======
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         initializeDashboardBehavior();

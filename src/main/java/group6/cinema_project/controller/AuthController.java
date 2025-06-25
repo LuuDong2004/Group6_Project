@@ -3,6 +3,7 @@ package group6.cinema_project.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,11 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.ChangePasswordDto;
-<<<<<<< Updated upstream
-=======
 import group6.cinema_project.dto.PasswordResetConfirmDto;
 import group6.cinema_project.dto.PasswordResetRequestDto;
->>>>>>> Stashed changes
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
 import group6.cinema_project.dto.UserRegistrationDto;
@@ -39,7 +37,10 @@ public class AuthController {
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,
                             @RequestParam(value = "logout", required = false) String logout,
-                            Model model) {
+                            @RequestParam(value = "continue", required = false) String continueUrl,
+                            Model model,
+                            HttpServletRequest request) {
+
 
         if (error != null) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
@@ -48,6 +49,11 @@ public class AuthController {
         if (logout != null) {
             model.addAttribute("message", "Đăng xuất thành công!");
         }
+        //luu thong tin url neu co
+        if (continueUrl != null && !continueUrl.trim().isEmpty()) {
+            request.getSession().setAttribute("continueAfterLogin", continueUrl);
+        }
+
         model.addAttribute("loginUser", new UserLoginDto());
 
         model.addAttribute("user", new UserRegistrationDto());
@@ -171,10 +177,6 @@ public class AuthController {
         }
     }
 
-<<<<<<< Updated upstream
-
-
-=======
     // Password Reset Endpoints
     @GetMapping("/forgot-password")
     public String forgotPasswordPage(Model model) {
@@ -268,7 +270,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
     }
->>>>>>> Stashed changes
 
     @GetMapping("/dashboard")
     public String dashboard() {

@@ -85,8 +85,8 @@ public class UserRegistrationDto {
     public boolean isPasswordsMatching() {
         return password != null && password.equals(confirmPassword);
     }
-<<<<<<< Updated upstream
+
 }
-=======
-}
->>>>>>> Stashed changes
+
+
+

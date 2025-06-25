@@ -1,16 +1,5 @@
 package group6.cinema_project.service.impl;
 
-<<<<<<< Updated upstream
-import group6.cinema_project.dto.ChangePasswordDto;
-import group6.cinema_project.dto.UserDto;
-import group6.cinema_project.dto.UserLoginDto;
-import group6.cinema_project.dto.UserRegistrationDto;
-import group6.cinema_project.entity.Role;
-import group6.cinema_project.entity.User;
-import group6.cinema_project.repository.UserRepository;
-import group6.cinema_project.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-=======
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,22 +8,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
->>>>>>> Stashed changes
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-<<<<<<< Updated upstream
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-@Service
-=======
 import org.springframework.transaction.annotation.Transactional;
 
 import group6.cinema_project.dto.AdminPasswordResetDto;
@@ -54,7 +33,6 @@ import group6.cinema_project.service.UserService;
 
 @Service
 @Transactional
->>>>>>> Stashed changes
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -62,9 +40,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-<<<<<<< Updated upstream
-
-=======
     
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -74,7 +49,6 @@ public class UserServiceImpl implements UserService {
     
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
->>>>>>> Stashed changes
 
     @Override
     public UserDto registerUser(UserRegistrationDto registrationDto) {
@@ -312,8 +286,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByPhone(phone).isPresent();
     }
 
-<<<<<<< Updated upstream
-=======
     @Override
     public void deleteUserById(int id) {
         userRepository.deleteById(id);
@@ -453,7 +425,6 @@ public class UserServiceImpl implements UserService {
         return sb.toString();
     }
 
->>>>>>> Stashed changes
     // Helper method to convert User entity to UserDto
     private UserDto convertToDto(User user) {
         return new UserDto(
