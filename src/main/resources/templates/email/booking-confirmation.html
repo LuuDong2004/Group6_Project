@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt vé</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px;
+        }
+        .booking-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .movie-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .movie-poster {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .movie-details h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .movie-details p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .booking-details {
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #667eea;
+        }
+        .seats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .seat-tag {
+            background-color: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Xác nhận đặt vé thành công!</h1>
+            <p>Mã đặt vé: <strong th:text="${bookingCode}">ABC12345</strong></p>
+        </div>
+        
+        <div class="content">
+            <div class="movie-info">
+                <img th:src="${booking.schedule.movie.image}" th:alt="${movieName}" class="movie-poster">
+                <div class="movie-details">
+                    <h3 th:text="${movieName}">Tên phim</h3>
+                    <p><strong>Rạp:</strong> <span th:text="${cinemaName}">Tên rạp</span></p>
+                    <p><strong>Phòng:</strong> <span th:text="${roomName}">Tên phòng</span></p>
+                    <p><strong>Ngày chiếu:</strong> <span th:text="${screeningDate}">dd/mm/yyyy</span></p>
+                    <p><strong>Giờ chiếu:</strong> <span th:text="${startTime}">HH:mm</span></p>
+                </div>
+            </div>
+
+            <div class="booking-details">
+                <h3>Chi tiết đặt vé</h3>
+                <div class="detail-row">
+                    <span>Ghế đã chọn:</span>
+                    <div class="seats">
+                        <span th:each="seat : ${seatNames}" th:text="${seat}" class="seat-tag"></span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <span>Tổng tiền:</span>
+                    <span th:text="${totalAmount}">0 VNĐ</span>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Lưu ý quan trọng:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Vui lòng thanh toán trong vòng 15 phút để giữ chỗ</li>
+                    <li>Mã đặt vé sẽ hết hạn nếu không thanh toán đúng hạn</li>
+                    <li>Vé điện tử sẽ được gửi sau khi thanh toán thành công</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="/payment?bookingId=${booking.id}" class="cta-button">
+                    💳 Thanh toán ngay
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Cinema Project. Tất cả quyền được bảo lưu.</p>
+            <p>Nếu có thắc mắc, vui lòng liên hệ: support@cinemaproject.com</p>
+        </div>
+    </div>
+</body>
+</html> 

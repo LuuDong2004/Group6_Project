@@ -5,8 +5,8 @@ import group6.cinema_project.dto.VietQRResponse;
 import group6.cinema_project.dto.SepayRequest;
 import group6.cinema_project.dto.SepayResponse;
 import group6.cinema_project.service.IBookingService;
-import group6.cinema_project.service.VietQRService;
-import group6.cinema_project.service.SepayService;
+import group6.cinema_project.service.impl.VietQRService;
+import group6.cinema_project.service.impl.SepayService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,6 +99,11 @@ public class PaymentController {
             model.addAttribute("bankCode", bankCode);
             model.addAttribute("bankTranNo", bankTranNo);
             model.addAttribute("payDate", payDate);
+            
+            // Thêm thông báo về email vé điện tử
+            model.addAttribute("emailSent", true);
+            model.addAttribute("emailMessage", "Vé điện tử đã được gửi về email của bạn!");
+            
             return "payment-success";
         } catch (Exception e) {
             return "redirect:/error?message=" + e.getMessage();
@@ -336,7 +341,7 @@ public class PaymentController {
     @PostMapping("/api/sepay/callback")
     public ResponseEntity<String> handleSepayCallback(@RequestBody String payload) {
         System.out.println("[SEPAY CALLBACK] Payload: " + payload);
-        // TODO: Xử lý payload, xác thực, cập nhật trạng thái booking nếu cần
+
         return ResponseEntity.ok("OK");
     }
 
@@ -350,7 +355,7 @@ public class PaymentController {
     @PostMapping("/sepay/webhook")
     public ResponseEntity<String> handleSepayWebhook(@RequestBody String payload) {
         System.out.println("[SEPAY WEBHOOK] Payload: " + payload);
-        // TODO: Xử lý payload, xác thực, cập nhật trạng thái booking nếu cần
+
         return ResponseEntity.ok("OK");
     }
 }

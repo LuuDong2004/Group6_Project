@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vé điện tử</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .ticket-container {
+            padding: 30px;
+        }
+        .ticket {
+            border: 2px dashed #28a745;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+            position: relative;
+        }
+        .ticket::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -10px;
+            width: 20px;
+            height: 20px;
+            background: #f4f4f4;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: #f4f4f4;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .movie-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .movie-poster {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .movie-details h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .movie-details p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .ticket-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .detail-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .detail-item h4 {
+            margin: 0 0 8px 0;
+            color: #28a745;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .detail-item p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .seats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .seat-tag {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .instructions {
+            background-color: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .instructions h4 {
+            margin: 0 0 15px 0;
+            color: #28a745;
+        }
+        .instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #333;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Vé điện tử của bạn</h1>
+            <p>Thanh toán thành công - Mã vé: <strong th:text="${bookingCode}">ABC12345</strong></p>
+        </div>
+        
+        <div class="ticket-container">
+            <div style="text-align: center;">
+                <div class="success-badge">✅ Thanh toán thành công</div>
+            </div>
+
+            <div class="ticket">
+                <div class="movie-info">
+                    <img th:src="${booking.schedule.movie.image}" th:alt="${movieName}" class="movie-poster">
+                    <div class="movie-details">
+                        <h3 th:text="${movieName}">Tên phim</h3>
+                        <p><strong>Rạp:</strong> <span th:text="${cinemaName}">Tên rạp</span></p>
+                        <p><strong>Phòng:</strong> <span th:text="${roomName}">Tên phòng</span></p>
+                        <p><strong>Ngày chiếu:</strong> <span th:text="${screeningDate}">dd/mm/yyyy</span></p>
+                        <p><strong>Giờ chiếu:</strong> <span th:text="${startTime}">HH:mm</span></p>
+                    </div>
+                </div>
+
+                <div class="ticket-details">
+                    <div class="detail-item">
+                        <h4>Ghế</h4>
+                        <div class="seats">
+                            <span th:each="seat : ${seatNames}" th:text="${seat}" class="seat-tag"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Tổng tiền</h4>
+                        <p th:text="${totalAmount}">0 VNĐ</p>
+                    </div>
+                </div>
+
+                <div class="qr-section">
+                    <h4>Mã QR vé</h4>
+                    <img th:src="${qrCode}" alt="QR Code" class="qr-code">
+                    <p style="font-size: 12px; color: #666; margin: 0;">
+                        Quét mã này tại rạp để vào phòng chiếu
+                    </p>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h4>📋 Hướng dẫn sử dụng vé điện tử:</h4>
+                <ul>
+                    <li>Vui lòng đến rạp trước giờ chiếu 15 phút</li>
+                    <li>Mang theo mã QR này (có thể hiển thị trên điện thoại)</li>
+                    <li>Quét mã QR tại quầy vé hoặc cổng vào phòng chiếu</li>
+                    <li>Vé này chỉ có hiệu lực cho suất chiếu đã đặt</li>
+                    <li>Không được chuyển nhượng hoặc hoàn tiền</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #28a745; font-weight: bold; font-size: 16px;">
+                    🎬 Chúc bạn xem phim vui vẻ!
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Cinema Project. Tất cả quyền được bảo lưu.</p>
+            <p>Nếu có thắc mắc, vui lòng liên hệ: support@cinemaproject.com</p>
+        </div>
+    </div>
+</body>
+</html> 

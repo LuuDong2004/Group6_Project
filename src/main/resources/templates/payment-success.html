@@ -56,6 +56,19 @@
             background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
             color: white;
         }
+        .email-notification {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 1px solid #10B981;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .email-notification i {
+            color: #10B981;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <!--<header>-->
@@ -66,6 +79,15 @@
     <div class="success-container text-center">
         <i class="fas fa-check-circle success-icon"></i>
         <h2 class="mb-4">Thanh toán thành công!</h2>
+        
+        <!-- Thông báo email vé điện tử -->
+        <div class="email-notification" th:if="${emailSent}">
+            <i class="fas fa-envelope"></i>
+            <h5 class="mb-2">📧 Vé điện tử đã được gửi!</h5>
+            <p class="mb-0" th:text="${emailMessage}">Vé điện tử đã được gửi về email của bạn!</p>
+            <small class="text-muted">Vui lòng kiểm tra hộp thư và thư mục spam</small>
+        </div>
+        
         <!-- Thêm thông tin booking nếu có -->
         <div class="booking-details mt-4 text-start" th:if="${booking != null}">
             <h4 class="mb-3">Thông tin vé</h4>
@@ -79,10 +101,12 @@
                 <span th:each="seat : ${booking.seatNames}" th:text="${seat}" class="badge bg-primary me-2"></span>
             </p>
         </div>
+        
         <div class="alert alert-warning mt-2" style="font-size: 1rem;">
             <i class="fas fa-exclamation-triangle me-2"></i>
-            <b>Lưu ý:</b> Vui lòng giữ mã đặt vé để tránh bị lộ vé!
+            <b>Lưu ý:</b> Vui lòng giữ mã đặt vé và kiểm tra email để lấy vé điện tử!
         </div>
+        
         <a href="/" class="btn-home">
             <i class="fas fa-home me-2"></i>Về trang chủ
         </a>

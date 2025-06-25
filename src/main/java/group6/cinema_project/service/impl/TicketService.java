@@ -1,9 +1,9 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.TicketDto;
-import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Ticket;
 import group6.cinema_project.repository.TicketRepository;
+import group6.cinema_project.service.ITicketService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

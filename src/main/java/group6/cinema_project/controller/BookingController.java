@@ -3,6 +3,7 @@ package group6.cinema_project.controller;
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
 import group6.cinema_project.service.IBookingService;
+import group6.cinema_project.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,9 @@ public class BookingController {
 
     @Autowired
     private IBookingService bookingService;
+
+    @Autowired
+    private MailService mailService;
 
     /**
      * Tạo booking mới
@@ -58,6 +62,29 @@ public class BookingController {
                 ResponseEntity.badRequest().body("Không thể hủy booking");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi khi hủy booking: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gửi lại email vé điện tử
+     */
+    @PostMapping("/resend-email/{bookingId}")
+    @ResponseBody
+    public ResponseEntity<?> resendETicketEmail(@PathVariable Integer bookingId) {
+        try {
+            BookingDto booking = bookingService.getBookingById(bookingId);
+            
+            // Kiểm tra trạng thái booking
+            if (!"PAID".equals(booking.getStatus())) {
+                return ResponseEntity.badRequest().body("Chỉ có thể gửi lại email cho vé đã thanh toán");
+            }
+            
+            // Gửi lại email vé điện tử
+            mailService.sendETicketEmail(booking, booking.getUser().getEmail());
+            
+            return ResponseEntity.ok().body("Đã gửi lại email vé điện tử thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi gửi lại email: " + e.getMessage());
         }
     }
 

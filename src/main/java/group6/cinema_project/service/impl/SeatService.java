@@ -1,14 +1,14 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.SeatDto;
 import group6.cinema_project.entity.Seat;
 import group6.cinema_project.repository.SeatRepository;
+import group6.cinema_project.service.ISeatService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

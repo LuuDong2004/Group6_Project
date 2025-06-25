@@ -1,15 +1,15 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.VietQRRequest;
 import group6.cinema_project.dto.VietQRResponse;
 import group6.cinema_project.entity.SeatReservation;
 import group6.cinema_project.repository.SeatReservationRepository;
+import group6.cinema_project.service.IBookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

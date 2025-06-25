@@ -2,7 +2,7 @@ package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.VietQRRequest;
 import group6.cinema_project.dto.VietQRResponse;
-import group6.cinema_project.service.VietQRService;
+import group6.cinema_project.service.impl.VietQRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +24,7 @@ public class VietQRController {
     @Autowired
     private VietQRService vietQRService;
 
-    /**
-     * PHƯƠNG ÁN 1: Tạo QR code sử dụng VietQR API
-     * Endpoint: POST /api/vietqr/create-with-api
-     */
+
     @PostMapping("/create-with-api")
     public ResponseEntity<VietQRResponse> createQRCodeWithAPI(@Valid @RequestBody VietQRRequest request) {
         try {

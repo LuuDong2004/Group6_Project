@@ -1,10 +1,11 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.ScheduleDto;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.Schedule;
 import group6.cinema_project.repository.ScheduleRepository;
+import group6.cinema_project.service.IScheduleService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
-public class ScheduleService implements IScheduleService{
+public class ScheduleService implements IScheduleService {
     @Autowired
     private ScheduleRepository scheduleRepository;
     @Autowired

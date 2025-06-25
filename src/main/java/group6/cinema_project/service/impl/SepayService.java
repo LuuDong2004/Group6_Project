@@ -1,4 +1,4 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.SepayRequest;
 import group6.cinema_project.dto.SepayResponse;

@@ -1,4 +1,4 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
@@ -10,12 +10,12 @@ import group6.cinema_project.repository.BookingRepository;
 import group6.cinema_project.repository.SeatReservationRepository;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.repository.ScheduleRepository;
-import jakarta.persistence.Id;
+import group6.cinema_project.service.IBookingService;
+import group6.cinema_project.service.MailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,6 +43,9 @@ public class BookingService implements IBookingService {
 
     @Autowired
     private SeatReservationRepository seatReservationRepository;
+
+    @Autowired
+    private MailService mailService;
 
     @Override
     public List<BookingDto> createBooking(BookingRequest request) {
@@ -128,6 +131,21 @@ public class BookingService implements IBookingService {
             booking.setStatus("CANCELLED");
             bookingRepository.save(booking);
 
+            // Gửi email thông báo hủy vé
+            try {
+                BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+                // Map danh sách ghế
+                List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
+                List<String> seatNames = reservations.stream()
+                    .map(r -> r.getSeat().getName())
+                    .collect(Collectors.toList());
+                bookingDto.setSeatNames(seatNames);
+                
+                mailService.sendCancellationEmail(bookingDto, booking.getUser().getEmail());
+            } catch (Exception e) {
+                System.err.println("Lỗi gửi email thông báo hủy vé: " + e.getMessage());
+            }
+
             return true;
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi hủy booking: " + e.getMessage());
@@ -164,18 +182,38 @@ public class BookingService implements IBookingService {
             throw new RuntimeException("Lỗi khi cập nhật trạng thái booking: " + e.getMessage());
         }
     }
+    
     @Override
     public void confirmBookingPaid(int bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+        
         // Cập nhật trạng thái booking
         booking.setStatus("PAID");
         bookingRepository.save(booking);
+        
         // Cập nhật trạng thái các SeatReservation liên quan
         List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
         for (SeatReservation reservation : reservations) {
             reservation.setStatus("RESERVED");
             seatReservationRepository.save(reservation);
+        }
+
+        // Gửi email vé điện tử sau khi thanh toán thành công
+        try {
+            BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+            // Map danh sách ghế
+            List<String> seatNames = reservations.stream()
+                .map(r -> r.getSeat().getName())
+                .collect(Collectors.toList());
+            bookingDto.setSeatNames(seatNames);
+            
+            // Gửi email vé điện tử
+            mailService.sendETicketEmail(bookingDto, booking.getUser().getEmail());
+            System.out.println("Đã gửi email vé điện tử cho booking ID: " + bookingId);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email vé điện tử: " + e.getMessage());
+            // Không throw exception để không ảnh hưởng đến việc xác nhận thanh toán
         }
     }
 }
