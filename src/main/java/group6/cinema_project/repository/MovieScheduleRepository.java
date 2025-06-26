@@ -162,4 +162,31 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                   ") " +
                   "ORDER BY m.name", nativeQuery = true)
       List<group6.cinema_project.entity.Movie> findStoppedShowingMovies();
+
+      /**
+       * Tìm tất cả lịch chiếu đã kết thúc nhưng vẫn có trạng thái ACTIVE
+       * Một lịch chiếu được coi là đã kết thúc nếu:
+       * - Ngày chiếu đã qua, hoặc
+       * - Ngày chiếu là hôm nay và thời gian kết thúc đã qua
+       */
+      @Query(value = "SELECT * FROM screening_schedule ss " +
+                  "WHERE ss.status = 'ACTIVE' " +
+                  "AND ((ss.screening_date < CAST(GETDATE() AS DATE)) " +
+                  "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.end_time < CAST(GETDATE() AS TIME)))", nativeQuery = true)
+      List<ScreeningSchedule> findExpiredActiveSchedules();
+
+     /**
+ * Tìm tất cả lịch chiếu đã đến thời gian chiếu nhưng vẫn có trạng thái UPCOMING
+ * Một lịch chiếu đã đến thời gian chiếu nếu:
+ * - Ngày chiếu đã qua, hoặc
+ * - Ngày chiếu là hôm nay và thời gian bắt đầu đã qua
+ */
+@Query(value = "SELECT * FROM screening_schedule ss " +
+               "WHERE ss.status = 'UPCOMING' " +
+               "AND (" +
+               "    (ss.screening_date < CONVERT(DATE, GETDATE())) " +
+               "    OR " +
+               "    (ss.screening_date = CONVERT(DATE, GETDATE()) AND ss.start_time <= CONVERT(TIME, GETDATE()))" +
+               ")", nativeQuery = true)
+List<ScreeningSchedule> findUpcomingSchedulesThatShouldBeActive();
 }

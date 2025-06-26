@@ -38,7 +38,7 @@ public class AdminScheduleController {
     /**
      * Display the schedule list page with optional filtering
      */
-    
+
     @GetMapping("/list")
     public String listSchedules(Model model,
             @RequestParam(value = "movieId", required = false) Integer movieId,
@@ -346,11 +346,11 @@ public class AdminScheduleController {
             redirectAttributes.addFlashAttribute("success", "Cập nhật lịch chiếu thành công!");
             return "redirect:/admin/schedules/list";
 
-        }  catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             log.warn("Cannot update a movie schedule is currently playing");
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/admin/schedules/list";
-         } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
             log.warn("Schedule conflict detected during update: {}", e.getDetailedMessage());
 
             // Add specific conflict error to binding result
@@ -396,12 +396,11 @@ public class AdminScheduleController {
             redirectAttributes.addFlashAttribute("success", "Xóa lịch chiếu thành công!");
             return "redirect:/admin/schedules/list";
 
-        }  catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             log.warn("Cannot delete a movie schedule is currently playing");
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/admin/schedules/list";
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error deleting schedule with ID: {}", id, e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/list";
@@ -411,11 +410,15 @@ public class AdminScheduleController {
     /**
      * Display movies currently playing (ACTIVE status)
      */
+    
     @GetMapping("/list/playing")
     public String listPlayingMovies(Model model) {
         log.info("Loading currently playing movies");
 
         try {
+            movieScheduleService.updateUpcomingToActiveSchedules();
+            movieScheduleService.updateExpiredScheduleStatuses();
+
             List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ACTIVE");
             model.addAttribute("movies", movies);
             model.addAttribute("currentTab", "playing");
@@ -509,6 +512,34 @@ public class AdminScheduleController {
             log.error("Error loading schedule details for movie ID: {}", movieId, e);
             model.addAttribute("error", "Lỗi khi tải chi tiết lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/list/playing";
+        }
+    }
+
+    @PostMapping("/update-statuses")
+    public String updateScheduleStatuses(RedirectAttributes redirectAttributes) {
+        log.info("Processing request to update movie schedule statuses");
+
+        try {
+            int upcomingToActiveCount = movieScheduleService.updateUpcomingToActiveSchedules();
+            int activeToEndedCount = movieScheduleService.updateExpiredScheduleStatuses();
+
+            int totalUpdated = upcomingToActiveCount + activeToEndedCount;
+
+            if (totalUpdated > 0) {
+                redirectAttributes.addFlashAttribute("success",
+                        "Đã cập nhật trạng thái cho " + totalUpdated + " lịch chiếu (" +
+                                upcomingToActiveCount + " từ sắp chiếu thành đang chiếu, " +
+                                activeToEndedCount + " từ đang chiếu thành đã kết thúc)");
+            } else {
+                redirectAttributes.addFlashAttribute("message", "Không có lịch chiếu nào cần cập nhật trạng thái");
+            }
+
+            return "redirect:/admin/schedules/list";
+
+        } catch (Exception e) {
+            log.error("Error updating schedule statuses", e);
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật trạng thái lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/list";
         }
     }
 }

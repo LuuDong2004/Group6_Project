@@ -42,7 +42,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto) {
         validateScheduleIsNotCurrentlyShowing(screeningScheduleDto.getId());
-        
+
         // Calculate and set the correct end time based on movie duration
         calculateAndSetEndTime(screeningScheduleDto);
 
@@ -57,7 +57,8 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
         }
-        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho xóa
+        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho
+        // xóa
         validateScheduleIsNotCurrentlyShowing(id);
 
         movieScheduleRepository.deleteById(id);
@@ -293,18 +294,10 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         // Use dynamic date-based categorization instead of static status field
         switch (status.toUpperCase()) {
             case "ACTIVE":
-            case "CURRENTLY_PLAYING":
-            case "PLAYING":
                 return getCurrentlyPlayingMovies();
-
             case "UPCOMING":
-            case "COMING_SOON":
-            case "COMINGSOON":
                 return getComingSoonMovies();
-
             case "ENDED":
-            case "STOPPED":
-            case "STOPPED_SHOWING":
                 return getStoppedShowingMovies();
 
             default:
@@ -510,16 +503,16 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         }
     }
 
-     private void validateScheduleIsNotCurrentlyShowing(Integer id) {
-        
+    private void validateScheduleIsNotCurrentlyShowing(Integer id) {
+
         if (id == null) {
             return; // New schedule, no need to validate
         }
-        
+
         Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(id);
         if (scheduleOpt.isPresent()) {
             ScreeningSchedule schedule = scheduleOpt.get();
-                       
+
             // Also check English status variants
             if ("ACTIVE".equalsIgnoreCase(schedule.getStatus())) {
                 throw new IllegalStateException("Cannot modify or delete a schedule that is currently showing");
@@ -527,5 +520,69 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         }
     }
 
-   
+    /**
+     * Cập nhật tự động trạng thái lịch chiếu
+     * Phương thức này sẽ tìm tất cả các lịch chiếu đã kết thúc nhưng vẫn có trạng
+     * thái ACTIVE
+     * và cập nhật chúng thành INACTIVE
+     */
+    @Override
+    @Transactional
+    public int updateExpiredScheduleStatuses() {
+
+        try {
+            // Tìm tất cả lịch chiếu đã kết thúc nhưng vẫn có trạng thái ACTIVE
+            List<ScreeningSchedule> expiredSchedules = movieScheduleRepository.findExpiredActiveSchedules();
+            int updatedCount = 0;
+
+            for (ScreeningSchedule schedule : expiredSchedules) {
+                schedule.setStatus("ENDED");
+                movieScheduleRepository.save(schedule);
+                updatedCount++;
+            }
+
+            if (updatedCount > 0) {
+                System.out.println("Đã cập nhật " + updatedCount + " lịch chiếu từ ACTIVE thành ENDED");
+            }
+
+            return updatedCount;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật trạng thái lịch chiếu đã hết hạn: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * Cập nhật tự động trạng thái lịch chiếu từ UPCOMING thành ACTIVE
+     * Phương thức này sẽ tìm tất cả các lịch chiếu đã đến hoặc vượt qua thời gian
+     * bắt đầu
+     * nhưng vẫn có trạng thái UPCOMING và cập nhật chúng thành ACTIVE
+     */
+    @Override
+    @Transactional
+    public int updateUpcomingToActiveSchedules() {
+        try {
+            // Tìm tất cả lịch chiếu đã đến thời gian chiếu nhưng vẫn có trạng thái UPCOMING
+            List<ScreeningSchedule> schedulesShouldBeActive = movieScheduleRepository
+                    .findUpcomingSchedulesThatShouldBeActive();
+            int updatedCount = 0;
+
+            for (ScreeningSchedule schedule : schedulesShouldBeActive) {
+                schedule.setStatus("ACTIVE");
+                movieScheduleRepository.save(schedule);
+                updatedCount++;
+            }
+
+            if (updatedCount > 0) {
+                System.out.println("Đã cập nhật " + updatedCount + " lịch chiếu từ UPCOMING thành ACTIVE");
+            }
+
+            return updatedCount;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật trạng thái lịch chiếu từ UPCOMING thành ACTIVE: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

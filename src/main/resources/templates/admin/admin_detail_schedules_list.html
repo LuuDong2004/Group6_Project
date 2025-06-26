@@ -204,6 +204,10 @@
         border-radius: 8px;
         padding: 1.5rem;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
       }
 
       .schedule-card:hover {
@@ -213,9 +217,9 @@
 
       .schedule-info {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1rem;
-        margin-bottom: 1rem;
+        flex: 1;
       }
 
       .schedule-detail {
@@ -229,12 +233,14 @@
       .schedule-detail i {
         color: #4f46e5;
         width: 16px;
+        flex-shrink: 0;
       }
 
       .schedule-actions {
         display: flex;
         gap: 0.5rem;
-        justify-content: flex-end;
+        flex-shrink: 0;
+        align-items: flex-start;
       }
 
       .btn-edit,
@@ -245,6 +251,7 @@
         font-weight: 500;
         text-decoration: none;
         transition: all 0.2s ease;
+        white-space: nowrap;
       }
 
       .btn-edit {
@@ -263,6 +270,7 @@
         background: #fee2e2;
         color: #dc2626;
         border: 1px solid #fecaca;
+        cursor: pointer;
       }
 
       .btn-delete:hover {
@@ -365,12 +373,25 @@
           grid-template-columns: 1fr;
         }
 
+        .schedule-card {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
         .schedule-info {
           grid-template-columns: 1fr;
+          margin-bottom: 1rem;
         }
 
         .schedule-actions {
           justify-content: center;
+          align-self: stretch;
+        }
+
+        .btn-edit,
+        .btn-delete {
+          flex: 1;
+          text-align: center;
         }
       }
     </style>
@@ -658,23 +679,22 @@
                   >
                 </div>
               </div>
+              <div class="schedule-actions">
+                <!-- Chỉ hiển thị nút Sửa khi KHÔNG phải ACTIVE -->
+                <a th:if="${schedule.status != 'ACTIVE' && schedule.status != 'ENDED'}" 
+                   th:href="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
+                   class="btn-edit">
+                    <i class="fas fa-edit me-1"></i>Sửa
+                </a>
 
-             <div class="schedule-actions">
-    <!-- Chỉ hiển thị nút Sửa khi KHÔNG phải ACTIVE -->
-    <a th:if="${schedule.status != 'ACTIVE'}" 
-       th:href="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
-       class="btn-edit">
-        <i class="fas fa-edit me-1"></i>Sửa
-    </a>
-
-    <!-- Chỉ hiển thị nút Xóa khi KHÔNG phải ACTIVE -->
-    <button th:if="${schedule.status != 'ACTIVE'}" 
-            type="button"
-            class="btn-delete"
-            th:onclick="'deleteSchedule(' + ${schedule.id} + ')'">
-        <i class="fas fa-trash me-1"></i>Xóa
-    </button>
-</div>
+                <!-- Chỉ hiển thị nút Xóa khi KHÔNG phải ACTIVE -->
+                <button th:if="${schedule.status != 'ACTIVE' && schedule.status != 'ENDED'}" 
+                        type="button"
+                        class="btn-delete"
+                        th:onclick="'deleteSchedule(' + ${schedule.id} + ')'">
+                    <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+              </div>
             </div>
           </div>
 

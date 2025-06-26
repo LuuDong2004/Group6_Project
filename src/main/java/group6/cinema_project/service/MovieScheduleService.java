@@ -115,4 +115,21 @@ public interface MovieScheduleService {
          * @return Number of schedules updated
          */
         int updateNullStatusesToAuto();
+
+        /**
+         * Cập nhật trạng thái của lịch chiếu đã kết thúc từ ACTIVE thành INACTIVE
+         * 
+         * @return Số lượng lịch chiếu đã được cập nhật
+         */
+        int updateExpiredScheduleStatuses(); 
+
+
+        /**
+         * Cập nhật trạng thái của lịch chiếu từ UPCOMING thành ACTIVE 
+         * khi thời gian hiện tại đã đến hoặc vượt qua thời gian bắt đầu
+         * 
+         * @return Số lượng lịch chiếu đã được cập nhật
+         */
+        int updateUpcomingToActiveSchedules();
+
 }
