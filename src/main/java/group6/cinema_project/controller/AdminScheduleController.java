@@ -2,6 +2,7 @@ package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.exception.ScheduleConflictException;
 import group6.cinema_project.service.MovieScheduleService;
 import group6.cinema_project.service.MovieService;
 import group6.cinema_project.service.ScreeningRoomService;
@@ -16,9 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Controller for handling admin schedule management operations.
@@ -410,7 +416,7 @@ public class AdminScheduleController {
     /**
      * Display movies currently playing (ACTIVE status)
      */
-    
+
     @GetMapping("/list/playing")
     public String listPlayingMovies(Model model) {
         log.info("Loading currently playing movies");
@@ -540,6 +546,48 @@ public class AdminScheduleController {
             log.error("Error updating schedule statuses", e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật trạng thái lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/list";
+        }
+    }
+
+    @PostMapping("/add-batch")
+    public String addBatchSchedules(
+            @RequestParam("movieId") Integer movieId,
+            @RequestParam("screeningDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
+            @RequestParam("price") BigDecimal price,
+            @RequestParam("status") String status,
+            @RequestParam("timeSlots") String timeSlotsJson, // JSON array của các suất chiếu
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Tạo baseSchedule với thông tin chung
+            ScreeningScheduleDto baseSchedule = new ScreeningScheduleDto();
+            baseSchedule.setMovieId(movieId);
+            baseSchedule.setScreeningDate(screeningDate);
+            baseSchedule.setPrice(price);
+            baseSchedule.setStatus(status);
+
+            // Chuyển đổi JSON string thành danh sách các suất chiếu
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<Map<String, Object>> timeSlots = objectMapper.readValue(
+                    timeSlotsJson,
+                    new TypeReference<List<Map<String, Object>>>() {
+                    });
+
+            // Gọi service để lưu hàng loạt lịch chiếu
+            List<ScreeningScheduleDto> savedSchedules = movieScheduleService.saveBatchSchedules(baseSchedule,
+                    timeSlots);
+
+            redirectAttributes.addFlashAttribute("success",
+                    String.format("Đã thêm thành công %d lịch chiếu cho phim!", savedSchedules.size()));
+
+            return "redirect:/admin/schedules/list";
+
+        } catch (ScheduleConflictException e) {
+            redirectAttributes.addFlashAttribute("error", "Phát hiện xung đột lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm lịch chiếu: " + e.getMessage());
+            return "redirect:/admin/schedules/add";
         }
     }
 }

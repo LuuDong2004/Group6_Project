@@ -189,4 +189,7 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                "    (ss.screening_date = CONVERT(DATE, GETDATE()) AND ss.start_time <= CONVERT(TIME, GETDATE()))" +
                ")", nativeQuery = true)
 List<ScreeningSchedule> findUpcomingSchedulesThatShouldBeActive();
+
+
+
 }

@@ -51,9 +51,7 @@ public class DirectorController {
             List<Director> directors;
 
             // For now, we'll get all directors. Later we can implement search functionality
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                // TODO: Implement search functionality in DirectorService
-                directors = directorService.getAllDirectors();
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {                directors = directorService.getAllDirectors();
                 log.info("Search functionality not yet implemented, showing all directors");
             } else {
                 directors = directorService.getAllDirectors();

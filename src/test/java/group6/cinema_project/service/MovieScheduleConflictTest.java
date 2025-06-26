@@ -2,7 +2,6 @@ package group6.cinema_project.service;
 
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
-import group6.cinema_project.service.MovieScheduleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

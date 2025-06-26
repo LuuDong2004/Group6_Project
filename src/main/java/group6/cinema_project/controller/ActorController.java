@@ -52,7 +52,6 @@ public class ActorController {
 
             // For now, we'll get all actors. Later we can implement search functionality
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                // TODO: Implement search functionality in ActorService
                 actors = actorService.getAllActors();
                 log.info("Search functionality not yet implemented, showing all actors");
             } else {

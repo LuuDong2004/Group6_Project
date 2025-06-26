@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -153,7 +154,6 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     /**
      * Calculate and set the correct end time based on movie duration
      */
-
     private void calculateAndSetEndTime(ScreeningScheduleDto screeningScheduleDto) {
         if (screeningScheduleDto.getMovieId() != null && screeningScheduleDto.getStartTime() != null) {
             Optional<Movie> movieOpt = movieRepository.findById(screeningScheduleDto.getMovieId());
@@ -584,5 +584,50 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    @Override
+    @Transactional
+    public List<ScreeningScheduleDto> saveBatchSchedules(ScreeningScheduleDto baseSchedule,
+            List<Map<String, Object>> timeSlots)
+            throws ScheduleConflictException {
+
+        List<ScreeningScheduleDto> savedSchedules = new ArrayList<>();
+
+        if (timeSlots == null || timeSlots.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách suất chiếu không được trống");
+        }
+
+        // Kiểm tra xem các trường bắt buộc của baseSchedule có hợp lệ không
+        if (baseSchedule.getMovieId() == null || baseSchedule.getScreeningDate() == null
+                || baseSchedule.getPrice() == null) {
+            throw new IllegalArgumentException("Thông tin cơ bản của lịch chiếu không đầy đủ");
+        }
+
+        // Duyệt qua từng suất chiếu và lưu
+        for (Map<String, Object> slot : timeSlots) {
+            ScreeningScheduleDto scheduleDto = new ScreeningScheduleDto();
+
+            // Sao chép thông tin cơ bản từ baseSchedule
+            scheduleDto.setMovieId(baseSchedule.getMovieId());
+            scheduleDto.setScreeningDate(baseSchedule.getScreeningDate());
+            scheduleDto.setPrice(baseSchedule.getPrice());
+            scheduleDto.setStatus(baseSchedule.getStatus());
+
+            // Lấy thông tin từ slot
+            scheduleDto.setStartTime(LocalTime.parse((String) slot.get("startTime")));
+            scheduleDto.setEndTime(LocalTime.parse((String) slot.get("endTime")));
+            scheduleDto.setScreeningRoomId(Integer.valueOf((String) slot.get("roomId")));
+            scheduleDto.setBranchId(Integer.valueOf((String) slot.get("branchId")));
+
+            // Kiểm tra xung đột lịch chiếu
+            validateScheduleConflicts(scheduleDto);
+
+            // Lưu lịch chiếu
+            ScreeningScheduleDto saved = saveOrUpdateScreeningSchedule(scheduleDto);
+            savedSchedules.add(saved);
+        }
+
+        return savedSchedules;
     }
 }

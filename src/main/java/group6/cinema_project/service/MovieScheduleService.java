@@ -8,6 +8,7 @@ import group6.cinema_project.exception.ScheduleConflictException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -121,15 +122,25 @@ public interface MovieScheduleService {
          * 
          * @return Số lượng lịch chiếu đã được cập nhật
          */
-        int updateExpiredScheduleStatuses(); 
-
+        int updateExpiredScheduleStatuses();
 
         /**
-         * Cập nhật trạng thái của lịch chiếu từ UPCOMING thành ACTIVE 
+         * Cập nhật trạng thái của lịch chiếu từ UPCOMING thành ACTIVE
          * khi thời gian hiện tại đã đến hoặc vượt qua thời gian bắt đầu
          * 
          * @return Số lượng lịch chiếu đã được cập nhật
          */
         int updateUpcomingToActiveSchedules();
 
+        /**
+         * Lưu nhiều lịch chiếu cho cùng một bộ phim trong một lần
+         * 
+         * @param baseSchedule Thông tin cơ bản chung (phim, ngày, giá vé)
+         * @param timeSlots    Danh sách thông tin suất chiếu (giờ bắt đầu, giờ kết
+         *                     thúc, phòng chiếu)
+         * @return Danh sách lịch chiếu đã lưu
+         */
+        List<ScreeningScheduleDto> saveBatchSchedules(ScreeningScheduleDto baseSchedule,
+                        List<Map<String, Object>> timeSlots)
+                        throws ScheduleConflictException;
 }
