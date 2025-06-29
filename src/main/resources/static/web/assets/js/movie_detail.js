@@ -80,7 +80,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const warnMsg = document.getElementById('commentWarnMsg');
             warnMsg.textContent = '';
             if (!userId) {
-                warnMsg.textContent = 'Bạn cần đăng nhập để đánh giá phim!';
+                // Hiện popup đăng nhập/đăng ký
+                showLoginRegisterPopup();
                 return;
             }
             try {
@@ -186,4 +187,41 @@ async function showMovieDetails(movieId) {
 
 // Đã xóa đoạn gán onclick cho closePopupBtn vì không còn nút đóng popup 
 
-document.getElementById('user-name').textContent = user.userName; 
+document.getElementById('user-name').textContent = user.userName;
+
+// Hàm hiện popup đăng nhập/đăng ký
+function showLoginRegisterPopup() {
+    let popup = document.getElementById('loginRegisterPopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'loginRegisterPopup';
+        popup.style.position = 'fixed';
+        popup.style.top = '0';
+        popup.style.left = '0';
+        popup.style.width = '100vw';
+        popup.style.height = '100vh';
+        popup.style.background = 'rgba(0,0,0,0.5)';
+        popup.style.display = 'flex';
+        popup.style.alignItems = 'center';
+        popup.style.justifyContent = 'center';
+        popup.style.zIndex = '9999';
+        popup.innerHTML = `
+            <div style="background:#222;padding:32px 40px;border-radius:12px;box-shadow:0 4px 24px #000;min-width:320px;text-align:center;position:relative;">
+                <button id="closeLoginRegisterPopup" style="position:absolute;top:10px;right:16px;font-size:1.5rem;background:none;border:none;color:#fff;cursor:pointer;">&times;</button>
+                <h3 style="color:#fff;margin-bottom:24px;">Bạn cần đăng nhập để đánh giá phim</h3>
+                <button id="popupLoginBtn" style="margin:8px 0 0 0;padding:10px 32px;font-size:1.1rem;border-radius:6px;border:none;background:#43b05c;color:#fff;font-weight:bold;">Đăng nhập</button><br>
+                <button id="popupRegisterBtn" style="margin:16px 0 0 0;padding:10px 32px;font-size:1.1rem;border-radius:6px;border:none;background:#2d72d9;color:#fff;font-weight:bold;">Đăng ký</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        document.getElementById('closeLoginRegisterPopup').onclick = function() {
+            popup.remove();
+        };
+        document.getElementById('popupLoginBtn').onclick = function() {
+            window.location.href = 'sign_in.html';
+        };
+        document.getElementById('popupRegisterBtn').onclick = function() {
+            window.location.href = 'sign_up.html';
+        };
+    }
+} 

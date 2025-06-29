@@ -51,30 +51,6 @@
 
 					<!--/search-right-->
 					<!--/search-right-->
-					<div class="search-right">
-						<a href="#search" class="btn search-hny mr-lg-3 mt-lg-0 mt-4" title="search">Search <span
-								class="fa fa-search ml-3" aria-hidden="true"></span></a>
-						<!-- search popup -->
-						<div id="search" class="pop-overlay">
-							<div class="popup">
-								<form action="#" method="post" class="search-box">
-									<input type="search" placeholder="Search your Keyword" name="search"
-										required="required" autofocus="">
-									<button type="submit" class="btn"><span class="fa fa-search"
-											aria-hidden="true"></span></button>
-								</form>
-								<div class="browse-items">
-									<h3 class="hny-title two mt-md-5 mt-4">Browse all:</h3>
-									<ul class="search-items" id="genre-list">
-										<!-- Sẽ render động bằng JS -->
-									</ul>
-								</div>
-							</div>
-							<a class="close" href="#close">×</a>
-						</div>
-						<!-- /search popup -->
-						<!--/search-right-->
-					</div>
 					<div class="Login_SignUp" id="login"
 						style="font-size: 2rem ; display: inline-block; position: relative;">
 						<!-- <li class="nav-item"> -->
@@ -114,231 +90,29 @@
 	<section class="w3l-grids">
 		<div class="grids-main py-4">
 			<div class="container py-lg-4">
-				<div class="headerhny-title">
-					<h3 class="hny-title">Phim Đang Chiếu</h3>
+				<div class="section-header">
+					<div class="headerhny-title">
+						<h3 class="hny-title">Phim Đang Chiếu</h3>
+					</div>
+					<div class="filters-bar">
+						<div class="dropdown">
+							<button class="btn-filter dropdown-toggle" type="button" id="genre-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Thể loại
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="genre-dropdown-btn">
+								<li><a class="dropdown-item btn-choose-genre active" data-genre="all">Tất cả</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="action">Hành động</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="horror">Kinh dị</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="family">Gia đình</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="comedy">Hài</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="romance">Tình cảm</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="drama">Tâm lý</a></li>
+							</ul>
+						</div>
+					</div>
 				</div>
 				<div id="movie-list">
 					<!-- Movies will be dynamically loaded here -->
-				</div>
-			</div>
-		</div>
-	</section>
-
-
-	<section class="w3l-albums py-5" id="projects">
-		<div class="container py-lg-4">
-			<div class="row">
-				<div class="col-lg-12 mx-auto">
-					<!--Horizontal Tab-->
-					<div id="parentHorizontalTab">
-						<ul class="resp-tabs-list hor_1">
-							<li>Recent Movies</li>
-							<li>Popular Movies</li>
-							<li>Trend Movies</li>
-							<div class="clear"></div>
-						</ul>
-						<div class="resp-tabs-container hor_1">
-							<div class="albums-content">
-								<div class="row">
-									<!--/set1-->
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html">
-
-													<img src="assets/images/1.jpg" class="img-fluid"
-														 alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Long Shot</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/11.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Jumanji</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/m4.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Little Women</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/m1.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Rocketman</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/n2.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Mulan</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<!--/set3-->
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/m10.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">Alita</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/m11.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">The Lego</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-									<div class="col-lg-4 new-relise-gd mt-lg-0 mt-0">
-										<div class="slider-info">
-											<div class="img-circle">
-												<a href="movies.html"><img src="assets/images/m12.jpg" class="img-fluid"
-																		   alt="author image">
-													<div class="overlay-icon">
-
-														<span class="fa fa-play video-icon" aria-hidden="true"></span>
-													</div>
-												</a>
-											</div>
-											<div class="message">
-												<p>English</p>
-												<a class="author-book-title" href="movies.html">The Hustle</a>
-												<h4> <span class="post"><span class="fa fa-clock-o"> </span> 2 Hr 4min
-
-													</span>
-
-													<span class="post fa fa-heart text-right"></span>
-												</h4>
-											</div>
-										</div>
-
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -511,8 +285,13 @@
 			</div>
 		</div>
 	</div>
-	<script src="assets/js/jquery-3.3.1.min.js"></script>
-	<!--/theme-change-->
+	<!-- jQuery (nên để bản CDN hoặc assets/js/jquery-3.3.1.min.js nếu có) -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<!-- Popper.js (bắt buộc cho dropdown Bootstrap 4) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<!-- Bootstrap JS (bản 4.x) -->
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<!-- Các script khác của bạn -->
 	<script src="assets/js/theme-change.js"></script>
 	<script src="assets/js/movies.js"></script>
 	<script>
@@ -535,26 +314,6 @@
 					localStorage.setItem('theme', 'light');
 				}
 			}, false);
-		});
-	</script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// Lấy danh sách thể loại từ API và render ra popup
-			fetch('/api/genres')
-				.then(res => res.json())
-				.then(genres => {
-					const genreList = document.getElementById('genre-list');
-					if (!genreList) return;
-					genreList.innerHTML = '';
-					genres.forEach(genre => {
-						const li = document.createElement('li');
-						const a = document.createElement('a');
-						a.href = `movies.html?genre=${encodeURIComponent(genre)}`;
-						a.textContent = genre;
-						li.appendChild(a);
-						genreList.appendChild(li);
-					});
-				});
 		});
 	</script>
 </body>

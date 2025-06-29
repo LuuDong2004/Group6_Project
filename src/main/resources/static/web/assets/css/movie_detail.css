@@ -331,14 +331,14 @@ body {
 
 .movie-detail-container {
     position: relative;
-    max-width: 500px;
+    max-width: 80%;
     width: 90%;
     margin: 40px auto;
     background: var(--theme-bg) !important;
     color: #eee;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-    padding: 32px 24px 24px 24px;
+    padding: 32px 50px 24px 50px;
 }
 .movie-detail-title {
     color: #fff;
@@ -404,4 +404,11 @@ body {
 .actor-chip:hover {
     background: #2e8b36;
     color: #fff;
+}
+
+@media (max-width: 700px) {
+  .movie-detail-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 } 

@@ -1,78 +1,91 @@
 // movies.js
 $(document).ready(function () {
-    const genre = getGenreFromUrl();
-    if (genre) {
-        $.get(`/api/movies/genre/${encodeURIComponent(genre)}`, function(movies) {
-            // Lọc chính xác genre (không phân biệt hoa thường, loại bỏ khoảng trắng thừa, hỗ trợ nhiều thể loại)
-            const genreNorm = genre.trim().toLowerCase();
-            const filtered = movies.filter(function(movie) {
-                if (!movie.genre) return false;
-                // Nếu genre là chuỗi nhiều thể loại, tách ra và so sánh từng thể loại con
-                return movie.genre.split(',').map(g => g.trim().toLowerCase()).includes(genreNorm);
-            });
-            let html = '';
-            if (filtered.length === 0) {
-                html = '<div style="color:#fff;text-align:center;margin:40px 0;">Không có phim nào thuộc thể loại này.</div>';
-            } else {
-                filtered.forEach(function(movie) {
-                    const imageUrl = 'assets/images/' + movie.image;
-                    html += `
-                    <div class="movie-card">
-                        <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
-                        <div class="movie-info">
-                            <div class="movie-title">${movie.name}</div>
-                            <div class="movie-meta">
-                                <span><b>Thể loại:</b> ${movie.genre}</span><br>
-                                <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
-                                <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
-                            </div>
-                            <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
-                        </div>
-                    </div>
-                    `;
-                });
-            }
-            $('#movie-list').html(html);
-            $('.movie-poster-img').on('click', function() {
-                const movieId = $(this).data('id');
-                window.location.href = `movie_detail.html?id=${movieId}`;
-            });
-        });
-    } else {
-        $.ajax({
-            url: '/api/movies', // API trả về danh sách phim
-            method: 'GET',
-            success: function(movies) {
-                movies.sort((a, b) => a.id - b.id); // Sắp xếp theo id tăng dần
-                let html = '';
-                movies.forEach(function(movie) {
-                    const imageUrl = 'assets/images/' + movie.image;
-                    html += `
-                    <div class="movie-card">
-                        <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" data-id="${movie.id}">
-                        <div class="movie-info">
-                            <div class="movie-title">${movie.name}</div>
-                            <div class="movie-meta">
-                                <span><b>Thể loại:</b> ${movie.genre}</span><br>
-                                <span><b>Thời lượng:</b> ${movie.duration} phút</span><br>
-                                <span><b>Khởi chiếu:</b> ${movie.releaseDate || movie.release_date}</span>
-                            </div>
-                            <button class="btn btn-detail" data-id="${movie.id}">Xem chi tiết</button>
-                        </div>
-                    </div>
-                    `;
-                });
-                $('#movie-list').html(html);
+    // Load tất cả phim khi trang load
+    $.ajax({
+        url: '/api/movies',
+        method: 'GET',
+        success: function(movies) {
+            movies.sort((a, b) => a.id - b.id);
+            renderMovieList(movies);
+        }
+    });
 
-                // Sự kiện click vào poster hoặc nút chi tiết
-                $('.movie-poster-img').on('click', function() {
-                    const movieId = $(this).data('id');
-                    window.location.href = `movie_detail.html?id=${movieId}`;
-                });
-            }
-        });
-    }
+    // Sự kiện click vào thể loại
+    $('.btn-choose-genre').on('click', function () {
+        // Cập nhật class active
+        $('.btn-choose-genre').removeClass('active');
+        $(this).addClass('active');
+        // Đổi tên nút dropdown
+        $('#genre-dropdown-btn').text($(this).text());
+
+        // Lấy thể loại
+        var genre = $(this).data('genre');
+        // Gọi API lấy phim theo thể loại
+        if (genre === 'all') {
+            $.ajax({
+                url: '/api/movies',
+                method: 'GET',
+                success: function(movies) {
+                    movies.sort((a, b) => a.id - b.id);
+                    renderMovieList(movies);
+                }
+            });
+        } else {
+            $.get(`/api/movies/genre/${encodeURIComponent(genre)}`, function(movies) {
+                renderMovieList(movies);
+            });
+        }
+    });
+
+    // Đóng modal khi click nút close
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('movieModal').style.display = 'none';
+    });
+
+    // Đóng modal khi click ra ngoài
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('movieModal');
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 });
+
+function renderMovieList(movies) {
+    const movieList = document.getElementById('movie-list');
+    movieList.innerHTML = '';
+    if (!movies || movies.length === 0) {
+        movieList.innerHTML = '<div style="color:#fff;text-align:center;margin:40px 0;">Không có phim nào phù hợp.</div>';
+        return;
+    }
+    movies.forEach(function(movie) {
+        const imageUrl = 'assets/images/' + movie.image;
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+        card.style.cursor = 'pointer';
+        card.style.borderRadius = '16px';
+        card.style.overflow = 'hidden';
+        card.style.background = '#181818';
+        card.style.margin = '16px';
+        card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        card.style.display = 'inline-block';
+        card.style.verticalAlign = 'top';
+        card.style.width = '300px';
+        card.addEventListener('click', function() {
+            window.location.href = `movie_detail.html?id=${movie.id}`;
+        });
+        card.innerHTML = `
+            <img src="${imageUrl}" alt="${movie.name}" class="movie-poster-img" style="width:100%;height:220px;object-fit:cover;">
+            <div class="movie-info" style="padding: 16px 50px;">
+                <div class="movie-title" style="font-weight:bold;font-size:1.1rem;color:#fff;">${movie.name}</div>
+                <div class="movie-meta" style="margin-top:8px;color:#ccc;">
+                    <span><i class="fa fa-clock-o"></i> ${movie.duration} phút</span>
+                </div>
+            </div>
+        `;
+        movieList.appendChild(card);
+    });
+}
 
 // Function to fetch all movies from the API
 async function fetchMovies() {
@@ -188,4 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function getGenreFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('genre');
+}
+
+function getSearchFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('search');
 } 
