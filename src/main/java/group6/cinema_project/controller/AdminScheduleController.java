@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -416,7 +417,6 @@ public class AdminScheduleController {
     /**
      * Display movies currently playing (ACTIVE status)
      */
-
     @GetMapping("/list/playing")
     public String listPlayingMovies(Model model) {
         log.info("Loading currently playing movies");
@@ -427,7 +427,7 @@ public class AdminScheduleController {
 
             List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ACTIVE");
             model.addAttribute("movies", movies);
-            model.addAttribute("currentTab", "playing");
+            model.addAttribute("currentTab", "PLAYING");
             model.addAttribute("tabTitle", "Đang chiếu");
 
             log.info("Successfully loaded {} currently playing movies", movies.size());
@@ -493,31 +493,77 @@ public class AdminScheduleController {
      * Display detailed schedules for a specific movie
      */
     @GetMapping("/detail/{movieId}")
-    public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId, Model model) {
-        log.info("Loading schedule details for movie ID: {}", movieId);
+    public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "backUrl", required = false) String backUrl,
+            Model model) {
+
+        log.info("Đang tải chi tiết lịch chiếu cho phim ID: {} với bộ lọc trạng thái: {}", movieId, status);
+
+        List<ScreeningScheduleDto> schedules;
+        String statusText = "Tất cả";
+        String defaultBackUrl = "/admin/schedules/list/playing";
 
         try {
-            List<ScreeningScheduleDto> schedules = movieScheduleService.getSchedulesByMovieId(movieId);
+            // Lấy tất cả lịch chiếu hoặc lọc theo trạng thái
+            if (status != null && !status.trim().isEmpty()) {
+                // Thêm log để debug
+                log.info("Tìm lịch chiếu với movieId={} và status={}", movieId, status);
+                schedules = movieScheduleService.getSchedulesByMovieIdAndStatus(movieId, status);
+                log.info("Tìm thấy {} lịch chiếu với trạng thái {}", schedules.size(), status);
 
-            if (schedules.isEmpty()) {
-                model.addAttribute("error", "Không tìm thấy lịch chiếu cho phim này");
-                return "redirect:/admin/schedules/list/playing";
+                // Xác định text hiển thị và URL quay lại theo trạng thái
+                switch (status.toUpperCase()) {
+                    case "ACTIVE":
+                        statusText = "Đang chiếu";
+                        defaultBackUrl = "/admin/schedules/list/playing";
+                        break;
+                    case "UPCOMING":
+                        statusText = "Sắp chiếu";
+                        defaultBackUrl = "/admin/schedules/list/comingsoon";
+                        break;
+                    case "ENDED":
+                        statusText = "Đã kết thúc";
+                        defaultBackUrl = "/admin/schedules/list/stopped";
+                        break;
+                    default:
+                        statusText = "Trạng thái: " + status;
+                        break;
+                }
+            } else {
+                schedules = movieScheduleService.getSchedulesByMovieId(movieId);
             }
 
-            // Get movie information from the first schedule
+            // Logic fallback đã được loại bỏ vì service đã được cập nhật để sử dụng logic
+            // động
+
+            if (schedules.isEmpty()) {
+                String errorMessage = status != null
+                        ? "Không tìm thấy lịch chiếu " + statusText.toLowerCase() + " cho phim này"
+                        : "Không tìm thấy lịch chiếu cho phim này";
+                log.warn(errorMessage);
+                model.addAttribute("error", errorMessage);
+                return "redirect:" + (backUrl != null ? backUrl : defaultBackUrl);
+            }
+
+            // Lấy thông tin phim từ lịch chiếu đầu tiên
             ScreeningScheduleDto firstSchedule = schedules.get(0);
             model.addAttribute("movieName", firstSchedule.getMovieName());
             model.addAttribute("movieImage", firstSchedule.getMovieImage());
             model.addAttribute("movieId", movieId);
             model.addAttribute("schedules", schedules);
+            model.addAttribute("statusText", statusText);
+            model.addAttribute("currentStatus", status);
+            model.addAttribute("backUrl", backUrl != null ? backUrl : defaultBackUrl);
 
-            log.info("Successfully loaded {} schedules for movie: {}", schedules.size(), firstSchedule.getMovieName());
+            log.info("Đã tải thành công {} lịch chiếu cho phim: {} ({})",
+                    schedules.size(), firstSchedule.getMovieName(), statusText);
             return "admin/admin_detail_schedules_list";
 
         } catch (Exception e) {
-            log.error("Error loading schedule details for movie ID: {}", movieId, e);
+            log.error("Lỗi khi tải chi tiết lịch chiếu cho phim ID: {} với trạng thái: {}", movieId, status, e);
             model.addAttribute("error", "Lỗi khi tải chi tiết lịch chiếu: " + e.getMessage());
-            return "redirect:/admin/schedules/list/playing";
+            return "redirect:" + (backUrl != null ? backUrl : defaultBackUrl);
         }
     }
 

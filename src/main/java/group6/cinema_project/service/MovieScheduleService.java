@@ -143,4 +143,13 @@ public interface MovieScheduleService {
         List<ScreeningScheduleDto> saveBatchSchedules(ScreeningScheduleDto baseSchedule,
                         List<Map<String, Object>> timeSlots)
                         throws ScheduleConflictException;
+
+        /**
+         * Lấy lịch chiếu của phim theo ID và trạng thái
+         * 
+         * @param movieId ID của phim
+         * @param status  Trạng thái lịch chiếu cần lọc
+         * @return Danh sách lịch chiếu đã lọc
+         */
+        List<ScreeningScheduleDto> getSchedulesByMovieIdAndStatus(Integer movieId, String status);
 }

@@ -177,11 +177,26 @@
         opacity: 0.9;
       }
 
+      /* Quick Actions Improved Layout */
       .quick-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(4, 1fr); /* Explicit 4 equal columns */
+        gap: 1.5rem;
         margin-bottom: 2rem;
+        align-items: stretch; /* Ensure all grid items stretch to the same height */
+      }
+
+      .action-link {
+        text-decoration: none;
+        color: inherit;
+        height: 100%; /* Make the link fill the grid cell height */
+        display: flex; /* Use flex to make action-card fill this link */
+        width: 100%;
+      }
+
+      .action-link:hover {
+        text-decoration: none;
+        color: inherit;
       }
 
       .action-card {
@@ -193,9 +208,11 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         display: flex;
         flex-direction: column;
-        height: 100%;
-        min-height: 180px;
-        justify-content: center;
+        align-items: center;
+        justify-content: space-between; /* Distribute space evenly between items */
+        flex-grow: 1; /* Allow the card to grow and fill the action-link's height */
+        min-height: 200px; /* Fixed minimum height */
+        /* Removed height: 100% as flex-grow: 1 handles filling available space */
       }
 
       .action-card:hover {
@@ -204,18 +221,23 @@
       }
 
       .action-card i {
-        font-size: 2rem;
+        font-size: 2.5rem; /* Slightly larger icons */
         margin-bottom: 1rem;
         color: #4f46e5;
         flex-shrink: 0;
+        height: 50px; /* Fixed height for icon area */
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .action-card h3 {
         font-size: 1.1rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
         color: #1e293b;
-        min-height: 1.5rem;
+        width: 100%;
+        height: 40px; /* Fixed height for title */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -225,59 +247,29 @@
         color: #64748b;
         font-size: 0.9rem;
         margin-bottom: 0;
-        line-height: 1.4;
-        flex-grow: 1;
+        line-height: 1.5;
+        width: 100%;
+        height: 60px; /* Fixed height for description */
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
-      }
-
-      .action-link {
-        text-decoration: none;
-        color: inherit;
-        height: 100%;
-        display: flex;
-      }
-
-      .action-link:hover {
-        text-decoration: none;
-        color: inherit;
+        overflow: hidden;
       }
 
       /* Responsive adjustments */
-      @media (max-width: 768px) {
-        .sidebar {
-          width: 80px;
-        }
-
-        .sidebar .sidebar-header h5,
-        .sidebar .sidebar-header small,
-        .sidebar .sidebar-menu span,
-        .sidebar .mt-auto .text-white,
-        .sidebar .mt-auto small {
-          display: none;
-        }
-
-        .sidebar .sidebar-menu .menu-item {
-          justify-content: center;
-        }
-
-        .main-content-wrapper {
-          margin-left: 80px;
-        }
-
-        .header-custom {
-          left: 80px;
-        }
-
-        .tab-nav {
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
+      @media (max-width: 992px) {
         .quick-actions {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(
+            2,
+            1fr
+          ); /* 2 columns on medium screens */
+        }
+      }
+
+      @media (max-width: 576px) {
+        .quick-actions {
+          grid-template-columns: 1fr; /* Stack on mobile */
         }
       }
     </style>

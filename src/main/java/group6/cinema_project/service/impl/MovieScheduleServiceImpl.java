@@ -503,6 +503,8 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         }
     }
 
+    // @Override
+    @Transactional
     private void validateScheduleIsNotCurrentlyShowing(Integer id) {
 
         if (id == null) {
@@ -629,5 +631,39 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         }
 
         return savedSchedules;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScreeningScheduleDto> getSchedulesByMovieIdAndStatus(Integer movieId, String status) {
+        try {
+            List<ScreeningSchedule> schedules;
+
+            // Sử dụng logic động dựa trên trạng thái yêu cầu
+            switch (status.toUpperCase()) {
+                case "ENDED":
+                    schedules = movieScheduleRepository.findEndedSchedulesByMovieIdWithRelatedEntities(movieId);
+                    break;
+                case "ACTIVE":
+                    schedules = movieScheduleRepository.findActiveSchedulesByMovieIdWithRelatedEntities(movieId);
+                    break;
+                case "UPCOMING":
+                    schedules = movieScheduleRepository.findUpcomingSchedulesByMovieIdWithRelatedEntities(movieId);
+                    break;
+                default:
+                    // Fallback to original method for other statuses
+                    schedules = movieScheduleRepository.findByMovieIdAndStatusWithRelatedEntities(movieId, status);
+                    break;
+            }
+
+            return schedules.stream()
+                    .map(this::convertToDtoWithRelatedData)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println(
+                    "Error fetching schedules for movie " + movieId + " with status " + status + ": " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

@@ -138,6 +138,14 @@
         color: white;
       }
 
+      .time-slot-group {
+        border: 1px dashed #cbd5e1;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+        background-color: #f8fafc;
+      }
+
       .form-actions {
         padding-top: 1.5rem;
         margin-top: 1.5rem;
@@ -194,6 +202,28 @@
         border-color: #ef4444;
       }
 
+      .btn-outline-secondary {
+        color: #64748b;
+        border-color: #cbd5e1;
+      }
+
+      .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
+
+      .btn-outline-primary {
+        color: #6366f1;
+        border-color: #6366f1;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: #6366f1;
+        color: white;
+        border-color: #6366f1;
+      }
+
       /* Responsive */
       @media (max-width: 992px) {
         .sidebar {
@@ -243,7 +273,7 @@
           </div>
           <div>
             <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Chỉnh Sửa Lịch Chiếu</small>
+            <small class="text-white-50">Quản lý Lịch Chiếu</small>
           </div>
         </div>
       </div>
@@ -398,7 +428,7 @@
           <header class="mb-4"></header>
           <form
             id="scheduleForm"
-            th:action="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
+            th:action="@{/admin/schedules/update/{id}(id=${schedule.id})}"
             method="post"
             th:object="${schedule}"
           >
@@ -413,13 +443,12 @@
                   </div>
                   <div class="card-body p-3 p-md-4">
                     <div class="row">
-                      <div class="col-md-4 mb-3">
+                      <div class="col-md-12 mb-3">
                         <label for="movieSelect" class="form-label fw-semibold"
                           >Chọn Phim <span class="text-danger">*</span></label
                         >
                         <select
                           id="movieSelect"
-                          name="movieId"
                           th:field="*{movieId}"
                           class="form-select"
                           required
@@ -429,74 +458,15 @@
                             th:each="movie : ${movies}"
                             th:value="${movie.id}"
                             th:text="${movie.name}"
-                          ></option>
-                        </select>
-                        <div
-                          th:if="${#fields.hasErrors('movieId')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{movieId}"></span>
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label
-                          for="screeningRoomSelect"
-                          class="form-label fw-semibold"
-                          >Phòng Chiếu <span class="text-danger">*</span></label
-                        >
-                        <select
-                          id="screeningRoomSelect"
-                          name="screeningRoomId"
-                          th:field="*{screeningRoomId}"
-                          class="form-select"
-                          required
-                        >
-                          <option value="" disabled>
-                            -- Chọn phòng chiếu --
+                            th:selected="${movie.id == schedule.movieId}"
+                          >
+                            Movie Name
                           </option>
-                          <option
-                            th:each="room : ${screeningRooms}"
-                            th:value="${room.id}"
-                            th:text="${room.name + ' (Sức chứa: ' + room.capacity + ')'}"
-                          ></option>
                         </select>
-                        <div
-                          th:if="${#fields.hasErrors('screeningRoomId')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{screeningRoomId}"></span>
-                        </div>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="branchSelect" class="form-label fw-semibold"
-                          >Chi Nhánh <span class="text-danger">*</span></label
-                        >
-                        <select
-                          id="branchSelect"
-                          name="branchId"
-                          th:field="*{branchId}"
-                          class="form-select"
-                          required
-                        >
-                          <option value="" disabled>
-                            -- Chọn chi nhánh --
-                          </option>
-                          <option
-                            th:each="branch : ${branches}"
-                            th:value="${branch.id}"
-                            th:text="${branch.name}"
-                          ></option>
-                        </select>
-                        <div
-                          th:if="${#fields.hasErrors('branchId')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{branchId}"></span>
-                        </div>
                       </div>
                     </div>
                     <div class="row">
-                      <div class="col-md-4 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label
                           for="screeningDate"
                           class="form-label fw-semibold"
@@ -505,66 +475,11 @@
                         <input
                           type="date"
                           id="screeningDate"
-                          name="screeningDate"
                           th:field="*{screeningDate}"
                           class="form-control"
                           required
                         />
-                        <div
-                          th:if="${#fields.hasErrors('screeningDate')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{screeningDate}"></span>
-                        </div>
                       </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="startTime" class="form-label fw-semibold"
-                          >Giờ Bắt Đầu <span class="text-danger">*</span></label
-                        >
-                        <input
-                          type="time"
-                          id="startTime"
-                          name="startTime"
-                          th:field="*{startTime}"
-                          class="form-control"
-                          th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''"
-                          required
-                        />
-                        <!-- Display validation errors for startTime -->
-                        <div
-                          th:if="${#fields.hasErrors('startTime')}"
-                          class="invalid-feedback"
-                        >
-                          <div
-                            th:each="error : ${#fields.errors('startTime')}"
-                            th:text="${error}"
-                          ></div>
-                        </div>
-                        <small class="form-text text-muted"> </small>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <label for="endTime" class="form-label fw-semibold"
-                          >Giờ Kết Thúc
-                          <span class="text-danger">*</span></label
-                        >
-                        <input
-                          type="time"
-                          id="endTime"
-                          name="endTime"
-                          th:field="*{endTime}"
-                          class="form-control"
-                          required
-                        />
-                        <div
-                          th:if="${#fields.hasErrors('endTime')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{endTime}"></span>
-                        </div>
-                        <small class="form-text text-muted"> </small>
-                      </div>
-                    </div>
-                    <div class="row">
                       <div class="col-md-6 mb-3">
                         <label for="ticketPrice" class="form-label fw-semibold"
                           >Giá Vé (VNĐ)
@@ -577,7 +492,6 @@
                           <input
                             type="number"
                             id="ticketPrice"
-                            name="price"
                             th:field="*{price}"
                             class="form-control"
                             placeholder="VD: 80000"
@@ -586,74 +500,169 @@
                             required
                           />
                         </div>
-                        <div
-                          th:if="${#fields.hasErrors('price')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{price}"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                      <i class="fas fa-clock me-2"></i>
+                      Thông Tin Suất Chiếu & Phòng Chiếu
+                    </h5>
+                  </div>
+                  <div class="card-body p-3 p-md-4">
+                    <!-- Container for all time slots -->
+                    <div id="timeSlotsContainer">
+                      <!-- Initial time slot (original inputs) -->
+                      <div class="time-slot-group mb-3 pb-3 border-bottom">
+                        <div class="row">
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="startTime"
+                              class="form-label fw-semibold"
+                              >Giờ Bắt Đầu
+                              <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="time"
+                              id="startTime"
+                              th:field="*{startTime}"
+                              name="startTime"
+                              class="form-control"
+                              th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''"
+                              required
+                            />
+                            <!-- Display validation errors for startTime -->
+                            <div
+                              th:if="${#fields.hasErrors('startTime')}"
+                              class="invalid-feedback"
+                            >
+                              <div
+                                th:each="error : ${#fields.errors('startTime')}"
+                                th:text="${error}"
+                              ></div>
+                            </div>
+                            <small class="form-text text-muted"> </small>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label for="endTime" class="form-label fw-semibold"
+                              >Giờ Kết Thúc
+                              <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="time"
+                              id="endTime"
+                              th:field="*{endTime}"
+                              name="endTime"
+                              class="form-control"
+                              required
+                            />
+                            <small class="form-text text-muted"> </small>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="screeningRoomSelect"
+                              class="form-label fw-semibold"
+                              >Phòng Chiếu
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              id="screeningRoomSelect"
+                              th:field="*{screeningRoomId}"
+                              name="screeningRoomId"
+                              class="form-select"
+                              required
+                            >
+                              <option value="" disabled>
+                                -- Chọn phòng --
+                              </option>
+                              <option
+                                th:each="room : ${screeningRooms}"
+                                th:value="${room.id}"
+                                th:text="${room.name}"
+                                th:selected="${room.id == schedule.screeningRoomId}"
+                              >
+                                Room Name
+                              </option>
+                            </select>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="branchSelect"
+                              class="form-label fw-semibold"
+                              >Chi Nhánh
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              id="branchSelect"
+                              th:field="*{branchId}"
+                              name="branchId"
+                              class="form-select"
+                              required
+                            >
+                              <option value="" disabled>
+                                -- Chọn chi nhánh --
+                              </option>
+                              <option
+                                th:each="branch : ${branches}"
+                                th:value="${branch.id}"
+                                th:text="${branch.name}"
+                                th:selected="${branch.id == schedule.branchId}"
+                              >
+                                Branch Name
+                              </option>
+                            </select>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-md-6 mb-3">
-                        <label
-                          for="scheduleStatus"
-                          class="form-label fw-semibold"
-                          >Trạng Thái Lịch Chiếu
-                          <span class="text-danger">*</span></label
-                        >
-                        <select
-                          id="scheduleStatus"
-                          name="status"
-                          th:field="*{status}"
-                          class="form-select"
-                          required
-                        >
-                          <option value="AUTO">
-                            Tự động (dựa trên ngày/giờ)
-                          </option>
-                          <option value="ACTIVE">Đang chiếu (thủ công)</option>
-                          <option value="UPCOMING">Sắp chiếu (thủ công)</option>
-                          <option value="ENDED">Đã kết thúc (thủ công)</option>
-                          <option value="CANCELLED">Đã hủy</option>
-                        </select>
-                        <div
-                          th:if="${#fields.hasErrors('status')}"
-                          class="text-danger small mt-1"
-                        >
-                          <span th:errors="*{status}"></span>
-                        </div>
-                      </div>
+                      <!-- Additional time slots will be added here by JavaScript -->
+                    </div>
+
+                    <!-- Button to add more time slots -->
+                    <div class="d-flex justify-content-center mt-3">
+                      <button
+                        type="button"
+                        id="addTimeSlotBtn"
+                        class="btn btn-outline-primary"
+                      >
+                        <i class="fas fa-plus-circle me-2"></i>Thêm Suất Chiếu
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                      <i class="fas fa-cogs me-2"></i>
+                      Thông tin thêm
+                    </h5>
+                  </div>
+                  <div class="card-body p-3 p-md-4">
+                    <div class="mb-3">
+                      <label for="scheduleStatus" class="form-label fw-semibold"
+                        >Trạng Thái Lịch Chiếu</label
+                      >
+                      <select
+                        id="scheduleStatus"
+                        th:field="*{status}"
+                        class="form-select"
+                      >
+                        <option value="AUTO">
+                          Tự động (dựa trên ngày/giờ)
+                        </option>
+                        <option value="ACTIVE">Đang chiếu (thủ công)</option>
+                        <option value="UPCOMING">Sắp chiếu (thủ công)</option>
+                        <option value="ENDED">Đã kết thúc (thủ công)</option>
+                        <option value="CANCELLED">Đã hủy</option>
+                      </select>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Display global form errors -->
-            <div
-              th:if="${#fields.hasGlobalErrors()}"
-              class="alert alert-danger mt-3"
-            >
-              <ul class="mb-0">
-                <li
-                  th:each="error : ${#fields.globalErrors()}"
-                  th:text="${error}"
-                ></li>
-              </ul>
-            </div>
-
-            <!-- Display success message -->
-            <div
-              th:if="${success}"
-              class="alert alert-success mt-3"
-              th:text="${success}"
-            ></div>
-
-            <!-- Display error message -->
-            <div
-              th:if="${error}"
-              class="alert alert-danger mt-3"
-              th:text="${error}"
-            ></div>
 
             <div
               class="d-flex justify-content-end align-items-center form-actions"
@@ -667,7 +676,7 @@
               </a>
               <button type="submit" class="btn btn-primary" id="submitBtn">
                 <i class="fas fa-save me-2"></i>
-                Cập Nhật Lịch Chiếu
+                Lưu Lịch Chiếu
               </button>
             </div>
           </form>
@@ -693,13 +702,8 @@
           scheduleForm.addEventListener("submit", function (event) {
             let isValid = true;
 
-            // Validate all required fields
+            // Validate all required fields first
             if (!validateAllRequiredFields()) {
-              isValid = false;
-            }
-
-            // Validate date and time are not in the past
-            if (!validateDateTimeNotInPast()) {
               isValid = false;
             }
 
@@ -713,7 +717,15 @@
               // Find the first invalid field and focus it for better UX
               const firstInvalidField = document.querySelector(".is-invalid");
               if (firstInvalidField) {
-                firstInvalidField.focus();
+                // For labels, find the associated input
+                if (firstInvalidField.tagName === "LABEL") {
+                  const fieldToFocus = document.getElementById(
+                    firstInvalidField.getAttribute("for")
+                  );
+                  if (fieldToFocus) fieldToFocus.focus();
+                } else {
+                  firstInvalidField.focus();
+                }
               }
               return false;
             }
@@ -723,31 +735,237 @@
         // Initialize required field validation
         initializeRequiredFieldValidation();
 
-        // Set minimum date to today
-        const dateInput = document.getElementById("screeningDate");
-        if (dateInput) {
-          const today = new Date().toISOString().split("T")[0];
-          dateInput.setAttribute("min", today);
-          dateInput.addEventListener("change", validateDateTimeNotInPast);
+        // Add time slot button event listener
+        const addTimeSlotBtn = document.getElementById("addTimeSlotBtn");
+        if (addTimeSlotBtn) {
+          addTimeSlotBtn.addEventListener("click", addNewTimeSlot);
         }
 
-        // Add real-time validation for time field
-        const timeInput = document.getElementById("startTime");
-        if (timeInput) {
-          timeInput.addEventListener("change", validateDateTimeNotInPast);
-        }
+        // Initialize time slot counter for unique IDs
+        window.timeSlotCounter = 1;
       });
+
+      // Function to add a new time slot
+      function addNewTimeSlot() {
+        const container = document.getElementById("timeSlotsContainer");
+        const newSlotId = window.timeSlotCounter++;
+
+        // Create a new time slot group
+        const newSlotGroup = document.createElement("div");
+        newSlotGroup.className = "time-slot-group mb-3 pb-3 border-bottom";
+        newSlotGroup.id = `timeSlot_${newSlotId}`;
+
+        // HTML for the new time slot
+        newSlotGroup.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-semibold mb-0">Suất chiếu #${newSlotId}</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-slot-btn" 
+                    onclick="removeTimeSlot('timeSlot_${newSlotId}')">
+              <i class="fas fa-times"></i> Xóa
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label for="startTime_${newSlotId}" class="form-label fw-semibold">
+                Giờ Bắt Đầu <span class="text-danger">*</span>
+              </label>
+              <input type="time" id="startTime_${newSlotId}" name="additionalStartTime_${newSlotId}" 
+                     class="form-control" required />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="endTime_${newSlotId}" class="form-label fw-semibold">
+                Giờ Kết Thúc <span class="text-danger">*</span>
+              </label>
+              <input type="time" id="endTime_${newSlotId}" name="additionalEndTime_${newSlotId}" 
+                     class="form-control" required />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="screeningRoomSelect_${newSlotId}" class="form-label fw-semibold">
+                Phòng Chiếu <span class="text-danger">*</span>
+              </label>
+              <select id="screeningRoomSelect_${newSlotId}" name="additionalScreeningRoomId_${newSlotId}" 
+                      class="form-select" required>
+                <option value="" disabled selected>-- Chọn phòng --</option>
+                ${Array.from(document.getElementById("screeningRoomSelect").options)
+                  .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
+                  .join("")}
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="branchSelect_${newSlotId}" class="form-label fw-semibold">
+                Chi Nhánh <span class="text-danger">*</span>
+              </label>
+              <select id="branchSelect_${newSlotId}" name="additionalBranchId_${newSlotId}" 
+                      class="form-select" required>
+                <option value="" disabled selected>-- Chọn chi nhánh --</option>
+                ${Array.from(document.getElementById("branchSelect").options)
+                  .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
+                  .join("")}
+              </select>
+            </div>
+          </div>
+        `;
+
+        // Add the new slot to the container
+        container.appendChild(newSlotGroup);
+
+        // Add validation to new fields
+        const newRequiredFields = newSlotGroup.querySelectorAll("[required]");
+        newRequiredFields.forEach(initializeRequiredFieldValidationForElement);
+
+        // Add time validation
+        const newStartTime = document.getElementById(`startTime_${newSlotId}`);
+        const newEndTime = document.getElementById(`endTime_${newSlotId}`);
+
+        if (newStartTime && newEndTime) {
+          newStartTime.addEventListener("change", () => validateAdditionalTimeSlot(newSlotId));
+          newEndTime.addEventListener("change", () => validateAdditionalTimeSlot(newSlotId));
+        }
+      }
+
+      // Function to remove a time slot
+      function removeTimeSlot(slotId) {
+        const slotToRemove = document.getElementById(slotId);
+        if (slotToRemove) {
+          slotToRemove.remove();
+        }
+      }
+
+      // Function to validate additional time slots
+      function validateAdditionalTimeSlot(slotId) {
+        const startTimeInput = document.getElementById(`startTime_${slotId}`);
+        const endTimeInput = document.getElementById(`endTime_${slotId}`);
+
+        if (!startTimeInput || !endTimeInput) return true;
+        if (!startTimeInput.value || !endTimeInput.value) return true;
+
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+
+        if (startTime >= endTime) {
+          startTimeInput.classList.add("is-invalid");
+          endTimeInput.classList.add("is-invalid");
+
+          let errorDiv = document.getElementById(`timeLogicError_${slotId}`);
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = `timeLogicError_${slotId}`;
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
+            endTimeInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
+        } else {
+          startTimeInput.classList.remove("is-invalid");
+          endTimeInput.classList.remove("is-invalid");
+
+          const errorDiv = document.getElementById(`timeLogicError_${slotId}`);
+          if (errorDiv) {
+            errorDiv.remove();
+          }
+          return true;
+        }
+      }
+
+      function validateTimeLogic() {
+        const startTimeInput = document.getElementById("startTime");
+        const endTimeInput = document.getElementById("endTime");
+
+        if (!startTimeInput.value || !endTimeInput.value) {
+          return true; // Let required field validation handle empty values
+        }
+
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+
+        if (startTime >= endTime) {
+          startTimeInput.classList.add("is-invalid");
+          endTimeInput.classList.add("is-invalid");
+
+          // Show error message
+          let errorDiv = document.getElementById("timeLogicError");
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = "timeLogicError";
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
+            endTimeInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
+        } else {
+          startTimeInput.classList.remove("is-invalid");
+          endTimeInput.classList.remove("is-invalid");
+
+          // Remove error message
+          const errorDiv = document.getElementById("timeLogicError");
+          if (errorDiv) {
+            errorDiv.remove();
+          }
+          return true;
+        }
+      }
+
+      function initializeRequiredFieldValidationForElement(field) {
+        if (!field) return;
+        const label = document.querySelector(`label[for="${field.id}"]`);
+        const validate = () => validateRequiredField(field, label);
+
+        field.addEventListener("blur", validate);
+        field.addEventListener("input", validate);
+        if (field.tagName === "SELECT") {
+          field.addEventListener("change", validate);
+        }
+      }
+
+      function initializeRequiredFieldValidation() {
+        const requiredFields = document.querySelectorAll("#scheduleForm [required]");
+        requiredFields.forEach(initializeRequiredFieldValidationForElement);
+      }
+
+      function validateRequiredField(field, label) {
+        if (!field) return;
+
+        const isSelect = field.tagName === "SELECT";
+        const isEmpty = isSelect ? !field.value : !field.value.trim();
+
+        if (isEmpty) {
+          field.classList.add("is-invalid");
+          if (label) label.classList.add("required-error");
+        } else {
+          field.classList.remove("is-invalid");
+          if (label) label.classList.remove("required-error");
+        }
+      }
+
+      function validateAllRequiredFields() {
+        const requiredFields = document.querySelectorAll("#scheduleForm [required]");
+        let allValid = true;
+
+        requiredFields.forEach((field) => {
+          const label = document.querySelector(`label[for="${field.id}"]`);
+          const isSelect = field.tagName === "SELECT";
+          const isEmpty = isSelect ? !field.value : !field.value.trim();
+
+          if (isEmpty) {
+            allValid = false;
+            field.classList.add("is-invalid");
+            if (label) label.classList.add("required-error");
+          } else {
+            field.classList.remove("is-invalid");
+            if (label) label.classList.remove("required-error");
+          }
+        });
+
+        return allValid;
+      }
 
       function initializeDashboardBehavior() {
         const sidebarToggle = document.getElementById("sidebarToggle");
         const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+        const mainContentWrapper = document.getElementById("mainContentWrapper");
 
         if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-          console.error(
-            "Sidebar toggle elements not found for behavior initialization."
-          );
+          console.error("Sidebar toggle elements not found for behavior initialization.");
           return;
         }
 
@@ -774,179 +992,6 @@
 
         mediaQuery.addEventListener("change", handleViewportChange);
         handleViewportChange(mediaQuery);
-      }
-
-      function validateDateTimeNotInPast() {
-        const dateInput = document.getElementById("screeningDate");
-        const timeInput = document.getElementById("startTime");
-
-        if (!dateInput.value || !timeInput.value) {
-          return true; // Let required field validation handle empty values
-        }
-
-        const selectedDate = new Date(dateInput.value);
-        const selectedTime = timeInput.value;
-        const now = new Date();
-        const today = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-        const currentTime =
-          now.getHours().toString().padStart(2, "0") +
-          ":" +
-          now.getMinutes().toString().padStart(2, "0");
-
-        // Check if selected date is in the past
-        if (selectedDate < today) {
-          dateInput.classList.add("is-invalid");
-
-          // Show error message for date
-          let errorDiv = document.getElementById("pastDateError");
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = "pastDateError";
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent = "Không thể chọn ngày trong quá khứ.";
-            dateInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        }
-
-        // Check if selected date is today and time is in the past
-        if (
-          selectedDate.getTime() === today.getTime() &&
-          selectedTime < currentTime
-        ) {
-          timeInput.classList.add("is-invalid");
-
-          // Show error message for time
-          let errorDiv = document.getElementById("pastTimeError");
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = "pastTimeError";
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent =
-              "Không thể chọn thời gian trong quá khứ cho hôm nay.";
-            timeInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        }
-
-        // Remove error styling and messages if validation passes
-        dateInput.classList.remove("is-invalid");
-        timeInput.classList.remove("is-invalid");
-
-        const pastDateError = document.getElementById("pastDateError");
-        if (pastDateError) {
-          pastDateError.remove();
-        }
-
-        const pastTimeError = document.getElementById("pastTimeError");
-        if (pastTimeError) {
-          pastTimeError.remove();
-        }
-
-        return true;
-      }
-
-      function validateTimeLogic() {
-        const startTimeInput = document.getElementById("startTime");
-        const endTimeInput = document.getElementById("endTime");
-
-        if (!startTimeInput.value || !endTimeInput.value) {
-          return true; // Let required validation handle empty fields
-        }
-
-        const startTime = startTimeInput.value;
-        const endTime = endTimeInput.value;
-
-        if (startTime >= endTime) {
-          // Show error message
-          endTimeInput.classList.add("is-invalid");
-
-          // Remove existing error message
-          const existingError =
-            endTimeInput.parentNode.querySelector(".time-error");
-          if (existingError) {
-            existingError.remove();
-          }
-
-          // Add error message
-          const errorDiv = document.createElement("div");
-          errorDiv.className = "text-danger small mt-1 time-error";
-          errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
-          endTimeInput.parentNode.appendChild(errorDiv);
-
-          return false;
-        } else {
-          // Remove error styling and message
-          endTimeInput.classList.remove("is-invalid");
-          const existingError =
-            endTimeInput.parentNode.querySelector(".time-error");
-          if (existingError) {
-            existingError.remove();
-          }
-          return true;
-        }
-      }
-
-      function initializeRequiredFieldValidationForElement(field) {
-        if (!field) return;
-        const label = document.querySelector(`label[for="${field.id}"]`);
-        const validate = () => validateRequiredField(field, label);
-
-        field.addEventListener("blur", validate);
-        field.addEventListener("input", validate);
-        if (field.tagName === "SELECT") {
-          field.addEventListener("change", validate);
-        }
-      }
-
-      function initializeRequiredFieldValidation() {
-        const requiredFields = document.querySelectorAll(
-          "#scheduleForm [required]"
-        );
-        requiredFields.forEach(initializeRequiredFieldValidationForElement);
-      }
-
-      function validateRequiredField(field, label) {
-        if (!field) return;
-
-        const isSelect = field.tagName === "SELECT";
-        const isEmpty = isSelect ? !field.value : !field.value.trim();
-
-        if (isEmpty) {
-          field.classList.add("is-invalid");
-          if (label) label.classList.add("required-error");
-        } else {
-          field.classList.remove("is-invalid");
-          if (label) label.classList.remove("required-error");
-        }
-      }
-
-      function validateAllRequiredFields() {
-        const requiredFields = document.querySelectorAll(
-          "#scheduleForm [required]"
-        );
-        let allValid = true;
-
-        requiredFields.forEach((field) => {
-          const label = document.querySelector(`label[for="${field.id}"]`);
-          const isSelect = field.tagName === "SELECT";
-          const isEmpty = isSelect ? !field.value : !field.value.trim();
-
-          if (isEmpty) {
-            allValid = false;
-            field.classList.add("is-invalid");
-            if (label) label.classList.add("required-error");
-          } else {
-            field.classList.remove("is-invalid");
-            if (label) label.classList.remove("required-error");
-          }
-        });
-
-        return allValid;
       }
     </script>
   </body>
