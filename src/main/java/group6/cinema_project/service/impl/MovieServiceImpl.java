@@ -110,60 +110,6 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> getFilteredMovies(String searchTerm, String filterBy) {
-        List<Movie> movies;
-
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            movies = movieRepository.findAll();
-        } else {
-            switch (filterBy.toLowerCase()) {
-                case "name":
-                case "title":
-                    movies = movieRepository.findByNameContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "description":
-                    movies = movieRepository.findByDescriptionContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "genre":
-                    movies = movieRepository.findByGenreContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "rating":
-                    movies = movieRepository.findByRatingContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "language":
-                    movies = movieRepository.findByLanguageContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "releaseyear":
-                case "release_year":
-                    try {
-                        Integer year = Integer.parseInt(searchTerm.trim());
-                        movies = movieRepository.findByReleaseYear(year);
-                    } catch (NumberFormatException e) {
-                        movies = List.of(); // Return empty list if year is not a valid number
-                    }
-                    break;
-                case "director":
-                case "directors":
-                    movies = movieRepository.findByDirectorNameContainingIgnoreCase(searchTerm.trim());
-                    break;
-                case "actor":
-                case "actors":
-                    movies = movieRepository.findByActorNameContainingIgnoreCase(searchTerm.trim());
-                    break;
-                default:
-                    // Default to searching by name if filterBy is not recognized
-                    movies = movieRepository.findByNameContainingIgnoreCase(searchTerm.trim());
-                    break;
-            }
-        }
-
-        return movies.stream()
-                .map(this::convertToBasicDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<MovieDto> getAllMoviesForDisplay() {
         return movieRepository.findAllWithDirectorsAndActors().stream()
                 .map(this::convertToDisplayDto)

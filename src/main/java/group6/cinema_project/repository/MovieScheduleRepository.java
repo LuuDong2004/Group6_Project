@@ -169,6 +169,16 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
         List<Movie> findStoppedShowingMovies();
 
         /**
+         * Find movies that have at least one schedule with 'ENDED' status
+         * This is simpler and more intuitive than the complex logic above
+         */
+        @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                        "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+                        "WHERE ss.status = 'ENDED' " +
+                        "ORDER BY m.name", nativeQuery = true)
+        List<Movie> findMoviesWithEndedSchedules();
+
+        /**
          * Tìm tất cả lịch chiếu đã kết thúc nhưng vẫn có trạng thái ACTIVE
          * Một lịch chiếu được coi là đã kết thúc nếu:
          * - Ngày chiếu đã qua, hoặc
@@ -220,8 +230,8 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                         "sr.name as screening_room_name, b.name as branch_name " +
                         "FROM screening_schedule ss " +
                         "LEFT JOIN Movie m ON ss.movie_id = m.id " +
-                        "LEFT JOIN screening_room sr ON ss.screening_room_id = sr.id " +
-                        "LEFT JOIN branch b ON ss.branch_id = b.id " +
+                        "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
+                        "LEFT JOIN Branch b ON ss.branch_id = b.id " +
                         "WHERE ss.movie_id = :movieId " +
                         "AND (" +
                         "  (ss.status = 'ENDED' OR ss.status = 'CANCELLED') " +
@@ -245,8 +255,8 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                         "sr.name as screening_room_name, b.name as branch_name " +
                         "FROM screening_schedule ss " +
                         "LEFT JOIN Movie m ON ss.movie_id = m.id " +
-                        "LEFT JOIN screening_room sr ON ss.screening_room_id = sr.id " +
-                        "LEFT JOIN branch b ON ss.branch_id = b.id " +
+                        "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
+                        "LEFT JOIN Branch b ON ss.branch_id = b.id " +
                         "WHERE ss.movie_id = :movieId " +
                         "AND (" +
                         "  ss.status = 'ACTIVE' " +
@@ -271,8 +281,8 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                         "sr.name as screening_room_name, b.name as branch_name " +
                         "FROM screening_schedule ss " +
                         "LEFT JOIN Movie m ON ss.movie_id = m.id " +
-                        "LEFT JOIN screening_room sr ON ss.screening_room_id = sr.id " +
-                        "LEFT JOIN branch b ON ss.branch_id = b.id " +
+                        "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
+                        "LEFT JOIN Branch b ON ss.branch_id = b.id " +
                         "WHERE ss.movie_id = :movieId " +
                         "AND (" +
                         "  ss.status = 'UPCOMING' " +

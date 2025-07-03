@@ -75,13 +75,6 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ScreeningScheduleDto> getFilteredScreeningSchedules(String searchTerm, String filterBy) {
-        // Basic implementation - can be enhanced based on requirements
-        return getAllScreeningSchedules();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<ScreeningScheduleDto> getAllScreeningSchedulesForDisplay() {
         List<ScreeningSchedule> schedules = movieScheduleRepository.findAllWithRelatedEntities();
         return schedules.stream()
@@ -298,7 +291,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
             case "UPCOMING":
                 return getComingSoonMovies();
             case "ENDED":
-                return getStoppedShowingMovies();
+                return getMoviesWithEndedSchedules(); // Changed to use the new method
 
             default:
                 // For backward compatibility, try the old static status approach as fallback
@@ -397,6 +390,22 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         } catch (Exception e) {
             // Log the error and return empty list to prevent application crash
             System.err.println("Error fetching stopped showing movies: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getMoviesWithEndedSchedules() {
+        try {
+            List<Movie> movies = movieScheduleRepository.findMoviesWithEndedSchedules();
+            return movies.stream()
+                    .map(this::convertMovieToBasicDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching movies with ended schedules: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
         }

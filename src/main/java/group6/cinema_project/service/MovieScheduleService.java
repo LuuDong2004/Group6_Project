@@ -21,8 +21,6 @@ public interface MovieScheduleService {
 
         List<ScreeningScheduleDto> getAllScreeningSchedules();
 
-        List<ScreeningScheduleDto> getFilteredScreeningSchedules(String searchTerm, String filterBy);
-
         /**
          * Get all screening schedules with related entity data for display
          */
@@ -97,6 +95,14 @@ public interface MovieScheduleService {
          * @return List of stopped showing movies
          */
         List<MovieDto> getStoppedShowingMovies();
+
+        /**
+         * Get movies that have at least one schedule with 'ENDED' status
+         * This is more intuitive for users who want to see movies with ended schedules
+         *
+         * @return List of movies with ended schedules
+         */
+        List<MovieDto> getMoviesWithEndedSchedules();
 
         /**
          * Get detailed information about how movies are categorized for debugging

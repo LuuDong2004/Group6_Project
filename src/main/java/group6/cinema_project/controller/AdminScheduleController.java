@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -494,9 +493,9 @@ public class AdminScheduleController {
      */
     @GetMapping("/detail/{movieId}")
     public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "backUrl", required = false) String backUrl,
-            Model model) {
+                                          @RequestParam(value = "status", required = false) String status,
+                                          @RequestParam(value = "backUrl", required = false) String backUrl,
+                                          Model model) {
 
         log.info("Đang tải chi tiết lịch chiếu cho phim ID: {} với bộ lọc trạng thái: {}", movieId, status);
 
@@ -505,37 +504,45 @@ public class AdminScheduleController {
         String defaultBackUrl = "/admin/schedules/list/playing";
 
         try {
-            // Lấy tất cả lịch chiếu hoặc lọc theo trạng thái
             if (status != null && !status.trim().isEmpty()) {
-                // Thêm log để debug
-                log.info("Tìm lịch chiếu với movieId={} và status={}", movieId, status);
-                schedules = movieScheduleService.getSchedulesByMovieIdAndStatus(movieId, status);
-                log.info("Tìm thấy {} lịch chiếu với trạng thái {}", schedules.size(), status);
-
-                // Xác định text hiển thị và URL quay lại theo trạng thái
+                // Xử lý từng trường hợp status riêng biệt
                 switch (status.toUpperCase()) {
-                    case "ACTIVE":
-                        statusText = "Đang chiếu";
-                        defaultBackUrl = "/admin/schedules/list/playing";
-                        break;
                     case "UPCOMING":
+                        log.info("Tìm lịch chiếu UPCOMING cho movieId={}", movieId);
+                        schedules = movieScheduleService.getSchedulesByMovieIdAndStatus(movieId, "UPCOMING");
                         statusText = "Sắp chiếu";
                         defaultBackUrl = "/admin/schedules/list/comingsoon";
                         break;
+
+                    case "ACTIVE":
+                    case "PLAYING":
+                        log.info("Tìm lịch chiếu ACTIVE cho movieId={}", movieId);
+                        schedules = movieScheduleService.getSchedulesByMovieIdAndStatus(movieId, "ACTIVE");
+                        statusText = "Đang chiếu";
+                        defaultBackUrl = "/admin/schedules/list/playing";
+                        break;
+
                     case "ENDED":
+                        log.info("Tìm lịch chiếu ENDED cho movieId={}", movieId);
+                        schedules = movieScheduleService.getSchedulesByMovieIdAndStatus(movieId, "ENDED");
                         statusText = "Đã kết thúc";
                         defaultBackUrl = "/admin/schedules/list/stopped";
                         break;
+
                     default:
-                        statusText = "Trạng thái: " + status;
+                        log.info("Status không hợp lệ: {}, hiển thị tất cả lịch chiếu", status);
+                        schedules = movieScheduleService.getSchedulesByMovieId(movieId);
+                        statusText = "Tất cả";
                         break;
                 }
             } else {
+                // Không có status - hiển thị tất cả lịch chiếu
+                log.info("Không có status filter, hiển thị tất cả lịch chiếu cho movieId={}", movieId);
                 schedules = movieScheduleService.getSchedulesByMovieId(movieId);
+                statusText = "Tất cả";
             }
 
-            // Logic fallback đã được loại bỏ vì service đã được cập nhật để sử dụng logic
-            // động
+            log.info("Tìm thấy {} lịch chiếu với status: {}", schedules.size(), statusText);
 
             if (schedules.isEmpty()) {
                 String errorMessage = status != null

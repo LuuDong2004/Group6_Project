@@ -14,8 +14,6 @@ public interface MovieService {
 
     List<MovieDto> getAllMovie();
 
-    List<MovieDto> getFilteredMovies(String searchTerm, String filterBy);
-
     // New methods for display with directors and actors
     List<MovieDto> getAllMoviesForDisplay();
 
