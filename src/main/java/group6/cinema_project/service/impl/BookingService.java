@@ -76,7 +76,7 @@ public class BookingService implements IBookingService {
 
             // Đặt các ghế đã chọn
             for (Integer seatId : request.getSeatIds()) {
-                seatReservationService.reserveSeat(seatId, request.getScheduleId(), 1, booking.getId());
+                seatReservationService.reserveSeat(seatId, request.getScheduleId(), 1, (int) booking.getId());
             }
 
             // ĐẢM BẢO: Gán bookingId cho các reservation PENDING vừa giữ chỗ (nếu có)
@@ -131,20 +131,7 @@ public class BookingService implements IBookingService {
             booking.setStatus("CANCELLED");
             bookingRepository.save(booking);
 
-            // Gửi email thông báo hủy vé
-            try {
-                BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
-                // Map danh sách ghế
-                List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
-                List<String> seatNames = reservations.stream()
-                    .map(r -> r.getSeat().getName())
-                    .collect(Collectors.toList());
-                bookingDto.setSeatNames(seatNames);
-                
-                mailService.sendCancellationEmail(bookingDto, booking.getUser().getEmail());
-            } catch (Exception e) {
-                System.err.println("Lỗi gửi email thông báo hủy vé: " + e.getMessage());
-            }
+
 
             return true;
         } catch (Exception e) {

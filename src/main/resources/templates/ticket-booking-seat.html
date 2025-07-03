@@ -765,7 +765,6 @@
     var movieId = /*[[${movieId}]]*/ 0;
     var scheduleId = /*[[${scheduleId}]]*/ 0;
     var roomId = /*[[${roomId}]]*/ 0;
-    var seatPrice = 100000; // Default seat price in VND
     var currentRoomId = /*[[${schedule.screeningRoom.id}]]*/ 0;
     
     // Debug log
@@ -778,7 +777,6 @@
 
 <script>
     // Seat Selection Management
-    // Seat Selection Management
     class SeatBooking {
         constructor() {
             this.selectedSeats = [];
@@ -786,9 +784,7 @@
             this.movieId = window.movieId || 0;
             this.scheduleId = window.scheduleId || 0;
             this.roomId = window.roomId || 0;
-            this.seatPrice = window.seatPrice || 100000;
             this.currentRoomId = window.currentRoomId || 0;
-
             this.init();
         }
 
@@ -824,34 +820,21 @@
                 console.error('Seats container not found');
                 return;
             }
-            
             console.log('Rendering seats with data:', this.seatsData);
-            
-            // If no seats data, create default seats
             if (!this.seatsData || !this.seatsData.length) {
                 console.log('No seats data, creating default seats');
                 this.createDefaultSeats();
                 return;
             }
-
-            // Group seats by row
             const seatsByRow = this.groupSeatsByRow(this.seatsData);
-
-            // Clear container
             container.innerHTML = '';
-
-            // Create rows
             Object.keys(seatsByRow).sort().forEach(rowKey => {
                 const rowDiv = document.createElement('div');
                 rowDiv.className = 'seat-row';
-
-                // Row label
                 const rowLabel = document.createElement('div');
                 rowLabel.className = 'row-label';
                 rowLabel.textContent = rowKey;
                 rowDiv.appendChild(rowLabel);
-
-                // Seats in row
                 seatsByRow[rowKey].forEach(seat => {
                     const seatDiv = document.createElement('div');
                     seatDiv.className = `seat ${seat.status === 'RESERVED' ? 'reserved' : seat.status === 'PENDING' ? 'pending' : 'available'}`;
@@ -859,14 +842,14 @@
                     seatDiv.dataset.seatId = seat.seatId;
                     seatDiv.dataset.seatName = seat.seatName;
                     seatDiv.dataset.status = seat.status;
-
+                    seatDiv.dataset.price = seat.price;
+                    // Tooltip giá ghế
+                    seatDiv.title = `Giá: ${formatPrice(seat.price || 0)}`;
                     if (seat.status !== 'RESERVED' && seat.status !== 'PENDING') {
                         seatDiv.addEventListener('click', () => this.toggleSeat(seat));
                     }
-
                     rowDiv.appendChild(seatDiv);
                 });
-
                 container.appendChild(rowDiv);
             });
         }
@@ -943,22 +926,22 @@
             if (seat.status === 'RESERVED' || seat.status === 'PENDING') {
                 return;
             }
-
             const seatElement = document.querySelector(`[data-seat-id="${seat.seatId}"]`);
             const isSelected = this.selectedSeats.find(s => s.seatId === seat.seatId);
-
             if (isSelected) {
-                // Deselect seat
                 this.selectedSeats = this.selectedSeats.filter(s => s.seatId !== seat.seatId);
                 seatElement.classList.remove('selected');
                 seatElement.classList.add('available');
             } else {
-                // Select seat
+                if (this.selectedSeats.length >= 6) {
+                    this.showAlert('Bạn chỉ được chọn tối đa 6 ghế!', 'error');
+                    return;
+                }
+                // Lưu cả price khi chọn ghế
                 this.selectedSeats.push(seat);
                 seatElement.classList.remove('available');
                 seatElement.classList.add('selected');
             }
-
             this.updateUI();
         }
 
@@ -1052,9 +1035,10 @@
         }
 
         getSelectedSeatsData() {
+            // Tính tổng động từ từng ghế
             return {
                 seats: this.selectedSeats,
-                total: this.selectedSeats.length * this.seatPrice,
+                total: this.selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0),
                 movieId: this.movieId,
                 scheduleId: this.scheduleId,
                 roomId: this.roomId
@@ -1093,13 +1077,11 @@
             console.error('Seat booking not initialized');
             return;
         }
-
         // FIXED: Check if seats are selected before proceeding
         if (seatBooking.selectedSeats.length === 0) {
             seatBooking.showAlert('Please select at least one seat', 'error');
             return;
         }
-
         const success = await seatBooking.reserveSeats();
         if (success) {
             // Store booking data in sessionStorage for payment page
@@ -1108,10 +1090,8 @@
             bookingData.foodTotal = Object.entries(foodQuantities).reduce(
                 (total, [item, quantity]) => total + quantity * foodPrices[item], 0
             );
-
             console.log('Booking data:', bookingData); // Debug log
             sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-
             // FIXED: Add error handling for redirect
             try {
                 // Create booking first
@@ -1129,17 +1109,12 @@
                         notes: ''
                     })
                 });
-
                 if (!response.ok) {
                     throw new Error('Failed to create booking');
                 }
-
                 const booking = await response.json();
-                
-                // Redirect to payment page with booking ID
-                setTimeout(() => {
-                    window.location.href = `/payment?bookingId=${booking[0].id}`;
-                }, 1000);
+                // Chuyển sang trang payment.html với bookingId
+                window.location.href = `/payment?bookingId=${booking[0].id}`;
             } catch (error) {
                 console.error('Error:', error);
                 seatBooking.showAlert('Error creating booking: ' + error.message, 'error');
@@ -1170,20 +1145,16 @@
 
     // FIXED: Ensure seatBooking is initialized before using it
     function updateTotals() {
-        // Check if seatBooking is initialized
         if (!seatBooking) {
             console.warn('SeatBooking not initialized yet');
             return;
         }
-
-        // Calculate seats total
-        const seatsTotal = seatBooking.selectedSeats.length * seatBooking.seatPrice;
+        // Tính tổng giá động từ từng ghế đã chọn
+        const seatsTotal = seatBooking.selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0);
         const seatsElement = document.getElementById('seats-total');
         if (seatsElement) {
             seatsElement.textContent = formatPrice(seatsTotal);
         }
-
-        // Calculate food total
         let foodTotal = 0;
         for (const [item, quantity] of Object.entries(foodQuantities)) {
             foodTotal += quantity * foodPrices[item];
@@ -1192,15 +1163,11 @@
         if (foodElement) {
             foodElement.textContent = formatPrice(foodTotal);
         }
-
-        // Calculate and display grand total
         const grandTotal = seatsTotal + foodTotal;
         const grandTotalElement = document.getElementById('grand-total');
         if (grandTotalElement) {
             grandTotalElement.textContent = formatPrice(grandTotal);
         }
-
-        // Enable/disable continue button based on seat selection
         const continueButton = document.getElementById('continue-button');
         if (continueButton) {
             continueButton.disabled = seatBooking.selectedSeats.length === 0;

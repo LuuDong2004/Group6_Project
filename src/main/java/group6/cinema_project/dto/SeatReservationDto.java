@@ -10,4 +10,5 @@ public class SeatReservationDto {
     private String row;
     private String status;
     private Date createTime;
-} 
+    private double price;
+}

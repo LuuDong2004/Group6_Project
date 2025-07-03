@@ -84,25 +84,25 @@ public class SeatReservationService implements ISeatReservationService {
     public List<SeatReservationDto> getSeatsWithStatus(Integer scheduleId) {
         try {
             logger.info("Getting seats for schedule ID: {}", scheduleId);
-            
             // Kiểm tra lịch chiếu tồn tại
             Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + scheduleId));
-            
+            // Lấy ngày chiếu
+            java.util.Date screeningDate = schedule.getScreeningDate();
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(screeningDate);
+            int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK); // CN=1, T2=2, ...
             // Lấy tất cả ghế trong phòng
             List<Seat> allSeats = seatRepository.findSeatsByRoomId(scheduleId);
             logger.info("Found {} seats for schedule", allSeats.size());
-            
             if (allSeats.isEmpty()) {
                 logger.warn("No seats found for schedule ID: {}", scheduleId);
                 throw new RuntimeException("Không tìm thấy ghế cho lịch chiếu này");
             }
-            
             // Lấy các ghế đã đặt
             List<SeatReservation> reservations = seatReservationRepository
                 .findActiveReservationsByScheduleId(scheduleId);
             logger.info("Found {} active reservations", reservations.size());
-            
             // Map trạng thái ghế
             return allSeats.stream()
                 .map(seat -> {
@@ -110,22 +110,34 @@ public class SeatReservationService implements ISeatReservationService {
                     dto.setSeatId(seat.getId());
                     dto.setSeatName(seat.getName());
                     dto.setRow(seat.getRow());
-                    
+                    // Set giá động đúng 3 loại
+                    double price = 0;
+                    String type = seat.getType() != null ? seat.getType().trim().toUpperCase() : "";
+                    if (dayOfWeek >= 2 && dayOfWeek <= 6) { // T2-T6
+                        if (type.equals("STANDARD")) price = 50_000;
+                        else if (type.equals("VIP")) price = 70_000;
+                        else if (type.equals("VIP2")) price = 80_000;
+                        else price = 50_000; // fallback
+                    } else { // T7, CN
+                        if (type.equals("STANDARD")) price = 80_000;
+                        else if (type.equals("VIP")) price = 100_000;
+                        else if (type.equals("VIP2")) price = 120_000;
+                        else price = 80_000; // fallback
+                    }
+                    dto.setPrice(price);
                     // Kiểm tra trạng thái ghế
-                    Optional<SeatReservation> reservation = reservations.stream()
+                    java.util.Optional<SeatReservation> reservation = reservations.stream()
                         .filter(r -> r.getSeat().getId().equals(seat.getId()))
                         .findFirst();
-                    
                     if (reservation.isPresent()) {
                         dto.setStatus(reservation.get().getStatus());
                         dto.setCreateTime(reservation.get().getCreateDate());
                     } else {
                         dto.setStatus("AVAILABLE");
                     }
-                    
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .collect(java.util.stream.Collectors.toList());
         } catch (Exception e) {
             logger.error("Error getting seats with status: {}", e.getMessage(), e);
             throw new RuntimeException("Lỗi khi lấy trạng thái ghế: " + e.getMessage());

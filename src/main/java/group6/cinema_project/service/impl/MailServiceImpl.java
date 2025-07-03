@@ -3,7 +3,6 @@ package group6.cinema_project.service.impl;
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.service.MailService;
 import group6.cinema_project.service.QRCodeService;
-import group6.cinema_project.service.SendGridMailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,14 +27,14 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private SendGridMailService sendGridMailService;
 
-    @Value("${spring.mail.username:your-email@example.com}")
+    @Value("${spring.mail.username}")
     private String fromEmail;
 
     private String formatDate(java.util.Date date, String pattern) {
         if (date == null) return "";
         
         if (date instanceof Date) {
-            // Xử lý java.sql.Date
+
             Date sqlDate = (Date) date;
             LocalDate localDate = sqlDate.toLocalDate();
             return localDate.format(DateTimeFormatter.ofPattern(pattern));
@@ -65,45 +64,16 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    @Override
-    public void sendmail() {
-        // Không dùng
-    }
 
-    @Override
-    public void sendBookingConfirmationEmail(BookingDto booking, String userEmail) {
-        try {
-            String subject = "Xác nhận đặt vé - " + booking.getSchedule().getMovie().getName();
-            Context context = new Context();
-            context.setVariable("booking", booking);
-            context.setVariable("bookingCode", booking.getCode());
-            context.setVariable("movieName", booking.getSchedule().getMovie().getName());
-            context.setVariable("cinemaName", booking.getSchedule().getBranch().getName());
-            context.setVariable("roomName", booking.getSchedule().getScreeningRoom().getName());
-            context.setVariable("screeningDate", formatDate(booking.getSchedule().getScreeningDate(), "dd/MM/yyyy"));
-            context.setVariable("startTime", formatTime(booking.getSchedule().getStartTime(), "HH:mm"));
-            context.setVariable("totalAmount", formatAmount(booking.getAmount()));
-            context.setVariable("seatNames", booking.getSeatNames());
-            String htmlContent = templateEngine.process("email/booking-confirmation", context);
-            sendGridMailService.sendEmail(userEmail, subject, htmlContent);
-            System.out.println("Email xác nhận đặt vé đã được gửi đến: " + userEmail);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Lỗi gửi email xác nhận đặt vé: " + e.getMessage());
-            throw new RuntimeException("Không thể gửi email xác nhận đặt vé", e);
-        }
-    }
+
 
     @Override
     public void sendETicketEmail(BookingDto booking, String userEmail) {
         try {
             String subject = "Vé điện tử - " + booking.getSchedule().getMovie().getName();
             String seatNamesStr = String.join(", ", booking.getSeatNames());
-            String qrCode = qrCodeService.generateTicketQRCode(
-                booking.getCode(), 
-                booking.getSchedule().getMovie().getName(), 
-                seatNamesStr
-            );
+            // Lấy dữ liệu QR code dạng file
+            byte[] qrCodeBytes = qrCodeService.generateQRCodeBytes(booking.getCode());
             Context context = new Context();
             context.setVariable("booking", booking);
             context.setVariable("bookingCode", booking.getCode());
@@ -114,9 +84,10 @@ public class MailServiceImpl implements MailService {
             context.setVariable("startTime", formatTime(booking.getSchedule().getStartTime(), "HH:mm"));
             context.setVariable("totalAmount", formatAmount(booking.getAmount()));
             context.setVariable("seatNames", booking.getSeatNames());
-            context.setVariable("qrCode", qrCode);
+            // Không cần context.setVariable("qrCode", ...);
             String htmlContent = templateEngine.process("email/e-ticket", context);
-            sendGridMailService.sendEmail(userEmail, subject, htmlContent);
+            // Gửi email với file đính kèm QR code dạng inline
+            sendGridMailService.sendEmail(userEmail, subject, htmlContent, qrCodeBytes, "qr-code.png", "image/png");
             System.out.println("Email vé điện tử đã được gửi đến: " + userEmail);
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,26 +96,7 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    @Override
-    public void sendCancellationEmail(BookingDto booking, String userEmail) {
-        try {
-            String subject = "Thông báo hủy vé - " + booking.getSchedule().getMovie().getName();
-            Context context = new Context();
-            context.setVariable("booking", booking);
-            context.setVariable("bookingCode", booking.getCode());
-            context.setVariable("movieName", booking.getSchedule().getMovie().getName());
-            context.setVariable("screeningDate", formatDate(booking.getSchedule().getScreeningDate(), "dd/MM/yyyy"));
-            context.setVariable("startTime", formatTime(booking.getSchedule().getStartTime(), "HH:mm"));
-            context.setVariable("totalAmount", formatAmount(booking.getAmount()));
-            String htmlContent = templateEngine.process("email/booking-cancellation", context);
-            sendGridMailService.sendEmail(userEmail, subject, htmlContent);
-            System.out.println("Email thông báo hủy vé đã được gửi đến: " + userEmail);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Lỗi gửi email thông báo hủy vé: " + e.getMessage());
-            throw new RuntimeException("Không thể gửi email thông báo hủy vé", e);
-        }
-    }
+
 
     private String formatAmount(Object amount) {
         if (amount instanceof Double || amount instanceof Float) {

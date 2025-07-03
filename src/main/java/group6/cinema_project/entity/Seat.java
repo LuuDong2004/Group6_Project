@@ -19,7 +19,9 @@ public class Seat {
 
     private String name;
     private String row;
-
+    @Column(name = "seat_type")
+    private String type;
+//    private double price;
     @ManyToOne
     @JoinColumn(name = "screening_room_id")
     private ScreeningRoom room;

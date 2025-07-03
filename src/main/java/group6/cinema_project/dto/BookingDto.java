@@ -13,16 +13,15 @@ import java.util.Map;
 
 @Data
 public class BookingDto {
-    private int id;
+    private Integer id;
     private UserDto user;
     private String code;
-    private long amount;
+    private Integer amount;
     private String status;
     private LocalDate date;
     private Date expiryDate; // ngày hiệu lực của booking
     private String notes;
-    private ScheduleDto schedule; // Thông tin lịch chiếu
-    private List<SeatReservationDto> seats; // Danh sách ghế đã đặt
-    private Map<String, Integer> foodItems; // Danh sách đồ ăn và số lượng
+    private ScheduleDto schedule;
     private List<String> seatNames;
+
 }

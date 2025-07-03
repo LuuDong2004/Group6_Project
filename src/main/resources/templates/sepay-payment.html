@@ -18,6 +18,9 @@
         .status-failed { background-color: #dc3545; }
         .copy-btn { cursor: pointer; color: #0d6efd; }
         .copy-btn:hover { color: #0a58ca; }
+        .loading-spinner { display: none; }
+        .qr-code-container { text-align: center; margin: 2rem 0; }
+        .payment-status { margin: 1rem 0; }
     </style>
 </head>
 <body>
@@ -28,8 +31,9 @@
             </h2>
 
             <!-- Payment Status -->
-            <div id="payment-status" class="alert alert-warning text-center mb-4">
-                <span id="status-indicator" class="status-indicator status-pending"></span>
+            <div class="alert alert-info text-center payment-status" id="payment-status">
+                <div class="status-indicator status-pending" id="status-indicator"></div>
+                <span th:text="${transactionId}"></span> -
                 <span id="status-text">Đang chờ thanh toán...</span>
             </div>
 
@@ -39,9 +43,18 @@
                 <div class="countdown" id="countdown">15:00</div>
             </div>
 
+            <!-- Loading Spinner -->
+            <div class="text-center loading-spinner" id="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Đang kiểm tra trạng thái thanh toán...</p>
+            </div>
+
             <!-- QR Code -->
-            <div class="text-center mb-4">
-                <img id="sepay-qr" th:src="${qrCodeBase64 != null and #strings.length(qrCodeBase64) > 0 ? qrCodeBase64 : qrCodeUrl}" alt="Sepay QR Code" class="img-fluid" style="max-width: 300px;">
+            <div class="qr-code-container" id="qr-code-container">
+                <img th:src="${qrCodeUrl}" src="" alt="QR Code"/>
+                <p class="mt-2 text-muted">Quét mã QR bằng app ngân hàng để thanh toán</p>
             </div>
 
             <!-- Thông tin giao dịch -->
@@ -50,85 +63,103 @@
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>Mã booking:</strong> <span th:text="${bookingId}"></span></p>
-                        <p><strong>Mã merchant:</strong> <span th:text="${merchantCode}"></span></p>
+                        <p><strong>Stk:</strong> <span th:text="${stk}"></span></p>
+                        <p><strong>Mã transaction:</strong> <span th:text="${transactionId}"></span></p>
+                        <p><strong>Số tiền:</strong> <span th:text="${#numbers.formatCurrency(amount)}"></span></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Manual Confirmation Button -->
+            <!-- Action Buttons -->
             <div class="text-center mt-4">
-                <button class="btn btn-danger" onclick="cancelPayment()">
+                <button class="btn btn-primary me-2" onclick="refreshQR()" id="refresh-btn">
+                    <i class="fas fa-sync-alt me-2"></i>Làm mới QR
+                </button>
+                <button class="btn btn-danger" onclick="cancelPayment()" id="cancel-btn">
                     <i class="fas fa-times-circle me-2"></i>Hủy thanh toán
                 </button>
+            </div>
+
+            <div class="alert alert-warning text-center mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                Quét mã QR bằng app ngân hàng để thanh toán. Sau khi thanh toán thành công, hệ thống sẽ tự động chuyển sang trang xác nhận!
+            </div>
+
+            <!-- Test Section (chỉ hiển thị trong development) -->
+            <div class="alert alert-info mt-3" id="test-section" style="display: none;">
+                <h6><i class="fas fa-flask me-2"></i>Test Section (Development Only)</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <button class="btn btn-success btn-sm w-100 mb-2" onclick="testCompletePayment()">
+                            <i class="fas fa-check me-1"></i>Test Complete Payment
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-warning btn-sm w-100 mb-2" onclick="testCancelPayment()">
+                            <i class="fas fa-times me-1"></i>Test Cancel Payment
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-info btn-sm w-100" onclick="showDebugInfo()">
+                            <i class="fas fa-bug me-1"></i>Show Debug Info
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script th:inline="javascript">
-        // Get transaction reference and expiry time from server
-        const transactionRef = /*[[${transactionRef}]]*/ '';
-        const expiryTime = new Date(/*[[${expiryTime}]]*/ '');
-        let countdownInterval = setInterval(updateCountdown, 1000);
-        let checkInterval = setInterval(() => checkPaymentStatus(), 5000);
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+        let transactionRef = '[[${transactionId}]]';
+        let bookingId = '[[${bookingId}]]';
+        let checkInterval;
+        let countdownInterval;
+        let timeLeft = 15 * 60; // 15 minutes in seconds
+        let stompClient = null;
 
-        function updateCountdown() {
-            try {
-                const now = new Date();
-                const diff = expiryTime - now;
-                if (diff <= 0) {
-                    clearInterval(countdownInterval);
-                    clearInterval(checkInterval);
-                    document.getElementById('countdown').textContent = '00:00';
-                    updatePaymentStatus('failed', 'Hết thời gian thanh toán!');
-                    return;
-                }
-                const minutes = Math.floor(diff / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
-                document.getElementById('countdown').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } catch (error) {
-                console.error('Error updating countdown:', error);
-                clearInterval(countdownInterval);
-                clearInterval(checkInterval);
-                updatePaymentStatus('failed', 'Lỗi đồng hồ đếm ngược!');
-            }
-        }
-
-        function checkPaymentStatus(showAlert = true) {
-            if (!transactionRef) {
-                console.error('Transaction reference is missing');
-                return;
-            }
-            fetch(`/payment/sepay/check-status?transactionId=${encodeURIComponent(transactionRef)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        if (data.status === 'COMPLETED') {
-                            updatePaymentStatus('success', 'Thanh toán thành công!');
-                            clearInterval(checkInterval);
-                            clearInterval(countdownInterval);
-                            setTimeout(() => {
-                                const successUrl = `/payment/success?bookingId=${data.bookingId}&transactionId=${encodeURIComponent(transactionRef)}&paymentMethod=sepay&amount=${encodeURIComponent(data.amount)}`;
-                                window.location.href = successUrl;
-                            }, 2000);
-                        } else if (showAlert) {
-                            console.log('Payment pending...');
-                        }
-                    } else if (showAlert) {
-                        console.error('Payment check failed:', data.error);
-                        alert('Lỗi kiểm tra trạng thái: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking payment status:', error);
-                    if (showAlert) {
-                        alert('Có lỗi xảy ra khi kiểm tra trạng thái. Vui lòng thử lại sau.');
+        function connectWebSocket() {
+            const socket = new SockJS('/ws/payment');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/payment-status/' + transactionRef, function (message) {
+                    const data = JSON.parse(message.body);
+                    if (data.transactionId === transactionRef && (data.status === 'COMPLETED' || data.status === 'SUCCESS')) {
+                        const successUrl = `/payment/success?bookingId=${bookingId}&transactionId=${encodeURIComponent(transactionRef)}&paymentMethod=sepay&amount=${encodeURIComponent(data.amount || '[[${amount}]]')}`;
+                        window.location.href = successUrl;
                     }
                 });
+            });
+        }
+
+        // Initialize countdown timer
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('countdown').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    clearInterval(checkInterval);
+                    updatePaymentStatus('failed', 'Hết thời gian thanh toán!');
+                    document.getElementById('countdown').textContent = '00:00';
+                    document.getElementById('countdown').style.color = '#dc3545';
+                }
+            }, 1000);
+        }
+
+        // Start payment status checking
+        function startPaymentChecking() {
+            checkInterval = setInterval(() => {
+                checkPaymentStatus(false);
+            }, 3000); // Check every 3 seconds
         }
 
         function updatePaymentStatus(status, message) {
@@ -142,63 +173,95 @@
                 statusIndicator.className = `status-indicator status-${status}`;
                 statusText.textContent = message;
                 if (status === 'success') {
-                    statusAlert.className = 'alert alert-success text-center';
+                    statusAlert.className = 'alert alert-success text-center payment-status';
                 } else if (status === 'failed') {
-                    statusAlert.className = 'alert alert-danger text-center';
+                    statusAlert.className = 'alert alert-danger text-center payment-status';
                 }
             } catch (error) {
                 console.error('Error updating payment status:', error);
             }
         }
 
-        function cancelPayment() {
+        function refreshQR() {
             if (!transactionRef) {
-                alert('Lỗi: Không tìm thấy thông tin giao dịch!');
+                alert('Không tìm thấy thông tin giao dịch!');
                 return;
             }
-            if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Giao dịch này sẽ bị hủy và ghế sẽ được giải phóng.')) {
-                clearInterval(checkInterval);
-                clearInterval(countdownInterval);
-                fetch(`/payment/sepay/cancel?transactionId=${encodeURIComponent(transactionRef)}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('qr-code-container').style.display = 'none';
+            fetch('/payment/sepay/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId: bookingId,
+                    amount: parseInt('[[${amount}]]'),
+                    description: 'Thanh toán vé xem phim',
+                    merchantCode: '[[${merchantCode}]]',
+                    callbackUrl: window.location.origin + '/payment/sepay/webhook'
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('qr-code-container').style.display = 'block';
+                if (data.qrCodeUrl) {
+                    document.querySelector('#qr-code-container img').src = data.qrCodeUrl;
+                    if (data.transactionId) {
+                        transactionRef = data.transactionId;
                     }
-                    return response.json();
+                    alert('Đã làm mới mã QR thành công!');
+                } else {
+                    alert('Có lỗi xảy ra khi làm mới mã QR: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('qr-code-container').style.display = 'block';
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi làm mới mã QR');
+            });
+        }
+
+        function cancelPayment() {
+            if (!transactionRef) {
+                alert('Không tìm thấy thông tin giao dịch!');
+                return;
+            }
+            if (confirm('Bạn có chắc chắn muốn hủy thanh toán?')) {
+                fetch('/payment/sepay/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `transactionId=${encodeURIComponent(transactionRef)}`
                 })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        updatePaymentStatus('failed', 'Đã hủy thanh toán thành công!');
+                        clearInterval(checkInterval);
+                        clearInterval(countdownInterval);
+                        updatePaymentStatus('failed', 'Thanh toán đã bị hủy!');
                         setTimeout(() => {
-                            const cancelUrl = `/payment/failed?message=Đã hủy thanh toán&bookingId=${data.bookingId}`;
-                            window.location.href = cancelUrl;
+                            window.location.href = `/payment/failed?bookingId=${data.bookingId}&message=Thanh toán đã bị hủy`;
                         }, 2000);
                     } else {
-                        throw new Error(data.message || 'Lỗi hủy thanh toán');
+                        alert('Lỗi khi hủy thanh toán: ' + data.error);
                     }
                 })
                 .catch(error => {
-                    console.error('Error cancelling payment:', error);
-                    alert('Có lỗi xảy ra khi hủy thanh toán. Vui lòng thử lại sau.');
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi hủy thanh toán');
                 });
             }
         }
-    </script>
-    <script>
-    // Tự động hủy thanh toán nếu người dùng thoát trang khi chưa thanh toán thành công
-    window.addEventListener('beforeunload', function (e) {
-        const statusText = document.getElementById('status-text');
-        if (statusText && statusText.textContent.includes('chờ thanh toán')) {
-            fetch('/payment/sepay/cancel?transactionId=' + encodeURIComponent(transactionRef), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                keepalive: true
-            });
-        }
-    });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+            startPaymentChecking();
+            connectWebSocket();
+        });
     </script>
 </body>
-</html> 
+</html>

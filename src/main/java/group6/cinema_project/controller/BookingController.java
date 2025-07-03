@@ -96,9 +96,7 @@ public class BookingController {
         return "booking-form";
     }
 
-    /**
-     * Trang hiển thị danh sách booking của người dùng
-     */
+
     @GetMapping("/list")
     public String showBookingList() {
         return "booking-list";

@@ -5,251 +5,483 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vé điện tử</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
         .container {
-            max-width: 600px;
+            max-width: 480px;
             margin: 0 auto;
-            background-color: #ffffff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            backdrop-filter: blur(10px);
         }
+
         .header {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(180deg); }
+        }
+
         .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 300;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
         .ticket-container {
             padding: 30px;
+            background: #ffffff;
         }
+
+        .success-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
         .ticket {
-            border: 2px dashed #28a745;
-            border-radius: 15px;
-            padding: 25px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 0;
             margin: 20px 0;
-            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+            overflow: hidden;
             position: relative;
         }
+
         .ticket::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: -10px;
-            width: 20px;
-            height: 20px;
-            background: #f4f4f4;
+            top: 280px;
+            left: -15px;
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
             border-radius: 50%;
-            transform: translateY(-50%);
+            box-shadow: 0 0 0 15px #f8fafc;
+            z-index: 2;
         }
+
         .ticket::after {
             content: '';
             position: absolute;
-            top: 50%;
-            right: -10px;
-            width: 20px;
-            height: 20px;
-            background: #f4f4f4;
+            top: 280px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
             border-radius: 50%;
-            transform: translateY(-50%);
+            box-shadow: 0 0 0 15px #f8fafc;
+            z-index: 2;
         }
+
+        .ticket-divider {
+            position: absolute;
+            top: 280px;
+            left: 30px;
+            right: 30px;
+            height: 2px;
+            background: repeating-linear-gradient(
+                    to right,
+                    #e2e8f0 0px,
+                    #e2e8f0 8px,
+                    transparent 8px,
+                    transparent 16px
+            );
+            z-index: 1;
+        }
+
+        .movie-section {
+            padding: 30px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
         .movie-info {
             display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            align-items: flex-start;
+            gap: 20px;
         }
+
         .movie-poster {
-            width: 80px;
-            height: 120px;
+            width: 90px;
+            height: 135px;
             object-fit: cover;
-            border-radius: 4px;
-            margin-right: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            flex-shrink: 0;
         }
+
+        .movie-details {
+            flex: 1;
+        }
+
         .movie-details h3 {
-            margin: 0 0 10px 0;
-            color: #333;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.2;
         }
-        .movie-details p {
-            margin: 5px 0;
-            color: #666;
+
+        .movie-details .detail-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
             font-size: 14px;
         }
-        .ticket-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
+
+        .movie-details .detail-row .label {
+            color: #64748b;
+            font-weight: 500;
+            min-width: 80px;
         }
-        .detail-item {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
+
+        .movie-details .detail-row .value {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .details-section {
+            padding: 30px;
+        }
+
+        .seats-container {
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
-        .detail-item h4 {
-            margin: 0 0 8px 0;
-            color: #28a745;
+
+        .seats-label {
+            color: #64748b;
             font-size: 14px;
+            font-weight: 500;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
         }
-        .detail-item p {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        .qr-section {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .qr-code {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 15px;
-            border: 2px solid #28a745;
-            border-radius: 8px;
-            padding: 10px;
-        }
+
         .seats {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
-            margin: 15px 0;
+            align-items: center;
         }
+
         .seat-tag {
-            background-color: #28a745;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 6px 15px;
-            border-radius: 20px;
+            padding: 12px 20px;
+            border-radius: 25px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
         }
-        .instructions {
-            background-color: #e8f5e8;
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+
+        .seat-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
         }
-        .instructions h4 {
-            margin: 0 0 15px 0;
-            color: #28a745;
-        }
-        .instructions ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        .instructions li {
-            margin: 8px 0;
-            color: #333;
-        }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 20px;
+
+        .total-amount {
             text-align: center;
-            color: #666;
-            font-size: 14px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            margin-bottom: 25px;
         }
-        .success-badge {
-            display: inline-block;
-            background-color: #28a745;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
+
+        .total-amount .label {
+            color: #64748b;
             font-size: 14px;
             font-weight: 500;
-            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .total-amount .amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .qr-section {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .qr-section h4 {
+            color: #1a1a1a;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .qr-placeholder {
+            width: 140px;
+            height: 140px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #64748b;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .instructions h4 {
+            color: #92400e;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            color: #92400e;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #d97706;
+            font-weight: bold;
+        }
+
+        .enjoy-message {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-radius: 16px;
+            margin: 25px 0;
+        }
+
+        .enjoy-message p {
+            color: #166534;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 25px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .footer p {
+            margin-bottom: 5px;
+        }
+
+        .footer p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .container {
+                margin: 0 10px;
+                border-radius: 16px;
+            }
+
+            .movie-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .movie-poster {
+                width: 120px;
+                height: 180px;
+                margin: 0 auto;
+            }
+
+            .seats {
+                gap: 8px;
+            }
+
+            .seat-tag {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎫 Vé điện tử của bạn</h1>
-            <p>Thanh toán thành công - Mã vé: <strong th:text="${bookingCode}">ABC12345</strong></p>
-        </div>
-        
-        <div class="ticket-container">
-            <div style="text-align: center;">
-                <div class="success-badge">✅ Thanh toán thành công</div>
-            </div>
+<div class="container">
+    <div class="header">
+        <h1>🎫 Vé điện tử của bạn</h1>
+        <p>Thanh toán thành công</p>
+    </div>
 
-            <div class="ticket">
+    <div class="ticket-container">
+        <div style="text-align: center;">
+            <div class="success-badge">
+                <span>✅</span>
+                <span>Thanh toán thành công</span>
+            </div>
+        </div>
+
+        <div class="ticket">
+            <div class="movie-section">
                 <div class="movie-info">
-                    <img th:src="${booking.schedule.movie.image}" th:alt="${movieName}" class="movie-poster">
                     <div class="movie-details">
                         <h3 th:text="${movieName}">Tên phim</h3>
-                        <p><strong>Rạp:</strong> <span th:text="${cinemaName}">Tên rạp</span></p>
-                        <p><strong>Phòng:</strong> <span th:text="${roomName}">Tên phòng</span></p>
-                        <p><strong>Ngày chiếu:</strong> <span th:text="${screeningDate}">dd/mm/yyyy</span></p>
-                        <p><strong>Giờ chiếu:</strong> <span th:text="${startTime}">HH:mm</span></p>
+                        <div class="detail-row">
+                            <span class="label">Rạp:</span>
+                            <span class="value" th:text="${cinemaName}">Tên rạp</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Phòng:</span>
+                            <span class="value" th:text="${roomName}">Tên phòng</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Ngày:</span>
+                            <span class="value" th:text="${screeningDate}">dd/mm/yyyy</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Giờ:</span>
+                            <span class="value" th:text="${startTime}">HH:mm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-divider"></div>
+
+            <div class="details-section">
+                <div class="seats-container">
+                    <div class="seats-label">Ghế đã chọn</div>
+                    <div class="seats">
+                        <span th:each="seat : ${seatNames}" th:text="${seat}" class="seat-tag"></span>
                     </div>
                 </div>
 
-                <div class="ticket-details">
-                    <div class="detail-item">
-                        <h4>Ghế</h4>
-                        <div class="seats">
-                            <span th:each="seat : ${seatNames}" th:text="${seat}" class="seat-tag"></span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <h4>Tổng tiền</h4>
-                        <p th:text="${totalAmount}">0 VNĐ</p>
-                    </div>
+                <div class="total-amount">
+                    <div class="label">Tổng tiền</div>
+                    <div class="amount" th:text="${totalAmount}">0 VNĐ</div>
                 </div>
 
                 <div class="qr-section">
-                    <h4>Mã QR vé</h4>
-                    <img th:src="${qrCode}" alt="QR Code" class="qr-code">
-                    <p style="font-size: 12px; color: #666; margin: 0;">
-                        Quét mã này tại rạp để vào phòng chiếu
-                    </p>
+                    <div style="display: none; margin-top: 15px; font-size: 12px; color: #64748b;">
+                        <strong>Mã vé:</strong> <span th:text="${bookingCode}">ABC12345</span><br>
+                        <strong>Phim:</strong> <span th:text="${movieName}">Tên phim</span><br>
+                        <strong>Ghế:</strong> <span th:text="${seatNames}">A1, A2</span>
+                    </div>
                 </div>
             </div>
-
-            <div class="instructions">
-                <h4>📋 Hướng dẫn sử dụng vé điện tử:</h4>
-                <ul>
-                    <li>Vui lòng đến rạp trước giờ chiếu 15 phút</li>
-                    <li>Mang theo mã QR này (có thể hiển thị trên điện thoại)</li>
-                    <li>Quét mã QR tại quầy vé hoặc cổng vào phòng chiếu</li>
-                    <li>Vé này chỉ có hiệu lực cho suất chiếu đã đặt</li>
-                    <li>Không được chuyển nhượng hoặc hoàn tiền</li>
-                </ul>
-            </div>
-
-            <div style="text-align: center; margin: 30px 0;">
-                <p style="color: #28a745; font-weight: bold; font-size: 16px;">
-                    🎬 Chúc bạn xem phim vui vẻ!
-                </p>
-            </div>
         </div>
 
-        <div class="footer">
-            <p>© 2024 Cinema Project. Tất cả quyền được bảo lưu.</p>
-            <p>Nếu có thắc mắc, vui lòng liên hệ: support@cinemaproject.com</p>
+        <div class="instructions">
+            <h4>
+                <span>📋</span>
+                <span>Hướng dẫn sử dụng vé điện tử</span>
+            </h4>
+            <ul>
+                <li>Vui lòng đến rạp trước giờ chiếu 15 phút</li>
+                <li>Quét mã QR tại quầy vé hoặc cổng vào phòng chiếu</li>
+                <li>Vé này chỉ có hiệu lực cho suất chiếu đã đặt</li>
+                <li>Không được đổi vé và hoàn tiền</li>
+                <li>Mã vé đã được gửi đính kèm trong email này, hãy bảo mật</li>
+            </ul>
+        </div>
+
+        <div class="enjoy-message">
+            <p>🎬 Chúc bạn xem phim vui vẻ!</p>
         </div>
     </div>
+
+    <div class="footer">
+        <p>© 2024 Cinema Project. Tất cả quyền được bảo lưu.</p>
+        <p>Nếu có thắc mắc, vui lòng liên hệ: luuvandong2004@gmail.com</p>
+    </div>
+</div>
 </body>
-</html> 
+</html>

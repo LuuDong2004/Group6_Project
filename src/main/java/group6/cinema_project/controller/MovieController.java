@@ -1,3 +1,4 @@
+
 package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.MovieDto;
