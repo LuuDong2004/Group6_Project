@@ -20,7 +20,6 @@
     />
 
     <style>
-      
       /* CSS cho Admin Dashboard */
       body {
         font-family: "Inter", sans-serif;
@@ -195,31 +194,131 @@
       }
 
       .schedules-grid {
-        display: grid;
-        gap: 1rem;
-      }
-
-      .schedule-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
+        flex-direction: column;
+        gap: 2rem;
       }
 
-      .schedule-card:hover {
+      .date-group {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+      }
+
+      .date-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .date-header h4 {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 1.25rem;
+      }
+
+      .date-header i {
+        color: #4f46e5;
+        font-size: 1.1rem;
+      }
+
+      .rooms-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .room-group {
+        background: white;
+        border-radius: 8px;
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .room-group:hover {
         border-color: #4f46e5;
         box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
       }
 
-      .schedule-info {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
-        flex: 1;
+      .room-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .room-header i {
+        color: #4f46e5;
+        width: 16px;
+      }
+
+      .time-slots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .time-slot {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: #475569;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .time-slot:hover {
+        background: #e0e7ff;
+        border-color: #4f46e5;
+        color: #4338ca;
+      }
+
+      .time-slot .price {
+        font-size: 0.75rem;
+        color: #059669;
+        font-weight: 600;
+      }
+
+      .time-slot .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .status-indicator.active {
+        background: #10b981;
+      }
+
+      .status-indicator.upcoming {
+        background: #f59e0b;
+      }
+
+      .status-indicator.ended {
+        background: #ef4444;
+      }
+
+      .schedule-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        align-items: center;
+        margin-left: auto;
       }
 
       .schedule-detail {
@@ -234,13 +333,6 @@
         color: #4f46e5;
         width: 16px;
         flex-shrink: 0;
-      }
-
-      .schedule-actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-shrink: 0;
-        align-items: flex-start;
       }
 
       .btn-edit,
@@ -373,25 +465,21 @@
           grid-template-columns: 1fr;
         }
 
-        .schedule-card {
+        .time-slots {
           flex-direction: column;
           align-items: stretch;
         }
 
-        .schedule-info {
-          grid-template-columns: 1fr;
-          margin-bottom: 1rem;
+        .time-slot {
+          justify-content: space-between;
         }
 
-        .schedule-actions {
-          justify-content: center;
-          align-self: stretch;
+        .room-group {
+          padding: 1rem;
         }
 
-        .btn-edit,
-        .btn-delete {
-          flex: 1;
-          text-align: center;
+        .date-group {
+          padding: 1rem;
         }
       }
     </style>
@@ -596,31 +684,26 @@
                 Movie Title
               </h1>
 
-              <div class="movie-meta" th:if="${not #lists.isEmpty(schedules)}">
+              <div
+                class="movie-meta"
+                th:if="${not #lists.isEmpty(groupedSchedules)}"
+              >
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
-                  <span
-                    th:text="${schedules[0].movieDuration != null ? schedules[0].movieDuration + ' phút' : 'N/A'}"
-                    >120 phút</span
-                  >
+                  <span>N/A</span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-star"></i>
-                  <span
-                    th:text="${schedules[0].movieRating != null ? schedules[0].movieRating : 'N/A'}"
-                    >PG-13</span
-                  >
+                  <span>N/A</span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-tags"></i>
-                  <span
-                    th:text="${schedules[0].movieGenre != null ? schedules[0].movieGenre : 'N/A'}"
-                    >Action, Adventure</span
-                  >
+                  <span>N/A</span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-calendar-alt"></i>
-                  <span th:text="${#lists.size(schedules)} + ' lịch chiếu'"
+                  <span
+                    th:text="${#aggregates.sum(groupedSchedules.![totalTimeSlots])} + ' lịch chiếu'"
                     >5 lịch chiếu</span
                   >
                 </div>
@@ -638,68 +721,85 @@
             </h3>
           </div>
 
-          <div th:if="${not #lists.isEmpty(schedules)}" class="schedules-grid">
-            <div th:each="schedule : ${schedules}" class="schedule-card">
-              <div class="schedule-info">
-                <div class="schedule-detail">
-                  <i class="fas fa-calendar"></i>
-                  <span
-                    th:text="${#temporals.format(schedule.screeningDate, 'dd/MM/yyyy')}"
-                    >01/01/2024</span
-                  >
-                </div>
-                <div class="schedule-detail">
-                  <i class="fas fa-clock"></i>
-                  <span
-                    th:text="${schedule.startTime} + ' - ' + ${schedule.endTime}"
-                    >19:00 - 21:30</span
-                  >
-                </div>
-                <div class="schedule-detail">
-                  <i class="fas fa-home"></i>
-                  <span th:text="${schedule.screeningRoomName}">Phòng 1</span>
-                </div>
-                <div class="schedule-detail">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span th:text="${schedule.branchName}">Chi nhánh A</span>
-                </div>
-                <div class="schedule-detail">
-                  <i class="fas fa-dollar-sign"></i>
-                  <span
-                    th:text="${#numbers.formatDecimal(schedule.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"
-                    >100,000 VNĐ</span
-                  >
-                </div>
-                <div class="schedule-detail">
-                  <i class="fas fa-info-circle"></i>
-                  <span
-                    th:class="${'status-badge ' + (schedule.status == 'ACTIVE' ? 'status-active' : schedule.status == 'UPCOMING' ? 'status-upcoming' : 'status-ended')}"
-                    th:text="${schedule.status == 'ACTIVE' ? 'Đang chiếu' : schedule.status == 'UPCOMING' ? 'Sắp chiếu' : 'Đã kết thúc'}"
-                    >Đang chiếu</span
-                  >
-                </div>
+          <!-- Hiển thị dữ liệu đã được nhóm sẵn từ backend -->
+          <div
+            th:if="${not #lists.isEmpty(groupedSchedules)}"
+            class="schedules-grid"
+          >
+            <!-- Duyệt qua từng ngày -->
+            <div th:each="dateGroup : ${groupedSchedules}" class="date-group">
+              <div class="date-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h4 th:text="${dateGroup.formattedDate}">
+                  Thứ Hai, 01/01/2024
+                </h4>
               </div>
-              <div class="schedule-actions">
-                <!-- Chỉ hiển thị nút Sửa khi KHÔNG phải ACTIVE -->
-                <a th:if="${schedule.status != 'ACTIVE' && schedule.status != 'ENDED'}" 
-                   th:href="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
-                   class="btn-edit">
-                    <i class="fas fa-edit me-1"></i>Sửa
-                </a>
 
-                <!-- Chỉ hiển thị nút Xóa khi KHÔNG phải ACTIVE -->
-                <button th:if="${schedule.status != 'ACTIVE' && schedule.status != 'ENDED'}" 
-                        type="button"
-                        class="btn-delete"
-                        th:onclick="'deleteSchedule(' + ${schedule.id} + ')'">
-                    <i class="fas fa-trash me-1"></i>Xóa
-                </button>
+              <div class="rooms-container">
+                <!-- Duyệt qua từng phòng trong ngày -->
+                <div
+                  th:each="roomGroup : ${dateGroup.rooms}"
+                  class="room-group"
+                >
+                  <div class="room-header">
+                    <i class="fas fa-home"></i>
+                    <span th:text="${roomGroup.roomName}">Phòng 1</span>
+                    <span class="schedule-detail" style="margin-left: 1rem">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span th:text="${roomGroup.branchName}">Chi nhánh A</span>
+                    </span>
+                  </div>
+
+                  <div class="time-slots">
+                    <!-- Duyệt qua từng khung giờ -->
+                    <div
+                      th:each="timeSlot : ${roomGroup.timeSlots}"
+                      class="time-slot"
+                    >
+                      <div
+                        th:class="${'status-indicator ' + timeSlot.statusClass}"
+                      ></div>
+                      <span th:text="${timeSlot.formattedTimeRange}"
+                        >19:00 - 21:30</span
+                      >
+                      <span
+                        class="price"
+                        th:text="${#numbers.formatDecimal(timeSlot.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"
+                        >100,000 VNĐ</span
+                      >
+
+                      <!-- Actions cho từng khung giờ -->
+                      <div class="schedule-actions" style="margin-left: 0.5rem">
+                        <!-- Chỉ hiển thị nút Sửa khi có thể chỉnh sửa -->
+                        <a
+                          th:if="${timeSlot.editable}"
+                          th:href="@{/admin/schedules/edit/{id}(id=${timeSlot.id})}"
+                          class="btn-edit"
+                          style="padding: 0.25rem 0.5rem; font-size: 0.75rem"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </a>
+
+                        <!-- Chỉ hiển thị nút Xóa khi có thể chỉnh sửa -->
+                        <button
+                          th:if="${timeSlot.editable}"
+                          type="button"
+                          class="btn-delete"
+                          style="padding: 0.25rem 0.5rem; font-size: 0.75rem"
+                          th:onclick="'deleteSchedule(' + ${timeSlot.id} + ')'"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Empty State -->
-          <div th:if="${#lists.isEmpty(schedules)}" class="empty-state">
+          <div th:if="${#lists.isEmpty(groupedSchedules)}" class="empty-state">
             <i class="fas fa-calendar-times"></i>
             <h3>Không có lịch chiếu</h3>
             <p>Phim này hiện tại không có lịch chiếu nào.</p>

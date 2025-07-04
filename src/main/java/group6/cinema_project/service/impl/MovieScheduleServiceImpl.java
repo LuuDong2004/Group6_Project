@@ -1,6 +1,9 @@
 package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.ScheduleGroupedByDateDto;
+import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
+import group6.cinema_project.dto.ScheduleTimeSlotDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningRoom;
@@ -287,7 +290,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         // Use dynamic date-based categorization instead of static status field
         switch (status.toUpperCase()) {
             case "ACTIVE":
-                return getCurrentlyPlayingMovies();
+                return getMoviesWithActiveSchedules(); // Changed to use the new method
             case "UPCOMING":
                 return getComingSoonMovies();
             case "ENDED":
@@ -321,6 +324,64 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         } catch (Exception e) {
             // Log the error and return empty list to prevent application crash
             System.err.println("Error fetching schedules for movie " + movieId + ": " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScheduleGroupedByDateDto> getSchedulesByMovieIdGrouped(Integer movieId) {
+        try {
+            // Get all schedules for the movie
+            List<ScreeningScheduleDto> schedules = getSchedulesByMovieId(movieId);
+
+            // Group schedules by date
+            Map<LocalDate, List<ScreeningScheduleDto>> schedulesByDate = schedules.stream()
+                    .collect(Collectors.groupingBy(ScreeningScheduleDto::getScreeningDate));
+
+            // Convert to grouped DTOs
+            return schedulesByDate.entrySet().stream()
+                    .map(entry -> {
+                        LocalDate date = entry.getKey();
+                        List<ScreeningScheduleDto> dailySchedules = entry.getValue();
+
+                        // Group daily schedules by room
+                        Map<String, List<ScreeningScheduleDto>> schedulesByRoom = dailySchedules.stream()
+                                .collect(Collectors.groupingBy(ScreeningScheduleDto::getScreeningRoomName));
+
+                        // Convert to room DTOs
+                        List<ScheduleGroupedByRoomDto> rooms = schedulesByRoom.entrySet().stream()
+                                .map(roomEntry -> {
+                                    String roomName = roomEntry.getKey();
+                                    List<ScreeningScheduleDto> roomSchedules = roomEntry.getValue();
+
+                                    // Get branch name from first schedule (all should be same)
+                                    String branchName = roomSchedules.isEmpty() ? ""
+                                            : roomSchedules.get(0).getBranchName();
+
+                                    // Convert to time slot DTOs
+                                    List<ScheduleTimeSlotDto> timeSlots = roomSchedules.stream()
+                                            .map(schedule -> new ScheduleTimeSlotDto(
+                                                    schedule.getId(),
+                                                    schedule.getStartTime(),
+                                                    schedule.getEndTime(),
+                                                    schedule.getPrice(),
+                                                    schedule.getStatus()))
+                                            .sorted((a, b) -> a.getStartTime().compareTo(b.getStartTime()))
+                                            .collect(Collectors.toList());
+
+                                    return new ScheduleGroupedByRoomDto(roomName, branchName, timeSlots);
+                                })
+                                .sorted((a, b) -> a.getRoomName().compareTo(b.getRoomName()))
+                                .collect(Collectors.toList());
+
+                        return new ScheduleGroupedByDateDto(date, rooms);
+                    })
+                    .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            System.err.println("Error fetching grouped schedules for movie " + movieId + ": " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -406,6 +467,22 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
         } catch (Exception e) {
             // Log the error and return empty list to prevent application crash
             System.err.println("Error fetching movies with ended schedules: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieDto> getMoviesWithActiveSchedules() {
+        try {
+            List<Movie> movies = movieScheduleRepository.findMoviesWithActiveSchedules();
+            return movies.stream()
+                    .map(this::convertMovieToBasicDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log the error and return empty list to prevent application crash
+            System.err.println("Error fetching movies with active schedules: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
         }

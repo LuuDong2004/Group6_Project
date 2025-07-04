@@ -158,76 +158,122 @@
         border-bottom-color: #4f46e5;
       }
 
-      /* Movie Cards */
-      .movies-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-      }
-
-      .movie-card {
+      /* Movie Table Styles */
+      .table-container {
         background: white;
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow-x: auto;
+        margin-top: 1rem;
       }
 
-      .movie-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      .movie-poster {
+      .movie-table {
         width: 100%;
-        height: 250px; /* Tăng từ 200px lên 250px */
-        object-fit: cover;
-        background: #e2e8f0;
+        border-collapse: collapse;
+        min-width: 1000px;
+      }
+
+      .movie-table th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        text-transform: uppercase;
+      }
+
+      .movie-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 14px;
+      }
+
+      .movie-table tr:hover {
+        background: #f8fafc;
       }
 
       .movie-info {
-        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
 
-      .movie-title {
-        font-size: 1.1rem;
+      .movie-poster {
+        width: 40px;
+        height: 60px;
+        border-radius: 4px;
+        object-fit: cover;
+        background: #e2e8f0;
+        flex-shrink: 0;
+      }
+
+      .movie-details h3 {
+        font-size: 14px;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 2px;
         color: #1e293b;
       }
 
-      .movie-details {
+      .movie-details p {
+        font-size: 12px;
         color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
+        margin-bottom: 2px;
       }
 
-      .movie-details .detail-item {
-        margin-bottom: 0.25rem;
-      }
-
-      .movie-actions {
+      .rating {
         display: flex;
-        gap: 0.5rem;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
       }
 
-      .btn-view-detail {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      .star {
+        color: #fbbf24;
+      }
+
+      .rating-badge {
+        background: #ec4899;
         color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .genre-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .genre-tag {
+        background: #e2e8f0;
+        color: #475569;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
         font-weight: 500;
-        text-decoration: none;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        white-space: nowrap;
       }
 
-      .btn-view-detail:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-buttons .btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .action-buttons .btn:hover {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
         color: white;
-        text-decoration: none;
       }
 
       .status-badge {
@@ -287,8 +333,32 @@
           gap: 0.5rem;
         }
 
-        .movies-grid {
-          grid-template-columns: 1fr;
+        .table-container {
+          overflow-x: auto;
+        }
+
+        .movie-table {
+          min-width: 800px;
+        }
+
+        .movie-table th,
+        .movie-table td {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+
+        .movie-poster {
+          width: 30px;
+          height: 45px;
+        }
+
+        .movie-details h3 {
+          font-size: 12px;
+        }
+
+        .genre-tags {
+          flex-direction: column;
+          align-items: flex-start;
         }
       }
     </style>
@@ -501,58 +571,109 @@
           </div>
         </div>
 
-        <!-- Movies Grid -->
-        <div th:if="${not #lists.isEmpty(movies)}" class="movies-grid">
-          <div th:each="movie : ${movies}" class="movie-card">
-            <img
-              th:src="${movie.image}"
-              th:alt="${movie.name}"
-              onerror="this.onerror=null;this.src='https://placehold.co/300x200/e2e8f0/94a3b8?text=Movie+Poster';"
-              class="movie-poster"
-            />
-
-            <div class="movie-info">
-              <h3 class="movie-title" th:text="${movie.name}">Movie Title</h3>
-
-              <div class="movie-details">
-                <div class="detail-item">
-                  <i class="fas fa-clock me-2"></i>
+        <!-- Movies List Table -->
+        <div th:if="${not #lists.isEmpty(movies)}" class="table-container">
+          <table class="movie-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Phim</th>
+                <th>Thời lượng</th>
+                <th>Rating</th>
+                <th>Ngày chiếu</th>
+                <th>Ngôn ngữ</th>
+                <th>Thể loại</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="movie : ${movies}">
+                <td th:text="${movie.id}">#001</td>
+                <td>
+                  <div class="movie-info">
+                    <img
+                      th:src="${movie.image}"
+                      th:alt="${movie.name}"
+                      onerror="this.onerror=null;this.src='https://placehold.co/40x60/e2e8f0/94a3b8?text=Poster';"
+                      class="movie-poster"
+                    />
+                    <div class="movie-details">
+                      <h3 th:text="${movie.name}">Movie Title</h3>
+                      <div class="rating">
+                        <span class="star">⭐</span>
+                        <span>N/A</span>
+                        <a
+                          th:if="${movie.trailer != null and !#strings.isEmpty(movie.trailer)}"
+                          th:href="${movie.trailer}"
+                          target="_blank"
+                          style="
+                            margin-left: 8px;
+                            color: #6366f1;
+                            font-size: 11px;
+                            text-decoration: none;
+                          "
+                        >
+                          <i class="fas fa-play-circle me-1"></i>Trailer
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa cập nhật'}"
+                >
+                  120 phút
+                </td>
+                <td>
                   <span
-                    th:text="${movie.duration != null ? movie.duration + ' phút' : 'N/A'}"
-                    >120 phút</span
-                  >
-                </div>
-                <div class="detail-item">
-                  <i class="fas fa-star me-2"></i>
-                  <span th:text="${movie.rating != null ? movie.rating : 'N/A'}"
+                    class="rating-badge"
+                    th:text="${movie.rating != null ? movie.rating : 'Chưa phân loại'}"
                     >PG-13</span
                   >
-                </div>
-                <div class="detail-item">
-                  <i class="fas fa-tags me-2"></i>
-                  <span th:text="${movie.genre != null ? movie.genre : 'N/A'}"
-                    >Action, Adventure</span
-                  >
-                </div>
-                <div class="detail-item">
-                  <i class="fas fa-calendar me-2"></i>
-                  <span
-                    th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'N/A'}"
-                    >01/01/2024</span
-                  >
-                </div>
-              </div>
-
-              <div class="movie-actions">
-                <a
-                  th:href="@{/admin/schedules/detail/{movieId}(movieId=${movie.id}, status='ACTIVE', backUrl='/admin/schedules/list/playing')}"
-                  class="btn-view-detail"  
+                </td>
+                <td
+                  th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'Sắp công bố'}"
                 >
-                  <i class="fas fa-eye me-2"></i>Xem Chi Tiết 
-                </a>
-              </div>
-            </div>
-          </div>
+                  01/01/2024
+                </td>
+                <td
+                  th:text="${movie.language != null ? movie.language : 'Đa ngôn ngữ'}"
+                >
+                  Tiếng Việt
+                </td>
+                <td>
+                  <div class="genre-tags">
+                    <th:block
+                      th:if="${movie.genre != null and !#strings.isEmpty(movie.genre)}"
+                    >
+                      <span
+                        th:each="genreItem : ${#strings.arraySplit(movie.genre, ',')}"
+                        class="genre-tag"
+                        th:text="${#strings.trim(genreItem)}"
+                        >Hành động</span
+                      >
+                    </th:block>
+                    <span
+                      th:if="${movie.genre == null or #strings.isEmpty(movie.genre)}"
+                      class="genre-tag text-muted"
+                      >Đang cập nhật</span
+                    >
+                  </div>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a
+                      th:href="@{/admin/schedules/detail/{movieId}(movieId=${movie.id}, status='ACTIVE', backUrl='/admin/schedules/list/playing')}"
+                      class="btn btn-sm btn-outline-primary"
+                      title="Xem chi tiết"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- Empty State -->

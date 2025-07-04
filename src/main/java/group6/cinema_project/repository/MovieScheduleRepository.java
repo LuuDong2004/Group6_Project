@@ -179,6 +179,16 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
         List<Movie> findMoviesWithEndedSchedules();
 
         /**
+         * Find movies that have at least one schedule with 'ACTIVE' status
+         * This is simpler and more intuitive than the complex logic above
+         */
+        @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
+                        "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+                        "WHERE ss.status = 'ACTIVE' " +
+                        "ORDER BY m.name", nativeQuery = true)
+        List<Movie> findMoviesWithActiveSchedules();
+
+        /**
          * Tìm tất cả lịch chiếu đã kết thúc nhưng vẫn có trạng thái ACTIVE
          * Một lịch chiếu được coi là đã kết thúc nếu:
          * - Ngày chiếu đã qua, hoặc
@@ -296,4 +306,5 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                         "ORDER BY ss.screening_date, ss.start_time", nativeQuery = true)
         List<ScreeningSchedule> findUpcomingSchedulesByMovieIdWithRelatedEntities(@Param("movieId") Integer movieId);
 
+        
 }

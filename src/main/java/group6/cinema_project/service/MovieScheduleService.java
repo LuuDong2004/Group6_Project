@@ -3,6 +3,7 @@ package group6.cinema_project.service;
 import org.springframework.stereotype.Service;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
 
@@ -42,11 +43,20 @@ public interface MovieScheduleService {
 
         /**
          * Get detailed schedules for a specific movie
-         * 
+         *
          * @param movieId The movie ID
          * @return List of schedules for the movie
          */
         List<ScreeningScheduleDto> getSchedulesByMovieId(Integer movieId);
+
+        /**
+         * Get schedules for a specific movie grouped by date and room
+         * This method pre-processes the data to reduce frontend complexity
+         *
+         * @param movieId The movie ID
+         * @return List of schedules grouped by date, then by room
+         */
+        List<ScheduleGroupedByDateDto> getSchedulesByMovieIdGrouped(Integer movieId);
 
         /**
          * Validate that a screening schedule does not conflict with existing schedules
@@ -103,6 +113,14 @@ public interface MovieScheduleService {
          * @return List of movies with ended schedules
          */
         List<MovieDto> getMoviesWithEndedSchedules();
+
+        /**
+         * Get movies that have at least one schedule with 'ACTIVE' status
+         * This is more intuitive for users who want to see movies with active schedules
+         *
+         * @return List of movies with active schedules
+         */
+        List<MovieDto> getMoviesWithActiveSchedules();
 
         /**
          * Get detailed information about how movies are categorized for debugging
