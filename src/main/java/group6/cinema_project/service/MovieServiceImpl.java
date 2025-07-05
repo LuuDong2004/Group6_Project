@@ -9,7 +9,9 @@ import group6.cinema_project.repository.MovieRepository;
 import group6.cinema_project.repository.ActorMovieRepository;
 import group6.cinema_project.repository.DirectorMovieRepository;
 import group6.cinema_project.repository.ReviewRepository;
-import group6.cinema_project.controller.MovieController.MovieDetailDTO;
+import group6.cinema_project.dto.MovieDetailDTO;
+import group6.cinema_project.dto.PersonDTO;
+import group6.cinema_project.dto.ReviewDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -80,20 +82,20 @@ public class MovieServiceImpl implements MovieService {
             .collect(Collectors.toList());
         dto.directorsData = directorMovieRepository.findByMovie_Id(id)
             .stream().map(dm -> {
-                MovieDetailDTO.PersonDTO p = new MovieDetailDTO.PersonDTO();
+                PersonDTO p = new PersonDTO();
                 p.id = dm.getDirector().getId();
                 p.name = dm.getDirector().getName();
                 return p;
             }).collect(Collectors.toList());
         dto.actorsData = actorMovieRepository.findByMovieId(id)
             .stream().map(am -> {
-                MovieDetailDTO.PersonDTO p = new MovieDetailDTO.PersonDTO();
+                PersonDTO p = new PersonDTO();
                 p.id = am.getActor().getId();
                 p.name = am.getActor().getName();
                 return p;
             }).collect(Collectors.toList());
         dto.reviews = reviewRepository.findByMovieId(id).stream().map(r -> {
-            MovieDetailDTO.ReviewDTO rv = new MovieDetailDTO.ReviewDTO();
+            ReviewDTO rv = new ReviewDTO();
             rv.user = r.getUserId() != null ? r.getUserId().toString() : null;
             rv.comment = r.getComment();
             rv.rating = r.getRating();

@@ -2,6 +2,8 @@ package group6.cinema_project.controller;
 
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
+import group6.cinema_project.dto.ActorDTO;
+import group6.cinema_project.dto.DirectorDTO;
 import group6.cinema_project.service.ActorDirectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,20 +17,20 @@ public class ActorDirectorController {
     private ActorDirectorService actorDirectorService;
 
     @GetMapping("/actors")
-    public List<Actor> getAllActors() { return actorDirectorService.getAllActors(); }
+    public List<ActorDTO> getAllActors() { return actorDirectorService.getAllActorDTOs(); }
 
     @GetMapping("/directors")
-    public List<Director> getAllDirectors() { return actorDirectorService.getAllDirectors(); }
+    public List<DirectorDTO> getAllDirectors() { return actorDirectorService.getAllDirectorDTOs(); }
 
     @GetMapping("/actors/{id}")
-    public Actor getActorById(@PathVariable Long id) { return actorDirectorService.getActorById(id); }
+    public ActorDTO getActorById(@PathVariable Long id) { return actorDirectorService.getActorDTOById(id); }
 
     @GetMapping("/directors/{id}")
-    public Director getDirectorById(@PathVariable Long id) { return actorDirectorService.getDirectorById(id); }
+    public DirectorDTO getDirectorById(@PathVariable Long id) { return actorDirectorService.getDirectorDTOById(id); }
 
     @GetMapping("/movies/{movieId}/actors")
-    public List<Actor> getActorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getActorsByMovieId(movieId); }
+    public List<ActorDTO> getActorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getActorDTOsByMovieId(movieId); }
 
     @GetMapping("/movies/{movieId}/directors")
-    public List<Director> getDirectorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getDirectorsByMovieId(movieId); }
+    public List<DirectorDTO> getDirectorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getDirectorDTOsByMovieId(movieId); }
 }
