@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>MyShowz - Home</title>
+    <link rel="stylesheet" th:href="@{/web/assets/css/style-starter.css}">
+    <link rel="stylesheet" th:href="@{/web/assets/css/movies.css}">
+    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+    <style>
+        #featured-movies {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            #featured-movies {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            #featured-movies {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 576px) {
+            #featured-movies {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- header -->
+    <header id="site-header" class="w3l-header fixed-top">
+        <!--/nav-->
+        <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+            <div class="container">
+                <h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log"
+                            aria-hidden="true"></span>
+                        MyShowz </a></h1>
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="fa icon-expand fa-bars"></span>
+                    <span class="fa icon-close fa-times"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" th:href="@{/}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/movies}">Movies</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/about}">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/contact}">Contact</a>
+                        </li>
+                    </ul>
+
+                    <!--/search-right-->
+                    <div class="Login_SignUp" id="login"
+                        style="font-size: 2rem ; display: inline-block; position: relative;">
+                        <a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
+                    </div>
+                </div>
+                <!-- toggle switch for light and dark theme -->
+                <div class="mobile-position">
+                    <nav class="navigation">
+                        <div class="theme-switch-wrapper">
+                            <label class="theme-switch" for="checkbox">
+                                <input type="checkbox" id="checkbox">
+                                <div class="mode-container">
+                                    <i class="gg-sun"></i>
+                                    <i class="gg-moon"></i>
+                                </div>
+                            </label>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Welcome to MyShowz</h1>
+                <p>Your ultimate destination for movies and entertainment</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Movies Section -->
+    <section class="w3l-grids">
+        <div class="grids-main py-4">
+            <div class="container py-lg-4">
+                <div class="headerhny-title">
+                    <h3 class="hny-title">Phim Nổi Bật</h3>
+                </div>
+                <div class="featured-movies-wrapper">
+                    <div id="featured-movies">
+                        <div class="movie-card" th:each="movie : ${featuredMovies}">
+                            <img th:src="@{'/web/assets/images/' + ${movie.image}}" th:alt="${movie.name}" class="movie-poster-img"/>
+                            <div class="movie-overlay">
+                                <div class="movie-title" th:text="${movie.name}"></div>
+                                <div class="movie-overlay-bottom">
+                                    <div class="movie-duration">
+                                        <i class="fa fa-clock-o"></i>
+                                        <span th:text="${movie.duration} + ' phút'"></span>
+                                        <span class="movie-fav"><i class="fa fa-heart"></i></span>
+                                    </div>
+                                    <a th:href="@{'/movies/' + ${movie.id}}" class="btn movie-detail-btn">Chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${featuredMovies == null or featuredMovies.empty}" class="text-center">
+                        <p>Không có phim nổi bật</p>
+                    </div>
+                </div>
+                <div class="button-center text-center mt-3">
+                    <a th:href="@{/movies}" class="btn view-button">Tất cả phim <span class="fa fa-angle-double-right ml-2" aria-hidden="true"></span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upcoming Movies Section -->
+    <section class="w3l-grids">
+        <div class="grids-main py-4">
+            <div class="container py-lg-4">
+                <div class="headerhny-title">
+                    <h3 class="hny-title">Phim Sắp Chiếu</h3>
+                </div>
+                <div class="upcoming-movies-wrapper">
+                    <div id="upcoming-movies"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- footer-66 -->
+    <footer class="w3l-footer">
+        <section class="footer-inner-main">
+            <div class="footer-hny-grids py-5">
+                <div class="container py-lg-4">
+                    <div class="text-txt">
+                        <div class="right-side">
+                            <div class="row footer-about">
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner1.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner2.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner3.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner4.jpg}"
+                                            alt=""></a>
+                                </div>
+                            </div>
+                            <div class="row footer-links">
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Movies</h6>
+                                    <ul>
+                                        <li><a th:href="@{/movies}">Movies</a></li>
+                                        <li><a href="#">Videos</a></li>
+                                        <li><a href="#">English Movies</a></li>
+                                        <li><a href="#">Tailor</a></li>
+                                        <li><a href="#">Upcoming Movies</a></li>
+                                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Information</h6>
+                                    <ul>
+                                        <li><a th:href="@{/}">Home</a> </li>
+                                        <li><a href="about.html">About</a> </li>
+                                        <li><a href="#">Tv Series</a> </li>
+                                        <li><a href="#">Blogs</a> </li>
+                                        <li><a th:href="@{/login}">Login</a></li>
+                                        <li><a th:href="@{/contact}">Contact</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Locations</h6>
+                                    <ul>
+                                        <li><a th:href="@{/movies}">Asia</a></li>
+                                        <li><a th:href="@{/movies}">France</a></li>
+                                        <li><a th:href="@{/movies}">Taiwan</a></li>
+                                        <li><a th:href="@{/movies}">United States</a></li>
+                                        <li><a th:href="@{/movies}">Korea</a></li>
+                                        <li><a th:href="@{/movies}">United Kingdom</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Newsletter</h6>
+                                    <form action="#" class="subscribe mb-3" method="post">
+                                        <input type="email" name="email" placeholder="Your Email Address" required="">
+                                        <button><span class="fa fa-envelope-o"></span></button>
+                                    </form>
+                                    <p>Enter your email and receive the latest news, updates and special offers from us.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="below-section">
+                <div class="container">
+                    <div class="copyright-footer">
+                        <div class="columns text-lg-left">
+                            <p>&copy; 2024 MyShowz. All rights reserved</p>
+                        </div>
+                        <ul class="social text-lg-right">
+                            <li><a href="#facebook"><span class="fa fa-facebook" aria-hidden="true"></span></a>
+                            </li>
+                            <li><a href="#linkedin"><span class="fa fa-linkedin" aria-hidden="true"></span></a>
+                            </li>
+                            <li><a href="#twitter"><span class="fa fa-twitter" aria-hidden="true"></span></a>
+                            </li>
+                            <li><a href="#google"><span class="fa fa-google-plus" aria-hidden="true"></span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- move top -->
+            <button onclick="topFunction()" id="movetop" title="Go to top">
+                <span class="fa fa-arrow-up" aria-hidden="true"></span>
+            </button>
+        </section>
+    </footer>
+
+    <script th:src="@{/web/assets/js/jquery-3.3.1.min.js}"></script>
+    <!--/theme-change-->
+    <script th:src="@{/web/assets/js/theme-change.js}"></script>
+    <script th:src="@{/web/assets/js/index.js}"></script>
+</body>
+
+</html>
+</body>
+
+</html> 

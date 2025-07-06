@@ -4,49 +4,61 @@ import group6.cinema_project.entity.Movie;
 import group6.cinema_project.service.MovieService;
 import group6.cinema_project.dto.MovieDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.ModelAndView;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@Controller
 public class MovieController {
 
     @Autowired
     private MovieService movieService;
 
+    @GetMapping("/")
+    public String home(Model model) {
+        List<MovieDetailDTO> featuredMovies = movieService.getFeaturedMovies();
+        model.addAttribute("featuredMovies", featuredMovies);
+        return "index";
+    }
+
     @GetMapping("/movies")
-    public List<MovieDetailDTO> getAllMovies() {
-        return movieService.getAllMovies();
+    public String getAllMovies(Model model) {
+        List<MovieDetailDTO> movies = movieService.getAllMovies();
+        model.addAttribute("movies", movies);
+        return "movies";
     }
 
     @GetMapping("/movies/{id}")
-    public Movie getMovieById(@PathVariable Long id) {
-        return movieService.getMovieById(id);
-    }
-
-    @GetMapping("/movies/{id}/detail")
-    public ResponseEntity<?> getMovieDetail(@PathVariable Long id) {
+    public String getMovieDetail(@PathVariable("id") Long id, Model model) {
         MovieDetailDTO dto = movieService.getMovieDetail(id);
-        if (dto == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(dto);
+        if (dto == null) {
+            return "redirect:/movies";
+        }
+        model.addAttribute("movie", dto);
+        return "movie_detail";
     }
 
     @GetMapping("/movies/featured")
-    public List<MovieDetailDTO> getFeaturedMovies() {
-        return movieService.getFeaturedMovies();
+    public String getFeaturedMovies(Model model) {
+        List<MovieDetailDTO> featuredMovies = movieService.getFeaturedMovies();
+        model.addAttribute("featuredMovies", featuredMovies);
+        return "movies";
     }
 
     @GetMapping("/genres")
-    public List<String> getAllGenres() {
-        return movieService.getAllGenres();
+    public String getAllGenres(Model model) {
+        List<String> genres = movieService.getAllGenres();
+        model.addAttribute("genres", genres);
+        return "genres";
     }
 
     @GetMapping("/movies/genre/{genre}")
-    public List<MovieDetailDTO> getMoviesByGenre(@PathVariable String genre) {
-        return movieService.getMoviesByGenre(genre);
+    public String getMoviesByGenre(@PathVariable String genre, Model model) {
+        List<MovieDetailDTO> movies = movieService.getMoviesByGenre(genre);
+        model.addAttribute("movies", movies);
+        model.addAttribute("selectedGenre", genre);
+        return "movies";
     }
-
-
 }

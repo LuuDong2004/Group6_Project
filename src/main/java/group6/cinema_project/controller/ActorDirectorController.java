@@ -6,31 +6,63 @@ import group6.cinema_project.dto.ActorDTO;
 import group6.cinema_project.dto.DirectorDTO;
 import group6.cinema_project.service.ActorDirectorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@Controller
 public class ActorDirectorController {
     @Autowired
     private ActorDirectorService actorDirectorService;
 
     @GetMapping("/actors")
-    public List<ActorDTO> getAllActors() { return actorDirectorService.getAllActorDTOs(); }
+    public String getAllActors(Model model) {
+        List<ActorDTO> actors = actorDirectorService.getAllActorDTOs();
+        model.addAttribute("actors", actors);
+        return "actors";
+    }
 
     @GetMapping("/directors")
-    public List<DirectorDTO> getAllDirectors() { return actorDirectorService.getAllDirectorDTOs(); }
+    public String getAllDirectors(Model model) {
+        List<DirectorDTO> directors = actorDirectorService.getAllDirectorDTOs();
+        model.addAttribute("directors", directors);
+        return "directors";
+    }
 
     @GetMapping("/actors/{id}")
-    public ActorDTO getActorById(@PathVariable Long id) { return actorDirectorService.getActorDTOById(id); }
+    public String getActorById(@PathVariable Long id, Model model) {
+        ActorDTO actor = actorDirectorService.getActorDTOById(id);
+        if (actor == null) {
+            return "redirect:/actors";
+        }
+        model.addAttribute("actor", actor);
+        return "person_detail";
+    }
 
     @GetMapping("/directors/{id}")
-    public DirectorDTO getDirectorById(@PathVariable Long id) { return actorDirectorService.getDirectorDTOById(id); }
+    public String getDirectorById(@PathVariable Long id, Model model) {
+        DirectorDTO director = actorDirectorService.getDirectorDTOById(id);
+        if (director == null) {
+            return "redirect:/directors";
+        }
+        model.addAttribute("director", director);
+        return "person_detail";
+    }
 
     @GetMapping("/movies/{movieId}/actors")
-    public List<ActorDTO> getActorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getActorDTOsByMovieId(movieId); }
+    public String getActorsByMovieId(@PathVariable Long movieId, Model model) {
+        List<ActorDTO> actors = actorDirectorService.getActorDTOsByMovieId(movieId);
+        model.addAttribute("actors", actors);
+        model.addAttribute("movieId", movieId);
+        return "movie_actors";
+    }
 
     @GetMapping("/movies/{movieId}/directors")
-    public List<DirectorDTO> getDirectorsByMovieId(@PathVariable Long movieId) { return actorDirectorService.getDirectorDTOsByMovieId(movieId); }
+    public String getDirectorsByMovieId(@PathVariable Long movieId, Model model) {
+        List<DirectorDTO> directors = actorDirectorService.getDirectorDTOsByMovieId(movieId);
+        model.addAttribute("directors", directors);
+        model.addAttribute("movieId", movieId);
+        return "movie_directors";
+    }
 }

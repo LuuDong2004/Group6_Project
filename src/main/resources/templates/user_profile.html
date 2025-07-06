@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${user != null ? user.fullName : 'Thông tin người dùng'}">Thông tin người dùng</title>
+    <link rel="stylesheet" th:href="@{/web/assets/css/style-starter.css}">
+    <link rel="stylesheet" th:href="@{/web/assets/css/movie_detail.css}">
+    <link rel="stylesheet" th:href="@{/web/assets/css/user_profile.css}">
+    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header id="site-header" class="w3l-header fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+            <div class="container">
+                <h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log" aria-hidden="true"></span> MyShowz </a></h1>
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa icon-expand fa-bars"></span>
+                    <span class="fa icon-close fa-times"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/movies}">Movies</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    </ul>
+                    <div class="Login_SignUp" id="login" style="font-size: 2rem ; display: inline-block; position: relative;">
+                        <a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
+                    </div>
+                    <!-- toggle switch for light and dark theme -->
+                    <div class="mobile-position">
+                        <nav class="navigation">
+                            <div class="theme-switch-wrapper">
+                                <label class="theme-switch" for="checkbox">
+                                    <input type="checkbox" id="checkbox">
+                                    <div class="mode-container">
+                                        <i class="gg-sun"></i>
+                                        <i class="gg-moon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="w3l-breadcrumbs">
+        <nav id="breadcrumbs" class="breadcrumbs">
+            <div class="container page-wrapper">
+                <a th:href="@{/}">Home</a> » <span class="breadcrumb_last" aria-current="page">Thông tin người dùng</span>
+            </div>
+        </nav>
+    </div>
+    <div class="profile-container">
+        <h2 class="movie-detail-title">THÔNG TIN NGƯỜI DÙNG</h2>
+        <div class="profile-main">
+
+            <div class="profile-info" th:if="${user != null}">
+                <p><span class="profile-label">Họ tên:</span> <span id="user-name" th:text="${user.fullName}">Họ tên</span></p>
+                <p><span class="profile-label">Email:</span> <span id="email" th:text="${user.email}">Email</span></p>
+                <p><span class="profile-label">Ngày sinh:</span> <span id="date-of-birth" th:text="${user.dateOfBirth != null ? user.dateOfBirth : 'N/A'}">Ngày sinh</span></p>
+                <p><span class="profile-label">Số điện thoại:</span> <span id="phone" th:text="${user.phone != null ? user.phone : 'N/A'}">Số điện thoại</span></p>
+                <p><span class="profile-label">Địa chỉ:</span> <span id="address" th:text="${user.address != null ? user.address : 'N/A'}">Địa chỉ</span></p>
+            </div>
+            <div th:if="${user == null}" class="text-center">
+                <p>Không tìm thấy thông tin người dùng</p>
+                <a th:href="@{/}" class="btn btn-primary">Quay lại trang chủ</a>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/web/assets/js/user_profile.js}"></script>
+    <script th:src="@{/web/assets/js/theme-change.js}"></script>
+</body>
+</html> 

@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Movies</title>
+	    <link rel="stylesheet" th:href="@{/web/assets/css/style-starter.css}">
+    <link rel="stylesheet" th:href="@{/web/assets/css/movies.css}">
+	<link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
+		rel="stylesheet">
+</head>
+
+<body>
+	<!-- header -->
+	<header id="site-header" class="w3l-header fixed-top">
+		<!--/nav-->
+		<nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+			<div class="container">
+				<h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
+																	aria-hidden="true"></span>
+							MyShowz </a></h1>
+				<!-- if logo is image enable this   
+							<a class="navbar-brand" href="#index.html">
+								<img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
+							</a> -->
+				<button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<!-- <span class="navbar-toggler-icon"></span> -->
+					<span class="fa icon-expand fa-bars"></span>
+					<span class="fa icon-close fa-times"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav ml-auto">
+						<li class="nav-item">
+							<a class="nav-link" th:href="@{/}">Home</a>
+						</li>
+						<li class="nav-item active">
+							<a class="nav-link" th:href="@{/movies}">Movies</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" th:href="@{/about}">About</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" th:href="@{/contact}">Contact</a>
+						</li>
+					</ul>
+
+					<!--/search-right-->
+					<!--/search-right-->
+					<div class="Login_SignUp" id="login"
+						style="font-size: 2rem ; display: inline-block; position: relative;">
+						<!-- <li class="nav-item"> -->
+						<a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
+						<!-- </li> -->
+					</div>
+
+				</div>
+				<!-- toggle switch for light and dark theme -->
+				<div class="mobile-position">
+					<nav class="navigation">
+						<div class="theme-switch-wrapper">
+							<label class="theme-switch" for="checkbox">
+								<input type="checkbox" id="checkbox">
+								<div class="mode-container">
+									<i class="gg-sun"></i>
+									<i class="gg-moon"></i>
+								</div>
+							</label>
+						</div>
+					</nav>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<!--/breadcrumbs -->
+	<div class="w3l-breadcrumbs">
+		<nav id="breadcrumbs" class="breadcrumbs">
+			<div class="container page-wrapper">
+				<a th:href="@{/}">Home</a> » <span class="breadcrumb_last" aria-current="page">movies</span>
+			</div>
+		</nav>
+	</div>
+	<!--/movies -->
+	
+	<!--grids-sec1-->
+	<section class="w3l-grids">
+		<div class="grids-main py-4">
+			<div class="container py-lg-4">
+				<div class="section-header">
+					<div class="headerhny-title">
+						<h3 class="hny-title">Phim Đang Chiếu</h3>
+					</div>
+					<div class="filters-bar">
+						<div class="dropdown">
+							<button class="btn-filter dropdown-toggle" type="button" id="genre-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Thể loại
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="genre-dropdown-btn">
+								<li><a class="dropdown-item btn-choose-genre active" data-genre="all">Tất cả</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="action">Hành động</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="horror">Kinh dị</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="family">Gia đình</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="comedy">Hài</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="romance">Tình cảm</a></li>
+								<li><a class="dropdown-item btn-choose-genre" data-genre="drama">Tâm lý</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div th:if="${movies != null and !movies.empty}" id="featured-movies">
+				<div class="movie-card" th:each="movie : ${movies}">
+					<img th:src="@{'/web/assets/images/' + ${movie.image}}" th:alt="${movie.name}" class="movie-poster-img"/>
+					<div class="movie-overlay">
+						<div class="movie-title" th:text="${movie.name}"></div>
+						<div class="movie-overlay-bottom">
+							<div class="movie-duration">
+								<i class="fa fa-clock-o"></i>
+								<span th:text="${movie.duration} + ' phút'"></span>
+								<span class="movie-fav"><i class="fa fa-heart"></i></span>
+							</div>
+							<a th:href="@{'/movies/' + ${movie.id}}" class="btn movie-detail-btn">Chi tiết</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div th:if="${movies == null or movies.empty}" class="text-center">
+				<p>Không có phim nào</p>
+			</div>
+		</div>
+	</section>
+	<!--grids-sec2-->
+	<!-- footer-66 -->
+	<footer class="w3l-footer">
+		<section class="footer-inner-main">
+			<div class="footer-hny-grids py-5">
+				<div class="container py-lg-4">
+					<div class="text-txt">
+						<div class="right-side">
+							<div class="row footer-about">
+								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+									<a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner1.jpg}"
+											alt=""></a>
+								</div>
+								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+									<a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner2.jpg}"
+											alt=""></a>
+								</div>
+								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+									<a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner3.jpg}"
+											alt=""></a>
+								</div>
+								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+									<a th:href="@{/movies}"><img class="img-fluid" th:src="@{/web/assets/images/banner4.jpg}"
+											alt=""></a>
+								</div>
+							</div>
+							<div class="row footer-links">
+
+
+								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
+									<h6>Movies</h6>
+									<ul>
+										<li><a th:href="@{/movies}">Movies</a></li>
+										<li><a href="#">Videos</a></li>
+										<li><a href="#">English Movies</a></li>
+										<li><a href="#">Tailor</a></li>
+										<li><a href="#">Upcoming Movies</a></li>
+										<li><a th:href="@{/contact}">Contact Us</a></li>
+									</ul>
+								</div>
+								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
+									<h6>Information</h6>
+									<ul>
+										<li><a th:href="@{/}">Home</a> </li>
+										<li><a th:href="@{/about}">About</a> </li>
+										<li><a href="#">Tv Series</a> </li>
+										<li><a href="#">Blogs</a> </li>
+										<li><a th:href="@{/login}">Login</a></li>
+										<li><a th:href="@{/contact}">Contact</a></li>
+									</ul>
+								</div>
+								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
+									<h6>Locations</h6>
+									<ul>
+										<li><a th:href="@{/movies}">Asia</a></li>
+										<li><a th:href="@{/movies}">France</a></li>
+										<li><a th:href="@{/movies}">Taiwan</a></li>
+										<li><a th:href="@{/movies}">United States</a></li>
+										<li><a th:href="@{/movies}">Korea</a></li>
+										<li><a th:href="@{/movies}">United Kingdom</a></li>
+									</ul>
+								</div>
+								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
+									<h6>Newsletter</h6>
+									<form action="#" class="subscribe mb-3" method="post">
+										<input type="email" name="email" placeholder="Your Email Address" required="">
+										<button><span class="fa fa-envelope-o"></span></button>
+									</form>
+									<p>Enter your email and receive the latest news, updates and special offers from us.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			</div>
+			<div class="below-section">
+				<div class="container">
+					<div class="copyright-footer">
+						<div class="columns text-lg-left">
+							<p>&copy; 2021 MyShowz. All rights reserved</p>
+						</div>
+
+						<ul class="social text-lg-right">
+							<li><a href="#facebook"><span class="fa fa-facebook" aria-hidden="true"></span></a>
+							</li>
+							<li><a href="#linkedin"><span class="fa fa-linkedin" aria-hidden="true"></span></a>
+							</li>
+							<li><a href="#twitter"><span class="fa fa-twitter" aria-hidden="true"></span></a>
+							</li>
+							<li><a href="#google"><span class="fa fa-google-plus" aria-hidden="true"></span></a>
+							</li>
+
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- move top -->
+			<button onclick="topFunction()" id="movetop" title="Go to top">
+				<span class="fa fa-arrow-up" aria-hidden="true"></span>
+			</button>
+			<script>
+				// When the user scrolls down 20px from the top of the document, show the button
+				window.onscroll = function () {
+					scrollFunction()
+				};
+
+				function scrollFunction() {
+					if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+						document.getElementById("movetop").style.display = "block";
+					} else {
+						document.getElementById("movetop").style.display = "none";
+					}
+				}
+
+				// When the user clicks on the button, scroll to the top of the document
+				function topFunction() {
+					document.body.scrollTop = 0;
+					document.documentElement.scrollTop = 0;
+				}
+			</script>
+			<!-- /move top -->
+
+		</section>
+	</footer>
+	<!-- Modal popup movie detail -->
+	<div id="movieModal" class="modal">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+			<div class="movie-modal-content">
+				<div class="movie-modal-poster">
+					<img id="moviePoster" src="" alt="Movie Poster">
+				</div>
+				<div class="movie-modal-info">
+					<h2 id="movieTitle"></h2>
+					<p><strong>Thể loại:</strong> <span id="movieGenre"></span></p>
+					<p><strong>Đạo diễn:</strong> <span id="movieDirector"></span></p>
+					<p><strong>Diễn viên:</strong> <span id="movieActors"></span></p>
+					<p><strong>Thời lượng:</strong> <span id="movieDuration"></span> phút</p>
+					<p><strong>Ngôn ngữ:</strong> <span id="movieLanguage"></span></p>
+					<p><strong>Khởi chiếu:</strong> <span id="movieReleaseDate"></span></p>
+					<p><strong>Định dạng:</strong> <span id="movieFormat"></span></p>
+					<p><strong>Đánh giá:</strong> <span id="movieRating"></span></p>
+					<button class="btn btn-success" id="bookTicketBtn">Đặt vé</button>
+				</div>
+			</div>
+			<!-- Trailer section -->
+			<div class="movie-trailer" style="margin-top: 30px;">
+				<h4>Trailer</h4>
+				<div class="trailer-container">
+					<iframe id="movieTrailer" width="100%" height="315" src="" frameborder="0" allowfullscreen></iframe>
+				</div>
+			</div>
+			<!-- Screenshots section -->
+			<div class="movie-screenshots" style="margin-top: 30px;">
+				<h4>Hình ảnh phim</h4>
+				<div id="movieScreenshots" class="screenshots-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+					<!-- Screenshots will be dynamically added here -->
+				</div>
+			</div>
+			<!-- Summary section -->
+			<div class="movie-summary" style="margin-top: 30px;">
+				<h4>Tóm tắt phim</h4>
+				<p id="movieSummary"></p>
+			</div>
+		</div>
+	</div>
+	<!-- jQuery (nên để bản CDN hoặc assets/js/jquery-3.3.1.min.js nếu có) -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<!-- Popper.js (bắt buộc cho dropdown Bootstrap 4) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<!-- Bootstrap JS (bản 4.x) -->
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<!-- Các script khác của bạn -->
+	<script th:src="@{/web/assets/js/theme-change.js}"></script>
+	<script th:src="@{/web/assets/js/movies.js}"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+			if (!toggleSwitch) return;
+			const currentTheme = localStorage.getItem('theme');
+			if (currentTheme) {
+				document.documentElement.setAttribute('data-theme', currentTheme);
+				if (currentTheme === 'dark') {
+					toggleSwitch.checked = true;
+				}
+			}
+			toggleSwitch.addEventListener('change', function(e) {
+				if (e.target.checked) {
+					document.documentElement.setAttribute('data-theme', 'dark');
+					localStorage.setItem('theme', 'dark');
+				} else {
+					document.documentElement.setAttribute('data-theme', 'light');
+					localStorage.setItem('theme', 'light');
+				}
+			}, false);
+		});
+	</script>
+</body>
+
+</html>

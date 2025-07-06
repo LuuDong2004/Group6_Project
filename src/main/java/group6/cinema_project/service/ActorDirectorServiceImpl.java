@@ -77,9 +77,9 @@ public class ActorDirectorServiceImpl implements ActorDirectorService {
         dto.id = actor.getId();
         dto.name = actor.getName();
         dto.image = actor.getImage();
-        dto.biography = actor.getBiography();
-        dto.birthDate = actor.getBirthDate() != null ? actor.getBirthDate().toString() : null;
-        dto.nationality = actor.getNationality();
+        dto.biography = actor.getDescription(); // Using description as biography
+        dto.birthDate = null; // birthDate field doesn't exist in Actor entity
+        dto.nationality = null; // nationality field doesn't exist in Actor entity
         return dto;
     }
     
@@ -88,9 +88,9 @@ public class ActorDirectorServiceImpl implements ActorDirectorService {
         dto.id = director.getId();
         dto.name = director.getName();
         dto.image = director.getImage();
-        dto.biography = director.getBiography();
-        dto.birthDate = director.getBirthDate() != null ? director.getBirthDate().toString() : null;
-        dto.nationality = director.getNationality();
+        dto.biography = director.getDescription(); // Using description as biography
+        dto.birthDate = null; // birthDate field doesn't exist in Director entity
+        dto.nationality = null; // nationality field doesn't exist in Director entity
         return dto;
     }
 } 

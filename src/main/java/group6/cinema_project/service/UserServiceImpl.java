@@ -23,9 +23,9 @@ public class UserServiceImpl implements UserService {
         
         UserDTO dto = new UserDTO();
         dto.id = user.getId();
-        dto.username = user.getUsername();
+        dto.username = user.getUserName();
         dto.email = user.getEmail();
-        dto.fullName = user.getFullName();
+        dto.fullName = user.getUserName(); // Using userName as fullName since fullName doesn't exist
         dto.phone = user.getPhone();
         dto.address = user.getAddress();
         return dto;
