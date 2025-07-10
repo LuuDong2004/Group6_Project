@@ -16,9 +16,9 @@ public class PageController {
         return "register";
     }
 
-    @GetMapping("/about")
-    public String aboutPage() {
-        return "about";
+    @GetMapping("/movie_theater")
+    public String movieTheaterPage() {
+        return "movie_theate";
     }
 
     @GetMapping("/contact")
