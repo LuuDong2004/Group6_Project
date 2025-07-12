@@ -275,47 +275,9 @@
             </div>
         </div>
     </div>
-    <nav class="sidebar-menu">
-        <a href="/admin" class="menu-item">
-            <i class="fas fa-home"></i>
-            <span>Bảng điều khiển</span>
-        </a>
-        <a href="/admin/movies/list" class="menu-item">
-            <i class="fas fa-film"></i>
-            <span>Phim</span>
-        </a>
-        <a href="/admin/foods/list" class="menu-item active">
-            <i class="fas fa-hamburger"></i>
-            <span>Combo Food</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-ticket-alt"></i>
-            <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-calendar-alt"></i> <span>Lịch chiếu</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-chart-pie"></i> <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span>Cài đặt</span>
-        </a>
-    </nav>
-    <div class="mt-auto p-4 border-top border-white-50" style="border-color: rgba(255,255,255,0.1) !important;">
-        <div class="d-flex align-items-center">
-            <img src="https://via.placeholder.com/40" alt="User Avatar" width="40" height="40" class="rounded-circle me-3">
-            <div>
-                <div class="text-white fw-semibold">Admin User</div>
-                <small class="text-white-50">admin@cinema.com</small>
-            </div>
-        </div>
-    </div>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
 </div>
 <div class="main-content-wrapper" id="mainContentWrapper">
     <header class="header-custom shadow-sm">

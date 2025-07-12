@@ -1,8 +1,7 @@
 package group6.cinema_project.security;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,15 +12,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import group6.cinema_project.service.CustomUserDetailsService;
-import group6.cinema_project.service.impl.CustomOAuth2UserService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
-import java.io.IOException;
+import group6.cinema_project.service.CustomUserDetailsService;
+import group6.cinema_project.service.impl.CustomOAuth2UserService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -49,6 +49,11 @@ public class SecurityConfig {
                                                 HttpServletResponse response,
                                                 org.springframework.security.core.Authentication authentication)
                     throws IOException, ServletException {
+                
+                System.out.println("Authentication Success - User: " + authentication.getName());
+                System.out.println("Authentication Type: " + authentication.getClass().getSimpleName());
+                System.out.println("Authorities: " + authentication.getAuthorities());
+                
                 //kiểm tra tiếp tục url trong session truoc
                 String continueUrl = (String) request.getSession().getAttribute("continueAfterLogin");
                 if (continueUrl != null) {
@@ -112,7 +117,7 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/update-profile", "/change-password")
+                        .ignoringRequestMatchers("/update-profile", "/change-password", "/logout")
                 )
 
                 .formLogin(form -> form
@@ -133,11 +138,7 @@ public class SecurityConfig {
                         )
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
+                        .disable()
                 )
                 .sessionManagement(session -> session
                         .maximumSessions(1)

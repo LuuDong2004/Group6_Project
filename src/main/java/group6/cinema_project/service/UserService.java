@@ -34,6 +34,8 @@ public interface UserService {
     UserDto updateUserProfile(String email, UserDto userDto);
     boolean changePassword(String email, ChangePasswordDto changePasswordDto);
 
+    void updateUserRole(int userId, String newRole);
+
     // Password reset
     boolean requestPasswordReset(PasswordResetRequestDto requestDto);
     boolean confirmPasswordReset(PasswordResetConfirmDto confirmDto);

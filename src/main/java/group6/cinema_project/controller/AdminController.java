@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import group6.cinema_project.dto.BranchDto;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +28,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.FoodDto;
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.UserRegistrationDto;
 import group6.cinema_project.entity.Actor;
+import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.Director;
+import group6.cinema_project.entity.Role;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.service.ActorService;
+import group6.cinema_project.service.BranchService;
 import group6.cinema_project.service.DirectorService;
 import group6.cinema_project.service.FoodService;
+import group6.cinema_project.service.UserService;
 import group6.cinema_project.service.impl.MovieServiceImpl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +51,14 @@ public class AdminController {
     private final MovieServiceImpl movieService;
     private final ActorService actorService;
     private final DirectorService directorService;
+    private final FoodService foodService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final BranchService branchService;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/movies/";
     private final String FOOD_UPLOAD_DIR = "src/main/resources/static/food/";
-    private final FoodService foodService;
-
 
     @GetMapping("/login")
     public String adminLoginPage(@RequestParam(value = "error", required = false) String error,
@@ -72,6 +84,38 @@ public class AdminController {
     @GetMapping
     public String adminDashboard() {
         return "admin_dashboard";
+    }
+
+    // Method để tạo tài khoản staff (chỉ dùng để test)
+    @GetMapping("/create-staff")
+    public String createStaffAccount() {
+        try {
+            // Tạo UserRegistrationDto cho staff
+            UserRegistrationDto staffDto = new UserRegistrationDto();
+            staffDto.setUserName("Staff User");
+            staffDto.setEmail("staff@cinema.com");
+            staffDto.setPassword("123456");
+            staffDto.setConfirmPassword("123456");
+            staffDto.setPhone("0123456789");
+            staffDto.setDateOfBirth("1990-01-01");
+            staffDto.setAddress("Hà Nội");
+            
+            // Tạo user với role STAFF
+            User user = new User(
+                staffDto.getUserName(),
+                staffDto.getPhone(),
+                staffDto.getEmail(),
+                passwordEncoder.encode(staffDto.getPassword()),
+                staffDto.getDateOfBirth(),
+                staffDto.getAddress(),
+                Role.STAFF
+            );
+            
+            userRepository.save(user);
+            return "redirect:/admin?message=Staff account created successfully";
+        } catch (Exception e) {
+            return "redirect:/admin?error=Failed to create staff account: " + e.getMessage();
+        }
     }
 
     // Movie management functions
@@ -399,4 +443,42 @@ public class AdminController {
         foodService.deleteFood(id);
         return "redirect:/admin/foods/list";
     }
+    
+//    // --- Branch Management ---
+//    @GetMapping("/branches/list")
+//    public String listBranches(Model model) {
+//        model.addAttribute("branches", branchService.findAll());
+//        model.addAttribute("branch", new Branch());
+//        return "admin_branch_management";
+//    }
+//
+//    @PostMapping("/branches/add")
+//    public String addBranch(@ModelAttribute BranchDto branchDto, RedirectAttributes redirectAttributes) {
+//        branchService.save(branchDto);
+//        redirectAttributes.addFlashAttribute("success", "Thêm chi nhánh thành công!");
+//        return "redirect:/admin/branches/list";
+//    }
+//
+//    @GetMapping("/branches/edit/{id}")
+//    public String editBranchForm(@PathVariable Integer id, Model model) {
+//        Branch branch = branchService.findById(id);
+//        model.addAttribute("branch", branch);
+//        return "admin_branch_edit";
+//    }
+//
+//    @PostMapping("/branches/edit/{id}")
+//    public String editBranch(@PathVariable Integer id, @ModelAttribute Branch branch, RedirectAttributes redirectAttributes) {
+//        branch.setId(id);
+//        branchService.saveOrUpdate(branch);
+//        redirectAttributes.addFlashAttribute("success", "Cập nhật chi nhánh thành công!");
+//        return "redirect:/admin/branches/list";
+//    }
+//
+//    @GetMapping("/branches/delete/{id}")
+//    public String deleteBranch(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+//        branchService.deleteBranch(id);
+//        redirectAttributes.addFlashAttribute("success", "Xóa chi nhánh thành công!");
+//        return "redirect:/admin/branches/list";
+//    }
+//
 }

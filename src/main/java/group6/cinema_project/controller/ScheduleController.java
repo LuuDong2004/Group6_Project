@@ -112,7 +112,7 @@ public class ScheduleController {
             if (branchId != null) {
                 for (BranchDto branch : branches) {
                     if (branch.getId() == branchId) {
-                        branch.setSelected(true);
+                        //branch.setSelected(true);
                         break;
                     }
                 }

@@ -25,7 +25,9 @@ public class User {
     @Column(name = "user_name", nullable = false, unique = true, length = 50, columnDefinition = "VARCHAR(50)")
     private String userName;
 
-    @Column(name = "phone", nullable = false, unique = true, length = 15, columnDefinition = "VARCHAR(15)")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Size(min = 10, max = 11, message = "Số điện thoại không hợp lệ")
+    @Column(name = "phone", nullable = true, unique = true, length = 15, columnDefinition = "VARCHAR(15)")
     private String phone;
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không hợp lệ")
@@ -33,13 +35,13 @@ public class User {
     private String email;
     //@NotBlank(message = "Mật khẩu không được để trống")
     //@Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
-    @Column(name = "password", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
+    @Column(name = "password", nullable = true, length = 100, columnDefinition = "VARCHAR(100)")
     private String password;
 
-    @Column(name = "date_of_birth", nullable = false, length = 10, columnDefinition = "VARCHAR(10)")
+    @Column(name = "date_of_birth", nullable = true, length = 10, columnDefinition = "VARCHAR(10)")
     private String dateOfBirth;
 
-    @Column(name = "address", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
+    @Column(name = "address", nullable = true, length = 100, columnDefinition = "VARCHAR(100)")
     private String address;
 
     @Enumerated(EnumType.STRING)

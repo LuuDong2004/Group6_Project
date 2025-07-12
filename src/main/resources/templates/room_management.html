@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý phòng chiếu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            border-radius: 8px;
+            margin: 5px 10px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4f46e5, #764ba2);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #764ba2, #4f46e5);
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .room-card {
+            transition: transform 0.2s ease;
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .seat-layout {
+            display: grid;
+            gap: 5px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .seat {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .seat-available {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .seat-occupied {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .seat-vip {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .screen {
+            background: linear-gradient(45deg, #333, #666);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý phòng chiếu</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+            <i class="fas fa-plus me-2"></i>
+            Thêm phòng chiếu
+        </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-door-open fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title" th:text="${totalRooms}">0</h5>
+                    <p class="card-text text-muted">Tổng phòng chiếu</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-chair fa-2x text-success mb-2"></i>
+                    <h5 class="card-title" th:text="${totalSeats}">0</h5>
+                    <p class="card-text text-muted">Tổng ghế ngồi</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-play-circle fa-2x text-info mb-2"></i>
+                    <h5 class="card-title" th:text="${activeRooms}">0</h5>
+                    <p class="card-text text-muted">Phòng đang hoạt động</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-tools fa-2x text-warning mb-2"></i>
+                    <h5 class="card-title" th:text="${maintenanceRooms}">0</h5>
+                    <p class="card-text text-muted">Phòng bảo trì</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rooms Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Danh sách phòng chiếu</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên phòng</th>
+                        <th>Loại phòng</th>
+                        <th>Số ghế</th>
+                        <th>Trạng thái</th>
+                        <th>Mô tả</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="room : ${rooms}">
+                        <td th:text="${room.id}">1</td>
+                        <td th:text="${room.name}">Phòng A1</td>
+                        <td>
+                            <span class="badge bg-info" th:text="${room.type}">2D</span>
+                        </td>
+                        <td th:text="${room.seatCount}">120</td>
+                        <td>
+                                    <span th:class="${room.status == 'ACTIVE' ? 'badge bg-success' : 'badge bg-warning'}"
+                                          th:text="${room.status == 'ACTIVE' ? 'Hoạt động' : 'Bảo trì'}">
+                                        Hoạt động
+                                    </span>
+                        </td>
+                        <td th:text="${room.description}">Phòng chiếu 2D tiêu chuẩn</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    th:onclick="'viewRoom(' + ${room.id} + ')'">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1"
+                                    th:onclick="'editRoom(' + ${room.id} + ')'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    th:onclick="'deleteRoom(' + ${room.id} + ')'">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Sample data for demo -->
+                    <tr>
+                        <td>1</td>
+                        <td>Phòng A1</td>
+                        <td><span class="badge bg-info">2D</span></td>
+                        <td>120</td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>Phòng chiếu 2D tiêu chuẩn</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Phòng B1</td>
+                        <td><span class="badge bg-primary">3D</span></td>
+                        <td>100</td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>Phòng chiếu 3D với âm thanh Dolby</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Phòng VIP</td>
+                        <td><span class="badge bg-warning">VIP</span></td>
+                        <td>50</td>
+                        <td><span class="badge bg-warning">Bảo trì</span></td>
+                        <td>Phòng VIP với ghế massage</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Room Modal -->
+<div class="modal fade" id="addRoomModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm phòng chiếu mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/admin/rooms}" method="post" th:object="${room}">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên phòng</label>
+                                <input type="text" class="form-control" th:field="*{name}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Loại phòng</label>
+                                <select class="form-select" th:field="*{type}" required>
+                                    <option value="">Chọn loại phòng</option>
+                                    <option value="2D">2D</option>
+                                    <option value="3D">3D</option>
+                                    <option value="IMAX">IMAX</option>
+                                    <option value="VIP">VIP</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số hàng ghế</label>
+                                <input type="number" class="form-control" th:field="*{rows}" min="1" max="20" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số ghế mỗi hàng</label>
+                                <input type="number" class="form-control" th:field="*{seatsPerRow}" min="1" max="30" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Trạng thái</label>
+                                <select class="form-select" th:field="*{status}" required>
+                                    <option value="ACTIVE">Hoạt động</option>
+                                    <option value="MAINTENANCE">Bảo trì</option>
+                                    <option value="INACTIVE">Ngưng hoạt động</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Màn hình</label>
+                                <select class="form-select" th:field="*{screenType}">
+                                    <option value="STANDARD">Tiêu chuẩn</option>
+                                    <option value="LARGE">Màn hình lớn</option>
+                                    <option value="CURVED">Màn hình cong</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3"
+                                  placeholder="Nhập mô tả về phòng chiếu..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tiện nghi</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" th:field="*{hasAirConditioner}" id="ac">
+                                    <label class="form-check-label" for="ac">Điều hòa</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" th:field="*{hasSurroundSound}" id="sound">
+                                    <label class="form-check-label" for="sound">Âm thanh vòm</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" th:field="*{hasRecliningSeats}" id="recline">
+                                    <label class="form-check-label" for="recline">Ghế ngả</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm phòng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Room Modal -->
+<div class="modal fade" id="viewRoomModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết phòng chiếu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Thông tin phòng</h6>
+                                <p><strong>Tên:</strong> <span id="viewRoomName">Phòng A1</span></p>
+                                <p><strong>Loại:</strong> <span id="viewRoomType">2D</span></p>
+                                <p><strong>Số ghế:</strong> <span id="viewRoomSeats">120</span></p>
+                                <p><strong>Trạng thái:</strong> <span id="viewRoomStatus">Hoạt động</span></p>
+                                <p><strong>Mô tả:</strong> <span id="viewRoomDescription">Phòng chiếu 2D tiêu chuẩn</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Sơ đồ phòng chiếu</h6>
+                                <div class="screen mb-3">
+                                    <i class="fas fa-desktop me-2"></i>
+                                    MÀN HÌNH
+                                </div>
+                                <div class="seat-layout" id="seatLayout">
+                                    <!-- Seat layout will be generated by JavaScript -->
+                                </div>
+                                <div class="mt-3">
+                                        <span class="me-3">
+                                            <span class="seat seat-available d-inline-block me-1"></span>
+                                            Ghế trống
+                                        </span>
+                                    <span class="me-3">
+                                            <span class="seat seat-occupied d-inline-block me-1"></span>
+                                            Ghế đã đặt
+                                        </span>
+                                    <span>
+                                            <span class="seat seat-vip d-inline-block me-1"></span>
+                                            Ghế VIP
+                                        </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Sample data for demonstration
+    const roomData = {
+        1: {
+            name: 'Phòng A1',
+            type: '2D',
+            seats: 120,
+            status: 'Hoạt động',
+            description: 'Phòng chiếu 2D tiêu chuẩn',
+            rows: 10,
+            seatsPerRow: 12
+        },
+        2: {
+            name: 'Phòng B1',
+            type: '3D',
+            seats: 100,
+            status: 'Hoạt động',
+            description: 'Phòng chiếu 3D với âm thanh Dolby',
+            rows: 10,
+            seatsPerRow: 10
+        },
+        3: {
+            name: 'Phòng VIP',
+            type: 'VIP',
+            seats: 50,
+            status: 'Bảo trì',
+            description: 'Phòng VIP với ghế massage',
+            rows: 5,
+            seatsPerRow: 10
+        }
+    };
+
+    function viewRoom(roomId) {
+        const room = roomData[roomId];
+        if (!room) return;
+
+        document.getElementById('viewRoomName').textContent = room.name;
+        document.getElementById('viewRoomType').textContent = room.type;
+        document.getElementById('viewRoomSeats').textContent = room.seats;
+        document.getElementById('viewRoomStatus').textContent = room.status;
+        document.getElementById('viewRoomDescription').textContent = room.description;
+
+        // Generate seat layout
+        generateSeatLayout(room.rows, room.seatsPerRow);
+
+        const modal = new bootstrap.Modal(document.getElementById('viewRoomModal'));
+        modal.show();
+    }
+
+    function generateSeatLayout(rows, seatsPerRow) {
+        const seatLayout = document.getElementById('seatLayout');
+        seatLayout.innerHTML = '';
+        seatLayout.style.gridTemplateColumns = `repeat(${seatsPerRow}, 1fr)`;
+
+        for (let i = 0; i < rows; i++) {
+            const rowLetter = String.fromCharCode(65 + i); // A, B, C, ...
+            for (let j = 1; j <= seatsPerRow; j++) {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.textContent = rowLetter + j;
+
+                // Random seat status for demo
+                const random = Math.random();
+                if (random < 0.1) {
+                    seat.classList.add('seat-vip');
+                } else if (random < 0.4) {
+                    seat.classList.add('seat-occupied');
+                } else {
+                    seat.classList.add('seat-available');
+                }
+
+                seatLayout.appendChild(seat);
+            }
+        }
+    }
+
+    function editRoom(roomId) {
+        // Implementation for editing room
+        alert(`Chỉnh sửa phòng ${roomId}`);
+    }
+
+    function deleteRoom(roomId) {
+        if (confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
+            // Implementation for deleting room
+            alert(`Xóa phòng ${roomId}`);
+        }
+    }
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+</body>
+</html>

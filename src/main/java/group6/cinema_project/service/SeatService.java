@@ -67,7 +67,7 @@ public class SeatService implements ISeatService {
         return listSeat.stream()
                 .map(seat -> {
                     SeatDto seatDto = modelMapper.map(seat, SeatDto.class);
-                    seatDto.setStatus(occupiedSeatIds.contains(seat.getId()) ? 1 : 0);
+                   // seatDto.setStatus(occupiedSeatIds.contains(seat.getId()) ? 1 : 0);
                     return seatDto;
                 })
                 .collect(Collectors.toList());

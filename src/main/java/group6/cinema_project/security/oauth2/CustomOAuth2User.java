@@ -1,11 +1,14 @@
 package group6.cinema_project.security.oauth2;
 
-import group6.cinema_project.entity.User;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Map;
+import group6.cinema_project.entity.User;
 
 public class CustomOAuth2User implements OAuth2User {
     private final OAuth2User oAuth2User;
@@ -14,26 +17,27 @@ public class CustomOAuth2User implements OAuth2User {
     public CustomOAuth2User(OAuth2User oAuth2User, User user) {
         this.oAuth2User = oAuth2User;
         this.user = user;
-
     }
+    
     @Override
     public Map<String, Object> getAttributes() {
         return oAuth2User.getAttributes();
     }
 
     @Override
-   public Collection<? extends GrantedAuthority> getAuthorities() {
-        return oAuth2User.getAuthorities();
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Return authorities based on user role
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
     }
 
     @Override
     public String getName() {
-        // Use "sub" (Google's unique user ID) or "email"
-        String name = oAuth2User.getAttribute("sub");
-        if (name == null) {
-            name = oAuth2User.getAttribute("email");
-        }
-        return name;
+        // Return email as the principal name for Spring Security
+        return user.getEmail();
     }
-
+    
+    // Getter for the user entity
+    public User getUser() {
+        return user;
+    }
 }

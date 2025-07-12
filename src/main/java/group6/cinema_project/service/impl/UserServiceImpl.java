@@ -161,7 +161,25 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    @Override
+    public void updateUserRole(int userId, String newRole) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found with id: " + userId);
+        }
 
+        User user = userOpt.get();
+
+        // Validate role
+        try {
+            Role role = Role.valueOf(newRole.toUpperCase());
+            user.setRole(role);
+            userRepository.save(user);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid role: " + newRole);
+        }
+
+    }
 
 
     @Override

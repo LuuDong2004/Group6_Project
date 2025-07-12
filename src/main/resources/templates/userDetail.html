@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="user-provider" th:content="${user?.provider}"/>
+    <meta name="is-oauth2-user" th:content="${isOAuth2User}"/>
     <title>Thông tin tài khoản - Cinemas</title>
 
 
@@ -42,7 +44,7 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Thông Tin Tài Khoản</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item" role="presentation" th:if="${user?.provider != 'GOOGLE'}">
             <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">Đổi Mật Khẩu</button>
         </li>
         <li class="nav-item" role="presentation">
@@ -57,7 +59,7 @@
             <form id="accountForm">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <!-- ✅ SỬA ID VÀ THYMELEAF FIELD -->
+                        <!-- SỬA ID VÀ THYMELEAF FIELD -->
                         <label class="form-label required" for="userName">Họ tên</label>
                         <input type="text" class="form-control" id="userName" th:value="${user?.userName}" required>
                     </div>
@@ -68,7 +70,7 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <!-- ✅ SỬA ID VÀ THYMELEAF FIELD -->
+                        <!--  SỬA ID VÀ THYMELEAF FIELD -->
                         <label class="form-label required" for="dateOfBirth">Ngày sinh</label>
                         <input type="date" class="form-control" id="dateOfBirth" th:value="${user?.dateOfBirth}" required>
                     </div>
@@ -90,7 +92,10 @@
         <!-- Tab Đổi mật khẩu -->
         <div class="tab-pane fade" id="password" role="tabpanel">
             <div id="passwordAlert"></div>
-            <form id="changePasswordForm">
+            <div th:if="${user?.provider == 'GOOGLE'}" class="alert alert-info">
+                <strong>Thông báo:</strong> Tài khoản Google không thể đổi mật khẩu tại đây. Vui lòng đổi mật khẩu trực tiếp trên Google.
+            </div>
+            <form id="changePasswordForm" th:if="${user?.provider != 'GOOGLE'}">
                 <div class="mb-3">
                     <label class="form-label required" for="oldPassword">Mật khẩu hiện tại</label>
                     <input type="password" class="form-control" id="oldPassword" required>
@@ -153,7 +158,9 @@
 
         <div class="d-flex justify-content-between align-items-center mt-4">
         <div></div>
-        <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
+        <div>
+            <a href="/logout" class="btn btn-danger">Đăng xuất</a>
+        </div>
         </div>
     </div>
 </div>
@@ -269,28 +276,6 @@
                 console.error('Error:', error);
                 showAlert('passwordAlert', 'danger', 'Có lỗi xảy ra khi đổi mật khẩu!');
             });
-    });
-
-    // Xử lý đăng xuất với POST request
-    document.getElementById("logoutBtn").addEventListener("click", function() {
-        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-            // Tạo form ẩn để submit
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/logout';
-
-            // Thêm CSRF token
-            if (csrfToken) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_csrf';
-                csrfInput.value = csrfToken;
-                form.appendChild(csrfInput);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-        }
     });
 
 </script>

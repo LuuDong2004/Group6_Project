@@ -3,7 +3,6 @@ package group6.cinema_project.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,6 +25,8 @@ import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
 import group6.cinema_project.dto.UserRegistrationDto;
 import group6.cinema_project.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
@@ -97,13 +98,29 @@ public class AuthController {
             // Lấy email của user hiện tại từ SecurityContext
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
+            
+            // Debug logging
+            System.out.println("Current authentication: " + auth);
+            System.out.println("Current user email: " + email);
+            System.out.println("Authentication type: " + auth.getClass().getSimpleName());
 
             UserDto user = userService.getUserByEmail(email);
             model.addAttribute("user", user);
+            
+            // Add CSRF token info for debugging
+            if (auth.getPrincipal() instanceof group6.cinema_project.security.oauth2.CustomOAuth2User) {
+                System.out.println("OAuth2 user detected in profile page");
+                model.addAttribute("isOAuth2User", true);
+            } else {
+                System.out.println("Local user detected in profile page");
+                model.addAttribute("isOAuth2User", false);
+            }
 
             return "userDetail";
         } catch (Exception e) {
-            model.addAttribute("error", "Không thể tải thông tin người dùng");
+            System.err.println("Error in profilePage: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
             return "redirect:/login";
         }
     }
@@ -117,16 +134,23 @@ public class AuthController {
             // Lấy email của user hiện tại
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
+            
+            System.out.println("AuthController.updateProfile - Updating profile for email: " + email);
+            System.out.println("AuthController.updateProfile - Request data: " + userDto);
 
             UserDto updatedUser = userService.updateUserProfile(email, userDto);
 
             response.put("success", true);
             response.put("message", "Cập nhật thông tin thành công!");
             response.put("user", updatedUser);
+            
+            System.out.println("AuthController.updateProfile - Update successful");
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            System.err.println("AuthController.updateProfile - Error: " + e.getMessage());
+            e.printStackTrace();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
@@ -268,6 +292,59 @@ public class AuthController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("AuthController.logout - Logging out user");
+            
+            // Get current authentication
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                System.out.println("AuthController.logout - Logging out user: " + auth.getName());
+                System.out.println("AuthController.logout - Authentication type: " + auth.getClass().getSimpleName());
+                
+                // Check if it's OAuth2 user
+                if (auth.getPrincipal() instanceof group6.cinema_project.security.oauth2.CustomOAuth2User) {
+                    System.out.println("AuthController.logout - OAuth2 user detected");
+                    group6.cinema_project.security.oauth2.CustomOAuth2User oauth2User = 
+                        (group6.cinema_project.security.oauth2.CustomOAuth2User) auth.getPrincipal();
+                    System.out.println("AuthController.logout - OAuth2 provider: " + oauth2User.getUser().getProvider());
+                }
+            }
+            
+            // Clear the security context
+            SecurityContextHolder.clearContext();
+            
+            // Invalidate the session
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                System.out.println("AuthController.logout - Invalidating session");
+                session.invalidate();
+            }
+            
+            // Clear any cookies
+            jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (jakarta.servlet.http.Cookie cookie : cookies) {
+                    if (cookie.getName().equals("JSESSIONID")) {
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                    }
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("message", "Đăng xuất thành công!");
+            System.out.println("AuthController.logout - Logout successful");
+            
+            return "redirect:/login?logout=true";
+        } catch (Exception e) {
+            System.err.println("AuthController.logout - Error during logout: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi đăng xuất!");
+            return "redirect:/login";
         }
     }
 
