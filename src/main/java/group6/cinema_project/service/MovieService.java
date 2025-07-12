@@ -19,4 +19,5 @@ public interface MovieService {
 
     List<MovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy);
 
+    
 }

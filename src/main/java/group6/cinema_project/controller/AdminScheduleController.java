@@ -29,6 +29,9 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 /**
  * Controller for handling admin schedule management operations.
@@ -538,22 +541,7 @@ public class AdminScheduleController {
                 }
 
                 // Filter grouped schedules by status
-                groupedSchedules = groupedSchedules.stream()
-                        .map(dateGroup -> {
-                            List<ScheduleGroupedByRoomDto> filteredRooms = dateGroup.getRooms().stream()
-                                    .map(roomGroup -> {
-                                        List<ScheduleTimeSlotDto> filteredTimeSlots = roomGroup.getTimeSlots().stream()
-                                                .filter(timeSlot -> status.equalsIgnoreCase(timeSlot.getStatus()))
-                                                .collect(Collectors.toList());
-                                        return new ScheduleGroupedByRoomDto(roomGroup.getRoomName(),
-                                                roomGroup.getBranchName(), filteredTimeSlots);
-                                    })
-                                    .filter(roomGroup -> !roomGroup.getTimeSlots().isEmpty())
-                                    .collect(Collectors.toList());
-                            return new ScheduleGroupedByDateDto(dateGroup.getDate(), filteredRooms);
-                        })
-                        .filter(dateGroup -> !dateGroup.getRooms().isEmpty())
-                        .collect(Collectors.toList());
+                groupedSchedules = filterSchedulesByStatus(groupedSchedules, status);
             }
 
             log.info("Tìm thấy {} ngày có lịch chiếu với status: {}", groupedSchedules.size(), statusText);
@@ -590,9 +578,39 @@ public class AdminScheduleController {
             log.error("Lỗi khi tải chi tiết lịch chiếu cho phim ID: {} với trạng thái: {}", movieId, status, e);
             model.addAttribute("error", "Lỗi khi tải chi tiết lịch chiếu: " + e.getMessage());
             return "redirect:" + (backUrl != null ? backUrl : defaultBackUrl);
-        } 
+        }
     }
-    
+
+    private List<ScheduleGroupedByDateDto> filterSchedulesByStatus(
+            List<ScheduleGroupedByDateDto> schedules, String status) {
+        
+        return schedules.stream()
+            .map(dateGroup -> filterDateGroup(dateGroup, status))
+            .filter(dateGroup -> !dateGroup.getRooms().isEmpty())
+            .collect(Collectors.toList());
+    }
+
+    private ScheduleGroupedByDateDto filterDateGroup(ScheduleGroupedByDateDto dateGroup, String status) {
+        List<ScheduleGroupedByRoomDto> filteredRooms = dateGroup.getRooms().stream()
+            .map(roomGroup -> filterRoomGroup(roomGroup, status))
+            .filter(roomGroup -> !roomGroup.getTimeSlots().isEmpty())
+            .collect(Collectors.toList());
+        
+        return new ScheduleGroupedByDateDto(dateGroup.getDate(), filteredRooms);
+    }
+
+    private ScheduleGroupedByRoomDto filterRoomGroup(ScheduleGroupedByRoomDto roomGroup, String status) {
+        List<ScheduleTimeSlotDto> filteredTimeSlots = roomGroup.getTimeSlots().stream()
+            .filter(timeSlot -> status.equalsIgnoreCase(timeSlot.getStatus()))
+            .collect(Collectors.toList());
+        
+        return new ScheduleGroupedByRoomDto(
+            roomGroup.getRoomName(), 
+            roomGroup.getBranchName(), 
+            filteredTimeSlots
+        );
+    }
+
     @PostMapping("/update-statuses")
     public String updateScheduleStatuses(RedirectAttributes redirectAttributes) {
         log.info("Processing request to update movie schedule statuses");
@@ -600,7 +618,6 @@ public class AdminScheduleController {
         try {
             int upcomingToActiveCount = movieScheduleService.updateUpcomingToActiveSchedules();
             int activeToEndedCount = movieScheduleService.updateExpiredScheduleStatuses();
-
             int totalUpdated = upcomingToActiveCount + activeToEndedCount;
 
             if (totalUpdated > 0) {
@@ -608,7 +625,7 @@ public class AdminScheduleController {
                         "Đã cập nhật trạng thái cho " + totalUpdated + " lịch chiếu (" +
                                 upcomingToActiveCount + " từ sắp chiếu thành đang chiếu, " +
                                 activeToEndedCount + " từ đang chiếu thành đã kết thúc)");
-            } else {
+            } else { 
                 redirectAttributes.addFlashAttribute("message", "Không có lịch chiếu nào cần cập nhật trạng thái");
             }
 
@@ -662,4 +679,8 @@ public class AdminScheduleController {
             return "redirect:/admin/schedules/add";
         }
     }
+
+ 
+    
 }
+

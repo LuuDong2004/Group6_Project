@@ -26,6 +26,5 @@ public class ScheduleGroupedByRoomDto {
     public boolean hasTimeSlots() {
         return timeSlots != null && !timeSlots.isEmpty();
     }
-
    
 }

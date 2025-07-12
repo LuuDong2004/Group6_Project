@@ -176,4 +176,6 @@ public interface MovieScheduleService {
          * @return Danh sách lịch chiếu đã lọc
          */
         List<ScreeningScheduleDto> getSchedulesByMovieIdAndStatus(Integer movieId, String status);
+
+
 }

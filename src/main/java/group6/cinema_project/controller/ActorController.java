@@ -187,7 +187,7 @@ public class ActorController {
                 bindingResult.rejectValue("name", "error.actor", "Diễn viên với tên này đã tồn tại");
                 return "admin/admin_actor_edit";
             }
-
+  
             // Handle image upload (only if new image is provided)
             if (imageFile != null && !imageFile.isEmpty()) {
                 String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
@@ -245,4 +245,6 @@ public class ActorController {
             return "redirect:/admin/actors/list";
         }
     }
-}
+} 
+
+

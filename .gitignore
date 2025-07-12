@@ -1,33 +1,67 @@
+# ==================================
+#   QUY TẮC TÙY CHỈNH CỦA DỰ ÁN
+# ==================================
+
+# 1. Bỏ qua tất cả các file ảnh
+# Đây là phần quan trọng nhất bạn cần
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.bmp
+*.webp
+
+# Nếu bạn lưu ảnh trong một thư mục riêng (ví dụ: /images), hãy bỏ comment dòng dưới
+# images/
+# assets/
+
+# 2. Bỏ qua các file log
+*.log
+
+# 3. Bỏ qua các file chứa biến môi trường (thường chứa key bí mật)
+.env
+
+# 4. Ghi chú: File HELP.md đang bị bỏ qua.
+# Nếu bạn MUỐN đưa file này lên GitHub, hãy xóa dòng dưới đây.
 HELP.md
+
+
+# ==================================
+#   THƯ MỤC BUILD VÀ DEPENDENCIES
+# ==================================
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
 .apt_generated
-.classpath
 .factorypath
-.project
-.settings
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+
+# Đừng bỏ qua Maven Wrapper, đây là file quan trọng
+!.mvn/wrapper/maven-wrapper.jar
+
+
+# ==================================
+#   CẤU HÌNH CỦA CÁC IDE
+# ==================================
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### STS / Eclipse ###
+.classpath
+.project
+.settings/
 
 ### VS Code ###
 .vscode/

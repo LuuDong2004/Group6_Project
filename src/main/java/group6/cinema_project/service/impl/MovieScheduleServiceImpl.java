@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     private final MovieRepository movieRepository;
     private final ScreeningRoomRepository screeningRoomRepository;
     private final ModelMapper modelMapper;
+    List<ScheduleGroupedByDateDto> groupedSchedules;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,10 +48,9 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto) {
         validateScheduleIsNotCurrentlyShowing(screeningScheduleDto.getId());
-
-        // Calculate and set the correct end time based on movie duration
+     
         calculateAndSetEndTime(screeningScheduleDto);
-
+        
         ScreeningSchedule screeningSchedule = modelMapper.map(screeningScheduleDto, ScreeningSchedule.class);
         ScreeningSchedule savedSchedule = movieScheduleRepository.save(screeningSchedule);
         return convertToDto(savedSchedule);
@@ -331,35 +332,26 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
     @Override
     @Transactional(readOnly = true)
     public List<ScheduleGroupedByDateDto> getSchedulesByMovieIdGrouped(Integer movieId) {
-        try {
-            // Get all schedules for the movie
+        try { 
             List<ScreeningScheduleDto> schedules = getSchedulesByMovieId(movieId);
+                
+            // Group schedules by date and then by room name in a single, more efficient
+            // operation.
+            Map<LocalDate, Map<String, List<ScreeningScheduleDto>>> groupedByDateAndRoom = schedules.stream()
+                    .collect(Collectors.groupingBy(
+                            ScreeningScheduleDto::getScreeningDate,
+                            Collectors.groupingBy(ScreeningScheduleDto::getScreeningRoomName)));
 
-            // Group schedules by date
-            Map<LocalDate, List<ScreeningScheduleDto>> schedulesByDate = schedules.stream()
-                    .collect(Collectors.groupingBy(ScreeningScheduleDto::getScreeningDate));
-
-            // Convert to grouped DTOs
-            return schedulesByDate.entrySet().stream()
-                    .map(entry -> {
-                        LocalDate date = entry.getKey();
-                        List<ScreeningScheduleDto> dailySchedules = entry.getValue();
-
-                        // Group daily schedules by room
-                        Map<String, List<ScreeningScheduleDto>> schedulesByRoom = dailySchedules.stream()
-                                .collect(Collectors.groupingBy(ScreeningScheduleDto::getScreeningRoomName));
-
-                        // Convert to room DTOs
-                        List<ScheduleGroupedByRoomDto> rooms = schedulesByRoom.entrySet().stream()
+            // Transform the nested map into the desired DTO structure.
+            return groupedByDateAndRoom.entrySet().stream()
+                    .map(dateEntry -> { 
+                        List<ScheduleGroupedByRoomDto> rooms = dateEntry.getValue().entrySet().stream()
                                 .map(roomEntry -> {
-                                    String roomName = roomEntry.getKey();
                                     List<ScreeningScheduleDto> roomSchedules = roomEntry.getValue();
+                                    // All schedules in this group share the same branch, so we can take it from the
+                                    // first one.
+                                    String branchName = roomSchedules.get(0).getBranchName();
 
-                                    // Get branch name from first schedule (all should be same)
-                                    String branchName = roomSchedules.isEmpty() ? ""
-                                            : roomSchedules.get(0).getBranchName();
-
-                                    // Convert to time slot DTOs
                                     List<ScheduleTimeSlotDto> timeSlots = roomSchedules.stream()
                                             .map(schedule -> new ScheduleTimeSlotDto(
                                                     schedule.getId(),
@@ -367,17 +359,17 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
                                                     schedule.getEndTime(),
                                                     schedule.getPrice(),
                                                     schedule.getStatus()))
-                                            .sorted((a, b) -> a.getStartTime().compareTo(b.getStartTime()))
+                                            .sorted(Comparator.comparing(ScheduleTimeSlotDto::getStartTime))
                                             .collect(Collectors.toList());
 
-                                    return new ScheduleGroupedByRoomDto(roomName, branchName, timeSlots);
+                                    return new ScheduleGroupedByRoomDto(roomEntry.getKey(), branchName, timeSlots);
                                 })
-                                .sorted((a, b) -> a.getRoomName().compareTo(b.getRoomName()))
+                                .sorted(Comparator.comparing(ScheduleGroupedByRoomDto::getRoomName))
                                 .collect(Collectors.toList());
 
-                        return new ScheduleGroupedByDateDto(date, rooms);
+                        return new ScheduleGroupedByDateDto(dateEntry.getKey(), rooms);
                     })
-                    .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
+                    .sorted(Comparator.comparing(ScheduleGroupedByDateDto::getDate))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -752,4 +744,5 @@ public class MovieScheduleServiceImpl implements MovieScheduleService {
             return new ArrayList<>();
         }
     }
+
 }

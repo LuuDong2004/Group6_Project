@@ -67,7 +67,7 @@ public class MovieCategorizationDebugController {
             return errorResponse;
         }
     }
-
+  
     /**
      * Update null statuses to AUTO for dynamic calculation
      */
