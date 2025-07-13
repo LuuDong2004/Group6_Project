@@ -5,18 +5,16 @@ import org.springframework.stereotype.Repository;
 
 import group6.cinema_project.entity.ScreeningRoom;
 
-import java.util.Optional;
-
 @Repository
 public interface ScreeningRoomRepository extends JpaRepository<ScreeningRoom, Integer> {
 
-    // Thêm các phương thức custom nếu cần
-    Optional<ScreeningRoom> findByName (String name);
     boolean existsByName(String name);
-    boolean existsById(int id);
-
-    ScreeningRoom findByNameAndBranchId(String name, int branchId);
-    boolean existsByNameAndBranchId(String name, int branchId);
-    boolean existsByIdAndBranchId(int id, int branchId);
-
-}
+    boolean existsByBranchId(int branchId);
+    boolean existsByBranchIdAndName(int branchId, String name);
+    boolean existsByBranchIdAndNameAndIdNot(int branchId, String name, int id);
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, int id);
+    boolean existsByBranchIdAndNameIgnoreCase(int branchId, String name);
+    boolean existsByBranchIdAndNameIgnoreCaseAndIdNot(int branchId, String name, int id);
+    // Thêm các phương thức custom nếu cần
+} 

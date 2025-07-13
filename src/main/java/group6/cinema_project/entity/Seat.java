@@ -14,21 +14,29 @@ import lombok.Setter;
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private int id;
-
+    @Column(name = "name", nullable = false, length = 50, columnDefinition = "NVARCHAR(50)")
     private String name;
+    @Column(name = "row", nullable = false)
     private int row;
+    @Column(name = "seat_type", nullable = false, length = 50, columnDefinition = "NVARCHAR(50)")
+    private String seatType;
+    @Column(name = "status", nullable = false, length = 50, columnDefinition = "NVARCHAR(50)")
+    private String status;
     @ManyToOne
-    @JoinColumn(name = "screeningRoomId")
+    @JoinColumn(name = "screening_room_id")
     private ScreeningRoom room;
 
     public Seat() {
     }
 
-    public Seat(int id, String name, int row, ScreeningRoom room) {
+    public Seat(int id, String name, int row, String seatType, String status, ScreeningRoom room) {
         this.id = id;
         this.name = name;
         this.row = row;
-        room = room;
+        this.seatType = seatType;
+        this.status = status;
+        this.room = room;
     }
 }

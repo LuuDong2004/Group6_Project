@@ -30,13 +30,13 @@ public class ScreeningRoom {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 50, columnDefinition = "VARCHAR(50)")
+    @Column(name = "name", nullable = false, unique = true, length = 50, columnDefinition = "NVARCHAR(50)")
     private String name;
 
     @Column(name = "capacity", nullable = false, length = 10, columnDefinition = "INT")
     private int capacity; // sức chứa
 
-    @Column(name = "description",nullable = false, length = 250, columnDefinition = "VARCHAR(255)")
+    @Column(name = "description",nullable = false, length = 250, columnDefinition = "NVARCHAR(255)")
     private String description;
 
     @Column(name = "type",nullable = false,  length = 20, columnDefinition = "VARCHAR(20)")
@@ -51,21 +51,9 @@ public class ScreeningRoom {
     private Branch branch;
     
     // Thêm các field mới
-    @Column(name = "rows", nullable = false, columnDefinition = "INT DEFAULT 10")
+    @Column(name = "rows", nullable = false)
     private int rows; // số hàng ghế
     
-    @Column(name = "seats_per_row", nullable = false, columnDefinition = "INT DEFAULT 12")
+    @Column(name = "seats_per_row", nullable = false)
     private int seatsPerRow; // số ghế mỗi hàng
-    
-    @Column(name = "screen_type", length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'STANDARD'")
-    private String screenType; // loại màn hình
-    
-    @Column(name = "has_air_conditioner", columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean hasAirConditioner; // có điều hòa
-    
-    @Column(name = "has_surround_sound", columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean hasSurroundSound; // có âm thanh vòm
-    
-    @Column(name = "has_reclining_seats", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean hasRecliningSeats; // có ghế ngả
 }
