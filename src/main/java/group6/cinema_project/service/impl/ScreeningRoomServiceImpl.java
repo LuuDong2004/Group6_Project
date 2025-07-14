@@ -80,7 +80,7 @@ public class ScreeningRoomServiceImpl implements ScreeningRoomService {
             }
             for (int j = 1; j <= seatsPerRow; j++) {
                 Seat seat = new Seat();
-                seat.setRow(i); // lưu số thứ tự hàng, nếu muốn lưu ký tự thì sửa thành String.valueOf(rowChar)
+                seat.setRow(String.valueOf(rowChar)); // lưu số thứ tự hàng, nếu muốn lưu ký tự thì sửa thành String.valueOf(rowChar)
                 seat.setName(rowChar + String.valueOf(j));
                 seat.setRoom(saved);
                 // Nếu entity Seat có seatType thì set:

@@ -1,16 +1,39 @@
 package group6.cinema_project.dto;
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class UserRegistrationDto {
+    @NotBlank(message = "Tên không được để trống")
+    @Size(min = 3, max = 50, message = "Tên không hợp lệ")
     private String userName;
 
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
+
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 8, max = 50, message = "Mật khẩu không hợp lệ")
     private String password;
 
+    @NotBlank(message = "Xác nhận mật khẩu không được để trống")
+    @Size(min = 8, max = 50, message = "Mật khẩu không hợp lệ")
     private String confirmPassword;
+
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Size(min = 10, max = 11, message = "Số điện thoại không hợp lệ")
     private String phone;
 
-    private String dateOfBirth;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
 
+    @NotBlank(message = "Địa chỉ không được để trống")
+    @Size(min = 10, max = 100, message = "Địa chỉ không hợp lệ")
     private String address;
 
     private String role ; // Default role
@@ -58,11 +81,11 @@ public class UserRegistrationDto {
         this.phone = phone;
     }
 
-    public String getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

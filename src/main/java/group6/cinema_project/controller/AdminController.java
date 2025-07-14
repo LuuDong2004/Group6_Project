@@ -6,6 +6,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import group6.cinema_project.dto.BranchDto;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +30,6 @@ import group6.cinema_project.dto.FoodDto;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.UserRegistrationDto;
 import group6.cinema_project.entity.Actor;
-import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.entity.Role;
 import group6.cinema_project.entity.User;
@@ -97,7 +96,7 @@ public class AdminController {
             staffDto.setPassword("123456");
             staffDto.setConfirmPassword("123456");
             staffDto.setPhone("0123456789");
-            staffDto.setDateOfBirth("1990-01-01");
+            staffDto.setDateOfBirth(LocalDate.parse("1990-01-01"));
             staffDto.setAddress("Hà Nội");
             
             // Tạo user với role STAFF

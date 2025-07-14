@@ -1,5 +1,7 @@
 package group6.cinema_project.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,8 +40,8 @@ public class User {
     @Column(name = "password", nullable = true, length = 100, columnDefinition = "VARCHAR(100)")
     private String password;
 
-    @Column(name = "date_of_birth", nullable = true, length = 10, columnDefinition = "VARCHAR(10)")
-    private String dateOfBirth;
+    @Column(name = "date_of_birth", nullable = true)
+    private LocalDate dateOfBirth;
 
     @Column(name = "address", nullable = true, length = 100, columnDefinition = "VARCHAR(100)")
     private String address;
@@ -63,7 +65,7 @@ public class User {
         this.provider = provider;
     }
 
-    public User(String userName, String phone, String email, String password, String dateOfBirth, String address, Role role) {
+    public User(String userName, String phone, String email, String password, LocalDate dateOfBirth, String address, Role role) {
         this.userName = userName;
         this.phone = phone;
         this.email = email;
@@ -114,11 +116,11 @@ public class User {
         this.password = password;
     }
 
-    public String getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

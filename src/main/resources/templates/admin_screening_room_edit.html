@@ -66,10 +66,15 @@
                     <label class="form-label">Số ghế mỗi hàng:</label>
                     <input type="number" class="form-control" id="seatsPerRow" th:field="*{seatsPerRow}" min="2" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Số lượng ghế</label>
+                    <input type="number" class="form-control" id="capacity" th:field="*{capacity}" readonly>
+                </div>
                 <div id="rowsSeatsError" class="error-message"></div>
                 <div class="form-group">
                     <div class="form-label">*Mặc định kiểu: 25% ghế đầu là standard, 50% ghế sau là ghế vip, còn lại là couple</div>
                 </div>
+
                 <div class="form-group">
                     <label class="form-label">Type:</label>
                     <div>
@@ -162,7 +167,23 @@ function renderSeatMap() {
     }
     document.getElementById('seatMapInfo').innerText = `Chọn hàng ghế: ${rows}, Số ghế mỗi hàng: ${seats}`;
 }
-window.onload = function() { validateRowsAndSeats(); };
+
+function updateCapacity() {
+    const rows = parseInt(document.getElementById('rows').value, 10);
+    const seats = parseInt(document.getElementById('seatsPerRow').value, 10);
+    const capacityInput = document.getElementById('capacity');
+    if (!isNaN(rows) && !isNaN(seats) && rows > 0 && seats > 0) {
+        capacityInput.value = rows * seats;
+    } else {
+        capacityInput.value = '';
+    }
+}
+document.getElementById('rows').addEventListener('input', updateCapacity);
+document.getElementById('seatsPerRow').addEventListener('input', updateCapacity);
+window.onload = function() {
+    validateRowsAndSeats();
+    updateCapacity();
+};
 </script>
 </body>
 </html> 

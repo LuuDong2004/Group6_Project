@@ -1,5 +1,9 @@
 package group6.cinema_project.dto;
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import group6.cinema_project.entity.Role;
 
 public class UserDto {
@@ -10,7 +14,8 @@ public class UserDto {
     private String phone;
     private String password;
 
-    private String dateOfBirth;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
 
     private String address;
     private Role role;
@@ -20,7 +25,7 @@ public class UserDto {
     public UserDto() {
     }
 
-    public UserDto(int id, String userName, String email, String phone, String password, String dateOfBirth, String address, Role role) {
+    public UserDto(int id, String userName, String email, String phone, String password, LocalDate dateOfBirth, String address, Role role) {
         this.id = id;
         this.userName = userName;
         this.email = email;
@@ -71,11 +76,11 @@ public class UserDto {
         this.password = password;
     }
 
-    public String getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
