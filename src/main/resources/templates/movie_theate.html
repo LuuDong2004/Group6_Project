@@ -78,61 +78,80 @@
 	</header>
     <main style="margin-top: 120px;">
         <style>
-            #cinema-flex-container {
-                display: flex;
-                height: 500px;
-                min-height: 350px;
-            }
-            #cinema-list {
-                flex: 1;
-                max-width: 350px;
-                overflow-y: auto;
-                border-right: 1px solid var(--theme-bg) !important;
-                padding: 16px;
-                background: var(--theme-bg) !important;    
-            }
-            #cinema-list div {
-                margin-bottom: 18px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #f0f0f0;
-            }
-            #cinema-list b {
-                color: #007bff;
-                cursor: pointer;
-            }
-            #map {
-                width: 100%;
-                height: 100%;
-                min-height: 350px;
-            }
-            #find-cinema-btn {
-                margin: 20px auto 0 auto;
-                display: block;
-                z-index: 10;
-                position: relative;
-                padding: 10px 24px;
-                font-size: 1.1rem;
-                background: #007bff;
-                color: #fff;
-                border: none;
-                border-radius: 6px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-            #find-cinema-btn:hover {
-                background: #0056b3;
-            }
-            @media (max-width: 900px) {
-                #cinema-flex-container { flex-direction: column; height: auto; }
-                #cinema-list { max-width: 100%; border-right: none; border-bottom: 1px solid #eee; }
-                #map { min-height: 250px; }
-            }
-        </style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+main {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+#cinema-flex-container {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+}
+#cinema-list {
+    flex: 1;
+    max-width: 350px;
+    overflow-y: auto;
+    border-right: 1px solid var(--theme-bg) !important;
+    padding: 16px;
+    background: var(--theme-bg) !important;    
+    height: 100%;
+    min-height: 0;
+}
+#cinema-list div {
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+#cinema-list b {
+    color: #007bff;
+    cursor: pointer;
+}
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+#find-cinema-btn {
+    margin: 16px 0 0 0;
+    display: inline-block;
+    z-index: 10;
+    position: relative;
+    padding: 10px 24px;
+    font-size: 1.1rem;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#find-cinema-btn:hover {
+    background: #0056b3;
+}
+@media (max-width: 900px) {
+    #cinema-flex-container { flex-direction: column; height: auto; }
+    #cinema-list { max-width: 100%; border-right: none; border-bottom: 1px solid #eee; }
+    #map { min-height: 250px; }
+}
+</style>
         <div id="cinema-flex-container">
             <!-- Cột trái: Danh sách rạp -->
             <div id="cinema-list">
                 <h3>Gợi ý rạp gần bạn</h3>
+                <button id="find-cinema-btn" onclick="showNearestCinemas()">Tìm rạp gần tôi</button>
                 <!-- Danh sách rạp sẽ được JS render vào đây -->
             </div>
             <!-- Cột phải: Google Map -->
@@ -140,7 +159,6 @@
                 <div id="map"></div>
             </div>
         </div>
-        <button id="find-cinema-btn" onclick="showNearestCinemas()">Tìm rạp gần tôi</button>
     </main>
 
     <script>
