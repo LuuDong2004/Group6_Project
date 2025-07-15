@@ -305,6 +305,5 @@ public interface MovieScheduleRepository extends JpaRepository<ScreeningSchedule
                         ") " +
                         "ORDER BY ss.screening_date, ss.start_time", nativeQuery = true)
         List<ScreeningSchedule> findUpcomingSchedulesByMovieIdWithRelatedEntities(@Param("movieId") Integer movieId);
-
-        
+      
 }

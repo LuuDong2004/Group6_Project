@@ -4,7 +4,7 @@ import group6.cinema_project.entity.Director;
 import java.util.List;
 import java.util.Set;
 
-public interface DirectorService {
+public interface IDirectorService {
     List<Director> getAllDirectors();
     Director getDirectorById(Integer id);
     Director getDirectorByName(String name);

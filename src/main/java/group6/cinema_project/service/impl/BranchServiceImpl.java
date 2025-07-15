@@ -3,7 +3,7 @@ package group6.cinema_project.service.impl;
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.repository.BranchRepository;
-import group6.cinema_project.service.BranchService;
+import group6.cinema_project.service.IBranchService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BranchServiceImpl implements BranchService {
+public class BranchServiceImpl implements IBranchService {
 
     private final BranchRepository branchRepository;
     private final ModelMapper modelMapper;

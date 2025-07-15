@@ -23,9 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
-import group6.cinema_project.service.ActorService;
-import group6.cinema_project.service.DirectorService;
-import group6.cinema_project.service.impl.MovieServiceImpl;
+import group6.cinema_project.service.IActorService;
+import group6.cinema_project.service.IDirectorService;
+import group6.cinema_project.service.IMovieService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +37,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class MovieController {
 
-    private final MovieServiceImpl movieService;
-    private final ActorService actorService;
-    private final DirectorService directorService;
+    private final IMovieService movieService;
+    private final IActorService actorService;
+    private final IDirectorService directorService;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/movies/";
 

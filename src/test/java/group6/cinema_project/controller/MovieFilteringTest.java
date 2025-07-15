@@ -1,6 +1,6 @@
 package group6.cinema_project.controller;
 
-import group6.cinema_project.service.MovieService;
+import group6.cinema_project.service.IMovieService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +29,7 @@ public class MovieFilteringTest {
         private MockMvc mockMvc;
 
         @MockBean
-        private MovieService movieService;
+        private IMovieService movieService;
 
         /**
          * Test that the movie list page loads without filters

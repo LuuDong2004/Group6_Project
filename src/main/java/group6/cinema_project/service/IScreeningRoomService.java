@@ -6,7 +6,7 @@ import group6.cinema_project.entity.ScreeningRoom;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScreeningRoomService {
+public interface IScreeningRoomService {
     
     Optional<ScreeningRoomDto> getScreeningRoomById(Integer id);
     

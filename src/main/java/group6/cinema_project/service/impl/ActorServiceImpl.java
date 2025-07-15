@@ -10,12 +10,12 @@ import group6.cinema_project.entity.Actor;
 import group6.cinema_project.repository.ActorRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import group6.cinema_project.service.ActorService;
+import group6.cinema_project.service.IActorService;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ActorServiceImpl implements ActorService {
+public class ActorServiceImpl implements IActorService {
 
     private final ActorRepository actorRepository;
 

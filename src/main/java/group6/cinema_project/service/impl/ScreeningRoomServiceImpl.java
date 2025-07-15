@@ -3,7 +3,7 @@ package group6.cinema_project.service.impl;
 import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.repository.ScreeningRoomRepository;
-import group6.cinema_project.service.ScreeningRoomService;
+import group6.cinema_project.service.IScreeningRoomService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ScreeningRoomServiceImpl implements ScreeningRoomService {
+public class ScreeningRoomServiceImpl implements IScreeningRoomService {
 
     private final ScreeningRoomRepository screeningRoomRepository;
     private final ModelMapper modelMapper;

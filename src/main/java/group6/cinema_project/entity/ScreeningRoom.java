@@ -43,4 +43,5 @@ public class ScreeningRoom {
     @OneToMany(mappedBy = "screeningRoom", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<ScreeningSchedule> screeningSchedules;
+    
 }

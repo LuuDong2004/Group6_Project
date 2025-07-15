@@ -1,7 +1,7 @@
 package group6.cinema_project.util;
 
 import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.service.MovieScheduleService;
+import group6.cinema_project.service.IMovieScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Utility class to verify that the movie categorization logic is working correctly.
- * This can be run as a Spring Boot command line runner to test the implementation.
+ * Utility class to verify that the movie categorization logic is working
+ * correctly.
+ * This can be run as a Spring Boot command line runner to test the
+ * implementation.
  */
 @Component
 @RequiredArgsConstructor
 public class MovieCategorizationVerifier implements CommandLineRunner {
 
-    private final MovieScheduleService movieScheduleService;
+    private final IMovieScheduleService movieScheduleService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -33,7 +35,7 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
         try {
             // Test the new dynamic methods
             System.out.println("Testing new dynamic categorization methods:");
-            
+
             List<MovieDto> currentlyPlaying = movieScheduleService.getCurrentlyPlayingMovies();
             List<MovieDto> comingSoon = movieScheduleService.getComingSoonMovies();
             List<MovieDto> stoppedShowing = movieScheduleService.getStoppedShowingMovies();
@@ -51,7 +53,7 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
 
             // Test backward compatibility
             System.out.println("Testing backward compatibility with getMoviesByScheduleStatus:");
-            
+
             List<MovieDto> activeMovies = movieScheduleService.getMoviesByScheduleStatus("ACTIVE");
             List<MovieDto> upcomingMovies = movieScheduleService.getMoviesByScheduleStatus("UPCOMING");
             List<MovieDto> endedMovies = movieScheduleService.getMoviesByScheduleStatus("ENDED");
@@ -70,13 +72,15 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
             for (MovieDto movie : currentlyPlaying) {
                 boolean inComingSoon = comingSoon.stream().anyMatch(m -> m.getId().equals(movie.getId()));
                 boolean inStopped = stoppedShowing.stream().anyMatch(m -> m.getId().equals(movie.getId()));
-                
+
                 if (inComingSoon) {
-                    System.out.println("✗ Movie '" + movie.getName() + "' appears in both Currently Playing and Coming Soon");
+                    System.out.println(
+                            "✗ Movie '" + movie.getName() + "' appears in both Currently Playing and Coming Soon");
                     hasOverlap = true;
                 }
                 if (inStopped) {
-                    System.out.println("✗ Movie '" + movie.getName() + "' appears in both Currently Playing and Stopped Showing");
+                    System.out.println(
+                            "✗ Movie '" + movie.getName() + "' appears in both Currently Playing and Stopped Showing");
                     hasOverlap = true;
                 }
             }
@@ -84,7 +88,8 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
             for (MovieDto movie : comingSoon) {
                 boolean inStopped = stoppedShowing.stream().anyMatch(m -> m.getId().equals(movie.getId()));
                 if (inStopped) {
-                    System.out.println("✗ Movie '" + movie.getName() + "' appears in both Coming Soon and Stopped Showing");
+                    System.out.println(
+                            "✗ Movie '" + movie.getName() + "' appears in both Coming Soon and Stopped Showing");
                     hasOverlap = true;
                 }
             }
@@ -133,7 +138,8 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
     }
 
     /**
-     * Manual verification method that can be called from other parts of the application
+     * Manual verification method that can be called from other parts of the
+     * application
      */
     public void manualVerification() {
         System.out.println("Manual Movie Categorization Verification");
@@ -159,13 +165,16 @@ public class MovieCategorizationVerifier implements CommandLineRunner {
 
             System.out.println();
             System.out.println("Backward Compatibility Check:");
-            System.out.println("- ACTIVE status: " + activeCount + " (should match Currently Playing: " + currentlyPlayingCount + ")");
-            System.out.println("- UPCOMING status: " + upcomingCount + " (should match Coming Soon: " + comingSoonCount + ")");
-            System.out.println("- ENDED status: " + endedCount + " (should match Stopped Showing: " + stoppedShowingCount + ")");
+            System.out.println("- ACTIVE status: " + activeCount + " (should match Currently Playing: "
+                    + currentlyPlayingCount + ")");
+            System.out.println(
+                    "- UPCOMING status: " + upcomingCount + " (should match Coming Soon: " + comingSoonCount + ")");
+            System.out.println(
+                    "- ENDED status: " + endedCount + " (should match Stopped Showing: " + stoppedShowingCount + ")");
 
-            boolean backwardCompatible = (activeCount == currentlyPlayingCount) && 
-                                       (upcomingCount == comingSoonCount) && 
-                                       (endedCount == stoppedShowingCount);
+            boolean backwardCompatible = (activeCount == currentlyPlayingCount) &&
+                    (upcomingCount == comingSoonCount) &&
+                    (endedCount == stoppedShowingCount);
 
             System.out.println("Backward compatibility: " + (backwardCompatible ? "✓ PASS" : "✗ FAIL"));
 

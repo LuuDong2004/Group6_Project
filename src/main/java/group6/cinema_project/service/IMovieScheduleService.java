@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public interface MovieScheduleService {
+public interface IMovieScheduleService {
         Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id);
 
         ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto);

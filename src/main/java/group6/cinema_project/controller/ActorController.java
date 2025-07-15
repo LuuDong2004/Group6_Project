@@ -1,7 +1,7 @@
 package group6.cinema_project.controller;
 
 import group6.cinema_project.entity.Actor;
-import group6.cinema_project.service.ActorService;
+import group6.cinema_project.service.IActorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class ActorController {
 
-    private final ActorService actorService;
+    private final IActorService actorService;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/actors/";
 

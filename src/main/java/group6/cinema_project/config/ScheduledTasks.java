@@ -1,6 +1,6 @@
 package group6.cinema_project.config;
 
-import group6.cinema_project.service.MovieScheduleService;
+import group6.cinema_project.service.IMovieScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Slf4j
 public class ScheduledTasks {
 
-    private final MovieScheduleService movieScheduleService;
+    private final IMovieScheduleService movieScheduleService;
 
     /**
      * Cập nhật tự động trạng thái lịch chiếu mỗi 1 phút

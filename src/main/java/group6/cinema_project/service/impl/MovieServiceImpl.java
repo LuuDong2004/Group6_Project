@@ -7,7 +7,7 @@ import group6.cinema_project.entity.Movie;
 import group6.cinema_project.repository.ActorRepository;
 import group6.cinema_project.repository.DirectorRepository;
 import group6.cinema_project.repository.MovieRepository;
-import group6.cinema_project.service.MovieService;
+import group6.cinema_project.service.IMovieService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class MovieServiceImpl implements MovieService {
+public class MovieServiceImpl implements IMovieService {
 
     private final MovieRepository movieRepository;
     private final ActorRepository actorRepository; // Thêm repo này

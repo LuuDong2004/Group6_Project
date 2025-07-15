@@ -2,7 +2,7 @@ package group6.cinema_project.service;
 
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
-import group6.cinema_project.service.MovieScheduleService;
+import group6.cinema_project.service.IMovieScheduleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MovieCategorizationTest {
 
     @Autowired
-    private MovieScheduleService movieScheduleService;
+    private IMovieScheduleService movieScheduleService;
 
     /**
      * Test case to verify that movies are correctly categorized as Currently

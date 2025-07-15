@@ -1,7 +1,7 @@
 package group6.cinema_project.controller;
 
 import group6.cinema_project.entity.Director;
-import group6.cinema_project.service.DirectorService;
+import group6.cinema_project.service.IDirectorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class DirectorController {
 
-    private final DirectorService directorService;
+    private final IDirectorService directorService;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/directors/";
 
@@ -51,7 +51,8 @@ public class DirectorController {
             List<Director> directors;
 
             // For now, we'll get all directors. Later we can implement search functionality
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {                directors = directorService.getAllDirectors();
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                directors = directorService.getAllDirectors();
                 log.info("Search functionality not yet implemented, showing all directors");
             } else {
                 directors = directorService.getAllDirectors();

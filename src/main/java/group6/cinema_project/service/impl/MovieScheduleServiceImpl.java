@@ -12,7 +12,7 @@ import group6.cinema_project.exception.ScheduleConflictException;
 import group6.cinema_project.repository.MovieRepository;
 import group6.cinema_project.repository.MovieScheduleRepository;
 import group6.cinema_project.repository.ScreeningRoomRepository;
-import group6.cinema_project.service.MovieScheduleService;
+import group6.cinema_project.service.IMovieScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class MovieScheduleServiceImpl implements MovieScheduleService {
+public class MovieScheduleServiceImpl implements IMovieScheduleService {
 
     private final MovieScheduleRepository movieScheduleRepository;
     private final MovieRepository movieRepository;

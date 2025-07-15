@@ -6,10 +6,10 @@ import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
 import group6.cinema_project.dto.ScheduleTimeSlotDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
-import group6.cinema_project.service.MovieScheduleService;
-import group6.cinema_project.service.MovieService;
-import group6.cinema_project.service.ScreeningRoomService;
-import group6.cinema_project.service.BranchService;
+import group6.cinema_project.service.IMovieScheduleService;
+import group6.cinema_project.service.IMovieService;
+import group6.cinema_project.service.IScreeningRoomService;
+import group6.cinema_project.service.IBranchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 /**
  * Controller for handling admin schedule management operations.
  * Handles the display of movie schedules in the admin interface.
@@ -43,10 +42,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Slf4j
 public class AdminScheduleController {
 
-    private final MovieScheduleService movieScheduleService;
-    private final MovieService movieService;
-    private final ScreeningRoomService screeningRoomService;
-    private final BranchService branchService;
+    private final IMovieScheduleService movieScheduleService;
+    private final IMovieService movieService;
+    private final IScreeningRoomService screeningRoomService;
+    private final IBranchService branchService;
 
     /**
      * Display the schedule list page with optional filtering
@@ -583,32 +582,31 @@ public class AdminScheduleController {
 
     private List<ScheduleGroupedByDateDto> filterSchedulesByStatus(
             List<ScheduleGroupedByDateDto> schedules, String status) {
-        
+
         return schedules.stream()
-            .map(dateGroup -> filterDateGroup(dateGroup, status))
-            .filter(dateGroup -> !dateGroup.getRooms().isEmpty())
-            .collect(Collectors.toList());
+                .map(dateGroup -> filterDateGroup(dateGroup, status))
+                .filter(dateGroup -> !dateGroup.getRooms().isEmpty())
+                .collect(Collectors.toList());
     }
 
     private ScheduleGroupedByDateDto filterDateGroup(ScheduleGroupedByDateDto dateGroup, String status) {
         List<ScheduleGroupedByRoomDto> filteredRooms = dateGroup.getRooms().stream()
-            .map(roomGroup -> filterRoomGroup(roomGroup, status))
-            .filter(roomGroup -> !roomGroup.getTimeSlots().isEmpty())
-            .collect(Collectors.toList());
-        
+                .map(roomGroup -> filterRoomGroup(roomGroup, status))
+                .filter(roomGroup -> !roomGroup.getTimeSlots().isEmpty())
+                .collect(Collectors.toList());
+
         return new ScheduleGroupedByDateDto(dateGroup.getDate(), filteredRooms);
     }
 
     private ScheduleGroupedByRoomDto filterRoomGroup(ScheduleGroupedByRoomDto roomGroup, String status) {
         List<ScheduleTimeSlotDto> filteredTimeSlots = roomGroup.getTimeSlots().stream()
-            .filter(timeSlot -> status.equalsIgnoreCase(timeSlot.getStatus()))
-            .collect(Collectors.toList());
-        
+                .filter(timeSlot -> status.equalsIgnoreCase(timeSlot.getStatus()))
+                .collect(Collectors.toList());
+
         return new ScheduleGroupedByRoomDto(
-            roomGroup.getRoomName(), 
-            roomGroup.getBranchName(), 
-            filteredTimeSlots
-        );
+                roomGroup.getRoomName(),
+                roomGroup.getBranchName(),
+                filteredTimeSlots);
     }
 
     @PostMapping("/update-statuses")
@@ -625,7 +623,7 @@ public class AdminScheduleController {
                         "Đã cập nhật trạng thái cho " + totalUpdated + " lịch chiếu (" +
                                 upcomingToActiveCount + " từ sắp chiếu thành đang chiếu, " +
                                 activeToEndedCount + " từ đang chiếu thành đã kết thúc)");
-            } else { 
+            } else {
                 redirectAttributes.addFlashAttribute("message", "Không có lịch chiếu nào cần cập nhật trạng thái");
             }
 
@@ -680,7 +678,4 @@ public class AdminScheduleController {
         }
     }
 
- 
-    
 }
-

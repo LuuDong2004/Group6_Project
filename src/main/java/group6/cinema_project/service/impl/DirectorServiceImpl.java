@@ -2,7 +2,7 @@ package group6.cinema_project.service.impl;
 
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.repository.DirectorRepository;
-import group6.cinema_project.service.DirectorService;
+import group6.cinema_project.service.IDirectorService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class DirectorServiceImpl implements DirectorService {
+public class DirectorServiceImpl implements IDirectorService {
 
     private final DirectorRepository directorRepository;
 

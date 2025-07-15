@@ -5,7 +5,7 @@ import group6.cinema_project.dto.MovieDto;
 import java.util.List;
 import java.util.Optional;
 
-public interface MovieService {
+public interface IMovieService {
     Optional<MovieDto> getMovieById(Integer id);
 
     MovieDto saveOrUpdate(MovieDto movieDto);
