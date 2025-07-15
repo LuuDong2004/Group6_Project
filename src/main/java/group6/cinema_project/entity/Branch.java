@@ -9,7 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Branch")
 public class Branch {
@@ -30,45 +38,9 @@ public class Branch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_chain_id")
     private CinemaChain cinemaChain;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private Region region;
-
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public String getAddress() {
-        return address;
-    }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    public CinemaChain getCinemaChain() {
-        return cinemaChain;
-    }
-    public void setCinemaChain(CinemaChain cinemaChain) {
-        this.cinemaChain = cinemaChain;
-    }
-    public Region getRegion() {
-        return region;
-    }
-    public void setRegion(Region region) {
-        this.region = region;
-    }
+ 
 }

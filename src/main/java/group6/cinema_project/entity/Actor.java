@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "actor") // Cập nhật tên bảng
+@Table(name = "Actor")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +28,7 @@ public class Actor {
 
     @Lob
     @Column(name = "description", columnDefinition = "NVARCHAR(MAX)") // columnDefinition có thể cần thiết cho
-    // NVARCHAR(MAX) trên một số DB
+                                                                      // NVARCHAR(MAX) trên một số DB
     private String description;
 
     @JsonIgnore
