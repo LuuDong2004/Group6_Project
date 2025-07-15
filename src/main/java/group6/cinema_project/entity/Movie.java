@@ -3,6 +3,7 @@ package group6.cinema_project.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Movie {
@@ -22,6 +23,20 @@ public class Movie {
     private List<String> directorNames;
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> reviews;
+
+    @ManyToMany
+    @JoinTable(name = "Director_Movie",
+        joinColumns = @JoinColumn(name = "movie_id"),
+        inverseJoinColumns = @JoinColumn(name = "director_id")
+    )
+    private Set<Director> directors;
+
+    public Set<Director> getDirectors() {
+        return directors;
+    }
+    public void setDirectors(Set<Director> directors) {
+        this.directors = directors;
+    }
 
     public Long getId() {
         return id;

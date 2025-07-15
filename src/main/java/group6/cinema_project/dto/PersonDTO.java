@@ -1,6 +1,6 @@
 package group6.cinema_project.dto;
 
-public class PersonDTO {
+public class PersonDto {
     public Long id;
     public String name;
 } 

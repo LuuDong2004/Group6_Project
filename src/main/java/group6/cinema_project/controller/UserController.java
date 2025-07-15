@@ -1,7 +1,6 @@
 package group6.cinema_project.controller;
 
-import group6.cinema_project.entity.User;
-import group6.cinema_project.dto.UserDTO;
+import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,7 +15,7 @@ public class UserController {
 
     @GetMapping("/profile/{id}")
     public String getUserProfile(@PathVariable Long id, Model model) {
-        UserDTO user = userService.getUserDTOById(id);
+        UserDto user = userService.getUserDTOById(id);
         if (user == null) {
             return "redirect:/";
         }

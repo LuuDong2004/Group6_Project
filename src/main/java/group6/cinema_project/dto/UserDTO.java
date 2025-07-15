@@ -1,6 +1,6 @@
 package group6.cinema_project.dto;
 
-public class UserDTO {
+public class UserDto {
     public Long id;
     public String username;
     public String email;

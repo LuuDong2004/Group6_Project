@@ -1,6 +1,6 @@
 package group6.cinema_project.dto;
 
-public class DirectorDTO {
+public class DirectorDto {
     public Long id;
     public String name;
     public String image;

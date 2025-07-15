@@ -1,9 +1,7 @@
 package group6.cinema_project.controller;
 
-import group6.cinema_project.entity.Actor;
-import group6.cinema_project.entity.Director;
-import group6.cinema_project.dto.ActorDTO;
-import group6.cinema_project.dto.DirectorDTO;
+import group6.cinema_project.dto.ActorDto;
+import group6.cinema_project.dto.DirectorDto;
 import group6.cinema_project.service.ActorDirectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,21 +16,21 @@ public class ActorDirectorController {
 
     @GetMapping("/actors")
     public String getAllActors(Model model) {
-        List<ActorDTO> actors = actorDirectorService.getAllActorDTOs();
+        List<ActorDto> actors = actorDirectorService.getAllActorDTOs();
         model.addAttribute("actors", actors);
         return "actors";
     }
 
     @GetMapping("/directors")
     public String getAllDirectors(Model model) {
-        List<DirectorDTO> directors = actorDirectorService.getAllDirectorDTOs();
+        List<DirectorDto> directors = actorDirectorService.getAllDirectorDTOs();
         model.addAttribute("directors", directors);
         return "directors";
     }
 
     @GetMapping("/actors/{id}")
     public String getActorById(@PathVariable Long id, Model model) {
-        ActorDTO actor = actorDirectorService.getActorDTOById(id);
+        ActorDto actor = actorDirectorService.getActorDTOById(id);
         if (actor == null) {
             return "redirect:/actors";
         }
@@ -42,7 +40,7 @@ public class ActorDirectorController {
 
     @GetMapping("/directors/{id}")
     public String getDirectorById(@PathVariable Long id, Model model) {
-        DirectorDTO director = actorDirectorService.getDirectorDTOById(id);
+        DirectorDto director = actorDirectorService.getDirectorDTOById(id);
         if (director == null) {
             return "redirect:/directors";
         }
@@ -52,7 +50,7 @@ public class ActorDirectorController {
 
     @GetMapping("/movies/{movieId}/actors")
     public String getActorsByMovieId(@PathVariable Long movieId, Model model) {
-        List<ActorDTO> actors = actorDirectorService.getActorDTOsByMovieId(movieId);
+        List<ActorDto> actors = actorDirectorService.getActorDTOsByMovieId(movieId);
         model.addAttribute("actors", actors);
         model.addAttribute("movieId", movieId);
         return "movie_actors";
@@ -60,7 +58,7 @@ public class ActorDirectorController {
 
     @GetMapping("/movies/{movieId}/directors")
     public String getDirectorsByMovieId(@PathVariable Long movieId, Model model) {
-        List<DirectorDTO> directors = actorDirectorService.getDirectorDTOsByMovieId(movieId);
+        List<DirectorDto> directors = actorDirectorService.getDirectorDTOsByMovieId(movieId);
         model.addAttribute("directors", directors);
         model.addAttribute("movieId", movieId);
         return "movie_directors";

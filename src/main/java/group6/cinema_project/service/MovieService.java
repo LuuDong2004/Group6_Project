@@ -1,14 +1,14 @@
 package group6.cinema_project.service;
 
 import group6.cinema_project.entity.Movie;
-import group6.cinema_project.dto.MovieDetailDTO;
+import group6.cinema_project.dto.MovieDetailDto;
 import java.util.List;
 
 public interface MovieService {
-    List<MovieDetailDTO> getAllMovies();
+    List<MovieDetailDto> getAllMovies();
     Movie getMovieById(Long id);
-    MovieDetailDTO getMovieDetail(Long id);
-    List<MovieDetailDTO> getFeaturedMovies();
+    MovieDetailDto getMovieDetail(Long id);
+    List<MovieDetailDto> getFeaturedMovies();
     List<String> getAllGenres();
-    List<MovieDetailDTO> getMoviesByGenre(String genre);
+    List<MovieDetailDto> getMoviesByGenre(String genre);
 } 

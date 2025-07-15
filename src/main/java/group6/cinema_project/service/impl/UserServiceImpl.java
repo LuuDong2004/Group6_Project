@@ -1,8 +1,9 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.entity.User;
-import group6.cinema_project.dto.UserDTO;
+import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.repository.UserRepository;
+import group6.cinema_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,11 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public UserDTO getUserDTOById(Long id) {
+    public UserDto getUserDTOById(Long id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) return null;
         
-        UserDTO dto = new UserDTO();
+        UserDto dto = new UserDto();
         dto.id = user.getId();
         dto.username = user.getUserName();
         dto.email = user.getEmail();

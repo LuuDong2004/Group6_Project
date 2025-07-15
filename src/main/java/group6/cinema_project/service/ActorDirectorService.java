@@ -2,8 +2,8 @@ package group6.cinema_project.service;
 
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
-import group6.cinema_project.dto.ActorDTO;
-import group6.cinema_project.dto.DirectorDTO;
+import group6.cinema_project.dto.ActorDto;
+import group6.cinema_project.dto.DirectorDto;
 import java.util.List;
 
 public interface ActorDirectorService {
@@ -15,10 +15,10 @@ public interface ActorDirectorService {
     List<Director> getDirectorsByMovieId(Long movieId);
     
     // DTO methods
-    List<ActorDTO> getAllActorDTOs();
-    List<DirectorDTO> getAllDirectorDTOs();
-    ActorDTO getActorDTOById(Long id);
-    DirectorDTO getDirectorDTOById(Long id);
-    List<ActorDTO> getActorDTOsByMovieId(Long movieId);
-    List<DirectorDTO> getDirectorDTOsByMovieId(Long movieId);
+    List<ActorDto> getAllActorDTOs();
+    List<DirectorDto> getAllDirectorDTOs();
+    ActorDto getActorDTOById(Long id);
+    DirectorDto getDirectorDTOById(Long id);
+    List<ActorDto> getActorDTOsByMovieId(Long movieId);
+    List<DirectorDto> getDirectorDTOsByMovieId(Long movieId);
 } 

@@ -2,7 +2,7 @@ package group6.cinema_project.dto;
 
 import java.util.List;
 
-public class MovieDetailDTO {
+public class MovieDetailDto {
     public Long id;
     public String name;
     public String image;
@@ -16,7 +16,7 @@ public class MovieDetailDTO {
     public String summary;
     public List<String> directors;
     public List<String> actors;
-    public List<ReviewDTO> reviews;
-    public List<PersonDTO> actorsData;
-    public List<PersonDTO> directorsData;
+    public List<ReviewDto> reviews;
+    public List<PersonDto> actorsData;
+    public List<PersonDto> directorsData;
 } 

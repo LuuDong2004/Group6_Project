@@ -2,15 +2,15 @@ package group6.cinema_project.dto;
 
 import group6.cinema_project.entity.Cinema;
 
-public class CinemaDTO {
+public class CinemaDto {
     private String name;
     private String address;
     private double latitude;
     private double longitude;
     private String googleMapsUrl;
 
-    public static CinemaDTO fromEntity(Cinema cinema) {
-        CinemaDTO dto = new CinemaDTO();
+    public static CinemaDto fromEntity(Cinema cinema) {
+        CinemaDto dto = new CinemaDto();
         dto.setName(cinema.getName());
         dto.setAddress(cinema.getAddress());
         dto.setLatitude(cinema.getLat());

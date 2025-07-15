@@ -1,6 +1,6 @@
 package group6.cinema_project.controller;
 
-import group6.cinema_project.dto.CinemaDTO;
+import group6.cinema_project.dto.CinemaDto;
 import group6.cinema_project.entity.Cinema;
 import group6.cinema_project.repository.CinemaRepository;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ public class NearestCinemaController {
     private final CinemaRepository cinemaRepository = new CinemaRepository();
 
     @GetMapping("/search")
-    public List<CinemaDTO> getNearestCinemas(
+    public List<CinemaDto> getNearestCinemas(
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") int limit) {
@@ -24,7 +24,7 @@ public class NearestCinemaController {
                 c -> c.distanceTo(lat, lng)))
             .limit(limit)
             .map(cinema -> {
-                CinemaDTO dto = new CinemaDTO();
+                CinemaDto dto = new CinemaDto();
                 dto.setName(cinema.getName());
                 dto.setLatitude(cinema.getLat());
                 dto.setLongitude(cinema.getLng());

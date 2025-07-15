@@ -1,6 +1,6 @@
 package group6.cinema_project.dto;
 
-public class ActorDTO {
+public class ActorDto {
     public Long id;
     public String name;
     public String image;

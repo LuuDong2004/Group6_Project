@@ -1,6 +1,7 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "Director")
@@ -17,17 +18,24 @@ public class Director {
     @Column(columnDefinition = "nvarchar(max)")
     private String description;
 
-    // Constructor mặc định
+    @ManyToMany(mappedBy = "directors")
+    private Set<Movie> movies;
+
+    public Set<Movie> getMovies() {
+        return movies;
+    }
+    public void setMovies(Set<Movie> movies) {
+        this.movies = movies;
+    }
+
     public Director() {}
 
-    // Constructor với tham số
     public Director(String name, String image, String description) {
         this.name = name;
         this.image = image;
         this.description = description;
     }
 
-    // Getters và Setters
     public Long getId() {
         return id;
     }

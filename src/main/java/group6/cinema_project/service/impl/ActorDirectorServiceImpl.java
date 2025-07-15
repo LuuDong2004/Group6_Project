@@ -1,26 +1,28 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.impl;
 
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.entity.ActorMovie;
-import group6.cinema_project.entity.DirectorMovie;
-import group6.cinema_project.dto.ActorDTO;
-import group6.cinema_project.dto.DirectorDTO;
+import group6.cinema_project.entity.Movie;
+import group6.cinema_project.dto.ActorDto;
+import group6.cinema_project.dto.DirectorDto;
 import group6.cinema_project.repository.ActorRepository;
 import group6.cinema_project.repository.DirectorRepository;
 import group6.cinema_project.repository.ActorMovieRepository;
-import group6.cinema_project.repository.DirectorMovieRepository;
+import group6.cinema_project.repository.MovieRepository;
+import group6.cinema_project.service.ActorDirectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Service
 public class ActorDirectorServiceImpl implements ActorDirectorService {
     @Autowired private ActorRepository actorRepository;
     @Autowired private DirectorRepository directorRepository;
     @Autowired private ActorMovieRepository actorMovieRepository;
-    @Autowired private DirectorMovieRepository directorMovieRepository;
+    @Autowired private MovieRepository movieRepository;
 
     @Override
     public List<Actor> getAllActors() { return actorRepository.findAll(); }
@@ -34,46 +36,52 @@ public class ActorDirectorServiceImpl implements ActorDirectorService {
     public List<Actor> getActorsByMovieId(Long movieId) {
         return actorMovieRepository.findByMovieId(movieId).stream().map(ActorMovie::getActor).collect(Collectors.toList());
     }
+    
     @Override
     public List<Director> getDirectorsByMovieId(Long movieId) {
-        return directorMovieRepository.findByMovie_Id(movieId).stream().map(DirectorMovie::getDirector).collect(Collectors.toList());
+        Movie movie = movieRepository.findById(movieId).orElse(null);
+        if (movie != null && movie.getDirectors() != null && !movie.getDirectors().isEmpty()) {
+            return new ArrayList<>(movie.getDirectors());
+        }
+        return List.of();
     }
     
     // DTO methods
     @Override
-    public List<ActorDTO> getAllActorDTOs() {
+    public List<ActorDto> getAllActorDTOs() {
         return actorRepository.findAll().stream().map(this::convertToActorDTO).collect(Collectors.toList());
     }
     
     @Override
-    public List<DirectorDTO> getAllDirectorDTOs() {
+    public List<DirectorDto> getAllDirectorDTOs() {
         return directorRepository.findAll().stream().map(this::convertToDirectorDTO).collect(Collectors.toList());
     }
     
     @Override
-    public ActorDTO getActorDTOById(Long id) {
+    public ActorDto getActorDTOById(Long id) {
         Actor actor = actorRepository.findById(id).orElse(null);
         return actor != null ? convertToActorDTO(actor) : null;
     }
     
     @Override
-    public DirectorDTO getDirectorDTOById(Long id) {
+    public DirectorDto getDirectorDTOById(Long id) {
         Director director = directorRepository.findById(id).orElse(null);
         return director != null ? convertToDirectorDTO(director) : null;
     }
     
     @Override
-    public List<ActorDTO> getActorDTOsByMovieId(Long movieId) {
+    public List<ActorDto> getActorDTOsByMovieId(Long movieId) {
         return getActorsByMovieId(movieId).stream().map(this::convertToActorDTO).collect(Collectors.toList());
     }
     
     @Override
-    public List<DirectorDTO> getDirectorDTOsByMovieId(Long movieId) {
-        return getDirectorsByMovieId(movieId).stream().map(this::convertToDirectorDTO).collect(Collectors.toList());
+    public List<DirectorDto> getDirectorDTOsByMovieId(Long movieId) {
+        // Nếu không còn liên kết nhiều-nhiều, trả về rỗng hoặc lấy theo quan hệ mới nếu có
+        return List.of();
     }
     
-    private ActorDTO convertToActorDTO(Actor actor) {
-        ActorDTO dto = new ActorDTO();
+    private ActorDto convertToActorDTO(Actor actor) {
+        ActorDto dto = new ActorDto();
         dto.id = actor.getId();
         dto.name = actor.getName();
         dto.image = actor.getImage();
@@ -83,8 +91,8 @@ public class ActorDirectorServiceImpl implements ActorDirectorService {
         return dto;
     }
     
-    private DirectorDTO convertToDirectorDTO(Director director) {
-        DirectorDTO dto = new DirectorDTO();
+    private DirectorDto convertToDirectorDTO(Director director) {
+        DirectorDto dto = new DirectorDto();
         dto.id = director.getId();
         dto.name = director.getName();
         dto.image = director.getImage();
