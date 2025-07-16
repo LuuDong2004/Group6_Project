@@ -1,9 +1,7 @@
 package group6.cinema_project.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.CinemaChainDto;
@@ -24,12 +23,15 @@ public class AdminCinemaChainController {
     private CinemaChainService cinemaChainService;
 
     @GetMapping("")
-    public String listCinemaChains(Model model) {
-        List<CinemaChainDto> chains = cinemaChainService.findAll().stream()
-                .map(CinemaChainDto::fromEntity)
-                .collect(Collectors.toList());
-        model.addAttribute("cinemaChains", chains);
+    public String listCinemaChains(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
+                                   @RequestParam(value = "size", defaultValue = "5") int size) {
+        Page<CinemaChain> chainPage = cinemaChainService.getCinemaChainsPage(page, size);
+        model.addAttribute("chainPage", chainPage);
+        model.addAttribute("cinemaChains", chainPage.getContent());
         model.addAttribute("cinemaChain", new CinemaChainDto());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", chainPage.getTotalPages());
+        model.addAttribute("pageSize", size);
         return "admin_cinema_chain_management";
     }
 

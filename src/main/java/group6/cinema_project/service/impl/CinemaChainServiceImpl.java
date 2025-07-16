@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import group6.cinema_project.entity.CinemaChain;
@@ -34,5 +36,10 @@ public class CinemaChainServiceImpl implements CinemaChainService {
     @Override
     public void deleteById(int id) {
         cinemaChainRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<CinemaChain> getCinemaChainsPage(int page, int size) {
+        return cinemaChainRepository.findAll(PageRequest.of(page, size));
     }
 } 

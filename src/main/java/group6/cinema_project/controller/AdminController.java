@@ -106,7 +106,7 @@ public class AdminController {
 
     @GetMapping("/foods/list")
     public String listFoods(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
-                            @RequestParam(value = "size", defaultValue = "10") int size) {
+                            @RequestParam(value = "size", defaultValue = "5") int size) {
         Page<FoodDto> foodPage = foodService.getFoodsPage(page, size);
         model.addAttribute("foodPage", foodPage);
         model.addAttribute("foods", foodPage.getContent());

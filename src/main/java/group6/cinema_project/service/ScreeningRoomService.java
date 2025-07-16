@@ -2,6 +2,8 @@ package group6.cinema_project.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import group6.cinema_project.dto.ScreeningRoomDto;
 
 public interface ScreeningRoomService {
@@ -13,5 +15,5 @@ public interface ScreeningRoomService {
     ScreeningRoomDto getRoomById(int id);
     ScreeningRoomDto saveOrUpdate(ScreeningRoomDto roomDto);
     boolean deleteRoom(int id);
-
+    Page<ScreeningRoomDto> getRoomsPage(int branchId, int page, int size);
 } 

@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import group6.cinema_project.dto.BranchDto;
@@ -58,5 +61,12 @@ public class BranchServiceImpl implements BranchService {
         return branchRepository.findByCinemaChainId(cinemaChainId).stream()
                 .map(BranchDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<BranchDto> getBranchesPage(int page, int size) {
+        Page<Branch> branchPage = branchRepository.findAll(PageRequest.of(page, size));
+        List<BranchDto> branchDtos = branchPage.getContent().stream().map(BranchDto::fromEntity).collect(Collectors.toList());
+        return new PageImpl<>(branchDtos, branchPage.getPageable(), branchPage.getTotalElements());
     }
 } 

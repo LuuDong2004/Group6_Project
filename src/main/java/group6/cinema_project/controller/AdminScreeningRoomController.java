@@ -1,8 +1,7 @@
 package group6.cinema_project.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.BranchDto;
@@ -28,22 +28,26 @@ public class AdminScreeningRoomController {
     private BranchService branchService;
     
     @GetMapping("/branch/{branchId}")
-    public String listScreeningRooms(@PathVariable int branchId, Model model, RedirectAttributes redirectAttributes) {
+    public String listScreeningRooms(@PathVariable int branchId, Model model, RedirectAttributes redirectAttributes,
+                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                     @RequestParam(value = "size", defaultValue = "5") int size) {
         BranchDto branch = branchService.findById(branchId);
         if (branch == null) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi nhánh!");
             return "redirect:/admin/branches";
         }
-        
-        List<ScreeningRoomDto> screeningRooms = screeningRoomService.getRoomsByBranchId(branchId);
+        Page<ScreeningRoomDto> roomPage = screeningRoomService.getRoomsPage(branchId, page, size);
         ScreeningRoomDto screeningRoomDto = new ScreeningRoomDto();
         screeningRoomDto.setBranch(branch);
         screeningRoomDto.setRows(10);
         screeningRoomDto.setSeatsPerRow(12);
-        
         model.addAttribute("branch", branch);
-        model.addAttribute("screeningRooms", screeningRooms);
+        model.addAttribute("roomPage", roomPage);
+        model.addAttribute("screeningRooms", roomPage.getContent());
         model.addAttribute("screeningRoom", screeningRoomDto);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", roomPage.getTotalPages());
+        model.addAttribute("pageSize", size);
         return "admin_screening_room_management";
     }
     

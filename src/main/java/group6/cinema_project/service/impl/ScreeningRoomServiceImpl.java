@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,5 +138,12 @@ public class ScreeningRoomServiceImpl implements ScreeningRoomService {
     @Override
     public boolean isRoomNameExists(String name) {
         return screeningRoomRepository.findAll().stream().anyMatch(r -> r.getName().equalsIgnoreCase(name));
+    }
+
+    @Override
+    public Page<ScreeningRoomDto> getRoomsPage(int branchId, int page, int size) {
+        Page<ScreeningRoom> roomPage = screeningRoomRepository.findByBranchId(branchId, PageRequest.of(page, size));
+        List<ScreeningRoomDto> roomDtos = roomPage.getContent().stream().map(room -> modelMapper.map(room, ScreeningRoomDto.class)).collect(Collectors.toList());
+        return new PageImpl<>(roomDtos, roomPage.getPageable(), roomPage.getTotalElements());
     }
 } 

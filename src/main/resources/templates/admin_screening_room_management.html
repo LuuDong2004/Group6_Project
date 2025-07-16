@@ -398,6 +398,23 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination controls -->
+                <div class="d-flex justify-content-center mt-4">
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${currentPage - 1},size=${pageSize})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${currentPage + 1},size=${pageSize})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>

@@ -1,5 +1,7 @@
 package group6.cinema_project.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,5 +18,6 @@ public interface ScreeningRoomRepository extends JpaRepository<ScreeningRoom, In
     boolean existsByNameIgnoreCaseAndIdNot(String name, int id);
     boolean existsByBranchIdAndNameIgnoreCase(int branchId, String name);
     boolean existsByBranchIdAndNameIgnoreCaseAndIdNot(int branchId, String name, int id);
+    Page<ScreeningRoom> findByBranchId(int branchId, Pageable pageable);
     // Thêm các phương thức custom nếu cần
 } 

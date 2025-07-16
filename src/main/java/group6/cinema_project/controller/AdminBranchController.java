@@ -3,6 +3,7 @@ package group6.cinema_project.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +27,19 @@ public class AdminBranchController {
     private CinemaChainService cinemaChainService;
 
     @GetMapping("")
-    public String listBranches(Model model) {
-        List<BranchDto> branches = branchService.findAll();
+    public String listBranches(Model model, @org.springframework.web.bind.annotation.RequestParam(value = "page", defaultValue = "0") int page,
+                               @org.springframework.web.bind.annotation.RequestParam(value = "size", defaultValue = "5") int size) {
+        Page<BranchDto> branchPage = branchService.getBranchesPage(page, size);
         List<CinemaChain> cinemaChains = cinemaChainService.findAll();
         BranchDto branchDto = new BranchDto();
         branchDto.setCinemaChainId(0);
-        model.addAttribute("branches", branches);
+        model.addAttribute("branchPage", branchPage);
+        model.addAttribute("branches", branchPage.getContent());
         model.addAttribute("cinemaChains", cinemaChains);
         model.addAttribute("branch", branchDto);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", branchPage.getTotalPages());
+        model.addAttribute("pageSize", size);
         return "admin_branch_management";
     }
 

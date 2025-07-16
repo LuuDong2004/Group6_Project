@@ -56,7 +56,7 @@ public interface UserService {
 
     // Trả về entity User theo email
     Optional<User> findByEmail(String email);
-    
+
     String resetPassword(int userId);
 
     // Admin methods
