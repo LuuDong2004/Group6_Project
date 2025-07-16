@@ -44,7 +44,4 @@ public class ScreeningSchedule {
     @Column(name = "status", nullable = false, length = 255)
     private String status;
 
-    @Column(name = "price", nullable = false, precision = 20)
-    private BigDecimal price;
-
 }

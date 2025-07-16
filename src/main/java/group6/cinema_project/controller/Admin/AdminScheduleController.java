@@ -644,7 +644,6 @@ public class AdminScheduleController {
     public String addBatchSchedules(
             @RequestParam("movieId") Integer movieId,
             @RequestParam("screeningDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
-            @RequestParam("price") BigDecimal price,
             @RequestParam("status") String status,
             @RequestParam("timeSlots") String timeSlotsJson, // JSON array của các suất chiếu
             RedirectAttributes redirectAttributes) {
@@ -654,7 +653,6 @@ public class AdminScheduleController {
             ScreeningScheduleDto baseSchedule = new ScreeningScheduleDto();
             baseSchedule.setMovieId(movieId);
             baseSchedule.setScreeningDate(screeningDate);
-            baseSchedule.setPrice(price);
             baseSchedule.setStatus(status);
 
             // Chuyển đổi JSON string thành danh sách các suất chiếu

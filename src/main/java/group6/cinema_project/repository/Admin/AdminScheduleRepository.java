@@ -44,7 +44,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
 
     // Alternative native SQL query as fallback
     @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
-            "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+            "INNER JOIN ScreeningSchedule ss ON m.id = ss.movie_id " +
             "WHERE ss.status = :status " +
             "ORDER BY m.name", nativeQuery = true)
     List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatusNative(@Param("status") String status);
@@ -175,7 +175,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
      * This is simpler and more intuitive than the complex logic above
      */
     @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
-            "INNER JOIN screening_schedule ss ON m.id = ss.movie_id " +
+            "INNER JOIN ScreeningSchedule ss ON m.id = ss.movie_id " +
             "WHERE ss.status = 'ENDED' " +
             "ORDER BY m.name", nativeQuery = true)
     List<Movie> findMoviesWithEndedSchedules();
