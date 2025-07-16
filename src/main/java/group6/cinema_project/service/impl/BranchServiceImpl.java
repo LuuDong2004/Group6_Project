@@ -1,18 +1,17 @@
 package group6.cinema_project.service.impl;
 
-import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.entity.Branch;
-import group6.cinema_project.entity.CinemaChain;
-import group6.cinema_project.repository.BranchRepository;
-import group6.cinema_project.repository.CinemaChainRepository;
-import group6.cinema_project.repository.RegionRepository;
-import group6.cinema_project.service.BranchService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import group6.cinema_project.dto.BranchDto;
+import group6.cinema_project.entity.Branch;
+import group6.cinema_project.repository.BranchRepository;
+import group6.cinema_project.repository.CinemaChainRepository;
+import group6.cinema_project.service.BranchService;
 
 @Service
 public class BranchServiceImpl implements BranchService {
@@ -20,8 +19,6 @@ public class BranchServiceImpl implements BranchService {
     private BranchRepository branchRepository;
     @Autowired
     private CinemaChainRepository cinemaChainRepository;
-    @Autowired
-    private RegionRepository regionRepository;
 
     @Override
     public List<BranchDto> findAll() {
@@ -45,7 +42,6 @@ public class BranchServiceImpl implements BranchService {
         branch.setAddress(branchDto.getAddress());
 
         // Lấy entity từ repository
-        branch.setRegion(regionRepository.findById(branchDto.getRegionId()).orElse(null));
         branch.setCinemaChain(cinemaChainRepository.findById(branchDto.getCinemaChainId()).orElse(null));
 
         Branch saved = branchRepository.save(branch);

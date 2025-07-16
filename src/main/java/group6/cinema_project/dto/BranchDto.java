@@ -7,11 +7,9 @@ public class BranchDto {
     private String name;
     private String description;
     private String address;
-    private int regionId = 0;
     private int cinemaChainId = 0;
 
     public BranchDto() {
-        this.regionId = 0;
         this.cinemaChainId = 0;
     }
 
@@ -41,12 +39,6 @@ public class BranchDto {
     public void setAddress(String address) {
         this.address = address;
     }
-    public int getRegionId() {
-        return regionId;
-    }
-    public void setRegionId(Integer regionId) {
-        this.regionId = (regionId == null) ? 0 : regionId;
-    }
     public int getCinemaChainId() {
         return cinemaChainId;
     }
@@ -72,7 +64,6 @@ public class BranchDto {
         dto.setName(branch.getName());
         dto.setDescription(branch.getDescription());
         dto.setAddress(branch.getAddress());
-        dto.setRegionId(branch.getRegion() != null ? branch.getRegion().getId() : 0);
         dto.setCinemaChainId(branch.getCinemaChain() != null ? branch.getCinemaChain().getId() : 0);
         return dto;
     }

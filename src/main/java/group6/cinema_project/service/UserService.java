@@ -3,6 +3,7 @@ package group6.cinema_project.service;
 // UserService.java
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +15,7 @@ import group6.cinema_project.dto.PasswordResetRequestDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.UserLoginDto;
 import group6.cinema_project.dto.UserRegistrationDto;
+import group6.cinema_project.entity.User;
 
 public interface UserService {
 
@@ -52,6 +54,9 @@ public interface UserService {
     boolean isEmailExists(String email);
     boolean isPhoneExists(String phone);
 
+    // Trả về entity User theo email
+    Optional<User> findByEmail(String email);
+    
     String resetPassword(int userId);
 
     // Admin methods

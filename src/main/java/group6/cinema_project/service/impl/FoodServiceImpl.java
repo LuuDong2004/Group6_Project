@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import group6.cinema_project.service.FoodService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import group6.cinema_project.dto.FoodDto;
 import group6.cinema_project.entity.Food;
 import group6.cinema_project.repository.FoodRepository;
-import group6.cinema_project.service.IFoodService;
+import group6.cinema_project.service.FoodService;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -45,6 +47,13 @@ public class FoodServiceImpl implements FoodService {
     @Override
     public List<FoodDto> getAllFoods() {
         return foodRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<FoodDto> getFoodsPage(int page, int size) {
+        Page<Food> foodPage = foodRepository.findAll(PageRequest.of(page, size));
+        List<FoodDto> foodDtos = foodPage.getContent().stream().map(this::toDto).collect(Collectors.toList());
+        return new PageImpl<>(foodDtos, foodPage.getPageable(), foodPage.getTotalElements());
     }
 
     @Override

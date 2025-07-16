@@ -2,10 +2,13 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <meta name="user-provider" th:content="${user?.provider}"/>
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="user-provider" th:content="${user?.provider}"/>
     <meta name="is-oauth2-user" th:content="${isOAuth2User}"/>
+    </th:block>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin tài khoản - Cinemas</title>
 
 

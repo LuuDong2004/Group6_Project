@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.dto.RegionDto;
 import group6.cinema_project.entity.CinemaChain;
 import group6.cinema_project.service.BranchService;
 import group6.cinema_project.service.CinemaChainService;
-import group6.cinema_project.service.RegionService;
 
 @Controller
 @RequestMapping("/admin/branches")
@@ -27,31 +25,20 @@ public class AdminBranchController {
     @Autowired
     private CinemaChainService cinemaChainService;
 
-    @Autowired
-    private RegionService regionService;
-
     @GetMapping("")
     public String listBranches(Model model) {
         List<BranchDto> branches = branchService.findAll();
-        List<RegionDto> regions = regionService.findAll();
         List<CinemaChain> cinemaChains = cinemaChainService.findAll();
         BranchDto branchDto = new BranchDto();
-        branchDto.setRegionId(0);
         branchDto.setCinemaChainId(0);
         model.addAttribute("branches", branches);
-        model.addAttribute("regions", regions);
         model.addAttribute("cinemaChains", cinemaChains);
         model.addAttribute("branch", branchDto);
-        model.addAttribute("region", new RegionDto()); // Để binding cho modal thêm khu vực
         return "admin_branch_management";
     }
 
     @PostMapping("/add")
     public String addBranch(@ModelAttribute("branch") BranchDto branchDto, RedirectAttributes redirectAttributes) {
-        if (branchDto.getRegionId() == 0) {
-            redirectAttributes.addFlashAttribute("error", "Bạn phải chọn khu vực!");
-            return "redirect:/admin/branches";
-        }
         if (branchDto.getCinemaChainId() == 0) {
             redirectAttributes.addFlashAttribute("error", "Bạn phải chọn chuỗi rạp!");
             return "redirect:/admin/branches";
@@ -79,10 +66,8 @@ public class AdminBranchController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi nhánh!");
             return "redirect:/admin/branches";
         }
-        List<RegionDto> regions = regionService.findAll();
         List<CinemaChain> cinemaChains = cinemaChainService.findAll();
         model.addAttribute("branch", branch);
-        model.addAttribute("regions", regions);
         model.addAttribute("cinemaChains", cinemaChains);
         return "admin_branch_edit";
     }

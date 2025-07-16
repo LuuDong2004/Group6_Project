@@ -396,7 +396,12 @@ public class UserServiceImpl implements UserService {
         // TODO: Gửi email chứa mật khẩu mới cho user.getEmail()
         return newPassword;
     }
-    
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     @Override
     public boolean adminResetPassword(AdminPasswordResetDto adminPasswordResetDto) {
         Optional<User> userOpt = userRepository.findById(adminPasswordResetDto.getUserId());

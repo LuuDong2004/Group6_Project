@@ -9,6 +9,8 @@ public interface FoodService {
     FoodDto saveOrUpdate(FoodDto foodDto);
     void deleteFood(Integer id);
     List<FoodDto> getAllFoods();
+    // Thêm phương thức phân trang
+    org.springframework.data.domain.Page<FoodDto> getFoodsPage(int page, int size);
 
 
 }

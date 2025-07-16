@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,11 +50,6 @@ public class SecurityConfig {
                                                 HttpServletResponse response,
                                                 org.springframework.security.core.Authentication authentication)
                     throws IOException, ServletException {
-                
-                System.out.println("Authentication Success - User: " + authentication.getName());
-                System.out.println("Authentication Type: " + authentication.getClass().getSimpleName());
-                System.out.println("Authorities: " + authentication.getAuthorities());
-                
                 //kiểm tra tiếp tục url trong session truoc
                 String continueUrl = (String) request.getSession().getAttribute("continueAfterLogin");
                 if (continueUrl != null) {
@@ -63,25 +59,30 @@ public class SecurityConfig {
                 }
 
                 SavedRequest savedRequest = requestCache.getRequest(request, response);
-
                 if (savedRequest != null) {
                     String targetUrl = savedRequest.getRedirectUrl();
-
-                    // kiểm tra các trang liên quan vé
-
                     if (isBookingRelatedUrl(targetUrl)) {
-                        // Xóa saved request để tránh loop
                         requestCache.removeRequest(request, response);
                         response.sendRedirect(targetUrl);
                         return;
                     }
                 }
 
+                // Phân quyền redirect
+                boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                boolean isStaff = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_STAFF"));
 
-                response.sendRedirect("/dashboard");
+                if (isAdmin) {
+                    response.sendRedirect("/admin");
+                } else if (isStaff) {
+                    response.sendRedirect("/staff");
+                } else {
+                    response.sendRedirect("/dashboard");
+                }
             }
 
-            // them method helper để kiểm tra url
             private boolean isBookingRelatedUrl(String url) {
                 return url.contains("/ticket-booking") ||
                         url.contains("/seat") ||
@@ -90,61 +91,74 @@ public class SecurityConfig {
                         url.contains("/payment");
             }
         };
-
     }
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .userDetailsService(userDetailsService)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/login", "/staff/login").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/staff/**").hasRole("STAFF")
-                        .requestMatchers(
-                                "/profile/**",
-                                "/update-profile",
-                                "/change-password",
-                                "/seat/**",
-                                "/api/tickets/**",
-                                "/user/**",
-                                "/ticket-booking/**",
-                                "/booking/**",
-                                "/showtimes/book/**",
-                                "/payment/**"
-                        ).authenticated()
-                        .anyRequest().permitAll()
-                )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/update-profile", "/change-password", "/logout")
-                )
+            .securityMatcher("/admin/secret-login", "/admin/**")
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/css/**", "/js/**", "/images/**",  "/assets/**", "/static/**"
+                ).permitAll()
+                .requestMatchers("/admin/secret-login").permitAll()
+                .anyRequest().hasRole("ADMIN")
+            )
+            .formLogin(form -> form
+                .loginPage("/admin/secret-login")
+                .loginProcessingUrl("/admin/secret-login")
+                .successHandler(customAuthenticationSuccessHandler())
+                .failureUrl("/admin/secret-login?error=true")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/admin/logout")
+                .logoutSuccessUrl("/admin/secret-login?logout=true")
+                .permitAll()
+            )
+            .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
 
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .successHandler(customAuthenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .permitAll()
+    @Bean
+    @Order(2)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**"
+                ).permitAll()
+                .requestMatchers("/login", "/register", "/staff/login").permitAll()
+                .requestMatchers("/staff/**").hasRole("STAFF")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .successHandler(customAuthenticationSuccessHandler())
+                .failureUrl("/login?error=true")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .successHandler(customAuthenticationSuccessHandler())
+                .failureUrl("/login?error=true")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService())
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .successHandler(customAuthenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService())
-                        )
-                )
-                .logout(logout -> logout
-                        .disable()
-                )
-                .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                );
-
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .permitAll()
+            )
+            .csrf(csrf -> csrf.disable());
         return http.build();
     }
     

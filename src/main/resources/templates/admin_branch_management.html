@@ -315,12 +315,6 @@
                     <button class="add-branch-btn" data-bs-toggle="modal" data-bs-target="#addBranchModal">
                         <i class="fas fa-plus me-1"></i> Thêm Chi nhánh
                     </button>
-                    <button class="add-branch-btn" data-bs-toggle="modal" data-bs-target="#addRegionModal">
-                        <i class="fas fa-map-marker-alt me-1"></i> Tạo khu vực
-                    </button>
-                    <a href="/admin/cinema-chains" class="add-branch-btn">
-                        <i class="fas fa-layer-group me-1"></i> Tạo chuỗi rạp
-                    </a>
                 </div>
             </div>
             <div class="table-container">
@@ -331,7 +325,6 @@
                         <th>Tên chi nhánh</th>
                         <th>Mô tả</th>
                         <th>Địa chỉ</th>
-                        <th>Khu vực</th>
                         <th>Chuỗi rạp</th>
                         <th>Hành động</th>
                     </tr>
@@ -342,11 +335,6 @@
                         <td th:text="${branch.name}"></td>
                         <td th:text="${branch.description}"></td>
                         <td th:text="${branch.address}"></td>
-                        <td>
-                          <span th:each="region : ${regions}"
-                                th:if="${region.id} == ${branch.regionId}"
-                                th:text="${region.name}"></span>
-                        </td>
                         <td>
                           <span th:each="chain : ${cinemaChains}"
                                 th:if="${chain.id} == ${branch.cinemaChainId}"
@@ -366,7 +354,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(branches)}">
-                        <td colspan="7" style="text-align: center;">Không có chi nhánh nào để hiển thị.</td>
+                        <td colspan="6" style="text-align: center;">Không có chi nhánh nào để hiển thị.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -396,16 +384,6 @@
                             <input type="text" class="form-control" th:field="*{address}" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Khu vực</label>
-                            <div class="input-group">
-                                <select class="form-select" th:field="*{regionId}" required>
-                                    <option value="0">Chọn khu vực</option>
-                                    <option th:each="region : ${regions}" th:value="${region.id}" th:text="${region.name}"></option>
-                                </select>
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addRegionModal">+</button>
-                            </div>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label">Chuỗi rạp</label>
                             <select class="form-select" th:field="*{cinemaChainId}" required>
                                 <option value="">Chọn chuỗi rạp</option>
@@ -421,38 +399,6 @@
             </div>
         </div>
     </div>
-    <!-- Modal Thêm Khu vực -->
-<div class="modal fade" id="addRegionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-                <form th:action="@{/admin/regions/add}" method="post" th:object="${region}">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm khu vực mới</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                            <label class="form-label">Miền</label>
-                            <select class="form-select" th:field="*{type}" required>
-                                <option value="">Chọn miền</option>
-                                <option value="Miền Bắc">Miền Bắc</option>
-                                <option value="Miền Trung">Miền Trung</option>
-                                <option value="Miền Nam">Miền Nam</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tên tỉnh/thành phố</label>
-                        <input type="text" class="form-control" th:field="*{name}" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Thêm khu vực</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
         document.addEventListener('DOMContentLoaded', function () {

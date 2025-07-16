@@ -30,9 +30,7 @@ public class Branch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_chain_id")
     private CinemaChain cinemaChain;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "region_id")
-    private Region region;
+
 
     // Getters and Setters
     public int getId() {
@@ -64,11 +62,5 @@ public class Branch {
     }
     public void setCinemaChain(CinemaChain cinemaChain) {
         this.cinemaChain = cinemaChain;
-    }
-    public Region getRegion() {
-        return region;
-    }
-    public void setRegion(Region region) {
-        this.region = region;
     }
 }
