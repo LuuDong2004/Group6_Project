@@ -3,7 +3,7 @@ package group6.cinema_project.service;
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.ScheduleDto;
 import group6.cinema_project.entity.Branch;
-import group6.cinema_project.entity.Schedule;
+import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.repository.ScheduleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ScheduleService implements IScheduleService{
 
     @Override
     public List<ScheduleDto> getScheduleByMovieId(Integer movieId) {
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieId(movieId);
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieId(movieId);
 
         // Lọc bỏ các lịch chiếu quá khứ
         Date currentDateTime = new Date();
@@ -55,7 +55,7 @@ public class ScheduleService implements IScheduleService{
             return new ArrayList<>(); // Trả về danh sách rỗng thay vì throw exception
         }
 
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieIdAndDate(movieId, normalizedDate);
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieIdAndDate(movieId, normalizedDate);
 
         // Nếu là ngày hiện tại, lọc bỏ các lịch chiếu có giờ bắt đầu đã qua
         if (isSameDay(normalizedDate, currentDate)) {
@@ -81,7 +81,7 @@ public class ScheduleService implements IScheduleService{
             return new ArrayList<>(); // Trả về danh sách rỗng thay vì throw exception
         }
 
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, normalizedDate);
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, normalizedDate);
 
         // Nếu là ngày hiện tại, lọc bỏ các lịch chiếu có giờ bắt đầu đã qua
         if (isSameDay(normalizedDate, currentDate)) {
@@ -106,7 +106,7 @@ public class ScheduleService implements IScheduleService{
 
     @Override
     public ScheduleDto getScheduleById(Integer scheduleId) {
-        Schedule schedule = scheduleRepository.findScheduleById(scheduleId);
+        ScreeningSchedule schedule = scheduleRepository.findScheduleById(scheduleId);
 
         if (schedule == null) {
             return null;
@@ -145,7 +145,7 @@ public class ScheduleService implements IScheduleService{
     /**
      * Kiểm tra xem lịch chiếu có phải là quá khứ không
      */
-    private boolean isScheduleInPast(Schedule schedule, Date currentDateTime) {
+    private boolean isScheduleInPast(ScreeningSchedule schedule, Date currentDateTime) {
         if (schedule.getScreeningDate() == null || schedule.getStartTime() == null) {
             return false;
         }

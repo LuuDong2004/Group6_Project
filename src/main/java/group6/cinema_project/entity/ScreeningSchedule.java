@@ -20,7 +20,7 @@ import java.util.Date;
 @Data
 @Getter
 @Setter
-public class Schedule {
+public class ScreeningSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
