@@ -25,6 +25,6 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "screening_room_id")
     private ScreeningRoom room;
-    private Integer status;
+    private String status;
 
 }

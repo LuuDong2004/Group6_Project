@@ -619,8 +619,8 @@
                 <h4>Show Details</h4>
                 <div>Cinema: <span th:text="${schedule.branch?.name}"></span></div>
                 <div>Room: <span th:text="${schedule.screeningRoom?.name}"></span></div>
-                <div>Date: <span th:text="${schedule.screeningDate}"></span></div>
-                <div>Time: <span th:text="${schedule.startTime} + ' - ' + ${schedule.endTime}"></span></div>
+                <div>Date: <span th:text="${schedule.screeningDateStr}"></span></div>
+                <div>Time: <span th:text="${schedule.startTimeStr}"></span></div>
             </div>
         </div>
     </div>

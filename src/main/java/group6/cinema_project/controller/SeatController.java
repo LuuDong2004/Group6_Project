@@ -1,7 +1,7 @@
 package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.ScheduleDto;
+import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.dto.SeatReservationDto;
 import group6.cinema_project.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class SeatController {
             List<MovieDto> movies = movieService.findMovieById(movieId);
 
             // Lấy thông tin lịch chiếu
-            ScheduleDto selectedSchedule = scheduleService.getScheduleById(scheduleId);
+            ScreeningScheduleDto selectedSchedule = scheduleService.getScheduleById(scheduleId);
 
             // Lấy danh sách ghế với trạng thái
             List<SeatReservationDto> seats = seatReservationService.getSeatsWithStatus(scheduleId);

@@ -1,76 +1,29 @@
-$(document).ready(function () {
-	var currentGfgStep, nextGfgStep, previousGfgStep;
-	var opacity;
-	var current = 1;
-	var steps = $("fieldset").length;
+// Xử lý chọn ngày
+$(document).on('click', '.date-selector', function() {
+  const date = $(this).data('date');
+  const movieId = $(this).data('movie-id');
+  if (date && movieId) {
+    window.location.href = `/schedule/movie/${movieId}/date?date=${date}`;
+  }
+});
 
-	setProgressBar(current);
+// Xử lý chọn rạp
+$(document).on('click', '.branch-selector', function() {
+  const branchId = $(this).data('branch-id');
+  const movieId = $(this).data('movie-id');
+  const date = $(this).data('date');
+  if (branchId && movieId && date) {
+    window.location.href = `/schedule/movie/${movieId}/date?date=${date}&branchId=${branchId}`;
+  }
+});
 
-	$(".next-step").click(function () {
-
-		currentGfgStep = $(this).parent();
-		nextGfgStep = $(this).parent().next();
-
-		$("#progressbar li").eq($("fieldset")
-			.index(nextGfgStep)).addClass("active");
-
-		nextGfgStep.show();
-		currentGfgStep.animate({
-			opacity: 0
-		}, {
-			step: function (now) {
-				opacity = 1 - now;
-
-				currentGfgStep.css({
-					'display': 'none',
-					'position': 'relative'
-				});
-				nextGfgStep.css({
-					'opacity': opacity
-				});
-			},
-			duration: 500
-		});
-		setProgressBar(++current);
-	});
-
-	$(".previous-step").click(function () {
-
-		currentGfgStep = $(this).parent();
-		previousGfgStep = $(this).parent().prev();
-
-		$("#progressbar li").eq($("fieldset")
-			.index(currentGfgStep)).removeClass("active");
-
-		previousGfgStep.show();
-
-		currentGfgStep.animate({
-			opacity: 0
-		}, {
-			step: function (now) {
-				opacity = 1 - now;
-
-				currentGfgStep.css({
-					'display': 'none',
-					'position': 'relative'
-				});
-				previousGfgStep.css({
-					'opacity': opacity
-				});
-			},
-			duration: 500
-		});
-		setProgressBar(--current);
-	});
-
-	function setProgressBar(currentStep) {
-		var percent = parseFloat(100 / steps) * current;
-		percent = percent.toFixed();
-		$(".progress-bar")
-			.css("width", percent + "%")
-	}
-
-	$(".submit").click(function () {
-		return false;
-	})
+// Xử lý chọn lịch chiếu
+$(document).on('click', '.schedule-selector', function() {
+  const scheduleId = $(this).data('schedule-id');
+  const movieId = $(this).data('movie-id');
+  const date = $(this).data('date');
+  const branchId = $(this).data('branch-id');
+  if (scheduleId && movieId && date && branchId) {
+    window.location.href = `/schedule/movie/${movieId}/date?date=${date}&branchId=${branchId}&scheduleId=${scheduleId}`;
+  }
 });

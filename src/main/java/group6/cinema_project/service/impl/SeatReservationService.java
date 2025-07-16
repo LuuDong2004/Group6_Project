@@ -3,7 +3,7 @@ package group6.cinema_project.service.impl;
 import group6.cinema_project.dto.SeatReservationDto;
 import group6.cinema_project.entity.Seat;
 import group6.cinema_project.entity.SeatReservation;
-import group6.cinema_project.entity.Schedule;
+import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.entity.Ticket;
 import group6.cinema_project.entity.Booking;
 import group6.cinema_project.repository.ScheduleRepository;
@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -85,7 +83,7 @@ public class SeatReservationService implements ISeatReservationService {
         try {
             logger.info("Getting seats for schedule ID: {}", scheduleId);
             // Kiểm tra lịch chiếu tồn tại
-            Schedule schedule = scheduleRepository.findById(scheduleId)
+            ScreeningSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + scheduleId));
             // Lấy ngày chiếu
             java.util.Date screeningDate = schedule.getScreeningDate();
@@ -161,7 +159,7 @@ public class SeatReservationService implements ISeatReservationService {
             // Kiểm tra ghế và lịch chiếu tồn tại
             Seat seat = seatRepository.findById(seatId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ghế với ID: " + seatId));
-            Schedule schedule = scheduleRepository.findById(scheduleId)
+            ScreeningSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + scheduleId));
 
             // Tìm booking

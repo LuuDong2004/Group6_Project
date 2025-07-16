@@ -28,9 +28,6 @@ import java.util.List;
 @Service
 @Transactional
 public class PaymentServiceImpl implements IPaymentService {
-
-
-
     @Autowired
     private BookingRepository bookingRepository;
     @Autowired
@@ -74,6 +71,7 @@ public class PaymentServiceImpl implements IPaymentService {
                     seatReservationRepository.save(reservation);
                 }
             }
+
             // Gửi trạng thái qua WebSocket
             paymentStatusWebSocketService.sendPaymentStatus(
                 transactionSepay.getTransactionId(),
@@ -153,7 +151,7 @@ public class PaymentServiceImpl implements IPaymentService {
             booking.setStatus("CANCELLED");
             bookingRepository.save(booking);
 
-            // Xóa hoặc cập nhật trạng thái các SeatReservation liên quan
+
             List<SeatReservation> reservations = seatReservationRepository.findByBookingId(booking.getId());
             for (SeatReservation reservation : reservations) {
                 if ("PENDING".equalsIgnoreCase(reservation.getStatus())) {

@@ -6,13 +6,10 @@ import group6.cinema_project.dto.TransactionSepayDto;
 import group6.cinema_project.service.IBookingService;
 import group6.cinema_project.service.IPaymentService;
 
-
 import group6.cinema_project.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import org.springframework.ui.Model;
@@ -31,7 +28,7 @@ public class PaymentController {
     @Value("${SEPAY_WEBHOOK_APIKEY:default_key}")
     private String sepaySecretKey;
 
-    @Value("${domain:https://c71c-42-114-15-78.ngrok-free.app}")
+    @Value("${domain}")
     private String domain;
 
     @Autowired

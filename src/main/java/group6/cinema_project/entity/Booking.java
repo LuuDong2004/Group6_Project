@@ -19,7 +19,7 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "screening_schedule_id")
-    private Schedule schedule;
+    private ScreeningSchedule schedule;
 
     @Column(name = "booking_code")
     private String code;

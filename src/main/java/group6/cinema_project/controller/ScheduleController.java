@@ -2,7 +2,7 @@ package group6.cinema_project.controller;
 
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.ScheduleDto;
+import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.service.IMovieService;
 import group6.cinema_project.service.IScheduleService;
 import org.modelmapper.ModelMapper;
@@ -65,11 +65,21 @@ public class ScheduleController {
             // FIXED: Truyền normalizedDate để xác định ngày được chọn
             List<Map<String, Object>> dateList = generateDateList(7, normalizedDate);
 
+            // Lấy danh sách ngày có lịch chiếu hợp lệ cho date picker
+            List<Date> availableScreeningDates = scheduleService.getAvailableScreeningDates(movieId);
+            model.addAttribute("availableScreeningDates", availableScreeningDates);
+            // Thêm danh sách ngày dạng string yyyy-MM-dd cho JS
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            List<String> availableScreeningDateStrs = availableScreeningDates.stream()
+                .map(sdf::format)
+                .collect(Collectors.toList());
+            model.addAttribute("availableScreeningDateStrs", availableScreeningDateStrs);
+
             // Lấy danh sách rạp có lịch chiếu cho phim vào ngày đã chọn
             List<BranchDto> branches = getBranchesForMovieAndDate(movieId, normalizedDate);
 
             // Lấy lịch chiếu cho ngày đã chọn (đã được lọc bỏ lịch chiếu quá khứ)
-            List<ScheduleDto> schedules = scheduleService.getScheduleByMovieIdAndDate(movieId, normalizedDate);
+            List<ScreeningScheduleDto> schedules = scheduleService.getScheduleByMovieIdAndDate(movieId, normalizedDate);
 
             // Lọc bỏ các lịch chiếu có giờ bắt đầu đã qua (chỉ áp dụng cho ngày hiện tại)
             if (isSameDay(normalizedDate, currentDate)) {
@@ -85,9 +95,9 @@ public class ScheduleController {
             }
 
             // Nhóm lịch chiếu theo rạp và phòng chiếu
-            Map<Integer, Map<String, List<ScheduleDto>>> schedulesByBranchAndRoom = new HashMap<>();
+            Map<Integer, Map<String, List<ScreeningScheduleDto>>> schedulesByBranchAndRoom = new HashMap<>();
 
-            for (ScheduleDto schedule : schedules) {
+            for (ScreeningScheduleDto schedule : schedules) {
                 if (schedule.getBranch() == null) continue;
 
                 int currBranchId = schedule.getBranch().getId();
@@ -98,7 +108,7 @@ public class ScheduleController {
                     schedulesByBranchAndRoom.put(currBranchId, new HashMap<>());
                 }
 
-                Map<String, List<ScheduleDto>> branchSchedules = schedulesByBranchAndRoom.get(currBranchId);
+                Map<String, List<ScreeningScheduleDto>> branchSchedules = schedulesByBranchAndRoom.get(currBranchId);
 
                 if (!branchSchedules.containsKey(roomName)) {
                     branchSchedules.put(roomName, new ArrayList<>());
@@ -118,7 +128,7 @@ public class ScheduleController {
             }
 
             // Nếu có scheduleId được chọn, đánh dấu lịch chiếu đó là đã chọn
-            ScheduleDto selectedSchedule = null;
+            ScreeningScheduleDto selectedSchedule = null;
             if (scheduleId != null) {
                 selectedSchedule = scheduleService.getScheduleById(scheduleId);
                 // Kiểm tra nếu lịch chiếu đã chọn có phải là lịch chiếu quá khứ không
@@ -154,7 +164,7 @@ public class ScheduleController {
     /**
      * Lọc bỏ các lịch chiếu có thời gian bắt đầu đã qua
      */
-    private List<ScheduleDto> filterPastSchedules(List<ScheduleDto> schedules, Date currentDateTime) {
+    private List<ScreeningScheduleDto> filterPastSchedules(List<ScreeningScheduleDto> schedules, Date currentDateTime) {
         return schedules.stream()
                 .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
                 .collect(Collectors.toList());
@@ -163,27 +173,18 @@ public class ScheduleController {
     /**
      * Kiểm tra xem lịch chiếu có phải là quá khứ không
      */
-    private boolean isScheduleInPast(ScheduleDto schedule, Date currentDateTime) {
+    private boolean isScheduleInPast(ScreeningScheduleDto schedule, Date currentDateTime) {
         if (schedule.getScreeningDate() == null || schedule.getStartTime() == null) {
             return false;
         }
-
-        // Kết hợp ngày chiếu và giờ bắt đầu
-        Calendar scheduleCalendar = Calendar.getInstance();
-        scheduleCalendar.setTime(schedule.getScreeningDate());
-
-        Calendar startTimeCalendar = Calendar.getInstance();
-        startTimeCalendar.setTime(schedule.getStartTime());
-
-        // Đặt giờ, phút, giây từ startTime vào scheduleCalendar
-        scheduleCalendar.set(Calendar.HOUR_OF_DAY, startTimeCalendar.get(Calendar.HOUR_OF_DAY));
-        scheduleCalendar.set(Calendar.MINUTE, startTimeCalendar.get(Calendar.MINUTE));
-        scheduleCalendar.set(Calendar.SECOND, startTimeCalendar.get(Calendar.SECOND));
-        scheduleCalendar.set(Calendar.MILLISECOND, 0);
-
-        Date scheduleDateTime = scheduleCalendar.getTime();
-
-        return scheduleDateTime.before(currentDateTime);
+        // Combine LocalDate and LocalTime to LocalDateTime
+        java.time.LocalDateTime scheduleDateTime = java.time.LocalDateTime.of(
+            schedule.getScreeningDate(), schedule.getStartTime()
+        );
+        java.time.LocalDateTime now = currentDateTime.toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDateTime();
+        return scheduleDateTime.isBefore(now);
     }
 
     /**
@@ -191,7 +192,7 @@ public class ScheduleController {
      */
     private List<BranchDto> getBranchesForMovieAndDate(Integer movieId, Date date) {
         // Lấy tất cả lịch chiếu cho phim vào ngày cụ thể
-        List<ScheduleDto> schedules = scheduleService.getScheduleByMovieIdAndDate(movieId, date);
+        List<ScreeningScheduleDto> schedules = scheduleService.getScheduleByMovieIdAndDate(movieId, date);
 
         // Nếu là ngày hiện tại, lọc bỏ lịch chiếu quá khứ
         Date currentDateTime = new Date();
@@ -204,7 +205,7 @@ public class ScheduleController {
         // Trích xuất và loại bỏ trùng lặp các rạp
         Map<Integer, BranchDto> uniqueBranches = new HashMap<>();
 
-        for (ScheduleDto schedule : schedules) {
+        for (ScreeningScheduleDto schedule : schedules) {
             if (schedule.getBranch() != null) {
                 uniqueBranches.put(schedule.getBranch().getId(), schedule.getBranch());
             }

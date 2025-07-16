@@ -14,7 +14,7 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
 
     @Query("SELECT s FROM Seat s " +
            "JOIN s.room r " +
-           "JOIN Schedule sch ON sch.screeningRoom.id = r.id " +
+           "JOIN ScreeningSchedule sch ON sch.screeningRoom.id = r.id " +
            "WHERE sch.id = :scheduleId")
     List<Seat> findSeatsByRoomId(@Param("scheduleId") Integer scheduleId);
 

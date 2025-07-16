@@ -5,12 +5,13 @@ import group6.cinema_project.dto.BookingRequest;
 import group6.cinema_project.entity.Booking;
 import group6.cinema_project.entity.SeatReservation;
 import group6.cinema_project.entity.User;
-import group6.cinema_project.entity.Schedule;
+import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.repository.BookingRepository;
 import group6.cinema_project.repository.SeatReservationRepository;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.repository.ScheduleRepository;
 import group6.cinema_project.service.IBookingService;
+import group6.cinema_project.service.IScheduleService;
 import group6.cinema_project.service.MailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -47,6 +49,9 @@ public class BookingService implements IBookingService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private ScheduleService scheduleService;
+
     @Override
     public List<BookingDto> createBooking(BookingRequest request) {
         try {
@@ -55,7 +60,7 @@ public class BookingService implements IBookingService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy user mặc định với ID: 1"));
 
             // Tìm schedule theo ID
-            Schedule schedule = scheduleRepository.findById(request.getScheduleId())
+            ScreeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + request.getScheduleId()));
 
             // Tạo mã booking ngẫu nhiên
@@ -94,6 +99,10 @@ public class BookingService implements IBookingService {
 
             // Chuyển đổi sang DTO và trả về
             BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+            // Map schedule với mapToDto để set các trường chuỗi thời gian
+            if (booking.getSchedule() != null) {
+                bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+            }
             List<BookingDto> result = new ArrayList<>();
             result.add(bookingDto);
             return result;
@@ -144,6 +153,10 @@ public class BookingService implements IBookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với ID: " + bookingId));
         BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+        // Map schedule với mapToDto để set các trường chuỗi thời gian
+        if (booking.getSchedule() != null) {
+            bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+        }
         // Map danh sách ghế
         List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
         List<String> seatNames = reservations.stream()
@@ -189,6 +202,10 @@ public class BookingService implements IBookingService {
         // Gửi email vé điện tử sau khi thanh toán thành công
         try {
             BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+            // Map schedule với mapToDto để set các trường chuỗi thời gian
+            if (booking.getSchedule() != null) {
+                bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+            }
             // Map danh sách ghế
             List<String> seatNames = reservations.stream()
                 .map(r -> r.getSeat().getName())

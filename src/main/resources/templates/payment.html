@@ -85,8 +85,8 @@
                     <img th:src="${booking.schedule.movie.image}" alt="Movie Poster" class="movie-poster">
                     <div class="movie-details">
                         <h3 th:text="${booking.schedule.movie.name}">Movie Name</h3>
-                        <p><i class="fa-solid fa-calendar me-2"></i><span th:text="${#dates.format(booking.schedule.screeningDate, 'dd/MM/yyyy')}">Date</span></p>
-                        <p><i class="fa-solid fa-clock me-2"></i><span th:text="${#dates.format(booking.schedule.startTime, 'HH:mm')}">Time</span></p>
+                        <p><i class="fa-solid fa-calendar me-2"></i><span th:text="${booking.schedule.screeningDate}">Date</span></p>
+                        <p><i class="fa-solid fa-clock me-2"></i><span th:text="${booking.schedule.startTime}">Time</span></p>
                         <p><i class="fa-solid fa-building me-2"></i><span th:text="${booking.schedule.branch.name}">Cinema</span></p>
                         <p><i class="fa-solid fa-door-open me-2"></i><span th:text="${booking.schedule.screeningRoom.name}">Room</span></p>
                     </div>

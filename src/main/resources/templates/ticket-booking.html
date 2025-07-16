@@ -13,6 +13,7 @@
   <link rel="stylesheet" type="text/css" th:href="@{/assets/css/e-ticket.css}">
   <link rel="stylesheet" type="text/css" th:href="@{/assets/css/payment.css}" />
   <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     /* Date selection styles - đặt ở trên đầu */
     .date-carousel-container {
@@ -376,8 +377,8 @@
           <!-- Date selection first -->
           <div class="date-selection" id="date-selection">
             <h3 class="section-heading"></h3>
-            <div class="date-carousel-container">
-              <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }' id="date-carousel">
+            <div class="date-carousel-container" style="display: flex; align-items: center;">
+              <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }' id="date-carousel" style="flex: 1;">
                 <!-- Date cells using Thymeleaf -->
                 <div th:each="dateInfo : ${dateList}"
                      class="carousel-cell date-selector"
@@ -388,7 +389,11 @@
                   <div class="date-day" th:text="${dateInfo.dayName}">Today</div>
                 </div>
               </div>
+              <button id="calendar-btn" style="margin-left: 16px; background: none; border: none; cursor: pointer;">
+                <i class="fa fa-calendar" style="font-size: 28px; color: #df0e62;"></i>
+              </button>
             </div>
+            <input type="text" id="calendar-picker" style="display:none;" readonly>
           </div>
 
           <!-- Movie information second -->
@@ -443,28 +448,30 @@
               <li th:each="roomEntry : ${schedulesByBranchAndRoom.get(selectedBranchId)}" class="time-li">
                 <div class="screens" th:text="${roomEntry.key}">Room Name</div>
                 <div class="time-btn">
-                  <div th:each="schedule : ${roomEntry.value}"
-                       class="screen-time schedule-selector"
-                       th:classappend="${selectedSchedule != null && selectedSchedule.id == schedule.id} ? 'selected' : ''"
-                       th:data-schedule-id="${schedule.id}"
-                       th:data-movie-id="${movieId}"
-                       th:data-date="${dateParam}"
-                       th:data-branch-id="${selectedBranchId}">
-                    <span th:text="${#dates.format(schedule.startTime, 'HH:mm')}"></span>
-                    <span th:if="${schedule.endTime != null}" th:text="${' - ' + #dates.format(schedule.endTime, 'HH:mm')}"></span>
+                  <div th:each="schedule : ${roomEntry.value}">
+                    <div th:if="${schedule.availableSeats > 0}"
+                         class="screen-time schedule-selector"
+                         th:classappend="${selectedSchedule != null && selectedSchedule.id == schedule.id} ? 'selected' : ''"
+                         th:data-schedule-id="${schedule.id}"
+                         th:data-movie-id="${movieId}"
+                         th:data-date="${dateParam}"
+                         th:data-branch-id="${selectedBranchId}">
+                      <span th:text="${schedule.startTimeStr}"></span>
+                      <span th:if="${schedule.endTimeStr != null}" th:text="${' - ' + schedule.endTimeStr}"></span>
+                      <span style="margin-left:8px; color: #888; font-size: 13px;">(<span th:text="${schedule.availableSeats}"></span> ghế trống)</span>
+                    </div>
+                    <div th:if="${schedule.availableSeats == 0}"
+                         class="screen-time"
+                         style="background:#eee; color:#aaa; cursor:not-allowed;">
+                      <span th:text="${schedule.startTimeStr}"></span>
+                      <span th:if="${schedule.endTimeStr != null}" th:text="${' - ' + schedule.endTimeStr}"></span>
+                      <span style="margin-left:8px; color: #888; font-size: 13px;">Hết ghế</span>
+                    </div>
                   </div>
                 </div>
               </li>
             </ul>
           </div>
-
-          <!-- Nút tiếp tục -->
-<!--          <a th:if="${selectedSchedule != null}"-->
-<!--             th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${movieId}, scheduleId=${selectedSchedule.id}, roomId=${selectedSchedule.screeningRoom.id})}"-->
-<!--             class="action-button">-->
-<!--            Continue Booking-->
-<!--          </a>-->
-
           <a th:if="${selectedSchedule != null and selectedSchedule.screeningRoom != null and selectedSchedule.screeningRoom.id != null}"
              th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${movieId}, scheduleId=${selectedSchedule.id}, roomId=${selectedSchedule.screeningRoom.id})}"
              class="action-button">
@@ -483,232 +490,33 @@
   </div>
 </div>
 <div th:replace="~{fragments/footer :: footer}"></div>
-<!-- Scripts -->
+<!-- Scripts: chỉ giữ lại 1 lần mỗi thư viện, đúng thứ tự -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script th:src="@{/assets/js/util.js}"></script>
+<script th:src="@{/assets/js/ticket-booking.js}"></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var availableDates = /*[[${availableScreeningDateStrs}]]*/ [];
+  /*]]>*/
+</script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Tham chiếu đến các phần tử DOM
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const toggleSwitch = document.querySelector('#checkbox');
-
-    // Biến lưu trữ trạng thái hiện tại
-    let currentState = {
-      movieId: null,
-      date: null,
-      branchId: null,
-      scheduleId: null
-    };
-
-    // Lấy các giá trị ban đầu từ URL
-    const urlParams = new URLSearchParams(window.location.search);
-    currentState.movieId = document.querySelector('[data-movie-id]')?.getAttribute('data-movie-id');
-    currentState.date = urlParams.get('date') || document.querySelector('[data-date]')?.getAttribute('data-date');
-    currentState.branchId = urlParams.get('branchId');
-    currentState.scheduleId = urlParams.get('scheduleId');
-
-    // Chức năng chuyển đổi theme
-    function switchTheme(e) {
-      if (e.target.checked) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
+document.addEventListener('DOMContentLoaded', function() {
+  flatpickr("#calendar-picker", {
+    dateFormat: "Y-m-d",
+    enable: availableDates,
+    onChange: function(selectedDates, dateStr, instance) {
+      if (dateStr) {
+        const movieId = document.querySelector('[data-movie-id]')?.getAttribute('data-movie-id');
+        window.location.href = `/schedule/movie/${movieId}/date?date=${dateStr}`;
       }
-    }
-
-    // Khôi phục theme từ localStorage
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
-    }
-
-    // Đăng ký sự kiện change cho theme switcher
-    toggleSwitch.addEventListener('change', switchTheme, false);
-
-    // === Xử lý các sự kiện click không làm mới trang ===
-
-    // 1. Xử lý click cho ngày
-    function attachDateEvents() {
-      document.querySelectorAll('.date-selector').forEach(dateCell => {
-        dateCell.addEventListener('click', function(e) {
-          e.preventDefault();
-
-          // Hiển thị loading
-          loadingOverlay.classList.add('show');
-
-          const date = this.getAttribute('data-date');
-          const movieId = this.getAttribute('data-movie-id');
-
-          // Cập nhật trạng thái hiện tại
-          currentState.date = date;
-          currentState.movieId = movieId;
-          // Reset branch và schedule khi chọn ngày mới
-          currentState.branchId = null;
-          currentState.scheduleId = null;
-
-          // FIXED: Gỡ bỏ selected từ tất cả date cells trước khi thêm vào cell được chọn
-          document.querySelectorAll('.date-selector').forEach(cell => {
-            cell.classList.remove('selected');
-          });
-
-          // Thêm selected vào cell được chọn
-          this.classList.add('selected');
-
-          // Tải nội dung mới không làm mới trang
-          loadContent();
-        });
-      });
-    }
-
-    // 2. Xử lý click cho rạp chiếu
-    function attachBranchEvents() {
-      document.querySelectorAll('.branch-selector').forEach(branchCard => {
-        branchCard.addEventListener('click', function(e) {
-          e.preventDefault();
-
-          // Hiển thị loading
-          loadingOverlay.classList.add('show');
-
-          const branchId = this.getAttribute('data-branch-id');
-          const movieId = this.getAttribute('data-movie-id');
-          const date = this.getAttribute('data-date');
-
-          // Cập nhật trạng thái hiện tại
-          currentState.branchId = branchId;
-          currentState.movieId = movieId;
-          currentState.date = date;
-          // Reset schedule khi chọn rạp mới
-          currentState.scheduleId = null;
-
-          // Gỡ bỏ selected từ tất cả branch cards
-          document.querySelectorAll('.branch-selector').forEach(card => {
-            card.classList.remove('selected');
-          });
-
-          // Thêm selected vào card được chọn
-          this.classList.add('selected');
-
-          // Tải nội dung mới không làm mới trang
-          loadContent();
-        });
-      });
-    }
-
-    // Hàm gắn sự kiện click cho các suất chiếu
-    function attachScheduleEvents() {
-      document.querySelectorAll('.schedule-selector').forEach(scheduleBtn => {
-        scheduleBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-
-          // Hiển thị loading
-          loadingOverlay.classList.add('show');
-
-          const scheduleId = this.getAttribute('data-schedule-id');
-          const movieId = this.getAttribute('data-movie-id');
-          const date = this.getAttribute('data-date');
-          const branchId = this.getAttribute('data-branch-id');
-
-          // Cập nhật trạng thái hiện tại
-          currentState.scheduleId = scheduleId;
-          currentState.movieId = movieId;
-          currentState.date = date;
-          currentState.branchId = branchId;
-
-          // Gỡ bỏ selected từ tất cả schedule buttons
-          document.querySelectorAll('.schedule-selector').forEach(btn => {
-            btn.classList.remove('selected');
-          });
-
-          // Thêm selected vào button được chọn
-          this.classList.add('selected');
-
-          // Tải nội dung mới không làm mới trang
-          loadContent();
-        });
-      });
-    }
-
-    // Gắn sự kiện ban đầu
-    attachDateEvents();
-    attachBranchEvents();
-    attachScheduleEvents();
-
-    // Hàm tải nội dung thông qua AJAX
-    function loadContent() {
-      // Xây dựng URL dựa trên trạng thái hiện tại
-      let url = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
-      if (currentState.branchId) url += `&branchId=${currentState.branchId}`;
-      if (currentState.scheduleId) url += `&scheduleId=${currentState.scheduleId}`;
-
-      // Thêm tham số AJAX để phân biệt
-      url += '&ajax=true';
-
-      // Sử dụng Fetch API để gọi AJAX
-      fetch(url, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.text();
-              })
-              .then(html => {
-                // Parse HTML response
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                // FIXED: Cập nhật phần date selection để đảm bảo trạng thái selected được cập nhật chính xác
-                const newDateSelection = doc.querySelector('#date-selection');
-                if (newDateSelection) {
-                  document.querySelector('#date-selection').outerHTML = newDateSelection.outerHTML;
-                  attachDateEvents(); // Gắn lại sự kiện cho các ngày mới
-                }
-
-                // Cập nhật phần cinema selection
-                const newCinemaSelection = doc.querySelector('#cinema-selection');
-                if (newCinemaSelection) {
-                  document.querySelector('#cinema-selection').outerHTML = newCinemaSelection.outerHTML;
-                  attachBranchEvents(); // Gắn lại sự kiện cho các rạp chiếu mới
-                }
-
-                // Cập nhật phần time selection
-                const newTimeSelection = doc.querySelector('#time-selection');
-                if (newTimeSelection) {
-                  document.querySelector('#time-selection').outerHTML = newTimeSelection.outerHTML;
-                  attachScheduleEvents(); // Gắn lại sự kiện cho các suất chiếu mới
-                }
-
-                // Cập nhật nút continue
-                const newActionButton = doc.querySelector('.action-button');
-                if (newActionButton) {
-                  document.querySelector('.action-button').outerHTML = newActionButton.outerHTML;
-                }
-
-                // Ẩn loading overlay
-                loadingOverlay.classList.remove('show');
-
-                // Cập nhật URL chỉ khi chọn ngày
-                const baseUrl = `/schedule/movie/${currentState.movieId}/date?date=${currentState.date}`;
-                history.replaceState({}, '', baseUrl);
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                // Ẩn loading và hiển thị thông báo lỗi
-                loadingOverlay.classList.remove('show');
-                alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
-              });
     }
   });
+  document.getElementById('calendar-btn').addEventListener('click', function() {
+    document.getElementById('calendar-picker')._flatpickr.open();
+  });
+});
 </script>
-
-<script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
-<script type="text/javascript" src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
-<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
 </body>
 </html>

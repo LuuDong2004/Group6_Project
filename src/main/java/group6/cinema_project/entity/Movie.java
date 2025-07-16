@@ -1,11 +1,11 @@
 package group6.cinema_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -15,16 +15,36 @@ import java.util.Date;
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id; // sua
     private String name;
     private String image;
-    private int duration; // thời lượng tính bằng phút
+
+    private Integer duration; // thời lượng tính bằng phút
+
     @Column(name = "release_date")
     private Date releaseDate;
-    private double rating;
+
+    private String rating; // double => string
     private String genre; // thể loại phim
     private String language;
+
     private String trailer;
-    
+
+
+    private String description;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "Actor_Movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
+    private Set<Actor> actors;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "Director_Movie", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "director_id"))
+    private Set<Director> directors;
 
 }

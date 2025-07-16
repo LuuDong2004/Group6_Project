@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Branch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private String name;
     private String description;
     private String address;

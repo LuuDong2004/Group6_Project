@@ -22,7 +22,7 @@ public class Ticket {
 
     @ManyToOne
     @JoinColumn(name = "screening_schedule_id")
-    private Schedule schedule;
+    private ScreeningSchedule schedule;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id", nullable = false)

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.sql.Time;
 
 import java.util.Date;
@@ -16,7 +17,7 @@ import java.util.Date;
 @Table(name = "ScreeningSchedule")
 @NoArgsConstructor
 @Data
-public class Schedule {
+public class ScreeningSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -39,4 +40,11 @@ public class Schedule {
     private Time startTime;
     @Column(name = "end_time")
     private Time endTime;
+
+    @Column(name = "status", nullable = false, length = 255)
+    private String status;
+
+    @Column(name = "price", nullable = false, precision = 20)
+    private BigDecimal price;
+
 }

@@ -69,12 +69,8 @@
                     </div>
                 </div>
             </div>
-
             <!-- Action Buttons -->
             <div class="text-center mt-4">
-                <button class="btn btn-primary me-2" onclick="refreshQR()" id="refresh-btn">
-                    <i class="fas fa-sync-alt me-2"></i>Làm mới QR
-                </button>
                 <button class="btn btn-danger" onclick="cancelPayment()" id="cancel-btn">
                     <i class="fas fa-times-circle me-2"></i>Hủy thanh toán
                 </button>
@@ -182,47 +178,6 @@
             }
         }
 
-        function refreshQR() {
-            if (!transactionRef) {
-                alert('Không tìm thấy thông tin giao dịch!');
-                return;
-            }
-            document.getElementById('loading-spinner').style.display = 'block';
-            document.getElementById('qr-code-container').style.display = 'none';
-            fetch('/payment/sepay/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    orderId: bookingId,
-                    amount: parseInt('[[${amount}]]'),
-                    description: 'Thanh toán vé xem phim',
-                    merchantCode: '[[${merchantCode}]]',
-                    callbackUrl: window.location.origin + '/payment/sepay/webhook'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('qr-code-container').style.display = 'block';
-                if (data.qrCodeUrl) {
-                    document.querySelector('#qr-code-container img').src = data.qrCodeUrl;
-                    if (data.transactionId) {
-                        transactionRef = data.transactionId;
-                    }
-                    alert('Đã làm mới mã QR thành công!');
-                } else {
-                    alert('Có lỗi xảy ra khi làm mới mã QR: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('qr-code-container').style.display = 'block';
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi làm mới mã QR');
-            });
-        }
 
         function cancelPayment() {
             if (!transactionRef) {

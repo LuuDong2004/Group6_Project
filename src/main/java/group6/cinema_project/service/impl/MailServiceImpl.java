@@ -80,8 +80,8 @@ public class MailServiceImpl implements MailService {
             context.setVariable("movieName", booking.getSchedule().getMovie().getName());
             context.setVariable("cinemaName", booking.getSchedule().getBranch().getName());
             context.setVariable("roomName", booking.getSchedule().getScreeningRoom().getName());
-            context.setVariable("screeningDate", formatDate(booking.getSchedule().getScreeningDate(), "dd/MM/yyyy"));
-            context.setVariable("startTime", formatTime(booking.getSchedule().getStartTime(), "HH:mm"));
+            context.setVariable("screeningDate", booking.getSchedule().getScreeningDate() != null ? booking.getSchedule().getScreeningDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "");
+            context.setVariable("startTime", booking.getSchedule().getStartTime() != null ? booking.getSchedule().getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) : "");
             context.setVariable("totalAmount", formatAmount(booking.getAmount()));
             context.setVariable("seatNames", booking.getSeatNames());
             // Không cần context.setVariable("qrCode", ...);

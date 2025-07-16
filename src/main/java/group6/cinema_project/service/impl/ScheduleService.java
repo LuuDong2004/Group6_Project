@@ -1,10 +1,12 @@
 package group6.cinema_project.service.impl;
 
 import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.dto.ScheduleDto;
+import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Branch;
-import group6.cinema_project.entity.Schedule;
+import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.repository.ScheduleRepository;
+import group6.cinema_project.repository.SeatRepository;
+import group6.cinema_project.repository.SeatReservationRepository;
 import group6.cinema_project.service.IScheduleService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,10 @@ public class ScheduleService implements IScheduleService {
     private ScheduleRepository scheduleRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private SeatRepository seatRepository;
+    @Autowired
+    private SeatReservationRepository seatReservationRepository;
 
     public ScheduleService() {
     }
@@ -32,20 +38,20 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
-    public List<ScheduleDto> getScheduleByMovieId(Integer movieId) {
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieId(movieId);
+    public List<ScreeningScheduleDto> getScheduleByMovieId(Integer movieId) {
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieId(movieId);
 
         // Lọc bỏ các lịch chiếu quá khứ
         Date currentDateTime = new Date();
 
         return schedules.stream()
                 .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ScheduleDto> getScheduleByMovieIdAndDate(Integer movieId, Date screeningDate) {
+    public List<ScreeningScheduleDto> getScheduleByMovieIdAndDate(Integer movieId, Date screeningDate) {
         // Đảm bảo screeningDate được chuẩn hóa (chỉ lưu phần ngày)
         Date normalizedDate = normalizeDateToMidnight(screeningDate);
         Date currentDateTime = new Date();
@@ -56,7 +62,7 @@ public class ScheduleService implements IScheduleService {
             return new ArrayList<>(); // Trả về danh sách rỗng thay vì throw exception
         }
 
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieIdAndDate(movieId, normalizedDate);
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieIdAndDate(movieId, normalizedDate);
 
         // Nếu là ngày hiện tại, lọc bỏ các lịch chiếu có giờ bắt đầu đã qua
         if (isSameDay(normalizedDate, currentDate)) {
@@ -66,12 +72,12 @@ public class ScheduleService implements IScheduleService {
         }
 
         return schedules.stream()
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date screeningDate) {
+    public List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date screeningDate) {
         // Đảm bảo screeningDate được chuẩn hóa (chỉ lưu phần ngày)
         Date normalizedDate = normalizeDateToMidnight(screeningDate);
         Date currentDateTime = new Date();
@@ -82,7 +88,7 @@ public class ScheduleService implements IScheduleService {
             return new ArrayList<>(); // Trả về danh sách rỗng thay vì throw exception
         }
 
-        List<Schedule> schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, normalizedDate);
+        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, normalizedDate);
 
         // Nếu là ngày hiện tại, lọc bỏ các lịch chiếu có giờ bắt đầu đã qua
         if (isSameDay(normalizedDate, currentDate)) {
@@ -92,7 +98,7 @@ public class ScheduleService implements IScheduleService {
         }
 
         return schedules.stream()
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -106,8 +112,8 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
-    public ScheduleDto getScheduleById(Integer scheduleId) {
-        Schedule schedule = scheduleRepository.findScheduleById(scheduleId);
+    public ScreeningScheduleDto getScheduleById(Integer scheduleId) {
+        ScreeningSchedule schedule = scheduleRepository.findScheduleById(scheduleId);
 
         if (schedule == null) {
             return null;
@@ -119,7 +125,8 @@ public class ScheduleService implements IScheduleService {
             return null; // Không trả về lịch chiếu quá khứ
         }
 
-        return modelMapper.map(schedule, ScheduleDto.class);
+        ScreeningScheduleDto dto = mapToDto(schedule);
+        return dto;
     }
 
     @Override
@@ -146,7 +153,7 @@ public class ScheduleService implements IScheduleService {
     /**
      * Kiểm tra xem lịch chiếu có phải là quá khứ không
      */
-    private boolean isScheduleInPast(Schedule schedule, Date currentDateTime) {
+    private boolean isScheduleInPast(ScreeningSchedule schedule, Date currentDateTime) {
         if (schedule.getScreeningDate() == null || schedule.getStartTime() == null) {
             return false;
         }
@@ -200,5 +207,29 @@ public class ScheduleService implements IScheduleService {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
+    }
+
+    private int getAvailableSeatsForSchedule(int scheduleId) {
+        int totalSeats = seatRepository.findSeatsByRoomId(scheduleId).size();
+        int reservedSeats = seatReservationRepository.findActiveReservationsByScheduleId(scheduleId).size();
+        return totalSeats - reservedSeats;
+    }
+
+    public ScreeningScheduleDto mapToDto(ScreeningSchedule schedule) {
+        ScreeningScheduleDto dto = modelMapper.map(schedule, ScreeningScheduleDto.class);
+        if (schedule.getScreeningDate() != null) {
+            dto.setScreeningDate(schedule.getScreeningDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            dto.setScreeningDateStr(dto.getScreeningDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
+        if (schedule.getStartTime() != null) {
+            dto.setStartTime(schedule.getStartTime().toLocalTime());
+            dto.setStartTimeStr(dto.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+        }
+        if (schedule.getEndTime() != null) {
+            dto.setEndTime(schedule.getEndTime().toLocalTime());
+            dto.setEndTimeStr(dto.getEndTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+        }
+        dto.setAvailableSeats(getAvailableSeatsForSchedule(schedule.getId()));
+        return dto;
     }
 }

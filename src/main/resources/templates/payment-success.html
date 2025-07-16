@@ -95,8 +95,8 @@
             <p><strong>Phim:</strong> <span th:text="${booking.schedule?.movie?.name}"></span></p>
             <p><strong>Rạp:</strong> <span th:text="${booking.schedule?.branch?.name}"></span></p>
             <p><strong>Phòng:</strong> <span th:text="${booking.schedule?.screeningRoom?.name}"></span></p>
-            <p><strong>Ngày chiếu:</strong> <span th:text="${#dates.format(booking.schedule?.screeningDate, 'dd/MM/yyyy')}"></span></p>
-            <p><strong>Giờ chiếu:</strong> <span th:text="${#dates.format(booking.schedule?.startTime, 'HH:mm')}"></span></p>
+            <p><strong>Ngày chiếu:</strong> <span th:text="${booking.schedule.screeningDateStr}"></span></p>
+            <p><strong>Giờ chiếu:</strong> <span th:text="${booking.schedule.startTimeStr}"></span></p>
             <p><strong>Ghế:</strong>
                 <span th:each="seat : ${booking.seatNames}" th:text="${seat}" class="badge bg-primary me-2"></span>
             </p>
