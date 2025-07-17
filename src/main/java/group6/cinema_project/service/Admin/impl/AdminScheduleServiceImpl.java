@@ -3,6 +3,7 @@ package group6.cinema_project.service.Admin.impl;
 import group6.cinema_project.repository.Admin.AdminMovieRepository;
 import group6.cinema_project.repository.Admin.AdminRoomRepository;
 import group6.cinema_project.repository.Admin.AdminScheduleRepository;
+import group6.cinema_project.repository.Admin.AdminBranchRepository;
 import group6.cinema_project.service.Admin.IAdminScheduleService;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
@@ -12,6 +13,7 @@ import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.Branch;
 import group6.cinema_project.exception.ScheduleConflictException;
 
 
@@ -35,6 +37,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     private final AdminScheduleRepository movieScheduleRepository;
     private final AdminMovieRepository movieRepository;
     private final AdminRoomRepository screeningRoomRepository;
+    private final AdminBranchRepository branchRepository;
     List<ScheduleGroupedByDateDto> groupedSchedules;
 
     @Override
@@ -123,7 +126,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setEndTime(screeningSchedule.getEndTime().toLocalTime());
         }
         dto.setStatus(screeningSchedule.getStatus());
-        dto.setPrice(screeningSchedule.getPrice());
         // availableSeats and display fields are set elsewhere if needed
         return dto;
     }
@@ -140,7 +142,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             entity.setScreeningRoom(room);
         }
         if (dto.getBranchId() != null) {
-            // TODO: Add branchRepository and set branch if needed
+            Branch branch = branchRepository.findById(dto.getBranchId()).orElse(null);
+            entity.setBranch(branch);
         }
         if (dto.getScreeningDate() != null) {
             entity.setScreeningDate(java.sql.Date.valueOf(dto.getScreeningDate()));
@@ -152,7 +155,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             entity.setEndTime(java.sql.Time.valueOf(dto.getEndTime()));
         }
         entity.setStatus(dto.getStatus());
-        entity.setPrice(dto.getPrice());
         return entity;
     }
 
@@ -393,7 +395,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                                                     schedule.getId(),
                                                     schedule.getStartTime(),
                                                     schedule.getEndTime(),
-                                                    schedule.getPrice(),
                                                     schedule.getStatus()))
                                             .sorted(Comparator.comparing(ScheduleTimeSlotDto::getStartTime))
                                             .collect(Collectors.toList());
@@ -715,8 +716,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         }
 
         // Kiểm tra xem các trường bắt buộc của baseSchedule có hợp lệ không
-        if (baseSchedule.getMovieId() == null || baseSchedule.getScreeningDate() == null
-                || baseSchedule.getPrice() == null) {
+        if (baseSchedule.getMovieId() == null || baseSchedule.getScreeningDate() == null) {
             throw new IllegalArgumentException("Thông tin cơ bản của lịch chiếu không đầy đủ");
         }
 
@@ -727,7 +727,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             // Sao chép thông tin cơ bản từ baseSchedule
             scheduleDto.setMovieId(baseSchedule.getMovieId());
             scheduleDto.setScreeningDate(baseSchedule.getScreeningDate());
-            scheduleDto.setPrice(baseSchedule.getPrice());
             scheduleDto.setStatus(baseSchedule.getStatus());
 
             // Lấy thông tin từ slot

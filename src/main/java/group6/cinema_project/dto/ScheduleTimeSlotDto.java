@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalTime;
 
 /**
@@ -19,7 +18,6 @@ public class ScheduleTimeSlotDto {
     private Integer id;
     private LocalTime startTime;
     private LocalTime endTime;
-    private BigDecimal price;
     private String status;
 
     // Helper methods for display

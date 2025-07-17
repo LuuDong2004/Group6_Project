@@ -19,7 +19,6 @@ public class ScreeningScheduleDto {
     private LocalTime startTime;
     private LocalTime endTime;
     private String status;
-    private BigDecimal price;
     private int availableSeats;
 
     // Nested DTOs for display
