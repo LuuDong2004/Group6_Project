@@ -1,14 +1,18 @@
 package group6.cinema_project.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Date;
-@Data
+
 @Entity
 @Table(name = "Booking")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,12 +37,5 @@ public class Booking {
     private Date expiryDate; // ngày hiệu lực của booking
     @Column(name = "notes")
     private String notes;
-
-
-
-
-
-
-
 
 }

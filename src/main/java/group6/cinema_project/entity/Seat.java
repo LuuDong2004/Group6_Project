@@ -1,17 +1,15 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Getter
-@Setter
-@Data
 @Table(name = "Seat")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +19,7 @@ public class Seat {
     private String row;
     @Column(name = "seat_type")
     private String type;
-//    private double price;
+    // private double price;
     @ManyToOne
     @JoinColumn(name = "screening_room_id")
     private ScreeningRoom room;

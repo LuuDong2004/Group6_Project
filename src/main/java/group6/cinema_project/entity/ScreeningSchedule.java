@@ -1,22 +1,21 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.sql.Time;
-
 import java.util.Date;
 
 @Entity
 @Table(name = "ScreeningSchedule")
-@NoArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ScreeningSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +42,5 @@ public class ScreeningSchedule {
 
     @Column(name = "status", nullable = false, length = 255)
     private String status;
-
-    @Column(name = "price", nullable = false, precision = 20)
-    private BigDecimal price;
 
 }

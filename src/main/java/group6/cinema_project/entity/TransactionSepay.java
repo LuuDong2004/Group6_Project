@@ -3,15 +3,15 @@ package group6.cinema_project.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 
-
-
-@Table(name = "TransactionSepay")
-@NoArgsConstructor
 @Entity
+@Table(name = "TransactionSepay")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionSepay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,6 @@ public class TransactionSepay {
 
     @Column(unique = true, nullable = false)
     private String transactionId;
-
 
     @ManyToOne
     @JoinColumn(name = "booking_id")
@@ -34,7 +33,6 @@ public class TransactionSepay {
     // Mã merchant (nếu dùng nhiều merchant)
     private String merchantCode;
 
-
     private LocalDate createdAt;
 
     // Thời gian cập nhật trạng thái cuối cùng
@@ -42,6 +40,5 @@ public class TransactionSepay {
 
     // Thông tin mô tả/ghi chú (nếu cần)
     private String description;
-
 
 }

@@ -3,14 +3,15 @@ package group6.cinema_project.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-
-@Data
 @Entity
 @Table(name = "ScreeningRoom")
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ScreeningRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

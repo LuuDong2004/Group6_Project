@@ -1,17 +1,17 @@
 package group6.cinema_project.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
 @Entity
-@NoArgsConstructor
-@Getter
-@Setter
 @Table(name = "SeatReservation")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SeatReservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
