@@ -36,4 +36,6 @@ public interface ScheduleRepository extends JpaRepository<ScreeningSchedule, Int
     @Query("SELECT DISTINCT s.screeningDate FROM ScreeningSchedule s WHERE s.movie.id = :movieId AND s.screeningDate >= :currentDate ORDER BY s.screeningDate")
     List<Date> findDistinctScreeningDatesByMovieIdFromDate(@Param("movieId") Integer movieId, @Param("currentDate") Date currentDate);
 
+
+    
 }

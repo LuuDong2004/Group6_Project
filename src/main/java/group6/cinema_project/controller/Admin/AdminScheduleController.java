@@ -708,4 +708,29 @@ public class AdminScheduleController {
         return "admin/test_schedule_form";
     }
 
+    /**
+     * Test endpoint để debug edit form
+     */
+    @GetMapping("/test-edit")
+    public String showTestEditForm() {
+        return "admin/test_edit_schedule";
+    }
+
+    /**
+     * Test endpoint để kiểm tra movie status display
+     */
+    @GetMapping("/test-status")
+    public String showTestStatusPage() {
+        return "admin/test_movie_status";
+    }
+
+    /**
+     * API endpoint để lấy movies theo status (for testing)
+     */
+    @GetMapping("/api/movies/{status}")
+    @ResponseBody
+    public List<MovieDto> getMoviesByStatusApi(@PathVariable String status) {
+        return movieScheduleService.getMoviesByScheduleStatus(status);
+    }
+
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.ArrayList;
@@ -478,7 +479,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Transactional(readOnly = true)
     public List<MovieDto> getComingSoonMovies() {
         try {
-            List<Movie> movies = movieScheduleRepository.findComingSoonMovies();
+            // Use the simple query that doesn't exclude movies with other statuses
+            List<Movie> movies = movieScheduleRepository.findMoviesWithUpcomingSchedules();
             return movies.stream()
                     .map(this::convertMovieToBasicDto)
                     .collect(Collectors.toList());
@@ -651,9 +653,20 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         if (scheduleOpt.isPresent()) {
             ScreeningSchedule schedule = scheduleOpt.get();
 
-            // Also check English status variants
-            if ("ACTIVE".equalsIgnoreCase(schedule.getStatus())) {
-                throw new IllegalStateException("Cannot modify or delete a schedule that is currently showing");
+            // Kiểm tra xem lịch chiếu có đang chiếu thực sự không (dựa trên thời gian)
+            LocalDateTime now = LocalDateTime.now();
+            LocalDate scheduleDate = convertDateToLocalDate(schedule.getScreeningDate());
+            LocalTime startTime = schedule.getStartTime().toLocalTime();
+            LocalTime endTime = schedule.getEndTime().toLocalTime();
+
+            LocalDateTime scheduleDateTime = LocalDateTime.of(scheduleDate, startTime);
+            LocalDateTime scheduleEndDateTime = LocalDateTime.of(scheduleDate, endTime);
+
+            // Chỉ không cho sửa nếu lịch chiếu đang thực sự diễn ra (trong khoảng thời gian
+            // chiếu)
+            if (now.isAfter(scheduleDateTime) && now.isBefore(scheduleEndDateTime)) {
+                throw new IllegalStateException(
+                        "Không thể sửa lịch chiếu đang diễn ra. Vui lòng đợi đến khi kết thúc suất chiếu.");
             }
         }
     }
