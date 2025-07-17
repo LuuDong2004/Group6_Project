@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Schedule Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Test Form Thêm Lịch Chiếu</h2>
+    
+    <!-- Hiển thị thông báo lỗi hoặc thành công -->
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+    
+    <div th:if="${success}" class="alert alert-success" role="alert">
+        <span th:text="${success}"></span>
+    </div>
+    
+    <form id="testForm" action="/admin/schedules/add-batch" method="post">
+        <div class="mb-3">
+            <label for="movieId" class="form-label">Movie ID</label>
+            <input type="number" class="form-control" id="movieId" name="movieId" value="1" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="screeningDate" class="form-label">Screening Date</label>
+            <input type="date" class="form-control" id="screeningDate" name="screeningDate" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-control" id="status" name="status" required>
+                <option value="AUTO">AUTO</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="UPCOMING">UPCOMING</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="timeSlots" class="form-label">Time Slots JSON</label>
+            <textarea class="form-control" id="timeSlots" name="timeSlots" rows="5" required>
+[
+  {
+    "startTime": "09:00",
+    "endTime": "11:30",
+    "roomId": "1",
+    "branchId": "1"
+  },
+  {
+    "startTime": "14:00",
+    "endTime": "16:30",
+    "roomId": "2",
+    "branchId": "1"
+  }
+]
+            </textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Test Submit</button>
+        <a href="/admin/schedules/list" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+
+<script>
+    // Set today's date as default
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('screeningDate').value = today;
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

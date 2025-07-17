@@ -16,7 +16,6 @@ import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.exception.ScheduleConflictException;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,6 +100,25 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     }
 
     /**
+     * Helper method to safely convert java.util.Date to LocalDate
+     */
+    private LocalDate convertDateToLocalDate(java.util.Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        // Handle both java.sql.Date and java.util.Date
+        if (date instanceof java.sql.Date) {
+            return ((java.sql.Date) date).toLocalDate();
+        } else {
+            // For java.util.Date, convert via Instant
+            return date.toInstant()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+        }
+    }
+
+    /**
      * Convert ScreeningSchedule entity to DTO without related entity data
      */
 
@@ -117,7 +135,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setBranchId(screeningSchedule.getBranch().getId());
         }
         if (screeningSchedule.getScreeningDate() != null) {
-            dto.setScreeningDate(screeningSchedule.getScreeningDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            // Convert java.util.Date to LocalDate safely
+            dto.setScreeningDate(convertDateToLocalDate(screeningSchedule.getScreeningDate()));
         }
         if (screeningSchedule.getStartTime() != null) {
             dto.setStartTime(screeningSchedule.getStartTime().toLocalTime());
@@ -265,8 +284,10 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                 conflicts.add(new ScheduleConflictException.ConflictingSchedule(
                         conflictingSchedule.getId(),
                         conflictMovieName,
-                        conflictingSchedule.getStartTime() != null ? conflictingSchedule.getStartTime().toLocalTime() : null,
-                        conflictingSchedule.getEndTime() != null ? conflictingSchedule.getEndTime().toLocalTime() : null));
+                        conflictingSchedule.getStartTime() != null ? conflictingSchedule.getStartTime().toLocalTime()
+                                : null,
+                        conflictingSchedule.getEndTime() != null ? conflictingSchedule.getEndTime().toLocalTime()
+                                : null));
             }
 
             throw new ScheduleConflictException(
@@ -618,7 +639,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         }
     }
 
-    //@Override
+    // @Override
     @Transactional
     private void validateScheduleIsNotCurrentlyShowing(Integer id) {
 
@@ -706,7 +727,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Override
     @Transactional
     public List<ScreeningScheduleDto> saveBatchSchedules(ScreeningScheduleDto baseSchedule,
-                                                         List<Map<String, Object>> timeSlots)
+            List<Map<String, Object>> timeSlots)
             throws ScheduleConflictException {
 
         List<ScreeningScheduleDto> savedSchedules = new ArrayList<>();
@@ -779,6 +800,5 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             return new ArrayList<>();
         }
     }
-
 
 }

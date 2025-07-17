@@ -12,7 +12,6 @@ import group6.cinema_project.service.Admin.IAdminMovieService;
 import group6.cinema_project.service.Admin.IAdminRoomService;
 import group6.cinema_project.service.Admin.IAdminScheduleService;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,7 +34,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.PostMapping;
 
-
 /**
  * Controller for handling admin schedule management operations.
  * Handles the display of movie schedules in the admin interface.
@@ -57,9 +55,9 @@ public class AdminScheduleController {
 
     @GetMapping("/list")
     public String listSchedules(Model model,
-                                @RequestParam(value = "movieId", required = false) Integer movieId,
-                                @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
-                                @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
+            @RequestParam(value = "movieId", required = false) Integer movieId,
+            @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
+            @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
 
         log.info("Loading schedule list with filters - movieId: {}, screeningDate: {}, screeningRoomId: {}",
                 movieId, screeningDate, screeningRoomId);
@@ -239,9 +237,9 @@ public class AdminScheduleController {
 
     @PostMapping("/add")
     public String addSchedule(@Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-                              BindingResult bindingResult,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Processing add schedule request for movie ID: {}", scheduleDto.getMovieId());
 
         if (bindingResult.hasErrors()) {
@@ -332,10 +330,10 @@ public class AdminScheduleController {
      */
     @PostMapping("/edit/{id}")
     public String editSchedule(@PathVariable("id") Integer id,
-                               @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-                               BindingResult bindingResult,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+            @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Processing edit schedule request for ID: {}", id);
 
         // Set the ID to ensure we're updating the correct record
@@ -503,9 +501,9 @@ public class AdminScheduleController {
      */
     @GetMapping("/detail/{movieId}")
     public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId,
-                                          @RequestParam(value = "status", required = false) String status,
-                                          @RequestParam(value = "backUrl", required = false) String backUrl,
-                                          Model model) {
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "backUrl", required = false) String backUrl,
+            Model model) {
 
         log.info("Đang tải chi tiết lịch chiếu cho phim ID: {} với bộ lọc trạng thái: {}", movieId, status);
 
@@ -648,12 +646,27 @@ public class AdminScheduleController {
             @RequestParam("timeSlots") String timeSlotsJson, // JSON array của các suất chiếu
             RedirectAttributes redirectAttributes) {
 
+        log.info("Processing batch schedule request - movieId: {}, screeningDate: {}, status: {}",
+                movieId, screeningDate, status);
+        log.info("Received timeSlots JSON: {}", timeSlotsJson);
+
         try {
+            // Kiểm tra dữ liệu đầu vào
+            if (movieId == null || screeningDate == null || status == null || timeSlotsJson == null
+                    || timeSlotsJson.trim().isEmpty()) {
+                log.error("Missing required parameters - movieId: {}, screeningDate: {}, status: {}, timeSlotsJson: {}",
+                        movieId, screeningDate, status, timeSlotsJson);
+                redirectAttributes.addFlashAttribute("error", "Thiếu thông tin bắt buộc để tạo lịch chiếu");
+                return "redirect:/admin/schedules/add";
+            }
+
             // Tạo baseSchedule với thông tin chung
             ScreeningScheduleDto baseSchedule = new ScreeningScheduleDto();
             baseSchedule.setMovieId(movieId);
             baseSchedule.setScreeningDate(screeningDate);
             baseSchedule.setStatus(status);
+
+            log.info("Created base schedule: {}", baseSchedule);
 
             // Chuyển đổi JSON string thành danh sách các suất chiếu
             ObjectMapper objectMapper = new ObjectMapper();
@@ -662,9 +675,14 @@ public class AdminScheduleController {
                     new TypeReference<List<Map<String, Object>>>() {
                     });
 
+            log.info("Parsed {} time slots from JSON", timeSlots.size());
+            log.debug("Time slots details: {}", timeSlots);
+
             // Gọi service để lưu hàng loạt lịch chiếu
             List<ScreeningScheduleDto> savedSchedules = movieScheduleService.saveBatchSchedules(baseSchedule,
                     timeSlots);
+
+            log.info("Successfully saved {} schedules", savedSchedules.size());
 
             redirectAttributes.addFlashAttribute("success",
                     String.format("Đã thêm thành công %d lịch chiếu cho phim!", savedSchedules.size()));
@@ -672,12 +690,22 @@ public class AdminScheduleController {
             return "redirect:/admin/schedules/list";
 
         } catch (ScheduleConflictException e) {
+            log.error("Schedule conflict error: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("error", "Phát hiện xung đột lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/add";
         } catch (Exception e) {
+            log.error("Error adding batch schedules: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm lịch chiếu: " + e.getMessage());
             return "redirect:/admin/schedules/add";
         }
+    }
+
+    /**
+     * Test endpoint để debug form submission
+     */
+    @GetMapping("/test-form")
+    public String showTestForm() {
+        return "admin/test_schedule_form";
     }
 
 }
