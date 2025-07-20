@@ -450,13 +450,22 @@
                 </div>
 
                 <div class="qr-section">
-                    <div style="display: none; margin-top: 15px; font-size: 12px; color: #64748b;">
-                        <strong>Mã vé:</strong> <span th:text="${bookingCode}">ABC12345</span><br>
-                        <strong>Phim:</strong> <span th:text="${movieName}">Tên phim</span><br>
-                        <strong>Ghế:</strong> <span th:text="${seatNames}">A1, A2</span>
-                    </div>
+                    <h4>Mã QR vé xem phim</h4>
+                    <img th:src="'data:image/png;base64,' + ${qrBase64}" alt="QR Code" style="width:140px;"/>
+                    <div style="font-size:12px; color:#888;">Quét mã này tại quầy vé hoặc cổng vào phòng chiếu</div>
                 </div>
             </div>
+        </div>
+
+        <div th:if="${foodWithQr != null and #lists.size(foodWithQr) > 0}">
+            <h3 style="margin-top:20px;">Đồ ăn & Thức uống đã đặt</h3>
+            <ul>
+                <li th:each="food : ${foodWithQr}" style="margin-bottom: 16px;">
+                    <span th:text="${food.name}">Tên đồ ăn</span> - Số lượng: <span th:text="${food.quantity}">1</span>
+                    <br/>
+                    <img th:src="'data:image/png;base64,' + ${food.qrBase64}" alt="QR Food" style="width:80px; margin-top:6px;"/>
+                </li>
+            </ul>
         </div>
 
         <div class="instructions">

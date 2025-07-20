@@ -18,5 +18,6 @@ public class BookingDto {
     private String notes;
     private ScreeningScheduleDto schedule;
     private List<String> seatNames;
+    private List<BookedFoodDto> foodList;
 
 }

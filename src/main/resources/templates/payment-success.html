@@ -100,6 +100,16 @@
             <p><strong>Ghế:</strong>
                 <span th:each="seat : ${booking.seatNames}" th:text="${seat}" class="badge bg-primary me-2"></span>
             </p>
+            <div th:if="${booking.foodList != null and #lists.size(booking.foodList) > 0}">
+                <h5 class="mt-3">Đồ ăn & Thức uống đã đặt</h5>
+                <ul>
+                    <li th:each="food : ${booking.foodList}" style="margin-bottom: 12px;">
+                        <span th:text="${food.name}">Tên đồ ăn</span> - Số lượng: <span th:text="${food.quantity}">1</span>
+                        <br/>
+                        <img th:src="@{'/qr/food/' + ${booking.code} + '/' + ${food.name}}" alt="QR Food" style="width:70px; margin-top:4px;"/>
+                    </li>
+                </ul>
+            </div>
         </div>
         
         <div class="alert alert-warning mt-2" style="font-size: 1rem;">

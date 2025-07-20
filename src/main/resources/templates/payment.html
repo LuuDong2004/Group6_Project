@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment</title>
+    <title>Thanh toán</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/payment.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -78,49 +78,54 @@
         <!-- Booking Info -->
         <div class="col-lg-7 col-md-12 mb-4">
             <div class="card p-4 booking-info">
-                <h2 class="mb-4"><i class="fa-solid fa-ticket me-2"></i>Booking Information</h2>
+                <h2 class="mb-4"><i class="fa-solid fa-ticket me-2"></i>Thông tin đặt vé</h2>
 
                 <!-- Movie Info -->
                 <div class="movie-info mb-4">
                     <img th:src="${booking.schedule.movie.image}" alt="Movie Poster" class="movie-poster">
                     <div class="movie-details">
-                        <h3 th:text="${booking.schedule.movie.name}">Movie Name</h3>
-                        <p><i class="fa-solid fa-calendar me-2"></i><span th:text="${booking.schedule.screeningDate}">Date</span></p>
-                        <p><i class="fa-solid fa-clock me-2"></i><span th:text="${booking.schedule.startTime}">Time</span></p>
-                        <p><i class="fa-solid fa-building me-2"></i><span th:text="${booking.schedule.branch.name}">Cinema</span></p>
-                        <p><i class="fa-solid fa-door-open me-2"></i><span th:text="${booking.schedule.screeningRoom.name}">Room</span></p>
+                        <h3 th:text="${booking.schedule.movie.name}">Tên phim</h3>
+                        <p><i class="fa-solid fa-calendar me-2"></i><span th:text="${booking.schedule.screeningDate}">Ngày</span></p>
+                        <p><i class="fa-solid fa-clock me-2"></i><span th:text="${booking.schedule.startTime}">Giờ</span></p>
+                        <p><i class="fa-solid fa-building me-2"></i><span th:text="${booking.schedule.branch.name}">Rạp</span></p>
+                        <p><i class="fa-solid fa-door-open me-2"></i><span th:text="${booking.schedule.screeningRoom.name}">Phòng</span></p>
                     </div>
                 </div>
 
                 <!-- Seats Info -->
                 <div class="mb-3">
-                    <h5 class="mb-2">Selected Seats</h5>
+                    <h5 class="mb-2">Ghế đã chọn</h5>
                     <div class="d-flex flex-wrap">
                         <span th:each="seat : ${booking.seatNames}" th:text="${seat}" class="seat-tag mb-2"></span>
                     </div>
                 </div>
 
-                <!-- Food Info -->
-<!--                <div class="mb-3" th:if="${booking.foodItems != null && !booking.foodItems.isEmpty()}">-->
-<!--                    <h5 class="mb-2">Food & Beverages</h5>-->
-<!--                    <div>-->
-<!--                        <div th:each="food : ${booking.foodItems}" class="food-item">-->
-<!--                            <span><i class="fa-solid fa-burger me-2"></i><span th:text="${food.key}">Food Name</span></span>-->
-<!--                            <span class="badge bg-primary" th:text="${food.value}">Quantity</span>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
+                 Food Info
+                <div class="mb-3" th:if="${booking.foodList != null && !booking.foodList.isEmpty()}">
+                    <h5 class="mb-2">Đồ ăn & Thức uống</h5>
+                    <div>
+                        <div th:each="food : ${booking.foodList}" class="food-item">
+                            <span><i class="fa-solid fa-burger me-2"></i><span th:text="${food.name}">Tên đồ ăn</span></span>
+                            <span class="badge bg-primary" th:text="${food.quantity}">Số lượng</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 d-flex gap-2">
+                    <a th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${booking.schedule.movie.id}, scheduleId=${booking.schedule.id}, roomId=${booking.schedule.screeningRoom.id}, bookingId=${booking.id})}" class="btn btn-outline-primary">
+                        <i class="fa fa-chair"></i> Chọn lại ghế/đồ ăn
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- Payment Form -->
         <div class="col-lg-5 col-md-12">
             <div class="card p-4 payment-form">
-                <h2 class="mb-4 text-center"><i class="fa-solid fa-credit-card me-2"></i>Payment Details</h2>
+                <h2 class="mb-4 text-center"><i class="fa-solid fa-credit-card me-2"></i>Chi tiết thanh toán</h2>
 
                 <!-- Total Amount -->
                 <div class="total-amount mb-4">
-                    <h3>Total: <span th:text="${#numbers.formatCurrency(booking.amount)}">0 VND</span></h3>
+                    <h3>Tổng cộng: <span th:text="${#numbers.formatCurrency(booking.amount)}">0 VND</span></h3>
                 </div>
 
                 <!-- Payment Form -->
@@ -169,6 +174,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script>
     function createPaymentUrl() {
         // Ensure bookingId is retrieved correctly
@@ -234,6 +241,30 @@
     document.getElementById('payment-form').addEventListener('submit', function(e) {
         // Không cần preventDefault, để form submit tự nhiên bằng GET
     });
+
+// Lấy transactionId từ backend hoặc URL (giả sử có biến transactionId)
+let transactionRef = (typeof transactionId !== 'undefined') ? transactionId : (new URLSearchParams(window.location.search).get('transactionId'));
+let stompClient = null;
+
+function connectWebSocket() {
+    if (!transactionRef) return;
+    const socket = new SockJS('/ws/payment');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/payment-status/' + transactionRef, function (message) {
+            console.log('WS message:', message.body); // <-- LOG để debug
+            const data = JSON.parse(message.body);
+            if (data.status === 'COMPLETED') {
+                window.location.href = '/payment/success?bookingId=' + data.bookingId;
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    connectWebSocket();
+});
 </script>
 </body>
 </html>

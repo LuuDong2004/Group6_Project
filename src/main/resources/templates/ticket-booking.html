@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ticket Booking</title>
+  <title>Đặt vé</title>
   <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
   <link rel="stylesheet" href="https://npmcdn.com/flickity@2/dist/flickity.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -386,7 +386,7 @@
                      th:data-date="${dateInfo.formattedDate}"
                      th:data-movie-id="${movieId}">
                   <div class="date-numeric" th:text="${dateInfo.dayNum}">25</div>
-                  <div class="date-day" th:text="${dateInfo.dayName}">Today</div>
+                  <div class="date-day" th:text="${dateInfo.dayName}">Hôm nay</div>
                 </div>
               </div>
               <button id="calendar-btn" style="margin-left: 16px; background: none; border: none; cursor: pointer;">
@@ -412,7 +412,7 @@
           <div id="screen-select-div">
             <!-- Cinema selection third -->
             <div class="cinema-selection" id="cinema-selection">
-              <h3 class="section-heading">Select Cinema</h3>
+              <h3 class="section-heading">Chọn rạp</h3>
               <div class="cinema-grid" id="cinema-grid">
                 <!-- Cinema cards with data attributes -->
                 <div th:each="branch : ${branches}"
@@ -421,8 +421,8 @@
                      th:data-branch-id="${branch.id}"
                      th:data-movie-id="${movieId}"
                      th:data-date="${dateParam}">
-                  <div class="cinema-name" th:text="${branch.name}">Cinema Name</div>
-                  <div class="cinema-address" th:text="${branch.address}">Cinema Address</div>
+                  <div class="cinema-name" th:text="${branch.name}">Tên rạp</div>
+                  <div class="cinema-address" th:text="${branch.address}">Địa chỉ rạp</div>
                 </div>
               </div>
             </div>
@@ -430,23 +430,23 @@
 
           <!-- Time selection last -->
           <div class="time-selection" id="time-selection">
-            <h3 class="section-heading">Select Show Time</h3>
+            <h3 class="section-heading">Chọn suất chiếu</h3>
 
             <!-- Hiển thị thông báo nếu không có rạp nào được chọn -->
             <div th:if="${selectedBranchId == null}" class="alert alert-info text-center">
-              Please select a cinema to view available showtimes.
+                Vui lòng chọn rạp để xem các suất chiếu.
             </div>
 
             <!-- Hiển thị thông báo nếu không có suất chiếu -->
             <div th:if="${selectedBranchId != null && (schedulesByBranchAndRoom == null || schedulesByBranchAndRoom.isEmpty() || !schedulesByBranchAndRoom.containsKey(selectedBranchId))}"
                  class="alert alert-info text-center">
-              No available showtimes for this cinema on the selected date.
+                Không có suất chiếu nào cho rạp này vào ngày đã chọn.
             </div>
 
             <!-- Hiển thị các suất chiếu theo phòng -->
             <ul class="time-ul" id="time-slots" th:if="${selectedBranchId != null && schedulesByBranchAndRoom != null && schedulesByBranchAndRoom.containsKey(selectedBranchId)}">
               <li th:each="roomEntry : ${schedulesByBranchAndRoom.get(selectedBranchId)}" class="time-li">
-                <div class="screens" th:text="${roomEntry.key}">Room Name</div>
+                <div class="screens" th:text="${roomEntry.key}">Phòng chiếu</div>
                 <div class="time-btn">
                   <div th:each="schedule : ${roomEntry.value}">
                     <div th:if="${schedule.availableSeats > 0}"
@@ -475,14 +475,14 @@
           <a th:if="${selectedSchedule != null and selectedSchedule.screeningRoom != null and selectedSchedule.screeningRoom.id != null}"
              th:href="@{/seat/{movieId}/{scheduleId}/{roomId}(movieId=${movieId}, scheduleId=${selectedSchedule.id}, roomId=${selectedSchedule.screeningRoom.id})}"
              class="action-button">
-            Continue Booking
+            Tiếp tục đặt vé
           </a>
 
           <button th:unless="${selectedSchedule != null}"
                   type="button"
                   class="action-button"
                   disabled="disabled">
-            Continue Booking
+            Tiếp tục đặt vé
           </button>
         </div>
       </div>

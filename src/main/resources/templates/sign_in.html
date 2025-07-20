@@ -1,105 +1,139 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Signin</title>
-	<link rel="stylesheet" type="text/css" href="assets/css/as-alert-message.min.css">
+	<title> Login - Cinema Booking</title>
+	<link rel="stylesheet" type="text/css" href="/assets/css/as-alert-message.min.css">
 	<link rel="stylesheet" type="text/css"
 		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
-	<link rel="stylesheet" type="text/css" href="assets/css/style-starter.css">
-	<link rel="stylesheet" type="text/css" href="assets/css/sign-in.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="/assets/css/style-starter.css">
+	<link rel="stylesheet" type="text/css" href="/assets/css/sign-in.css">
+	<style>
+		.error {
+			color: #e74c3c;
+			font-size: 0.95em;
+			margin-top: 2px;
+			display: block;
+		}
+		.admin-link {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+		}
+
+		.admin-link a {
+			background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+			color: white;
+			padding: 10px 20px;
+			border-radius: 25px;
+			text-decoration: none;
+			font-weight: 500;
+			box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+			transition: all 0.3s ease;
+		}
+
+		.admin-link a:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+			color: white;
+		}
+
+		.admin-link i {
+			margin-right: 8px;
+		}
+	</style>
 </head>
 
 <body>
-<header id="site-header" class="w3l-header fixed-top">
-	<!--/nav-->
-	<nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
-		<div class="container">
-			<h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
-																aria-hidden="true"></span>
-				MyShowz </a></h1>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			</div>
-			<div class="Login_SignUp" id="login_s">
-				<!-- style="font-size: 2rem ; display: inline-block; position: relative;" -->
-				<!-- <li class="nav-item"> -->
-				<a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
-				<!-- </li> -->
-			</div>
-			<!-- toggle switch for light and dark theme -->
-			<div class="mobile-position">
-				<nav class="navigation">
-					<div class="theme-switch-wrapper">
-						<label class="theme-switch" for="checkbox">
-							<input type="checkbox" id="checkbox">
-							<div class="mode-container">
-								<i class="gg-sun"></i>
-								<i class="gg-moon"></i>
-							</div>
-						</label>
-					</div>
-				</nav>
-			</div>
-		</div>
-	</nav>
-</header>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <div class="container_signup_signin" id="container_signup_signin">
+	<!-- Register Form -->
 	<div class="form-container sign-up-container">
-		<form name="sign-up-form" action="#" onsubmit="return signUpValidateForm()">
+		<form th:action="@{/register}" th:object="${user}" method="post">
 			<h1>Create Account</h1>
-			<div class="social-container">
-				<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-				<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
-				<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
-			</div>
-			<span>or use your email for registration</span>
-			<input name="sign-up-name" type="text" placeholder="Name" />
-			<input name="sign-up-email" type="email" placeholder="Email" />
-			<input name="sign-up-passwd" type="password" placeholder="Password" />
-			<button>Sign Up</button>
+			<span>Đăng ký tài khoản để đặt vé xem phim</span>
+
+			<!-- Hiển thị thông báo lỗi -->
+			<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+			<!-- Form fields - cần điều chỉnh theo UserRegistrationDto -->
+			<input th:field="*{userName}" type="text" placeholder="Username" required />
+			<span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" class="error"></span>
+
+			<input th:field="*{email}" type="email" placeholder="Email" required />
+			<span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+
+			<input th:field="*{dateOfBirth}" type="date" placeholder="Date of Birth"  required />
+			<span th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" class="error"></span>
+			<input th:field="*{phone}" type="tel" placeholder="Phone" required />
+			<span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
+			<input th:field="*{address}" type="text" placeholder="Address" required />
+			<span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="error"></span>
+			<input th:field="*{password}" type="password" placeholder="Password" required />
+			<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+			<input th:field="*{confirmPassword}" type="password" placeholder="Confirm Password" required />
+			<span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
+
+			<button type="submit">Sign Up</button>
 		</form>
 	</div>
+
+	<!-- Login Form -->
 	<div class="form-container sign-in-container">
-		<form name="sign-in-form" style="color: var(--theme-title);" action="#"
-			  onsubmit="return signInValidateForm()">
+		<form th:action="@{/login}" method="post" style="color: var(--theme-title);">
 			<h1>Sign in</h1>
+			<span>Đăng nhập để đặt vé xem phim</span>
+
 			<div class="social-container">
 				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
-				<a href="#" class="social" style="color: var(--theme-title);"><i
-						class="fab fa-google-plus-g"></i></a>
+				<a href="/oauth2/authorization/google" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
 				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-linkedin-in"></i></a>
 			</div>
 			<span>or use your account</span>
-			<input name="sign-in-email" type="email" placeholder="Email" />
-			<input name="sign-in-passwd" type="password" placeholder="Password" />
-			<a href="#">Forgot your password?</a>
-			<button>Sign In</button>
+
+			<!-- Hiển thị thông báo lỗi và thành công -->
+			<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+			<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+			<div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+			<!-- Spring Security sử dụng email và password mặc định -->
+			<input name="email" type="text" placeholder="Email" required />
+			<input name="password" type="password" placeholder="Password" required />
+
+
+			<a href="/forgot-password">Forgot your password?</a>
+
+			<button type="submit">Sign In</button>
 		</form>
 	</div>
+
 	<div class="overlay-container">
 		<div class="overlay">
 			<div class="overlay-panel overlay-left">
 				<h1>Welcome Back!</h1>
-				<p>To keep connected with us please login with your login details</p>
+				<p>Đăng nhập để tiếp tục đặt vé xem phim</p>
 				<button class="ghost" id="signIn">Sign In</button>
 			</div>
 			<div class="overlay-panel overlay-right">
 				<h1>Hello, Friend!</h1>
-				<p>Register and book your tickets now!!!</p>
+				<p>Đăng ký tài khoản và đặt vé xem phim ngay hôm nay!</p>
 				<button class="ghost" id="signUp">Sign Up</button>
 			</div>
 		</div>
 	</div>
 </div>
 
-<script type="text/javascript" src="assets/js/as-alert-message.min.js"></script>
-<script src="assets/js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/as-alert-message.min.js"></script>
+<script src="/assets/js/jquery-3.3.1.min.js"></script>
 <!--/theme-change-->
-<script src="assets/js/theme-change.js"></script>
+<script src="/assets/js/theme-change.js"></script>
 <!-- disable body scroll which navbar is in active -->
 <script>
 	$(function () {
@@ -136,9 +170,10 @@
 		});
 	});
 </script>
-<script src="assets/js/bootstrap.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
 
-<script type="text/javascript" src="assets/js/sign-in.js"></script>
+<script type="text/javascript" src="/assets/js/sign-in.js"></script>
+
 
 </body>
 

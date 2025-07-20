@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ticket Booking</title>
+    <title>Đặt vé</title>
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/progress.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/ticket-booking.css}">
@@ -145,7 +145,7 @@
         }
 
         .screen::before {
-            content: "SCREEN";
+            content: "MÀN HÌNH";
             position: absolute;
             top: -25px;
             left: 50%;
@@ -528,71 +528,77 @@
         }
 
         .food-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-
         .food-item {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 24px 32px;
             display: flex;
             align-items: center;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 320px;
+            max-width: 400px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s;
         }
-
-        .food-item img {
-            width: 60px;
-            height: 60px;
+        .food-item:hover {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+        }
+        .food-img {
+            width: 56px;
+            height: 56px;
             object-fit: cover;
-            margin-right: 15px;
-            border-radius: 4px;
+            border-radius: 8px;
+            margin-right: 20px;
+            background: #f3f3f3;
         }
-
         .food-details {
             flex: 1;
+            text-align: center;
         }
-
-        .food-details h5 {
-            margin: 0 0 5px 0;
-            color: #333;
+        .food-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 6px;
         }
-
-        .food-details p {
-            margin: 0 0 10px 0;
-            color: #666;
+        .food-price {
+            color: #df0e62;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
         }
-
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .quantity-control button {
-            width: 30px;
-            height: 30px;
-            border: none;
-            background: #df0e62;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            gap: 12px;
         }
-
-        .quantity-control button:hover {
+        .quantity-btn {
+            background: #df0e62;
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .quantity-btn:hover {
             background: #c20a54;
         }
-
         .quantity-control span {
-            min-width: 30px;
+            min-width: 32px;
             text-align: center;
+            font-size: 1.2rem;
             font-weight: bold;
+            background: #f8f8f8;
+            border-radius: 6px;
+            padding: 4px 0;
         }
     </style>
 </head>
@@ -609,29 +615,29 @@
     <div th:each="movie: ${movies}" class="movie-info-container">
         <img th:src="${movie.image}" th:alt="${movie.name}" class="movie-poster"/>
         <div class="movie-details">
-            <div class="movie-title" th:text="${movie.name}">Movie Title</div>
-            <div class="movie-meta">Duration: <span th:text="${movie.duration}">120 min</span></div>
-            <div class="movie-meta">Language: <span th:text="${movie.language}">English</span></div>
-            <div class="movie-meta">Genre: <span th:text="${movie.genre}">Action</span></div>
-            <div class="movie-meta">Rating: <span th:text="${movie.rating}">PG-13</span></div>
+            <div class="movie-title" th:text="${movie.name}">Tên phim</div>
+            <div class="movie-meta">Thời lượng: <span th:text="${movie.duration}">120 phút</span></div>
+            <div class="movie-meta">Ngôn ngữ: <span th:text="${movie.language}">Tiếng Việt</span></div>
+            <div class="movie-meta">Thể loại: <span th:text="${movie.genre}">Tình cảm</span></div>
+            <div class="movie-meta">Đánh giá: <span th:text="${movie.rating}">9</span></div>
 
             <div class="showtime-info" th:if="${schedule}">
-                <h4>Show Details</h4>
-                <div>Cinema: <span th:text="${schedule.branch?.name}"></span></div>
-                <div>Room: <span th:text="${schedule.screeningRoom?.name}"></span></div>
-                <div>Date: <span th:text="${schedule.screeningDateStr}"></span></div>
-                <div>Time: <span th:text="${schedule.startTimeStr}"></span></div>
+                <h4 style="color:#df0e62;">Thông tin suất chiếu</h4>
+                <div>Rạp: <span th:text="${schedule.branch?.name}"></span></div>
+                <div>Phòng: <span th:text="${schedule.screeningRoom?.name}"></span></div>
+                <div>Ngày: <span th:text="${schedule.screeningDateStr}"></span></div>
+                <div>Giờ: <span th:text="${schedule.startTimeStr}"></span></div>
             </div>
         </div>
     </div>
 
     <!-- Seat Selection -->
     <div class="cinema-layout">
-        <h3 class="section-heading">Select Your Seats</h3>
+        <h3 class="section-heading">Chọn ghế của bạn</h3>
 
         <!-- Room Selection -->
         <div class="room-selection">
-            <label for="room-select">Select Room:</label>
+            <label for="room-select">Chọn phòng:</label>
             <select id="room-select" onchange="handleRoomChange(this.value)">
                 <option th:each="room : ${rooms}"
                         th:value="${room.id}"
@@ -642,7 +648,7 @@
         </div>
 
         <!-- Screen -->
-        <div class="screen">SCREEN</div>
+        <div class="screen">MÀN HÌNH</div>
 
         <!-- Seat Map -->
         <div class="seat-map">
@@ -654,19 +660,19 @@
         <div class="legend">
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #4CAF50;"></div>
-                <span>Available</span>
+                <span>Trống</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #f44336;"></div>
-                <span>Reserved</span>
+                <span>Đã đặt</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #2196F3;"></div>
-                <span>Selected</span>
+                <span>Đang chọn</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #9c27b0;"></div>
-                <span>Pending</span>
+                <span>Đang giữ</span>
             </div>
         </div>
     </div>
@@ -674,7 +680,7 @@
     <!-- Action Section -->
     <div class="action-section">
         <div class="selected-seats-info" id="selected-seats-info" style="display: none;">
-            <h4>Selected Seats</h4>
+            <h4>Ghế đã chọn</h4>
             <div class="seat-tags" id="selected-seat-tags">
                 <!-- Selected seat tags will be added here -->
             </div>
@@ -683,16 +689,16 @@
         <div class="total-section">
             <div class="total-details">
                 <div class="total-item">
-                    <span>Seats:</span>
+                    <span>Ghế:</span>
                     <span id="seats-total">0 VND</span>
                 </div>
                 <div class="total-item">
-                    <span>Food & Beverages:</span>
+                    <span>Đồ ăn & Thức uống:</span>
                     <span id="food-total">0 VND</span>
                 </div>
                 <div class="total-divider"></div>
                 <div class="total-item grand-total">
-                    <span>Total:</span>
+                    <span>Tổng cộng:</span>
                     <span id="grand-total">0 VND</span>
                 </div>
             </div>
@@ -701,47 +707,23 @@
         <!-- Food Selection Button -->
         <div class="food-button-container">
             <button class="action-button select-food" onclick="toggleFoodSelection()">
-                <i class="fa fa-cutlery"></i> Select Food & Beverages
+                <i class="fa fa-cutlery"></i> Chọn đồ ăn & thức uống
             </button>
         </div>
 
         <!-- Food Selection (Hidden by default) -->
         <div class="food-selection" id="food-selection" style="display: none;">
-            <h4>Select Food & Beverages</h4>
+            <h4>Chọn đồ ăn & thức uống</h4>
             <div class="food-items">
-                <div class="food-item">
-                    <img src="/images/popcorn.png" alt="Popcorn">
+                <div th:each="food : ${foodList}" class="food-item">
+                    <img th:src="${food.image}" th:alt="${food.name}" class="food-img">
                     <div class="food-details">
-                        <h5>Popcorn</h5>
-                        <p>50,000 VND</p>
+                        <h5 th:text="${food.name}" class="food-title">Food Name</h5>
+                        <p class="food-price" th:text="${#numbers.formatInteger(food.price, 0, 'POINT')} + ' đ'">0 đ</p>
                         <div class="quantity-control">
-                            <button type="button" class="quantity-btn" data-action="decrease" data-item="popcorn">-</button>
-                            <span id="popcorn-quantity">0</span>
-                            <button type="button" class="quantity-btn" data-action="increase" data-item="popcorn">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="food-item">
-                    <img src="/images/coke.png" alt="Coke">
-                    <div class="food-details">
-                        <h5>Coke</h5>
-                        <p>30,000 VND</p>
-                        <div class="quantity-control">
-                            <button type="button" class="quantity-btn" data-action="decrease" data-item="coke">-</button>
-                            <span id="coke-quantity">0</span>
-                            <button type="button" class="quantity-btn" data-action="increase" data-item="coke">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="food-item">
-                    <img src="/images/hotdog.png" alt="Hot Dog">
-                    <div class="food-details">
-                        <h5>Hot Dog</h5>
-                        <p>40,000 VND</p>
-                        <div class="quantity-control">
-                            <button type="button" class="quantity-btn" data-action="decrease" data-item="hotdog">-</button>
-                            <span id="hotdog-quantity">0</span>
-                            <button type="button" class="quantity-btn" data-action="increase" data-item="hotdog">+</button>
+                            <button type="button" class="quantity-btn" data-action="decrease" th:attr="data-item=${food.id}">-</button>
+                            <span th:attr="id='food-' + ${food.id} + '-quantity'">0</span>
+                            <button type="button" class="quantity-btn" data-action="increase" th:attr="data-item=${food.id}">+</button>
                         </div>
                     </div>
                 </div>
@@ -750,7 +732,7 @@
 
         <div class="button-group">
             <button type="button" class="action-button" id="continue-button" disabled>
-                <i class="fa fa-credit-card"></i> Continue to Payment
+                <i class="fa fa-credit-card"></i> Tiếp tục thanh toán
             </button>
         </div>
     </div>
@@ -766,13 +748,14 @@
     var scheduleId = /*[[${scheduleId}]]*/ 0;
     var roomId = /*[[${roomId}]]*/ 0;
     var currentRoomId = /*[[${schedule.screeningRoom.id}]]*/ 0;
-    
+    var foodListJS = /*[[${foodList}]]*/ [];
     // Debug log
     console.log('Seats data from backend:', seatsData);
     console.log('Movie ID:', movieId);
     console.log('Schedule ID:', scheduleId);
     console.log('Room ID:', roomId);
     console.log('Current Room ID:', currentRoomId);
+    console.log('Food list:', foodListJS);
 </script>
 
 <script>
@@ -1122,25 +1105,31 @@
         }
     }
 
-    // Food prices
-    const foodPrices = {
-        popcorn: 50000,
-        coke: 30000,
-        hotdog: 40000
-    };
-
-    // Food quantities
-    let foodQuantities = {
-        popcorn: 0,
-        coke: 0,
-        hotdog: 0
-    };
-
-    function updateQuantity(item, change) {
-        const newQuantity = Math.max(0, foodQuantities[item] + change);
-        foodQuantities[item] = newQuantity;
-        document.getElementById(`${item}-quantity`).textContent = newQuantity;
+    // Tạo map giá food từ foodList
+    let foodPrices = {};
+    if (typeof foodListJS !== 'undefined' && Array.isArray(foodListJS)) {
+        foodListJS.forEach(food => {
+            foodPrices[food.id] = food.price;
+        });
+    }
+    // Quản lý số lượng food động theo id
+    let foodQuantities = {};
+    function updateFoodQuantity(foodId, change) {
+        if (!foodQuantities[foodId] || isNaN(foodQuantities[foodId])) foodQuantities[foodId] = 0;
+        const newQuantity = Math.max(0, Number(foodQuantities[foodId]) + change);
+        foodQuantities[foodId] = newQuantity;
+        document.getElementById(`food-${foodId}-quantity`).textContent = newQuantity;
         updateTotals();
+    }
+    // Gắn lại event cho các nút tăng/giảm sau khi render
+    function attachFoodQuantityEvents() {
+        document.querySelectorAll('.quantity-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.dataset.action;
+                const foodId = this.dataset.item;
+                updateFoodQuantity(foodId, action === 'increase' ? 1 : -1);
+            });
+        });
     }
 
     // FIXED: Ensure seatBooking is initialized before using it
@@ -1156,8 +1145,9 @@
             seatsElement.textContent = formatPrice(seatsTotal);
         }
         let foodTotal = 0;
-        for (const [item, quantity] of Object.entries(foodQuantities)) {
-            foodTotal += quantity * foodPrices[item];
+        for (const [foodId, quantity] of Object.entries(foodQuantities)) {
+            const price = foodPrices[foodId] || 0;
+            foodTotal += (Number(quantity) || 0) * (Number(price) || 0);
         }
         const foodElement = document.getElementById('food-total');
         if (foodElement) {
@@ -1185,7 +1175,7 @@
                 selectFoodButton.style.backgroundColor = '#f44336';
             } else {
                 foodSelection.style.display = 'none';
-                selectFoodButton.innerHTML = '<i class="fa fa-cutlery"></i> Select Food & Beverages';
+                selectFoodButton.innerHTML = '<i class="fa fa-cutlery"></i> Chọn đồ ăn & thức uống';
                 selectFoodButton.style.backgroundColor = '#4CAF50';
             }
         }
@@ -1244,14 +1234,7 @@
         }
 
         // Add event listeners for food quantity buttons
-        document.querySelectorAll('.quantity-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.dataset.action;
-                const item = this.dataset.item;
-                const change = action === 'increase' ? 1 : -1;
-                updateQuantity(item, change);
-            });
-        });
+        attachFoodQuantityEvents();
 
         // FIXED: Add event listener for continue button with error handling
         const continueButton = document.getElementById('continue-button');

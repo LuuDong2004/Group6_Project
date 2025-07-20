@@ -1,0 +1,45 @@
+package group6.cinema_project.service.User.Impl;
+
+import group6.cinema_project.dto.TicketDto;
+import group6.cinema_project.entity.Ticket;
+import group6.cinema_project.repository.User.TicketRepository;
+import group6.cinema_project.service.User.ITicketService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class TicketService implements ITicketService {
+    @Autowired
+    private TicketRepository ticketRepository;
+    @Autowired
+    private ModelMapper modelMapper;
+    public TicketService() {
+    }
+
+    public TicketService(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
+    }
+    public List<TicketDto> getTicketsByCustomerId(Integer customerId) {
+        System.out.println("Searching tickets for Customer ID: " + customerId);
+
+        List<Ticket> tickets = ticketRepository.findTicketsByCustomerId(customerId);
+
+        System.out.println("Tickets found: " + tickets.size());
+        tickets.forEach(ticket -> System.out.println("Found ticket ID: " + ticket.getId()));
+
+        return tickets.stream()
+                .map(ticket -> modelMapper.map(ticket, TicketDto.class))
+                .collect(Collectors.toList());
+    }
+
+//    public List<TicketDto> getTicketByMovieId(Integer movieId) {
+//        System.out.println("Searching tickets for Movie ID: " + movieId);
+////        List<Ticket> tickets =
+//                return null;
+//    }
+
+}
