@@ -7,6 +7,7 @@ import group6.cinema_project.service.User.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -116,5 +117,12 @@ public class BookingController {
     @GetMapping("/list")
     public String showBookingList() {
         return "booking-list";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String bookingDetail(@PathVariable Integer id, Model model) {
+        BookingDto booking = bookingService.getBookingById(id);
+        model.addAttribute("booking", booking);
+        return "booking_detail";
     }
 }

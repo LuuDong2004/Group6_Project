@@ -144,12 +144,34 @@ public class BookingService implements IBookingService {
     @Override
     public List<BookingDto> getBookingsByUserId(Integer userId) {
         try {
-            List<Booking> bookings = bookingRepository.findByUserId(1); // Sử dụng userId = 1
+            List<Booking> bookings = bookingRepository.findByUserId(userId);
             return bookings.stream()
-                    .map(booking -> modelMapper.map(booking, BookingDto.class))
+                    .map(booking -> {
+                        BookingDto dto = modelMapper.map(booking, BookingDto.class);
+                        if (booking.getSchedule() != null) {
+                            dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+                        }
+                        return dto;
+                    })
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh sách booking: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<BookingDto> getPaidBookingsByUserIdAndDateAfter(Integer userId, LocalDate fromDate) {
+        try {
+            List<Booking> bookings = bookingRepository.findByUserIdAndDateAfterAndStatus(userId, fromDate, "PAID");
+            return bookings.stream().map(booking -> {
+                BookingDto dto = modelMapper.map(booking, BookingDto.class);
+                if (booking.getSchedule() != null) {
+                    dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+                }
+                return dto;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách booking PAID theo thời gian: " + e.getMessage());
         }
     }
 

@@ -9,6 +9,7 @@ public interface IBookingService {
 
     List<BookingDto> createBooking(BookingRequest request);
     List<BookingDto> getBookingsByUserId(Integer userId);
+    List<BookingDto> getPaidBookingsByUserIdAndDateAfter(Integer userId, java.time.LocalDate fromDate);
     boolean cancelBooking(Integer bookingId);
     BookingDto getBookingById(Integer bookingId);
     boolean updateBookingStatus(Integer bookingId, String status);

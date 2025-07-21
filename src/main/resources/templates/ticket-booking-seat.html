@@ -245,6 +245,17 @@
             box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
         }
 
+        .seat-standard { background-color: #4CAF50; border-color: #388e3c; }
+        .seat-standard.available:hover { background-color: #388e3c; }
+        .seat-vip1 { background-color: #ff9800; border-color: #fb8c00; }
+        .seat-vip1.available:hover { background-color: #fb8c00; }
+        .seat-vip2 { background-color: #9c27b0; border-color: #7b1fa2; }
+        .seat-vip2.available:hover { background-color: #7b1fa2; }
+        .seat-couple { background-color: #e91e63; border-color: #ad1457; }
+        .seat-couple.available:hover { background-color: #ad1457; }
+        .seat-sweetbox { background-color: #2196f3; border-color: #1565c0; }
+        .seat-sweetbox.available:hover { background-color: #1565c0; }
+
         /* Seat legend */
         .legend {
             display: flex;
@@ -820,14 +831,18 @@
                 rowDiv.appendChild(rowLabel);
                 seatsByRow[rowKey].forEach(seat => {
                     const seatDiv = document.createElement('div');
-                    seatDiv.className = `seat ${seat.status === 'RESERVED' ? 'reserved' : seat.status === 'PENDING' ? 'pending' : 'available'}`;
+                    let seatTypeClass = '';
+                    if (seat.type === 'Vip2') seatTypeClass = 'seat-vip2';
+                    else if (seat.type === 'Vip1') seatTypeClass = 'seat-vip1';
+                    else seatTypeClass = 'seat-standard';
+                    seatDiv.className = `seat ${seatTypeClass} ${seat.status === 'RESERVED' ? 'reserved' : seat.status === 'PENDING' ? 'pending' : 'available'}`;
                     seatDiv.textContent = seat.seatName;
                     seatDiv.dataset.seatId = seat.seatId;
                     seatDiv.dataset.seatName = seat.seatName;
                     seatDiv.dataset.status = seat.status;
                     seatDiv.dataset.price = seat.price;
-                    // Tooltip giá ghế
-                    seatDiv.title = `Giá: ${formatPrice(seat.price || 0)}`;
+                    seatDiv.dataset.type = seat.type;
+                    seatDiv.title = `Loại: ${seat.type || 'Standard'} | Giá: ${formatPrice(seat.price || 0)}`;
                     if (seat.status !== 'RESERVED' && seat.status !== 'PENDING') {
                         seatDiv.addEventListener('click', () => this.toggleSeat(seat));
                     }

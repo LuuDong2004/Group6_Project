@@ -13,7 +13,5 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByUserId(Integer userId);
 
-    Integer user(User user);
-
-
+    List<Booking> findByUserIdAndDateAfterAndStatus(Integer userId, java.time.LocalDate fromDate, String status);
 }

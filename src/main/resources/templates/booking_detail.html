@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đặt vé</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .movie-img { width: 120px; height: 180px; object-fit: cover; border-radius: 8px; }
+        .qr-img { width: 140px; height: 140px; }
+        .food-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+    </style>
+</head>
+<body>
+<div class="container mt-4 mb-4">
+    <a href="/profile" class="btn btn-secondary mb-3">Quay lại lịch sử vé</a>
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img th:src="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.image : '/static/assets/images/no-image.png'}" class="movie-img mb-2" alt="Ảnh phim">
+            <h5 th:text="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.name : ''}">Tên phim</h5>
+            <div th:if="${booking.schedule != null && booking.schedule.movie != null}">
+                <span th:text="${booking.schedule.movie.genre}"></span> | <span th:text="${booking.schedule.movie.duration + ' phút'}"></span>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <h4>Thông tin vé</h4>
+            <table class="table table-bordered">
+                <tr><th>Rạp</th><td th:text="${booking.schedule != null && booking.schedule.branch != null ? booking.schedule.branch.name : ''}"></td></tr>
+                <tr><th>Phòng chiếu</th><td th:text="${booking.schedule != null && booking.schedule.screeningRoom != null ? booking.schedule.screeningRoom.name : ''}"></td></tr>
+                <tr><th>Ngày chiếu</th><td th:text="${booking.schedule != null ? booking.schedule.screeningDateStr : ''}"></td></tr>
+                <tr><th>Giờ chiếu</th><td th:text="${booking.schedule != null ? booking.schedule.startTimeStr : ''}"></td></tr>
+                <tr><th>Ghế</th>
+                    <td>
+                        <span th:if="${booking.seatNames == null || #lists.isEmpty(booking.seatNames)}">Không</span>
+                        <span th:if="${booking.seatNames != null && !#lists.isEmpty(booking.seatNames)}">
+                            <span th:each="seat, iterStat : ${booking.seatNames}">
+                                <span th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr><th>Giá vé</th><td th:text="${#numbers.formatDecimal(booking.amount, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></td></tr>
+            </table>
+            <div class="mb-3">
+                <h5>QR Code vé</h5>
+                <img th:src="@{'/qr/' + ${booking.code}}" class="qr-img" alt="QR vé">
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>Đồ ăn đã đặt</h4>
+            <div th:if="${booking.foodList != null && !booking.foodList.isEmpty()}">
+                <table class="table table-bordered align-middle text-center">
+                    <thead><tr><th>Ảnh</th><th>Tên</th><th>Số lượng</th><th>QR Code</th></tr></thead>
+                    <tbody>
+                    <tr th:each="food : ${booking.foodList}">
+                        <td><img th:src="${food.image != null ? food.image : '/static/assets/images/no-image.png'}" class="food-img" alt="Ảnh food"></td>
+                        <td th:text="${food.name}"></td>
+                        <td th:text="${food.quantity}"></td>
+                        <td><img th:src="@{'/qr/food/' + ${booking.id} + '/' + ${food.name}}" class="qr-img" alt="QR food"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${booking.foodList == null || booking.foodList.isEmpty()}">
+                <span class="text-muted">Không có đồ ăn nào được đặt.</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

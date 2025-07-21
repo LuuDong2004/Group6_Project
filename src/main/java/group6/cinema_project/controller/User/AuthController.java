@@ -7,6 +7,7 @@ import group6.cinema_project.dto.Login.ChangePasswordDto;
 import group6.cinema_project.dto.Login.PasswordResetRequestDto;
 import group6.cinema_project.dto.Login.UserLoginDto;
 import group6.cinema_project.dto.Login.UserRegistrationDto;
+import group6.cinema_project.service.User.IBookingService;
 import group6.cinema_project.service.User.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class AuthController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private IBookingService bookingService;
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,
@@ -124,33 +128,48 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public String profilePage(Model model) {
+    public String profilePage(Model model, @RequestParam(value = "page", defaultValue = "1") int page) {
         try {
             // Lấy email của user hiện tại từ SecurityContext
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
 
-            // Debug logging
-            System.out.println("Current authentication: " + auth);
-            System.out.println("Current user email: " + email);
-            System.out.println("Authentication type: " + auth.getClass().getSimpleName());
-
             UserDto user = userService.getUserByEmail(email);
             model.addAttribute("user", user);
 
-            // Add CSRF token info for debugging
+            // Lấy booking PAID trong 3 tháng gần nhất, phân trang 5 booking/trang
+            java.util.List<group6.cinema_project.dto.BookingDto> allPaidBookings = new java.util.ArrayList<>();
+            try {
+                if (user != null) {
+                    java.time.LocalDate threeMonthsAgo = java.time.LocalDate.now().minusMonths(3);
+                    allPaidBookings = bookingService.getPaidBookingsByUserIdAndDateAfter(user.getId(), threeMonthsAgo);
+                }
+            } catch (Exception ex) {
+                System.err.println("Không thể lấy lịch sử đặt vé: " + ex.getMessage());
+            }
+
+            // Sắp xếp booking theo ngày đặt giảm dần (gần nhất lên đầu)
+            allPaidBookings.sort((b1, b2) -> b2.getDate().compareTo(b2.getDate()));
+
+            int pageSize = 5;
+            int total = allPaidBookings.size();
+            int totalPages = (int) Math.ceil((double) total / pageSize);
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, total);
+            java.util.List<group6.cinema_project.dto.BookingDto> bookings = (fromIndex < total) ? allPaidBookings.subList(fromIndex, toIndex) : java.util.Collections.emptyList();
+
+            model.addAttribute("bookings", bookings);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+
             if (auth.getPrincipal() instanceof group6.cinema_project.security.oauth2.CustomOAuth2User) {
-                System.out.println("OAuth2 user detected in profile page");
                 model.addAttribute("isOAuth2User", true);
             } else {
-                System.out.println("Local user detected in profile page");
                 model.addAttribute("isOAuth2User", false);
             }
 
             return "userDetail";
         } catch (Exception e) {
-            System.err.println("Error in profilePage: " + e.getMessage());
-            e.printStackTrace();
             model.addAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
             return "redirect:/login";
         }
