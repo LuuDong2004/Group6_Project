@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/payment.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+        }
+        .movie-poster {
+            width: 120px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .seat-tag {
+            background: #6366f1;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            margin-right: 6px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .food-item {
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .total-amount {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 18px 0;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        .total-amount h3 {
+            color: #4f46e5;
+            font-weight: 700;
+        }
+        .payment-form label {
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            border: none;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 12px 0;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+        }
+        @media (max-width: 991px) {
+            .movie-poster { width: 90px; height: 130px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row">
+        <!-- Booking Info -->
+        <div class="col-lg-7 col-md-12 mb-4">
+            <div class="card p-4 booking-info">
+                <h2 class="mb-4"><i class="fa-solid fa-ticket me-2"></i>Booking Information</h2>
+
+                <!-- Movie Info -->
+                <div class="movie-info mb-4">
+                    <img th:src="${booking != null and booking.schedule != null and booking.schedule.movie != null and booking.schedule.movie.image != null ? booking.schedule.movie.image : '/web/assets/images/default.jpg'}" alt="Movie Poster" class="movie-poster">
+                    <div class="movie-details">
+                        <h3 th:text="${booking != null and booking.schedule != null and booking.schedule.movie != null ? booking.schedule.movie.name : 'Movie Name'}">Movie Name</h3>
+                        <p><i class="fa-solid fa-calendar me-2"></i><span th:text="${booking != null and booking.schedule != null and booking.schedule.screeningDate != null ? booking.schedule.screeningDate.toString() : 'Date'}">Date</span></p>
+                        <p><i class="fa-solid fa-clock me-2"></i><span th:text="${booking != null and booking.schedule != null and booking.schedule.startTime != null ? booking.schedule.startTime.toString() : 'Time'}">Time</span></p>
+                        <p><i class="fa-solid fa-building me-2"></i><span th:text="${booking != null and booking.schedule != null and booking.schedule.branch != null ? booking.schedule.branch.name : 'Cinema'}">Cinema</span></p>
+                        <p><i class="fa-solid fa-door-open me-2"></i><span th:text="${booking != null and booking.schedule != null and booking.schedule.screeningRoom != null ? booking.schedule.screeningRoom.name : 'Room'}">Room</span></p>
+                    </div>
+                </div>
+
+                <!-- Seats Info -->
+                <div class="mb-3">
+                    <h5 class="mb-2">Selected Seats</h5>
+                    <div class="d-flex flex-wrap">
+                        <span th:each="seat : ${booking != null and booking.seatNames != null ? booking.seatNames : {}}" th:text="${seat}" class="seat-tag mb-2"></span>
+                    </div>
+                </div>
+
+               
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="col-lg-5 col-md-12">
+            <div class="card p-4 payment-form">
+                <h2 class="mb-4 text-center"><i class="fa-solid fa-credit-card me-2"></i>Payment Details</h2>
+
+                <!-- Total Amount -->
+                <div class="total-amount mb-4">
+                    <h3>Total: <span id="totalAmount" th:text="${booking != null and booking.amount != null ? #numbers.formatCurrency(booking.amount) : '0 VND'}">0 VND</span></h3>
+                </div>
+                <!-- Discount Code Input -->
+                <div class="mb-4">
+                    <label for="discountCode" class="form-label">Nhập mã giảm giá</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã...">
+                        <button type="button" class="btn btn-outline-secondary" id="applyDiscount">Áp dụng</button>
+                    </div>
+                    <div id="discountMsg" class="mt-2 text-success"></div>
+                    <div th:if="${discountCodes != null}">
+                        <small class="text-muted">Mã demo: <span th:each="code : ${discountCodes}" th:text="${code} + ' '"></span></small>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <form id="payment-form" th:action="@{/payment/process}" method="GET">
+                    <input type="hidden" name="bookingId" th:value="${booking != null ? booking.id : ''}">
+                    <input type="hidden" id="merchantCode" value="[[${merchantCode}]]" />
+
+                    <!-- Payment Methods -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Chọn phương thức thanh toán</h5>
+                        <div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="sepay" value="sepay">
+                                <label class="form-check-label" for="sepay">
+                                    <i class="fas fa-qrcode me-2"></i>Sepay QR (MB Bank)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="paymentButton">
+                        <i class="fas fa-lock me-2"></i>Thanh toán
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script>
+    function createPaymentUrl() {
+        // Ensure bookingId is retrieved correctly
+        const bookingIdInput = document.querySelector('input[name="bookingId"]');
+        const bookingId = bookingIdInput ? bookingIdInput.value : null;
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+        if (!bookingId) {
+            alert('Không tìm thấy bookingId!');
+            return;
+        }
+        if (paymentMethod === 'sepay') {
+            // Gọi API Sepay
+            const request = {
+                amount: parseInt(document.getElementById('amount').value),
+                orderId: bookingId,
+                description: 'Thanh toán vé xem phim',
+                merchantCode: document.getElementById('merchantCode').value || 'YOUR_MERCHANT_CODE',
+                callbackUrl: window.location.origin + '/payment/success?bookingId=' + bookingId
+            };
+            fetch('/payment/sepay/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(request)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.qrCodeUrl) {
+                        document.getElementById('qrCodeImage').src = data.qrCodeUrl;
+                    } else if (data.qrCodeBase64) {
+                        document.getElementById('qrCodeImage').src = data.qrCodeBase64;
+                    } else {
+                        alert('Có lỗi xảy ra khi tạo mã QR: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi tạo mã QR');
+                });
+
+        } else {
+            alert('Phương thức thanh toán này chưa được hỗ trợ');
+        }
+    }
+
+    // Sửa lỗi: chỉ gán sự kiện nếu tồn tại refreshQR
+    const refreshBtn = document.getElementById('refreshQR');
+    if (refreshBtn) refreshBtn.addEventListener('click', createPaymentUrl);
+
+    // Handle payment method selection
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'momo' || this.value === 'zalopay' || this.value === 'sepay') {
+                createPaymentUrl();
+            }
+        });
+    });
+
+    // Nếu có bookingId thì mới gọi tạo QR, tránh lỗi khi demo
+    const bookingIdInput = document.querySelector('input[name="bookingId"]');
+    if (bookingIdInput && bookingIdInput.value) {
+        createPaymentUrl();
+    }
+
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+        // Không cần preventDefault, để form submit tự nhiên bằng GET
+    });
+
+    // Discount code demo logic
+    const originalAmount = parseInt(/*[[${booking.amount}]]*/ 300000);
+    const totalAmountEl = document.getElementById('totalAmount');
+    const discountInput = document.getElementById('discountCode');
+    const discountMsg = document.getElementById('discountMsg');
+    const applyBtn = document.getElementById('applyDiscount');
+    if (applyBtn) {
+        applyBtn.onclick = function() {
+            const code = discountInput.value.trim().toUpperCase();
+            fetch(`/api/discount/check?code=${encodeURIComponent(code)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        let newAmount = originalAmount;
+                        if (data.type === 'percent') {
+                            newAmount = Math.round(originalAmount * (1 - data.value / 100));
+                            discountMsg.textContent = `Áp dụng mã ${code}: giảm ${data.value}%`;
+                        } else if (data.type === 'amount') {
+                            newAmount = Math.max(0, originalAmount - data.value);
+                            discountMsg.textContent = `Áp dụng mã ${code}: giảm ${data.value.toLocaleString('vi-VN')} VND`;
+                        }
+                        totalAmountEl.textContent = newAmount.toLocaleString('vi-VN') + ' VND';
+                    } else {
+                        totalAmountEl.textContent = originalAmount.toLocaleString('vi-VN') + ' VND';
+                        discountMsg.textContent = 'Mã không hợp lệ hoặc không tồn tại!';
+                    }
+                });
+        };
+    }
+</script>
+</body>
+</html>

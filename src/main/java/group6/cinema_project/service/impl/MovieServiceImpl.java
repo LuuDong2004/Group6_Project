@@ -3,9 +3,7 @@ package group6.cinema_project.service.impl;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
-import group6.cinema_project.entity.ActorMovie;
 import group6.cinema_project.repository.MovieRepository;
-import group6.cinema_project.repository.ActorMovieRepository;
 import group6.cinema_project.repository.ReviewRepository;
 import group6.cinema_project.dto.MovieDetailDto;
 import group6.cinema_project.dto.PersonDto;
@@ -21,8 +19,6 @@ import java.util.Comparator;
 public class MovieServiceImpl implements MovieService {
     @Autowired
     private MovieRepository movieRepository;
-    @Autowired
-    private ActorMovieRepository actorMovieRepository;
     @Autowired
     private ReviewRepository reviewRepository;
 
@@ -69,20 +65,20 @@ public class MovieServiceImpl implements MovieService {
         dto.trailer = movie.getTrailer();
         dto.summary = "";
         dto.directors = movie.getDirectors() != null ? movie.getDirectors().stream().map(Director::getName).collect(Collectors.toList()) : List.of();
-        dto.actors = actorMovieRepository.findByMovieId(id)
-            .stream()
-            .map(ActorMovie::getActor)
-            .map(Actor::getName)
-            .distinct()
-            .collect(Collectors.toList());
-        dto.directorsData = movie.getDirectors() != null ? movie.getDirectors().stream().map(d -> { PersonDto p = new PersonDto(); p.id = d.getId(); p.name = d.getName(); return p; }).collect(Collectors.toList()) : List.of();
-        dto.actorsData = actorMovieRepository.findByMovieId(id)
-            .stream().map(am -> {
+        dto.actors = movie.getActors() != null ? movie.getActors().stream().map(Actor::getName).distinct().collect(Collectors.toList()) : List.of();
+        dto.directorsData = movie.getDirectors() != null ? movie.getDirectors().stream().map(d -> {
+            PersonDto p = new PersonDto();
+            p.id = d.getId();
+            p.name = d.getName();
+            System.out.println("DEBUG directorData: id=" + p.id + ", name=" + p.name);
+            return p;
+        }).collect(Collectors.toList()) : List.of();
+        dto.actorsData = movie.getActors() != null ? movie.getActors().stream().map(a -> {
                 PersonDto p = new PersonDto();
-                p.id = am.getActor().getId();
-                p.name = am.getActor().getName();
+                p.id = a.getId();
+                p.name = a.getName();
                 return p;
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList()) : List.of();
         dto.reviews = reviewRepository.findByMovieId(id).stream().map(r -> {
             ReviewDto rv = new ReviewDto();
             rv.user = r.getUserId() != null ? r.getUserId().toString() : null;

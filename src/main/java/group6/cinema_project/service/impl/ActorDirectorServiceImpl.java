@@ -2,13 +2,11 @@ package group6.cinema_project.service.impl;
 
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
-import group6.cinema_project.entity.ActorMovie;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.dto.ActorDto;
 import group6.cinema_project.dto.DirectorDto;
 import group6.cinema_project.repository.ActorRepository;
 import group6.cinema_project.repository.DirectorRepository;
-import group6.cinema_project.repository.ActorMovieRepository;
 import group6.cinema_project.repository.MovieRepository;
 import group6.cinema_project.service.ActorDirectorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import java.util.ArrayList;
 public class ActorDirectorServiceImpl implements ActorDirectorService {
     @Autowired private ActorRepository actorRepository;
     @Autowired private DirectorRepository directorRepository;
-    @Autowired private ActorMovieRepository actorMovieRepository;
     @Autowired private MovieRepository movieRepository;
 
     @Override
@@ -34,7 +31,11 @@ public class ActorDirectorServiceImpl implements ActorDirectorService {
     public Director getDirectorById(Long id) { return directorRepository.findById(id).orElse(null); }
     @Override
     public List<Actor> getActorsByMovieId(Long movieId) {
-        return actorMovieRepository.findByMovieId(movieId).stream().map(ActorMovie::getActor).collect(Collectors.toList());
+        Movie movie = movieRepository.findById(movieId).orElse(null);
+        if (movie != null && movie.getActors() != null && !movie.getActors().isEmpty()) {
+            return new ArrayList<>(movie.getActors());
+        }
+        return List.of();
     }
     
     @Override

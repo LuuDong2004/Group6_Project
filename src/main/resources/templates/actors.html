@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Danh sách Diễn viên</title>
+    <link rel="stylesheet" th:href="@{/web/assets/css/style-starter.css}">
+    <link rel="stylesheet" th:href="@{/web/assets/css/movies.css}">
+</head>
+<body>
+<header id="site-header" class="w3l-header fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+        <div class="container">
+            <h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log" aria-hidden="true"></span> MyShowz </a></h1>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="fa icon-expand fa-bars"></span>
+                <span class="fa icon-close fa-times"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/movies}">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/movie_theater}">Movie Theater</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                </ul>
+                <div class="Login_SignUp" id="login" style="font-size: 2rem ; display: inline-block; position: relative;">
+                    <a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+<main style="margin-top: 120px;">
+    <div class="container py-4">
+        <h2>Danh sách Diễn viên</h2>
+        <div th:if="${actors != null and !actors.empty}">
+            <div class="row">
+                <div class="col-md-3 mb-4" th:each="actor : ${actors}">
+                    <div class="card h-100">
+                        <img class="card-img-top" th:src="@{'/web/assets/images/' + ${actor.image}}" th:alt="${actor.name}" alt="Ảnh diễn viên">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${actor.name}"></h5>
+                            <p class="card-text" th:text="${actor.biography}"></p>
+                            <a class="btn btn-primary" th:href="@{'/person_detail.html?type=actor&id=' + ${actor.id}}">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${actors == null or actors.empty}" class="text-center">
+            <p>Không có diễn viên nào.</p>
+        </div>
+    </div>
+</main>
+<script th:src="@{/web/assets/js/theme-change.js}"></script>
+</body>
+</html> 

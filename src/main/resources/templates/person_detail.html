@@ -66,20 +66,15 @@
     <!--/breadcrumbs end-->
     <div class="movie-detail-container">
         <h2 class="movie-detail-title" id="personDetailTitle">THÔNG TIN CÁ NHÂN</h2>
-        <div class="movie-detail-main" th:if="${actor != null or director != null}">
+        <div class="movie-detail-main">
             <div class="movie-detail-poster">
-                <img id="personImage" th:src="${actor != null ? (actor.image != null ? actor.image : '/web/assets/images/a1.jpg') : (director != null ? (director.image != null ? director.image : '/web/assets/images/a1.jpg') : '/web/assets/images/a1.jpg')}" 
-                     th:alt="${actor != null ? actor.name : (director != null ? director.name : 'Ảnh cá nhân')}" alt="Ảnh cá nhân">
+                <img id="personImage" src="/web/assets/images/a1.jpg" alt="Ảnh cá nhân">
             </div>
             <div class="movie-detail-info">
-                <h1 id="personName" th:text="${actor != null ? actor.name : (director != null ? director.name : 'Tên')}">Tên</h1>
-                <p><b>Vai trò:</b> <span id="personRole" th:text="${actor != null ? 'Diễn viên' : (director != null ? 'Đạo diễn' : 'N/A')}">Vai trò</span></p>
-                <p><b>Mô tả:</b> <span id="personDescription" th:text="${actor != null ? actor.biography : (director != null ? director.biography : 'N/A')}">Mô tả</span></p>
+                <h1 id="personName">Tên</h1>
+                <p><b>Vai trò:</b> <span id="personRole">Vai trò</span></p>
+                <p><b>Mô tả:</b> <span id="personDescription">Mô tả</span></p>
             </div>
-        </div>
-        <div th:if="${actor == null and director == null}" class="text-center">
-            <p>Không tìm thấy thông tin</p>
-            <a th:href="@{/movies}" class="btn btn-primary">Quay lại danh sách phim</a>
         </div>
         <div class="person-movies" id="personMovies"></div>
     </div>

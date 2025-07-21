@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 public class ActorDirectorController {
@@ -62,5 +63,33 @@ public class ActorDirectorController {
         model.addAttribute("directors", directors);
         model.addAttribute("movieId", movieId);
         return "movie_directors";
+    }
+}
+
+@RestController
+@RequestMapping("/api/actors")
+class ActorApiController {
+    @Autowired
+    private ActorDirectorService actorDirectorService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getActorById(@PathVariable Long id) {
+        ActorDto actor = actorDirectorService.getActorDTOById(id);
+        if (actor == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(actor);
+    }
+}
+
+@RestController
+@RequestMapping("/api/directors")
+class DirectorApiController {
+    @Autowired
+    private ActorDirectorService actorDirectorService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getDirectorById(@PathVariable Long id) {
+        DirectorDto director = actorDirectorService.getDirectorDTOById(id);
+        if (director == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(director);
     }
 }

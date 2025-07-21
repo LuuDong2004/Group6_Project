@@ -1,38 +1,154 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Movies</title>
+    <title>Movie Theater - MyShowz</title>
+    <!-- Template CSS -->
 	    <link rel="stylesheet" th:href="@{/web/assets/css/style-starter.css}">
     <link rel="stylesheet" th:href="@{/web/assets/css/movies.css}">
-	<link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
-		rel="stylesheet">
+    <!-- Google fonts -->
+    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <style>
+        .theater-container {
+            padding: 2rem;
+            margin-top: 80px;
+            background: var(--bg-color);
+            min-height: calc(100vh - 80px);
+        }
+        .map-section {
+            display: flex;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        #map {
+            flex: 2;
+            height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cinema-list {
+            flex: 1;
+            max-width: 400px;
+            background: var(--bg-grey);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        .cinema-item {
+            background: var(--bg-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .cinema-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .cinema-name {
+            color: var(--theme-title);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .cinema-address {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .cinema-distance {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+        .direction-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .direction-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+        .find-cinema-btn {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+        .find-cinema-btn:hover {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .section-title {
+            color: var(--theme-title);
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 991px) {
+            .map-section {
+                flex-direction: column;
+            }
+            .cinema-list {
+                max-width: 100%;
+                max-height: 400px;
+            }
+            #map {
+                height: 400px;
+            }
+        }
+        .leaflet-routing-container {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .leaflet-routing-alt {
+            border-bottom: 1px solid var(--border-color);
+        }
+    </style>
 </head>
-
 <body>
-	<!-- header -->
+    <!-- Header -->
 	<header id="site-header" class="w3l-header fixed-top">
-		<!--/nav-->
 		<nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
 			<div class="container">
-				<h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
-																	aria-hidden="true"></span>
-							MyShowz </a></h1>
-				<!-- if logo is image enable this   
-							<a class="navbar-brand" href="#index.html">
-								<img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
-							</a> -->
+                <h1>
+                    <a class="navbar-brand" href="index.html">
+                        <span class="fa fa-play icon-log" aria-hidden="true"></span>
+                        MyShowz
+                    </a>
+                </h1>
 				<button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
 					data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
 					aria-label="Toggle navigation">
-					<!-- <span class="navbar-toggler-icon"></span> -->
 					<span class="fa icon-expand fa-bars"></span>
 					<span class="fa icon-close fa-times"></span>
 				</button>
-
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto">
 						<li class="nav-item">
@@ -48,18 +164,11 @@
 							<a class="nav-link" th:href="@{/contact}">Contact</a>
 						</li>
 					</ul>
-
-					<!--/search-right-->
-					<!--/search-right-->
-					<div class="Login_SignUp" id="login"
-						style="font-size: 2rem ; display: inline-block; position: relative;">
-						<!-- <li class="nav-item"> -->
+                    <div class="Login_SignUp" id="login">
 						<a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
-						<!-- </li> -->
 					</div>
-
 				</div>
-				<!-- toggle switch for light and dark theme -->
+                <!-- Theme switch -->
 				<div class="mobile-position">
 					<nav class="navigation">
 						<div class="theme-switch-wrapper">
@@ -76,208 +185,360 @@
 			</div>
 		</nav>
 	</header>
-    <main style="margin-top: 120px;">
-        <style>
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-main {
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-}
-#cinema-flex-container {
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-    height: 100%;
-}
-#cinema-list {
-    flex: 1;
-    max-width: 350px;
-    overflow-y: auto;
-    border-right: 1px solid var(--theme-bg) !important;
-    padding: 16px;
-    background: var(--theme-bg) !important;    
-    height: 100%;
-    min-height: 0;
-}
-#cinema-list div {
-    margin-bottom: 18px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-#cinema-list b {
-    color: #007bff;
-    cursor: pointer;
-}
-#map {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
-#find-cinema-btn {
-    margin: 16px 0 0 0;
-    display: inline-block;
-    z-index: 10;
-    position: relative;
-    padding: 10px 24px;
-    font-size: 1.1rem;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-#find-cinema-btn:hover {
-    background: #0056b3;
-}
-@media (max-width: 900px) {
-    #cinema-flex-container { flex-direction: column; height: auto; }
-    #cinema-list { max-width: 100%; border-right: none; border-bottom: 1px solid #eee; }
-    #map { min-height: 250px; }
-}
-</style>
-        <div id="cinema-flex-container">
-            <!-- Cột trái: Danh sách rạp -->
-            <div id="cinema-list">
-                <h3>Gợi ý rạp gần bạn</h3>
-                <button id="find-cinema-btn" onclick="showNearestCinemas()">Tìm rạp gần tôi</button>
-                <!-- Danh sách rạp sẽ được JS render vào đây -->
-            </div>
-            <!-- Cột phải: Google Map -->
-            <div style="flex: 3;">
-                <div id="map"></div>
-            </div>
+
+    <!-- Main content -->
+    <div class="theater-container">
+        <h2 class="section-title">Tìm Rạp Chiếu Phim</h2>
+        <button class="find-cinema-btn" onclick="showNearestCinemas()">
+            <i class="fa fa-location-arrow"></i>
+            Tìm Rạp Gần Tôi
+        </button>
+        <div class="map-section">
+            <div id="map"></div>
+            <div id="cinema-list" class="cinema-list"></div>
         </div>
-    </main>
+    </div>
 
+    <!-- Footer -->
+    <footer class="w3l-footer">
+        <section class="footer-inner-main">
+            <div class="footer-hny-grids py-5">
+                <div class="container py-lg-4">
+                    <div class="text-txt">
+                        <div class="right-side">
+                            <div class="row footer-about">
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies"><img class="img-fluid" th:src="@{/web/assets/images/banner1.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies"><img class="img-fluid" th:src="@{/web/assets/images/banner2.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies"><img class="img-fluid" th:src="@{/web/assets/images/banner3.jpg}"
+                                            alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies"><img class="img-fluid" th:src="@{/web/assets/images/banner4.jpg}"
+                                            alt=""></a>
+                                </div>
+                            </div>
+                            <div class="row footer-links">
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Movies</h6>
+                                    <ul>
+                                        <li><a href="#">Movies</a></li>
+                                        <li><a href="#">Videos</a></li>
+                                        <li><a href="#">English Movies</a></li>
+                                        <li><a href="#">Tailor</a></li>
+                                        <li><a href="#">Upcoming Movies</a></li>
+                                        <li><a href="contact.html">Contact Us</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Information</h6>
+                                    <ul>
+                                        <li><a href="index.html">Home</a> </li>
+                                        <li><a href="about.html">About</a> </li>
+                                        <li><a href="#">Tv Series</a> </li>
+                                        <li><a href="#">Blogs</a> </li>
+                                        <li><a href="sign_in.html">Login</a></li>
+                                        <li><a href="contact.html">Contact</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Locations</h6>
+                                    <ul>
+                                        <li><a href="movies">Asia</a></li>
+                                        <li><a href="movies">France</a></li>
+                                        <li><a href="movies">Taiwan</a></li>
+                                        <li><a href="movies">United States</a></li>
+                                        <li><a href="movies">Korea</a></li>
+                                        <li><a href="movies">United Kingdom</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Newsletter</h6>
+                                    <form action="#" class="subscribe mb-3" method="post">
+                                        <input type="email" name="email" placeholder="Your Email Address" required="">
+                                        <button><span class="fa fa-envelope-o"></span></button>
+                                    </form>
+                                    <p>Enter your email and receive the latest news, updates and special offers from us.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            </div>
+        </section>
+    </footer>
+
+    <!-- Scripts -->
+    <script th:src="@{/web/assets/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/web/assets/js/theme-change.js}"></script>
+    <script th:src="@{/web/assets/js/owl.carousel.js}"></script>
+    <script th:src="@{/web/assets/js/jquery.waypoints.min.js}"></script>
+    <script th:src="@{/web/assets/js/jquery.countup.js}"></script>
+    <script th:src="@{/web/assets/js/bootstrap.min.js}"></script>
+
+    <!-- Leaflet and Routing -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script>
-    let map;
-    let markers = [];
-    let lastUserLat = null, lastUserLng = null;
-    let directionsService, directionsRenderer;
+        // Kiểm tra xem Leaflet Routing Machine có load được không
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof L.Routing === 'undefined') {
+                console.error('Leaflet Routing Machine không load được!');
+                alert('Thư viện chỉ đường không load được. Vui lòng sử dụng nút "Mở OSM" hoặc "Google" thay thế.');
+            } else {
+                console.log('Leaflet Routing Machine đã load thành công');
+            }
+        });
 
-    function haversine(lat1, lng1, lat2, lng2) {
-        const R = 6371; // km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
+        let map, userMarker, cinemaMarkers = [], routingControl;
+
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([21.0285, 105.8542], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            }
     }
 
     function showNearestCinemas() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                lastUserLat = lat;
-                lastUserLng = lng;
-                fetch(`/cinema/nearest/search?lat=${lat}&lng=${lng}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        let html = '';
-                        data.forEach(cinema => {
-                            const distance = haversine(lat, lng, cinema.latitude, cinema.longitude).toFixed(2);
-                            html += `<div>
-                                <b style='cursor:pointer;color:#007bff' onclick=\"window.open('https://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=${cinema.latitude},${cinema.longitude}','_blank')\">${cinema.name}</b><br>
-                                <span>Khoảng cách: ${distance} km</span><br>
-                                <a href=\"https://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=${cinema.latitude},${cinema.longitude}\" target=\"_blank\">Xem trên Google Maps</a> |
-                                <a href=\"#\" onclick=\"showDirectionOnMap(${lat},${lng},${cinema.latitude},${cinema.longitude});return false;\">Chỉ đường</a>
-                            </div><hr>`;
-                        });
-                        document.getElementById('cinema-list').innerHTML = html;
-                        showMap(lat, lng, data);
-                    });
-            }, function() {
-                alert("Không thể lấy vị trí. Hãy bật định vị!");
-            });
-        } else {
-            alert("Trình duyệt không hỗ trợ định vị.");
-        }
-    }
-
-    function showDirectionOnMap(userLat, userLng, destLat, destLng) {
-        if (!directionsService) directionsService = new google.maps.DirectionsService();
-        if (!directionsRenderer) {
-            directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
-        }
-        const request = {
-            origin: { lat: userLat, lng: userLng },
-            destination: { lat: destLat, lng: destLng },
-            travelMode: 'DRIVING'
-        };
-        directionsService.route(request, function(result, status) {
-            if (status == 'OK') {
-                directionsRenderer.setDirections(result);
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        console.log('User location:', userLat, userLng);
+                        
+                        fetch(`/api/cinemas/nearest?lat=${userLat}&lng=${userLng}`)
+                            .then(response => {
+                                console.log('Response status:', response.status);
+                                return response.json();
+                            })
+                            .then(cinemas => {
+                                console.log('Cinemas data:', cinemas);
+                                showMap(userLat, userLng, cinemas);
+                                showCinemaList(cinemas, userLat, userLng);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching cinemas:', error);
+                                alert('Có lỗi khi tải dữ liệu rạp phim. Vui lòng thử lại.');
+                            });
+                    },
+                    error => {
+                        console.error("Error getting location:", error);
+                        alert("Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.");
+                    }
+                );
             } else {
-                alert('Không tìm được đường đi!');
+                alert("Trình duyệt của bạn không hỗ trợ định vị.");
             }
-        });
     }
 
     function showMap(userLat, userLng, cinemas) {
-        if (!map) {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: userLat, lng: userLng },
-                zoom: 13
+            // Xóa markers cũ
+            cinemaMarkers.forEach(marker => marker.remove());
+            cinemaMarkers = [];
+            
+            if (userMarker) userMarker.remove();
+            if (routingControl) map.removeControl(routingControl);
+
+            // Đặt lại view của bản đồ
+            map.setView([userLat, userLng], 13);
+
+            // Thêm marker vị trí người dùng với icon màu xanh
+            userMarker = L.marker([userLat, userLng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map)
+              .bindPopup('Vị trí của bạn')
+              .openPopup();
+
+            // Thêm markers cho các rạp với icon màu đỏ
+            cinemas.forEach(cinema => {
+                const marker = L.marker([cinema.lat, cinema.lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map)
+                  .bindPopup(`<b>${cinema.name}</b><br>${cinema.address}`);
+                cinemaMarkers.push(marker);
             });
-        } else {
-            map.setCenter({ lat: userLat, lng: userLng });
         }
 
-        // Xóa directions route cũ nếu có
-        if (typeof directionsRenderer !== 'undefined' && directionsRenderer) {
-            directionsRenderer.setMap(null);
-            directionsRenderer = null;
+        function showCinemaList(cinemas, userLat, userLng) {
+            const listContainer = document.getElementById('cinema-list');
+            listContainer.innerHTML = '<h3 style="margin-bottom: 1rem; color: var(--theme-title);">Danh sách rạp gần bạn</h3>';
+
+            cinemas.forEach(cinema => {
+                const distance = calculateDistance(userLat, userLng, cinema.lat, cinema.lng);
+                const item = document.createElement('div');
+                item.className = 'cinema-item';
+                item.innerHTML = `
+                    <div class="cinema-name">${cinema.name}</div>
+                    <div class="cinema-address">${cinema.address}</div>
+                    <div class="cinema-distance">
+                        <i class="fa fa-map-marker"></i> 
+                        Khoảng cách: ${distance.toFixed(1)} km
+                    </div>
+                    <div style="display: flex; gap: 5px; margin-top: 8px;">
+                        <button class="direction-btn" style="flex: 1;" onclick="showDirections(${userLat}, ${userLng}, ${cinema.lat}, ${cinema.lng})">
+                            <i class="fa fa-directions"></i> Chỉ đường
+                        </button>
+                        <button class="direction-btn" style="flex: 1; background: #dc3545;" onclick="openOSMDirections(${userLat}, ${userLng}, ${cinema.lat}, ${cinema.lng})">
+                            <i class="fa fa-external-link"></i> Mở OSM
+                        </button>
+                        <button class="direction-btn" style="flex: 1; background: #28a745;" onclick="openGoogleMaps(${userLat}, ${userLng}, ${cinema.lat}, ${cinema.lng})">
+                            <i class="fa fa-map"></i> Google
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
         }
 
-        // Xóa marker cũ
-        markers.forEach(marker => marker.setMap(null));
-        markers = [];
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
 
-        // Marker vị trí người dùng
-        const userMarker = new google.maps.Marker({
-            position: { lat: userLat, lng: userLng },
-            map: map,
-            title: "Vị trí của bạn",
-            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-        });
-        markers.push(userMarker);
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
 
-        // Marker các rạp
-        cinemas.forEach(cinema => {
-            const marker = new google.maps.Marker({
-                position: { lat: cinema.latitude, lng: cinema.longitude },
-                map: map,
-                title: cinema.name
-            });
-            const infoWindow = new google.maps.InfoWindow({
-                content: `<b>${cinema.name}</b><br>Địa chỉ: ${cinema.address}<br>
-                <a href="https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${cinema.latitude},${cinema.longitude}" target="_blank">Chỉ đường</a>`
-            });
-            marker.addListener('click', function() {
-                infoWindow.open(map, marker);
-            });
-            markers.push(marker);
-        });
-    }
+        function showDirections(userLat, userLng, cinemaLat, cinemaLng) {
+            console.log('Showing directions from', userLat, userLng, 'to', cinemaLat, cinemaLng);
+            
+            // Xóa routing control cũ nếu có
+            if (routingControl) {
+                console.log('Removing old routing control');
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+
+            // Xóa đường cũ nếu có
+            if (window.currentRoute) {
+                map.removeLayer(window.currentRoute);
+            }
+
+            try {
+                // Thử sử dụng Leaflet Routing Machine
+                if (typeof L.Routing !== 'undefined') {
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(userLat, userLng),
+                            L.latLng(cinemaLat, cinemaLng)
+                        ],
+                        routeWhileDragging: true,
+                        language: 'vi',
+                        showAlternatives: true,
+                        lineOptions: {
+                            styles: [{color: '#007bff', opacity: 0.8, weight: 6}]
+                        },
+                        createMarker: function() { return null; }
+                    });
+                    
+                    console.log('Adding routing control to map');
+                    routingControl.addTo(map);
+                } else {
+                    // Fallback: Vẽ đường thẳng đơn giản
+                    console.log('Using fallback: drawing straight line');
+                    const routeLine = L.polyline([
+                        [userLat, userLng],
+                        [cinemaLat, cinemaLng]
+                    ], {
+                        color: '#007bff',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+                    
+                    window.currentRoute = routeLine;
+                    
+                    // Thêm popup thông tin
+                    const distance = calculateDistance(userLat, userLng, cinemaLat, cinemaLng);
+                    routeLine.bindPopup(`Khoảng cách: ${distance.toFixed(1)} km<br>Đây là đường thẳng, không phải tuyến đường thực tế.`);
+                }
+
+                // Fit bounds để hiển thị toàn bộ tuyến đường
+                const bounds = L.latLngBounds([
+                    [userLat, userLng],
+                    [cinemaLat, cinemaLng]
+                ]);
+                map.fitBounds(bounds, {padding: [50, 50]});
+                
+                console.log('Directions displayed successfully');
+            } catch (error) {
+                console.error('Error creating routing control:', error);
+                
+                // Fallback: Vẽ đường thẳng
+                try {
+                    const routeLine = L.polyline([
+                        [userLat, userLng],
+                        [cinemaLat, cinemaLng]
+                    ], {
+                        color: '#007bff',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+                    
+                    window.currentRoute = routeLine;
+                    
+                    const distance = calculateDistance(userLat, userLng, cinemaLat, cinemaLng);
+                    routeLine.bindPopup(`Khoảng cách: ${distance.toFixed(1)} km<br>Đây là đường thẳng, không phải tuyến đường thực tế.`);
+                    
+                    const bounds = L.latLngBounds([
+                        [userLat, userLng],
+                        [cinemaLat, cinemaLng]
+                    ]);
+                    map.fitBounds(bounds, {padding: [50, 50]});
+                    
+                    console.log('Fallback route displayed');
+                } catch (fallbackError) {
+                    console.error('Fallback also failed:', fallbackError);
+                    alert('Có lỗi khi tạo chỉ đường. Vui lòng sử dụng nút "Mở OSM" hoặc "Google" thay thế.');
+                }
+            }
+        }
+
+        function openOSMDirections(userLat, userLng, cinemaLat, cinemaLng) {
+            const url = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userLat},${userLng};${cinemaLat},${cinemaLng}`;
+            window.open(url, '_blank');
+        }
+
+        function openGoogleMaps(userLat, userLng, cinemaLat, cinemaLng) {
+            const url = `https://www.google.com/maps/dir/?api=1&travelmode=driving&waypoints=${userLat},${userLng};${cinemaLat},${cinemaLng}`;
+            window.open(url, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', initMap);
     </script>
-    <!-- Thay YOUR_API_KEY bằng Google Maps API Key của bạn. Đăng ký miễn phí tại https://console.cloud.google.com/apis/credentials -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGUA7CFmlf1BwXpX0BRKaSDTvc0WFTFyw"></script>
-    <script th:src="@{/web/assets/js/theme-change.js}"></script>
     </body>
     </html>

@@ -18,7 +18,6 @@ public class Movie {
     private String genre;
     private String language;
     private String trailer;
-    // private String description; // Loại bỏ hoặc comment nếu không có trong DB
     @ElementCollection
     private List<String> directorNames;
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -31,11 +30,26 @@ public class Movie {
     )
     private Set<Director> directors;
 
+    @ManyToMany
+    @JoinTable(
+        name = "Actor_Movie",
+        joinColumns = @JoinColumn(name = "movie_id"),
+        inverseJoinColumns = @JoinColumn(name = "actor_id")
+    )
+    private Set<Actor> actors;
+
     public Set<Director> getDirectors() {
         return directors;
     }
     public void setDirectors(Set<Director> directors) {
         this.directors = directors;
+    }
+
+    public Set<Actor> getActors() {
+        return actors;
+    }
+    public void setActors(Set<Actor> actors) {
+        this.actors = actors;
     }
 
     public Long getId() {
@@ -76,12 +90,5 @@ public class Movie {
 
     public List<String> getDirectorNames() {
         return directorNames;
-    }
-
-    // Setters có thể thêm nếu cần
-
-    // Phương thức getSomeField() không cần thiết và có thể xóa
-    public String getSomeField() {
-        return this.name;
     }
 }

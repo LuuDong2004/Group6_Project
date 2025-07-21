@@ -101,14 +101,26 @@
             <div class="movie-detail-info">
                 <h1 id="movieTitle" th:text="${movie.name}">Movie Name</h1>
                 <p><b>Thể loại:</b> <span id="movieGenre" th:text="${movie.genre}">Genre</span></p>
-                <p><b>Đạo diễn:</b> <span id="movieDirector" th:utext="${movie.directors != null and !movie.directors.isEmpty() ? movie.directors.toString().replace('[','').replace(']','') : 'N/A'}">Director</span></p>
-                <p><b>Diễn viên:</b> <span id="movieActors" th:utext="${movie.actors != null and !movie.actors.isEmpty() ? movie.actors.toString().replace('[','').replace(']','') : 'N/A'}">Actors</span></p>
+                <p><b>Đạo diễn:</b>
+                    <span id="movieDirector">
+                        <span th:if="${movie.directorsData != null and !movie.directorsData.isEmpty()}" th:each="director,iter : ${movie.directorsData}">
+                            <a th:href="@{'/person_detail.html?type=director&id=' + ${director.id}}" th:text="${director.name}"></a><span th:if="${!iter.last}">, </span>
+                        </span>
+                        <span th:if="${movie.directorsData == null or movie.directorsData.isEmpty()}">N/A</span>
+                    </span>
+                </p>
+                <p><b>Diễn viên:</b>
+                    <span id="movieActors">
+                        <span th:if="${movie.actorsData != null and !movie.actorsData.isEmpty()}" th:each="actor,iter : ${movie.actorsData}">
+                            <a th:href="@{'/person_detail.html?type=actor&id=' + ${actor.id}}" th:text="${actor.name}"></a><span th:if="${!iter.last}">, </span>
+                        </span>
+                        <span th:if="${movie.actorsData == null or movie.actorsData.isEmpty()}">N/A</span>
+                    </span>
+                </p>
                 <p><b>Thời lượng:</b> <span id="movieDuration" th:text="${movie.duration != null ? movie.duration : 'N/A'}">Duration</span> phút</p>
                 <p><b>Ngôn ngữ:</b> <span id="movieLanguage" th:text="${movie.language != null ? movie.language : 'N/A'}">Language</span></p>
                 <p><b>Khởi chiếu:</b> <span id="movieReleaseDate" th:text="${movie.release_date != null ? movie.release_date : 'N/A'}">Release Date</span></p>
                 <p><b>Đánh giá:</b> <span id="movieRating" th:text="${movie.rating != null ? movie.rating : 'N/A'}">Rating</span></p>
-                <!-- BỎ PHẦN TÓM TẮT -->
-                <!-- <p><b>Tóm tắt:</b> <span id="movieSummary" th:text="${movie.summary != null ? movie.summary : 'N/A'}">Summary</span></p> -->
                 <button class="btn btn-success" id="bookTicketBtn">Đặt vé</button>
             </div>
         </div>
