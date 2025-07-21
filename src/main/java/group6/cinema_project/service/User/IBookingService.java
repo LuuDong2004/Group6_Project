@@ -15,4 +15,5 @@ public interface IBookingService {
     boolean updateBookingStatus(Integer bookingId, String status);
     void confirmBookingPaid(int bookingId);
     void cancelPendingBooking(Integer bookingId);
+    List<BookingDto> getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(Integer userId, java.time.LocalDate fromDate);
 }

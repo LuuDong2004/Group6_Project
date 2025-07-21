@@ -176,6 +176,33 @@ public class BookingService implements IBookingService {
     }
 
     @Override
+    public List<BookingDto> getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(Integer userId, LocalDate fromDate) {
+        try {
+            List<Booking> bookings = bookingRepository.findByUserIdAndDateAfterAndStatus(userId, fromDate, "PAID");
+            List<BookingDto> dtos = bookings.stream().map(booking -> {
+                BookingDto dto = modelMapper.map(booking, BookingDto.class);
+                if (booking.getSchedule() != null) {
+                    dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            // Sắp xếp theo ngày suất chiếu giảm dần
+            dtos.sort((b1, b2) -> {
+                if (b1.getSchedule() != null && b2.getSchedule() != null && b1.getSchedule().getScreeningDate() != null && b2.getSchedule().getScreeningDate() != null) {
+                    return b2.getSchedule().getScreeningDate().compareTo(b1.getSchedule().getScreeningDate());
+                } else if (b1.getDate() != null && b2.getDate() != null) {
+                    return b2.getDate().compareTo(b1.getDate());
+                } else {
+                    return 0;
+                }
+            });
+            return dtos;
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách booking PAID theo thời gian (sorted): " + e.getMessage());
+        }
+    }
+
+    @Override
     public boolean cancelBooking(Integer bookingId) {
         try {
             // Tìm booking theo ID

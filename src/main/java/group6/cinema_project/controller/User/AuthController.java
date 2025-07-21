@@ -1,8 +1,10 @@
 package group6.cinema_project.controller.User;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.Login.ChangePasswordDto;
 import group6.cinema_project.dto.Login.PasswordResetRequestDto;
 import group6.cinema_project.dto.Login.UserLoginDto;
@@ -137,19 +139,16 @@ public class AuthController {
             UserDto user = userService.getUserByEmail(email);
             model.addAttribute("user", user);
 
-            // Lấy booking PAID trong 3 tháng gần nhất, phân trang 5 booking/trang
-            java.util.List<group6.cinema_project.dto.BookingDto> allPaidBookings = new java.util.ArrayList<>();
+            // Lấy booking PAID trong 3 tháng gần nhất, đã sắp xếp theo ngày suất chiếu mới nhất
+            List<BookingDto> allPaidBookings = new java.util.ArrayList<>();
             try {
                 if (user != null) {
                     java.time.LocalDate threeMonthsAgo = java.time.LocalDate.now().minusMonths(3);
-                    allPaidBookings = bookingService.getPaidBookingsByUserIdAndDateAfter(user.getId(), threeMonthsAgo);
+                    allPaidBookings = bookingService.getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(user.getId(), threeMonthsAgo);
                 }
             } catch (Exception ex) {
                 System.err.println("Không thể lấy lịch sử đặt vé: " + ex.getMessage());
             }
-
-            // Sắp xếp booking theo ngày đặt giảm dần (gần nhất lên đầu)
-            allPaidBookings.sort((b1, b2) -> b2.getDate().compareTo(b2.getDate()));
 
             int pageSize = 5;
             int total = allPaidBookings.size();
