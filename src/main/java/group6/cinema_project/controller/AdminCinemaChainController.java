@@ -85,4 +85,21 @@ public class AdminCinemaChainController {
         }
         return "redirect:/admin/cinema-chains";
     }
+
+    @GetMapping("/view/{id}")
+    public String viewCinemaChain(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            CinemaChain chain = cinemaChainService.findById(id);
+            if (chain == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy chuỗi rạp!");
+                return "redirect:/admin/cinema-chains";
+            }
+            model.addAttribute("cinemaChain", CinemaChainDto.fromEntity(chain));
+            model.addAttribute("branches", chain.getBranches());
+            return "admin_cinema_chain_view";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            return "redirect:/admin/cinema-chains";
+        }
+    }
 } 

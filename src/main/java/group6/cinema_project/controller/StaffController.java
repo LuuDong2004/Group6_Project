@@ -61,7 +61,7 @@ public class StaffController {
 
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String rawPassword = "123456";
+        String rawPassword = "123456789";
         String hashedPassword = encoder.encode(rawPassword);
         System.out.println(hashedPassword);
     }

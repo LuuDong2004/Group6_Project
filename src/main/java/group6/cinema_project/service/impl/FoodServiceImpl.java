@@ -1,6 +1,7 @@
 package group6.cinema_project.service.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import group6.cinema_project.dto.FoodDto;
 import group6.cinema_project.entity.Food;
@@ -72,5 +74,21 @@ public class FoodServiceImpl implements FoodService {
     @Override
     public void deleteFood(Integer id) {
         foodRepository.deleteById(id);
+    }
+
+    // Trừ số lượng combo food khi user mua
+    @Transactional
+    public void subtractFoodQuantities(Map<Integer, Integer> foodOrder) {
+        for (Map.Entry<Integer, Integer> entry : foodOrder.entrySet()) {
+            Integer foodId = entry.getKey();
+            Integer quantity = entry.getValue();
+            Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Combo food not found"));
+            if (food.getSize() < quantity) {
+                throw new RuntimeException("Không đủ số lượng combo food: " + food.getName());
+            }
+            food.setSize(food.getSize() - quantity);
+            foodRepository.save(food);
+        }
     }
 } 

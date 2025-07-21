@@ -56,7 +56,7 @@
 	<!-- Register Form -->
 	<div class="form-container sign-up-container">
 		<form th:action="@{/register}" th:object="${user}" method="post">
-			<h1>Create Account</h1>
+			<h1>Tạo Tài Khoản</h1>
 			<span>Đăng ký tài khoản để đặt vé xem phim</span>
 
 			<!-- Hiển thị thông báo lỗi -->
@@ -80,20 +80,20 @@
 			<input th:field="*{confirmPassword}" type="password" placeholder="Confirm Password" required />
 			<span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
 
-			<button type="submit">Sign Up</button>
+			<button type="submit">Đăng Ký</button>
 		</form>
 	</div>
 
 	<!-- Login Form -->
 	<div class="form-container sign-in-container">
 		<form th:action="@{/login}" method="post" style="color: var(--theme-title);">
-			<h1>Sign in</h1>
+			<h1>Đăng Nhập</h1>
 			<span>Đăng nhập để đặt vé xem phim</span>
 			
 			<div class="social-container">
-				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
+<!--				<a href="#" class="social" style="color: var(&#45;&#45;theme-title);"><i class="fab fa-facebook-f"></i></a>-->
 				<a href="/oauth2/authorization/google" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
-				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-linkedin-in"></i></a>
+<!--				<a href="#" class="social" style="color: var(&#45;&#45;theme-title);"><i class="fab fa-linkedin-in"></i></a>-->
 			</div>
 			<span>or use your account</span>
 
@@ -107,9 +107,10 @@
 			<input name="password" type="password" placeholder="Password" required />
 
 
-			<a href="/forgot-password">Forgot your password?</a>
+			<a href="/forgot-password">Bạn quên mật khẩu?</a>
 
-			<button type="submit">Sign In</button>
+
+			<button type="submit">Đăng nhập</button>
 		</form>
 	</div>
 
@@ -118,12 +119,12 @@
 			<div class="overlay-panel overlay-left">
 				<h1>Welcome Back!</h1>
 				<p>Đăng nhập để tiếp tục đặt vé xem phim</p>
-				<button class="ghost" id="signIn">Sign In</button>
+				<button class="ghost" id="signIn">Đăng nhập</button>
 			</div>
 			<div class="overlay-panel overlay-right">
-				<h1>Hello, Friend!</h1>
+				<h1>Xin chào Bạn!</h1>
 				<p>Đăng ký tài khoản và đặt vé xem phim ngay hôm nay!</p>
-				<button class="ghost" id="signUp">Sign Up</button>
+				<button class="ghost" id="signUp">Đăng nhập</button>
 			</div>
 		</div>
 	</div>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Chuỗi rạp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8fafc; }
+        .chain-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .chain-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        .chain-desc {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        .branch-table {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .branch-table th {
+            background: #f1f5f9;
+            color: #6366f1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+        .branch-table td {
+            font-size: 1rem;
+            color: #334155;
+        }
+        .no-branch {
+            color: #94a3b8;
+            font-style: italic;
+            text-align: center;
+        }
+        .back-btn {
+            margin-top: 2rem;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+        }
+        @media (max-width: 600px) {
+            .chain-card { padding: 1rem; }
+            .branch-table th, .branch-table td { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 mb-5">
+    <div class="chain-card">
+        <div class="chain-title" th:text="${cinemaChain.name}"></div>
+        <div class="chain-desc"><b>Mô tả:</b> <span th:text="${cinemaChain.description}"></span></div>
+        <h4 class="mb-3 mt-4">Danh sách chi nhánh</h4>
+        <div class="table-responsive">
+            <table class="table branch-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tên chi nhánh</th>
+                        <th>Địa chỉ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="branch,iter : ${branches}">
+                        <td th:text="${iter.index + 1}"></td>
+                        <td th:text="${branch.name}"></td>
+                        <td th:text="${branch.address}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(branches)}">
+                        <td colspan="3" class="no-branch">Không có chi nhánh nào.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <a href="/admin/cinema-chains" class="back-btn d-inline-block mt-3"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+    </div>
+</div>
+<!-- FontAwesome for icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html> 

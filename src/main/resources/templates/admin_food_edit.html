@@ -17,13 +17,14 @@
         }
         .form-section {
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
             margin-bottom: 1.5rem;
+            padding: 2rem 2.5rem;
         }
         .form-section .card-header {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
             color: white;
         }
@@ -260,6 +261,9 @@
                 display: none;
             }
         }
+        @media (max-width: 768px) {
+            .form-section { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -313,7 +317,7 @@
     </header>
     <div class="container-fluid p-4">
         <div id="editFoodFormView" class="container py-4">
-            <form id="foodForm" th:action="@{'/admin/foods/edit/' + ${food.id}}" method="post" enctype="multipart/form-data" th:object="${food}">
+            <form id="foodForm" th:action="@{'/admin/foods/edit/' + ${food.id}}" method="post" enctype="multipart/form-data" th:object="${food}" onsubmit="return validateFoodForm()">
                 <div class="row">
                     <div class="col-12">
                         <div class="form-section">
@@ -459,6 +463,47 @@
             this.classList.add("d-none");
             if (fileInput) fileInput.value = "";
         });
+    }
+    function validateFoodForm() {
+        let valid = true;
+        let name = document.getElementById('name');
+        let price = document.getElementById('price');
+        let size = document.getElementById('size');
+        let imageFile = document.getElementById('imageFile');
+        let errorMsg = '';
+        if (!name.value.trim()) {
+            errorMsg += 'Tên combo là bắt buộc!\n';
+            name.classList.add('is-invalid');
+            valid = false;
+        } else {
+            name.classList.remove('is-invalid');
+        }
+        if (!price.value || parseFloat(price.value) <= 0) {
+            errorMsg += 'Giá phải lớn hơn 0!\n';
+            price.classList.add('is-invalid');
+            valid = false;
+        } else {
+            price.classList.remove('is-invalid');
+        }
+        if (!size.value || parseInt(size.value) <= 0) {
+            errorMsg += 'Số lượng phải lớn hơn 0!\n';
+            size.classList.add('is-invalid');
+            valid = false;
+        } else {
+            size.classList.remove('is-invalid');
+        }
+        // Nếu là thêm mới, bắt buộc phải có ảnh
+        if (!document.querySelector('img.img-thumbnail') && !imageFile.value) {
+            errorMsg += 'Hình ảnh là bắt buộc!\n';
+            imageFile.classList.add('is-invalid');
+            valid = false;
+        } else {
+            imageFile.classList.remove('is-invalid');
+        }
+        if (!valid) {
+            alert(errorMsg);
+        }
+        return valid;
     }
 </script>
 </body>

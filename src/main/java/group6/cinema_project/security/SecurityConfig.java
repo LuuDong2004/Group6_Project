@@ -132,9 +132,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**"
                 ).permitAll()
+                .requestMatchers(
+                    "/", "/dashboard", "/movies", "/showtimes", "/ticket-booking", "/sign_in", "/about", "/contact", "/e-ticket"
+                ).permitAll()
                 .requestMatchers("/login", "/register", "/staff/login").permitAll()
+                .requestMatchers("/payment/**", "/user/**").authenticated()
                 .requestMatchers("/staff/**").hasRole("STAFF")
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form
                 .loginPage("/login")
