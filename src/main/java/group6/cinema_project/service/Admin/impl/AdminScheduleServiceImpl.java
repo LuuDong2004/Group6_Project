@@ -34,12 +34,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
+    // Sử dụng AdminScheduleRepository để thao tác với lịch chiếu
     private final AdminScheduleRepository movieScheduleRepository;
+    // Sử dụng AdminMovieRepository để thao tác với phim
     private final AdminMovieRepository movieRepository;
+    // Sử dụng AdminRoomRepository để thao tác với phòng chiếu
     private final AdminRoomRepository screeningRoomRepository;
+    // Sử dụng AdminBranchRepository để thao tác với chi nhánh
     private final AdminBranchRepository branchRepository;
     List<ScheduleGroupedByDateDto> groupedSchedules;
 
+    /**
+     * Lấy lịch chiếu theo ID
+     * Sử dụng: movieScheduleRepository.findById() từ JpaRepository
+     * 
+     * @param id ID của lịch chiếu
+     * @return Optional chứa ScreeningScheduleDto hoặc empty nếu không tìm thấy
+     */
     @Override
     @Transactional(readOnly = true)
     public Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id) {

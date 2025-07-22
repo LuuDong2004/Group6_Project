@@ -701,36 +701,224 @@ public class AdminScheduleController {
     }
 
     /**
-     * Test endpoint để debug form submission
+     * Hiển thị trang lịch chiếu theo tháng (Calendar view)
      */
-    @GetMapping("/test-form")
-    public String showTestForm() {
-        return "admin/test_schedule_form";
+    @GetMapping("/calendar")
+    public String showCalendarView(Model model,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month) {
+        log.info("Loading calendar view - year: {}, month: {}", year, month);
+
+        try {
+            // Nếu không có tham số year/month, sử dụng tháng hiện tại
+            LocalDate currentDate = LocalDate.now();
+            int targetYear = (year != null) ? year : currentDate.getYear();
+            int targetMonth = (month != null) ? month : currentDate.getMonthValue();
+
+            // Tạo ngày đầu và cuối tháng để lấy dữ liệu
+            LocalDate startOfMonth = LocalDate.of(targetYear, targetMonth, 1);
+            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+            log.info("Loading schedules for period: {} to {}", startOfMonth, endOfMonth);
+
+            // Lấy tất cả lịch chiếu trong tháng
+            List<ScreeningScheduleDto> allSchedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
+
+            // Filter theo tháng được chọn
+            List<ScreeningScheduleDto> monthlySchedules = allSchedules.stream()
+                    .filter(schedule -> {
+                        LocalDate scheduleDate = schedule.getScreeningDate();
+                        return scheduleDate != null &&
+                                !scheduleDate.isBefore(startOfMonth) &&
+                                !scheduleDate.isAfter(endOfMonth);
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Format dữ liệu cho calendar frontend
+            Map<String, Object> calendarData = formatSchedulesForCalendar(monthlySchedules);
+
+            // Thêm dữ liệu vào model
+            model.addAttribute("schedules", monthlySchedules);
+            model.addAttribute("calendarData", calendarData);
+            model.addAttribute("currentYear", targetYear);
+            model.addAttribute("currentMonth", targetMonth);
+            model.addAttribute("startOfMonth", startOfMonth);
+            model.addAttribute("endOfMonth", endOfMonth);
+
+            // Thống kê nhanh
+            long playingCount = monthlySchedules.stream()
+                    .filter(s -> "ACTIVE".equals(s.getStatus()))
+                    .count();
+            long comingSoonCount = monthlySchedules.stream()
+                    .filter(s -> "UPCOMING".equals(s.getStatus()))
+                    .count();
+            long stoppedCount = monthlySchedules.stream()
+                    .filter(s -> "ENDED".equals(s.getStatus()))
+                    .count();
+
+            model.addAttribute("totalSchedules", monthlySchedules.size());
+            model.addAttribute("playingCount", playingCount);
+            model.addAttribute("comingSoonCount", comingSoonCount);
+            model.addAttribute("stoppedCount", stoppedCount);
+
+            // Thêm tên tháng tiếng Việt
+            String[] monthNames = {
+                    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+            };
+            model.addAttribute("currentMonthName", monthNames[targetMonth - 1]);
+
+            log.info("Successfully loaded calendar view with {} schedules", monthlySchedules.size());
+            return "admin/admin_schedule_calendar";
+
+        } catch (Exception e) {
+            log.error("Error loading calendar view", e);
+            model.addAttribute("error", "Lỗi khi tải lịch chiếu: " + e.getMessage());
+            model.addAttribute("schedules", java.util.Collections.emptyList());
+            model.addAttribute("calendarData", new java.util.HashMap<>());
+            model.addAttribute("currentYear", LocalDate.now().getYear());
+            model.addAttribute("currentMonth", LocalDate.now().getMonthValue());
+            model.addAttribute("currentMonthName", "Tháng " + LocalDate.now().getMonthValue());
+            model.addAttribute("totalSchedules", 0);
+            model.addAttribute("playingCount", 0);
+            model.addAttribute("comingSoonCount", 0);
+            model.addAttribute("stoppedCount", 0);
+            return "admin/admin_schedule_calendar";
+        }
     }
 
     /**
-     * Test endpoint để debug edit form
+     * Helper method để format dữ liệu lịch chiếu cho calendar frontend
      */
-    @GetMapping("/test-edit")
-    public String showTestEditForm() {
-        return "admin/test_edit_schedule";
+    private Map<String, Object> formatSchedulesForCalendar(List<ScreeningScheduleDto> schedules) {
+        Map<String, Object> calendarData = new java.util.HashMap<>();
+
+        // Nhóm lịch chiếu theo ngày
+        Map<String, List<Map<String, Object>>> schedulesByDate = new java.util.HashMap<>();
+
+        for (ScreeningScheduleDto schedule : schedules) {
+            String dateKey = schedule.getScreeningDate().toString(); // Format: yyyy-MM-dd
+
+            Map<String, Object> scheduleInfo = new java.util.HashMap<>();
+            scheduleInfo.put("id", schedule.getId());
+            scheduleInfo.put("time", schedule.getStartTime().toString());
+            scheduleInfo.put("movie", schedule.getMovieName());
+            scheduleInfo.put("room", schedule.getScreeningRoomName());
+            scheduleInfo.put("status", mapStatusToFrontend(schedule.getStatus()));
+            scheduleInfo.put("branchName", schedule.getBranchName());
+
+            schedulesByDate.computeIfAbsent(dateKey, k -> new java.util.ArrayList<>()).add(scheduleInfo);
+        }
+
+        calendarData.put("schedulesByDate", schedulesByDate);
+        calendarData.put("totalSchedules", schedules.size());
+
+        return calendarData;
     }
 
     /**
-     * Test endpoint để kiểm tra movie status display
+     * API endpoint để lấy dữ liệu lịch chiếu cho calendar (JSON response)
      */
-    @GetMapping("/test-status")
-    public String showTestStatusPage() {
-        return "admin/test_movie_status";
-    }
-
-    /**
-     * API endpoint để lấy movies theo status (for testing)
-     */
-    @GetMapping("/api/movies/{status}")
+    @GetMapping("/api/calendar-data")
     @ResponseBody
-    public List<MovieDto> getMoviesByStatusApi(@PathVariable String status) {
-        return movieScheduleService.getMoviesByScheduleStatus(status);
+    public Map<String, Object> getCalendarData(
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "status", required = false) String status) {
+
+        log.info("API request for calendar data - year: {}, month: {}, status: {}", year, month, status);
+
+        try {
+            // Nếu không có tham số year/month, sử dụng tháng hiện tại
+            LocalDate currentDate = LocalDate.now();
+            int targetYear = (year != null) ? year : currentDate.getYear();
+            int targetMonth = (month != null) ? month : currentDate.getMonthValue();
+
+            // Tạo ngày đầu và cuối tháng
+            LocalDate startOfMonth = LocalDate.of(targetYear, targetMonth, 1);
+            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+            // Lấy tất cả lịch chiếu
+            List<ScreeningScheduleDto> allSchedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
+
+            // Filter theo tháng và status (nếu có)
+            List<ScreeningScheduleDto> filteredSchedules = allSchedules.stream()
+                    .filter(schedule -> {
+                        LocalDate scheduleDate = schedule.getScreeningDate();
+                        boolean inMonth = scheduleDate != null &&
+                                !scheduleDate.isBefore(startOfMonth) &&
+                                !scheduleDate.isAfter(endOfMonth);
+
+                        boolean statusMatch = (status == null || status.isEmpty() ||
+                                status.equals("all") ||
+                                status.equals(schedule.getStatus()));
+
+                        return inMonth && statusMatch;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Nhóm lịch chiếu theo ngày
+            Map<String, List<Map<String, Object>>> schedulesByDate = new java.util.HashMap<>();
+
+            for (ScreeningScheduleDto schedule : filteredSchedules) {
+                String dateKey = schedule.getScreeningDate().toString();
+
+                Map<String, Object> scheduleData = new java.util.HashMap<>();
+                scheduleData.put("id", schedule.getId());
+                scheduleData.put("time", schedule.getStartTime().toString());
+                scheduleData.put("movie", schedule.getMovieName());
+                scheduleData.put("room", schedule.getScreeningRoomName());
+                scheduleData.put("status", mapStatusToFrontend(schedule.getStatus()));
+                scheduleData.put("branchName", schedule.getBranchName());
+
+                schedulesByDate.computeIfAbsent(dateKey, k -> new java.util.ArrayList<>()).add(scheduleData);
+            }
+
+            // Tạo response
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("success", true);
+            response.put("year", targetYear);
+            response.put("month", targetMonth);
+            response.put("schedules", schedulesByDate);
+            response.put("totalCount", filteredSchedules.size());
+
+            // Thống kê
+            Map<String, Long> stats = new java.util.HashMap<>();
+            stats.put("total", (long) filteredSchedules.size());
+            stats.put("playing", filteredSchedules.stream().filter(s -> "ACTIVE".equals(s.getStatus())).count());
+            stats.put("comingSoon", filteredSchedules.stream().filter(s -> "UPCOMING".equals(s.getStatus())).count());
+            stats.put("stopped", filteredSchedules.stream().filter(s -> "ENDED".equals(s.getStatus())).count());
+            response.put("stats", stats);
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("Error getting calendar data", e);
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("schedules", new java.util.HashMap<>());
+            return errorResponse;
+        }
+    }
+
+    /**
+     * Helper method để map status từ backend sang frontend
+     */
+    private String mapStatusToFrontend(String backendStatus) {
+        if (backendStatus == null)
+            return "unknown";
+
+        switch (backendStatus.toUpperCase()) {
+            case "ACTIVE":
+                return "playing";
+            case "UPCOMING":
+                return "coming-soon";
+            case "ENDED":
+                return "stopped";
+            default:
+                return "unknown";
+        }
     }
 
 }
