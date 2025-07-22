@@ -56,19 +56,20 @@
                 <input type="hidden" th:field="*{branch.id}" />
                 <div class="form-group">
                     <label class="form-label">Tên phòng chiếu</label>
-                    <input type="text" class="form-control" th:field="*{name}" required>
+                    <input type="text" class="form-control" th:field="*{name}" required th:readonly="${readonly}" th:disabled="${readonly}" >
+                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Chọn hàng ghế:</label>
-                    <input type="number" class="form-control" id="rows" th:field="*{rows}" min="2" required>
+                    <input type="number" class="form-control" id="rows" th:field="*{rows}" min="2" required th:readonly="${readonly}" th:disabled="${readonly}" >
                 </div>
                 <div class="form-group">
                     <label class="form-label">Số ghế mỗi hàng:</label>
-                    <input type="number" class="form-control" id="seatsPerRow" th:field="*{seatsPerRow}" min="2" required>
+                    <input type="number" class="form-control" id="seatsPerRow" th:field="*{seatsPerRow}" min="2" required th:readonly="${readonly}" th:disabled="${readonly}" >
                 </div>
                 <div class="form-group">
                     <label class="form-label">Số lượng ghế</label>
-                    <input type="number" class="form-control" id="capacity" th:field="*{capacity}" readonly>
+                    <input type="number" class="form-control" id="capacity" th:field="*{capacity}" readonly th:readonly="${readonly}" th:disabled="${readonly}" >
                 </div>
                 <div id="rowsSeatsError" class="error-message"></div>
                 <div class="form-group">
@@ -78,17 +79,17 @@
                 <div class="form-group">
                     <label class="form-label">Type:</label>
                     <div>
-                        <label><input type="radio" th:field="*{type}" value="2D" required> 2D</label>
-                        <label class="ms-3"><input type="radio" th:field="*{type}" value="3D"> 3D</label>
-                        <label class="ms-3"><input type="radio" th:field="*{type}" value="4D"> 4D</label>
-                        <label class="ms-3"><input type="radio" th:field="*{type}" value="5D"> 5D</label>
-                        <label class="ms-3"><input type="radio" th:field="*{type}" value="IMAX"> IMAX</label>
+                        <label><input type="radio" th:field="*{type}" value="2D" required th:disabled="${readonly}"> 2D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="3D" th:disabled="${readonly}"> 3D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="4D" th:disabled="${readonly}"> 4D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="5D" th:disabled="${readonly}"> 5D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="IMAX" th:disabled="${readonly}"> IMAX</label>
 
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Trạng thái:</label>
-                    <select class="form-select" th:field="*{status}" required>
+                    <select class="form-select" th:field="*{status}" required th:disabled="${readonly}" >
                         <option value="ACTIVE">Hoạt động</option>
                         <option value="INACTIVE">Không hoạt động</option>
                         <option value="MAINTENANCE">Bảo trì</option>
@@ -97,11 +98,11 @@
 
                 <div class="form-group">
                     <label class="form-label">Mô tả</label>
-                    <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                    <textarea class="form-control" th:field="*{description}" rows="3" th:readonly="${readonly}" th:disabled="${readonly}" ></textarea>
                 </div>
                 <div class="d-flex gap-2 mt-4">
                     <a th:href="@{/admin/screening-rooms/branch/{id}(id=${screeningRoom.branch.id})}" class="btn btn-secondary">Hủy</a>
-                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="submit" class="btn btn-primary" th:if="${readonly == null or !readonly}">Lưu</button>
                 </div>
             </form>
         </div>

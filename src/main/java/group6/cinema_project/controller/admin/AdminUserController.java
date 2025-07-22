@@ -1,4 +1,4 @@
-package group6.cinema_project.controller;
+package group6.cinema_project.controller.admin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +33,14 @@ public class AdminUserController {
     @GetMapping("/list")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
-        return "admin_user_list";
+        return "admin/user_list";
     }
 
     // Hiển thị form thêm user
     @GetMapping("/add")
     public String showAddUserForm(Model model) {
         model.addAttribute("user", new UserRegistrationDto());
-        return "admin_user_add";
+        return "admin/user_add";
     }
 
     // Xử lý thêm user
@@ -49,7 +49,7 @@ public class AdminUserController {
                          BindingResult result,
                          RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "admin_user_add";
+            return "admin/user_add";
         }
         try {
             userService.registerUser(userDto);
@@ -67,7 +67,7 @@ public class AdminUserController {
         try {
             UserDto user = userService.getUserById(id);
             model.addAttribute("user", user);
-            return "admin_user_view";
+            return "admin/user_view";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy người dùng!");
             return "redirect:/admin/users/list";
@@ -95,7 +95,7 @@ public class AdminUserController {
             model.addAttribute("user", user);
             model.addAttribute("resetPasswordSuccess", true);
             model.addAttribute("newPassword", newPassword);
-            return "admin_user_view";
+            return "admin/user_view";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể reset mật khẩu: " + e.getMessage());
             return "redirect:/admin/users/list";

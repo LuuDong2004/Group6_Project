@@ -1,26 +1,24 @@
-package group6.cinema_project.service.impl;
+package group6.cinema_project.service.admin.impl;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import group6.cinema_project.dto.FoodDto;
 import group6.cinema_project.entity.Food;
 import group6.cinema_project.repository.FoodRepository;
-import group6.cinema_project.service.FoodService;
-import lombok.RequiredArgsConstructor;
+import group6.cinema_project.service.admin.AdminFoodService;
 
 @Service
-@RequiredArgsConstructor
-public class FoodServiceImpl implements FoodService {
-    private final FoodRepository foodRepository;
+public class AdminFoodServiceImpl implements AdminFoodService {
+    @Autowired
+    private FoodRepository foodRepository;
 
     private FoodDto toDto(Food food) {
         if (food == null) return null;
@@ -51,11 +49,29 @@ public class FoodServiceImpl implements FoodService {
         return foodRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
+    // Hàm mới hỗ trợ search và sort
     @Override
-    public Page<FoodDto> getFoodsPage(int page, int size) {
-        Page<Food> foodPage = foodRepository.findAll(PageRequest.of(page, size));
-        List<FoodDto> foodDtos = foodPage.getContent().stream().map(this::toDto).collect(Collectors.toList());
-        return new PageImpl<>(foodDtos, foodPage.getPageable(), foodPage.getTotalElements());
+    public Page<FoodDto> getFoodsPage(int page, int size, String search, String sort) {
+        Page<Food> foodPage;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        boolean isSearch = search != null && !search.trim().isEmpty();
+        boolean isSortAsc = "asc".equalsIgnoreCase(sort);
+        boolean isSortDesc = "desc".equalsIgnoreCase(sort);
+        if (isSearch && isSortAsc) {
+            foodPage = foodRepository.searchByNameOrderByPriceAsc(search, pageable);
+        } else if (isSearch && isSortDesc) {
+            foodPage = foodRepository.searchByNameOrderByPriceDesc(search, pageable);
+        } else if (isSearch) {
+            foodPage = foodRepository.searchByName(search, pageable);
+        } else if (isSortAsc) {
+            foodPage = foodRepository.findAllOrderByPriceAsc(pageable);
+        } else if (isSortDesc) {
+            foodPage = foodRepository.findAllOrderByPriceDesc(pageable);
+        } else {
+            foodPage = foodRepository.findAll(pageable);
+        }
+        java.util.List<FoodDto> foodDtos = foodPage.getContent().stream().map(this::toDto).collect(java.util.stream.Collectors.toList());
+        return new org.springframework.data.domain.PageImpl<>(foodDtos, foodPage.getPageable(), foodPage.getTotalElements());
     }
 
     @Override
@@ -76,6 +92,16 @@ public class FoodServiceImpl implements FoodService {
         foodRepository.deleteById(id);
     }
 
+    @Override
+    public boolean isNameDuplicate(String name, Integer id) {
+        List<Food> foods = foodRepository.findByName(name);
+        if (id == null) {
+            return !foods.isEmpty();
+        } else {
+            return foods.stream().anyMatch(f -> f.getId() != id);
+        }
+    }
+
     // Trừ số lượng combo food khi user mua
     @Transactional
     public void subtractFoodQuantities(Map<Integer, Integer> foodOrder) {
@@ -83,7 +109,7 @@ public class FoodServiceImpl implements FoodService {
             Integer foodId = entry.getKey();
             Integer quantity = entry.getValue();
             Food food = foodRepository.findById(foodId)
-                .orElseThrow(() -> new RuntimeException("Combo food not found"));
+                    .orElseThrow(() -> new RuntimeException("Combo food not found"));
             if (food.getSize() < quantity) {
                 throw new RuntimeException("Không đủ số lượng combo food: " + food.getName());
             }

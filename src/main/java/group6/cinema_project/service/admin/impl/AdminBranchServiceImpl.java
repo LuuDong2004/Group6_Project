@@ -1,4 +1,4 @@
-package group6.cinema_project.service.impl;
+package group6.cinema_project.service.admin.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +14,11 @@ import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.repository.BranchRepository;
 import group6.cinema_project.repository.CinemaChainRepository;
-import group6.cinema_project.service.BranchService;
+import group6.cinema_project.service.admin.AdminBranchService;
+
 
 @Service
-public class BranchServiceImpl implements BranchService {
+public class AdminBranchServiceImpl implements AdminBranchService {
     @Autowired
     private BranchRepository branchRepository;
     @Autowired
@@ -69,4 +70,29 @@ public class BranchServiceImpl implements BranchService {
         List<BranchDto> branchDtos = branchPage.getContent().stream().map(BranchDto::fromEntity).collect(Collectors.toList());
         return new PageImpl<>(branchDtos, branchPage.getPageable(), branchPage.getTotalElements());
     }
+
+    @Override
+    public Page<Branch> getBranchesPage(int page, int size, String name, String address, String cinemaChain) {
+        boolean hasSearch = (name != null && !name.trim().isEmpty()) || (address != null && !address.trim().isEmpty()) || (cinemaChain != null && !cinemaChain.trim().isEmpty());
+        if (hasSearch) {
+            return branchRepository.searchBranches(
+                (name == null || name.isBlank()) ? null : name,
+                (address == null || address.isBlank()) ? null : address,
+                (cinemaChain == null || cinemaChain.isBlank()) ? null : cinemaChain,
+                PageRequest.of(page, size)
+            );
+        } else {
+            return branchRepository.findAll(PageRequest.of(page, size));
+        }
+    }
+
+    @Override
+public boolean isNameDuplicate(String name, Integer id) {
+    List<Branch> branches = branchRepository.findByName(name);
+    if (id == null) {
+        return !branches.isEmpty();
+    } else {
+        return branches.stream().anyMatch(b -> b.getId() != id);
+    }
+}
 } 

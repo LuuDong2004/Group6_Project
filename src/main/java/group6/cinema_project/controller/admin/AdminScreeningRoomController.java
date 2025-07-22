@@ -1,9 +1,10 @@
-package group6.cinema_project.controller;
+package group6.cinema_project.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,29 +15,38 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.ScreeningRoomDto;
-import group6.cinema_project.service.BranchService;
-import group6.cinema_project.service.ScreeningRoomService;
+import group6.cinema_project.service.admin.AdminBranchService;
+import group6.cinema_project.service.admin.AdminScreeningRoomService;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/admin/screening-rooms")
 public class AdminScreeningRoomController {
     
     @Autowired
-    private ScreeningRoomService screeningRoomService;
+    private AdminScreeningRoomService adminScreeningRoomService;
     
     @Autowired
-    private BranchService branchService;
+    private AdminBranchService adminBranchService;
     
     @GetMapping("/branch/{branchId}")
     public String listScreeningRooms(@PathVariable int branchId, Model model, RedirectAttributes redirectAttributes,
                                      @RequestParam(value = "page", defaultValue = "0") int page,
-                                     @RequestParam(value = "size", defaultValue = "5") int size) {
-        BranchDto branch = branchService.findById(branchId);
+                                     @RequestParam(value = "size", defaultValue = "5") int size,
+                                     @RequestParam(value = "name", required = false) String name,
+                                     @RequestParam(value = "type", required = false) String type,
+                                     @RequestParam(value = "status", required = false) String status,
+                                     @RequestParam(value = "rows", required = false) Integer rows,
+                                     @RequestParam(value = "seatsPerRow", required = false) Integer seatsPerRow) {
+        BranchDto branch = adminBranchService.findById(branchId);
         if (branch == null) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi nhánh!");
             return "redirect:/admin/branches";
         }
-        Page<ScreeningRoomDto> roomPage = screeningRoomService.getRoomsPage(branchId, page, size);
+        name = (name != null && !name.trim().isEmpty()) ? name.trim() : null;
+        type = (type != null && !type.trim().isEmpty()) ? type.trim() : null;
+        status = (status != null && !status.trim().isEmpty()) ? status.trim() : null;
+        Page<ScreeningRoomDto> roomPage = adminScreeningRoomService.getRoomsPage(branchId, page, size, name, type, status, rows, seatsPerRow);
         ScreeningRoomDto screeningRoomDto = new ScreeningRoomDto();
         screeningRoomDto.setBranch(branch);
         screeningRoomDto.setRows(10);
@@ -48,24 +58,38 @@ public class AdminScreeningRoomController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", roomPage.getTotalPages());
         model.addAttribute("pageSize", size);
-        return "admin_screening_room_management";
+        model.addAttribute("name", name);
+        model.addAttribute("type", type);
+        model.addAttribute("status", status);
+        model.addAttribute("rows", rows);
+        model.addAttribute("seatsPerRow", seatsPerRow);
+        return "admin/screening_room_management";
     }
     
     @GetMapping("/add")
     public String addScreeningRoomForm(@org.springframework.web.bind.annotation.RequestParam("branchId") int branchId, Model model) {
-        BranchDto branch = branchService.findById(branchId);
+        BranchDto branch = adminBranchService.findById(branchId);
         ScreeningRoomDto screeningRoomDto = new ScreeningRoomDto();
         screeningRoomDto.setBranch(branch);
         screeningRoomDto.setRows(8);
         screeningRoomDto.setSeatsPerRow(8);
         screeningRoomDto.setStatus("ACTIVE");
         model.addAttribute("screeningRoom", screeningRoomDto);
-        return "admin_screening_room_edit";
+        return "admin/screening_room_edit";
     }
     
     @PostMapping("/add")
-    public String addScreeningRoom(@ModelAttribute("screeningRoom") ScreeningRoomDto screeningRoomDto, 
+    public String addScreeningRoom(@Valid @ModelAttribute("screeningRoom") ScreeningRoomDto screeningRoomDto, BindingResult result, 
                                    RedirectAttributes redirectAttributes, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("screeningRoom", screeningRoomDto);
+            return "admin/screening_room_edit";
+        }
+//        if (adminScreeningRoomService.isNameDuplicate(screeningRoomDto.getName(), null)) {
+//            result.rejectValue("name", "error.screeningRoom", "Tên phòng đã tồn tại.");
+//            model.addAttribute("screeningRoom", screeningRoomDto);
+//            return "admin/screening_room_edit";
+//        }
         int rows = screeningRoomDto.getRows();
         int seats = screeningRoomDto.getSeatsPerRow();
         if (rows != seats) {
@@ -79,7 +103,7 @@ public class AdminScreeningRoomController {
             return "redirect:/admin/screening-rooms/branch/" + screeningRoomDto.getBranch().getId();
         }
         try {
-            screeningRoomService.saveOrUpdate(screeningRoomDto);
+            adminScreeningRoomService.saveOrUpdate(screeningRoomDto);
             redirectAttributes.addFlashAttribute("success", "Thêm phòng chiếu thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể thêm phòng chiếu: " + e.getMessage());
@@ -89,19 +113,28 @@ public class AdminScreeningRoomController {
     
     @GetMapping("/edit/{id}")
     public String editScreeningRoomForm(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
-        ScreeningRoomDto screeningRoom = screeningRoomService.getRoomById(id);
+        ScreeningRoomDto screeningRoom = adminScreeningRoomService.getRoomById(id);
         if (screeningRoom == null) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy phòng chiếu!");
             return "redirect:/admin/branches";
         }
         
         model.addAttribute("screeningRoom", screeningRoom);
-        return "admin_screening_room_edit";
+        return "admin/screening_room_edit";
     }
     
     @PostMapping("/edit/{id}")
-    public String editScreeningRoom(@PathVariable int id, @ModelAttribute("screeningRoom") ScreeningRoomDto screeningRoomDto, 
+    public String editScreeningRoom(@PathVariable int id, @Valid @ModelAttribute("screeningRoom") ScreeningRoomDto screeningRoomDto, BindingResult result, 
                                     RedirectAttributes redirectAttributes, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("screeningRoom", screeningRoomDto);
+            return "admin/screening_room_edit";
+        }
+//        if (adminScreeningRoomService.isNameDuplicate(screeningRoomDto.getName(), id)) {
+//            result.rejectValue("name", "error.screeningRoom", "Tên phòng đã tồn tại.");
+//            model.addAttribute("screeningRoom", screeningRoomDto);
+//            return "admin/screening_room_edit";
+//        }
         int rows = screeningRoomDto.getRows();
         int seats = screeningRoomDto.getSeatsPerRow();
         if (rows != seats) {
@@ -116,7 +149,7 @@ public class AdminScreeningRoomController {
         }
         try {
             screeningRoomDto.setId(id);
-            screeningRoomService.saveOrUpdate(screeningRoomDto);
+            adminScreeningRoomService.saveOrUpdate(screeningRoomDto);
             redirectAttributes.addFlashAttribute("success", "Cập nhật phòng chiếu thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể cập nhật phòng chiếu: " + e.getMessage());
@@ -127,19 +160,31 @@ public class AdminScreeningRoomController {
     @GetMapping("/delete/{id}")
     public String deleteScreeningRoom(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
-            ScreeningRoomDto screeningRoom = screeningRoomService.getRoomById(id);
+            ScreeningRoomDto screeningRoom = adminScreeningRoomService.getRoomById(id);
             if (screeningRoom == null) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phòng chiếu!");
                 return "redirect:/admin/branches";
             }
             
             int branchId = screeningRoom.getBranch().getId();
-            screeningRoomService.deleteRoom(id);
+            adminScreeningRoomService.deleteRoom(id);
             redirectAttributes.addFlashAttribute("success", "Xóa phòng chiếu thành công!");
             return "redirect:/admin/screening-rooms/branch/" + branchId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể xóa phòng chiếu. Phòng có thể đang được sử dụng.");
             return "redirect:/admin/branches";
         }
+    }
+
+    @GetMapping("/view/{id}")
+    public String viewScreeningRoom(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
+        ScreeningRoomDto screeningRoom = adminScreeningRoomService.getRoomById(id);
+        if (screeningRoom == null) {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy phòng chiếu!");
+            return "redirect:/admin/branches";
+        }
+        model.addAttribute("screeningRoom", screeningRoom);
+        model.addAttribute("readonly", true);
+        return "admin/screening_room_edit";
     }
 } 

@@ -51,22 +51,11 @@
         .delete-btn { background: #fee2e2; color: #ef4444; }
         .delete-btn:hover { background: #fecaca; }
         .view-btn {
-            background: #e0f2fe;
+            background: #dbeafe;
             color: #2563eb;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background 0.2s, color 0.2s;
-            margin-right: 4px;
         }
         .view-btn:hover {
-            background: #bae6fd;
-            color: #1d4ed8;
+            background: #bfdbfe;
         }
         @media (max-width: 768px) { .sidebar { width: 80px; } .sidebar .sidebar-header h5, .sidebar .sidebar-header small, .sidebar .sidebar-menu span, .sidebar .mt-auto .text-white, .sidebar .mt-auto small { display: none; } .sidebar .sidebar-menu .menu-item { justify-content: center; } .sidebar .sidebar-menu .menu-item i { margin-right: 0; font-size: 1.25rem; } .main-content-wrapper { margin-left: 80px; } .header-custom { left: 80px; padding: 0 1rem; } .header-custom .flex-grow-1 { display: none; } .chain-list-section .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
     </style>
@@ -98,6 +87,11 @@
                     <i class="fas fa-plus me-1"></i> Thêm Chuỗi rạp
                 </button>
             </div>
+            <!-- Form search -->
+            <form method="get" action="" class="mb-3 d-flex" style="gap: 10px;">
+                <input type="text" name="search" placeholder="Tìm kiếm theo tên chuỗi rạp" th:value="${search}" class="form-control" style="width: 250px;">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            </form>
             <div class="table-container mb-4">
                 <table class="chain-table">
                     <thead>
@@ -134,14 +128,14 @@
                 <nav th:if="${totalPages > 1}">
                     <ul class="pagination">
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage - 1},size=${pageSize})}">Trước</a>
+                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage - 1},size=${pageSize},search=${search})}">Trước</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                             th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
+                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${i},size=${pageSize},search=${search})}" th:text="${i + 1}"></a>
                         </li>
                         <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage + 1},size=${pageSize})}">Sau</a>
+                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage + 1},size=${pageSize},search=${search})}">Sau</a>
                         </li>
                     </ul>
                 </nav>
@@ -161,6 +155,7 @@
                         <div class="mb-3">
                             <label class="form-label">Tên chuỗi rạp</label>
                             <input type="text" class="form-control" th:field="*{name}" required>
+                            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Mô tả</label>
@@ -200,6 +195,20 @@
             checkViewport();
             window.addEventListener('resize', checkViewport);
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                let lastValue = searchInput.value;
+                searchInput.addEventListener('input', function() {
+                    if (this.value === '' && lastValue !== '') {
+                        this.form.submit();
+                    }
+                    lastValue = this.value;
+                });
+            }
+        });
     </script>
 </div>
 </body>

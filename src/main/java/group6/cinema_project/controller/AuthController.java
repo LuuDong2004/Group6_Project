@@ -42,6 +42,11 @@ public class AuthController {
                             Model model,
                             HttpServletRequest request) {
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            // Nếu đã đăng nhập, redirect về trang chủ
+            return "redirect:/";
+        }
 
         if (error != null) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
@@ -58,8 +63,6 @@ public class AuthController {
         model.addAttribute("loginUser", new UserLoginDto());
 
         model.addAttribute("user", new UserRegistrationDto());
-
-
 
         return "sign_in";
     }

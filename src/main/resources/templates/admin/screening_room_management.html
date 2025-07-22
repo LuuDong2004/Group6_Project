@@ -131,6 +131,13 @@
             font-weight: 700;
             color: #1e293b;
         }
+        .view-btn {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .view-btn:hover {
+            background: #bfdbfe;
+        }
         .add-room-btn {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
@@ -280,6 +287,8 @@
                 align-items: flex-start;
                 gap: 1rem;
             }
+
+
         }
     </style>
 </head>
@@ -353,6 +362,26 @@
                 </div>
                 
                 <div class="table-container">
+                    <form method="get" class="d-flex gap-2 mb-3">
+                        <input type="text" name="name" placeholder="Tên phòng" th:value="${name}" class="form-control" style="width: 150px;">
+                        <select name="type" class="form-select" style="width: 100px;">
+                            <option value="">Loại phòng</option>
+                            <option value="2D" th:selected="${type} == '2D'">2D</option>
+                            <option value="3D" th:selected="${type} == '3D'">3D</option>
+                            <option value="4D" th:selected="${type} == '4D'">4D</option>
+                            <option value="5D" th:selected="${type} == '5D'">5D</option>
+                            <option value="IMAX" th:selected="${type} == 'IMAX'">IMAX</option>
+                        </select>
+                        <select name="status" class="form-select" style="width: 120px;">
+                            <option value="">Trạng thái</option>
+                            <option value="ACTIVE" th:selected="${status} == 'ACTIVE'">Hoạt động</option>
+                            <option value="INACTIVE" th:selected="${status} == 'INACTIVE'">Không hoạt động</option>
+                            <option value="MAINTENANCE" th:selected="${status} == 'MAINTENANCE'">Bảo trì</option>
+                        </select>
+                        <input type="number" name="rows" placeholder="Số hàng" th:value="${rows}" class="form-control" style="width: 80px;">
+                        <input type="number" name="seatsPerRow" placeholder="Ghế/hàng" th:value="${seatsPerRow}" class="form-control" style="width: 100px;">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </form>
                     <table class="screening-room-table">
                         <thead>
                             <tr>
@@ -382,6 +411,9 @@
                                 <td th:text="${room.description}"></td>
                                 <td>
                                     <div class="actions">
+                                        <a th:href="@{/admin/screening-rooms/view/{id}(id=${room.id})}" class="action-btn view-btn" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                         <a th:href="@{/admin/screening-rooms/edit/{id}(id=${room.id})}" class="action-btn edit-btn" title="Sửa">
                                             <i class="fas fa-pencil-alt"></i>
                                         </a>
@@ -517,6 +549,26 @@
             window.addEventListener('resize', checkViewport);
         }
     </script>
-</div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    ['name', 'type', 'status', 'rows', 'seatsPerRow'].forEach(function(field) {
+        const input = document.querySelector('[name="' + field + '"]');
+        if (input) {
+            // Với input text/number: submit khi thay đổi giá trị
+            if (input.type === 'text' || input.type === 'number') {
+                input.addEventListener('input', function() {
+                    this.form.submit();
+                });
+            }
+            // Với select: submit khi chọn giá trị khác
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+        }
+    });
+});
+</script>
 </body>
 </html> 

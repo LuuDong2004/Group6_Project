@@ -1,4 +1,4 @@
-package group6.cinema_project.service.impl;
+package group6.cinema_project.service.admin.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,17 +10,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.Seat;
 import group6.cinema_project.repository.ScreeningRoomRepository;
 import group6.cinema_project.repository.SeatRepository;
-import group6.cinema_project.service.ScreeningRoomService;
+import group6.cinema_project.service.admin.AdminScreeningRoomService;
+import jakarta.transaction.Transactional;
 
 @Service
-public class ScreeningRoomServiceImpl implements ScreeningRoomService {
+public class AdminScreeningRoomServiceImpl implements AdminScreeningRoomService {
     @Autowired
     private ScreeningRoomRepository screeningRoomRepository;
     @Autowired
@@ -141,9 +141,17 @@ public class ScreeningRoomServiceImpl implements ScreeningRoomService {
     }
 
     @Override
-    public Page<ScreeningRoomDto> getRoomsPage(int branchId, int page, int size) {
-        Page<ScreeningRoom> roomPage = screeningRoomRepository.findByBranchId(branchId, PageRequest.of(page, size));
+    public Page<ScreeningRoomDto> getRoomsPage(int branchId, int page, int size, String name, String type, String status, Integer rows, Integer seatsPerRow) {
+        Page<ScreeningRoom> roomPage = screeningRoomRepository.searchRooms(branchId,
+            (name != null && !name.trim().isEmpty()) ? name.trim() : null,
+            (type != null && !type.trim().isEmpty()) ? type.trim() : null,
+            (status != null && !status.trim().isEmpty()) ? status.trim() : null,
+            rows,
+            seatsPerRow,
+            PageRequest.of(page, size)
+        );
         List<ScreeningRoomDto> roomDtos = roomPage.getContent().stream().map(room -> modelMapper.map(room, ScreeningRoomDto.class)).collect(Collectors.toList());
         return new PageImpl<>(roomDtos, roomPage.getPageable(), roomPage.getTotalElements());
     }
+
 } 

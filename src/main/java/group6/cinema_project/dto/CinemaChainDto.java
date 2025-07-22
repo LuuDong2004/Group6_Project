@@ -1,6 +1,7 @@
 package group6.cinema_project.dto;
 
 import group6.cinema_project.entity.CinemaChain;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CinemaChainDto {
     private int id;
+    @NotBlank(message = "Tên chuỗi rạp không được để trống.")
     private String name;
     private String description;
 

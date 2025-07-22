@@ -1,11 +1,14 @@
 package group6.cinema_project.dto;
 
 import group6.cinema_project.entity.Branch;
+import jakarta.validation.constraints.NotBlank;
 
 public class BranchDto {
     private int id;
+    @NotBlank(message = "Tên chi nhánh không được để trống.")
     private String name;
     private String description;
+    @NotBlank(message = "Địa chỉ không được để trống.")
     private String address;
     private int cinemaChainId = 0;
 
@@ -47,15 +50,15 @@ public class BranchDto {
     }
 
     // Convert DTO to Entity
-//    public Branch toEntity(RegionRepository regionRepo, CinemaChainRepository chainRepo) {
-//        Branch branch = new Branch();
-//        branch.setName(this.name);
-//        branch.setDescription(this.description);
-//        branch.setAddress(this.address);
-//        branch.setRegion(regionRepo.findById(this.regionId).orElse(null));
-//        branch.setCinemaChain(chainRepo.findById(this.cinemaChainId).orElse(null));
-//        return branch;
-//    }
+    public Branch toEntity() {
+        Branch branch = new Branch();
+        branch.setId(this.id);
+        branch.setName(this.name);
+        branch.setDescription(this.description);
+        branch.setAddress(this.address);
+        // Không set cinemaChain ở đây (cần xử lý riêng nếu cần)
+        return branch;
+    }
 
     // Convert Entity to DTO
     public static BranchDto fromEntity(Branch branch) {

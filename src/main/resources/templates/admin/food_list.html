@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CinemaAdmin - Quản lý Chi nhánh Rạp</title>
+    <title>CinemaAdmin - Quản lý Combo Food</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Copy toàn bộ style từ admin_food_list.html vào đây */
+        /* Copy toàn bộ style từ admin_movie_list.html vào đây */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
@@ -54,8 +54,6 @@
             color: #6366f1;
         }
         .sidebar-menu {
-            display: flex;
-            flex-direction: column;
             flex-grow: 1;
             padding-top: 1rem;
         }
@@ -115,24 +113,24 @@
         .main-content-wrapper.expanded .header-custom {
             left: 80px;
         }
-        .branch-list-section * {
+        .movie-list-section * {
             box-sizing: border-box;
         }
-        .branch-list-section {
+        .movie-list-section {
             color: #334155;
         }
-        .branch-list-section .page-header {
+        .movie-list-section .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 32px;
         }
-        .branch-list-section .page-title {
+        .movie-list-section .page-title {
             font-size: 24px;
             font-weight: 700;
             color: #1e293b;
         }
-        .add-branch-btn {
+        .add-movie-btn {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
@@ -147,7 +145,7 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .add-branch-btn:hover {
+        .add-movie-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
@@ -157,12 +155,12 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             overflow-x: auto;
         }
-        .branch-table {
+        .movie-table {
             width: 100%;
             border-collapse: collapse;
             min-width: 900px;
         }
-        .branch-table th {
+        .movie-table th {
             background: #f8fafc;
             padding: 12px 16px;
             text-align: left;
@@ -172,14 +170,22 @@
             border-bottom: 1px solid #e2e8f0;
             text-transform: uppercase;
         }
-        .branch-table td {
+        .movie-table td {
             padding: 12px 16px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             font-size: 14px;
         }
-        .branch-table tr:hover {
+        .movie-table tr:hover {
             background: #f8fafc;
+        }
+        .movie-poster {
+            width: 40px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e2e8f0;
+            flex-shrink: 0;
         }
         .actions {
             display: flex;
@@ -197,12 +203,89 @@
             transition: all 0.2s;
             font-size: 13px;
         }
-        .view-btn {
-            background: #dbeafe;
-            color: #2563eb;
+        .edit-btn {
+            background: #e0e7ff;
+            color: #4338ca;
         }
-        .view-btn:hover {
-            background: #bfdbfe;
+        .edit-btn:hover {
+            background: #c7d2fe;
+        }
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        .food-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .food-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        .food-table {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .food-table th {
+            background: #f1f5f9;
+            color: #6366f1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+        .food-table td {
+            font-size: 1rem;
+            color: #334155;
+        }
+        .no-food {
+            color: #94a3b8;
+            font-style: italic;
+            text-align: center;
+        }
+        .add-food-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .add-food-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 13px;
         }
         .edit-btn {
             background: #e0e7ff;
@@ -217,6 +300,21 @@
         }
         .delete-btn:hover {
             background: #fecaca;
+        }
+        .food-poster {
+            width: 40px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .view-btn {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .view-btn:hover {
+            background: #bfdbfe;
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -246,11 +344,13 @@
             .header-custom .flex-grow-1 {
                 display: none;
             }
-            .branch-list-section .page-header {
+            .movie-list-section .page-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
             }
+            .food-card { padding: 1rem; }
+            .food-table th, .food-table td { font-size: 0.95rem; }
         }
     </style>
 </head>
@@ -263,7 +363,7 @@
         <div class="d-flex align-items-center">
             <button class="btn btn-link text-secondary me-2" id="sidebarToggle"><i class="fas fa-bars fs-5"></i>
             </button>
-            <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Chi nhánh Rạp</h4>
+            <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Combo Food</h4>
         </div>
         <div class="d-flex align-items-center">
             <button class="btn btn-link text-secondary me-1 position-relative">
@@ -297,127 +397,107 @@
             </div>
         </div>
     </header>
-    <div class="container-fluid p-4">
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="container mt-5 mb-5">
+        <!-- Thêm form search và sort -->
+        <form method="get" action="" class="mb-3 d-flex" style="gap: 10px;">
+            <input type="text" name="search" placeholder="Tìm kiếm theo tên" th:value="${search}" class="form-control" style="width: 200px;">
+            <select name="sort" class="form-select" style="width: 150px;">
+                <option value="">Sắp xếp theo giá</option>
+                <option value="asc" th:selected="${sort} == 'asc'">Giá tăng dần</option>
+                <option value="desc" th:selected="${sort} == 'desc'">Giá giảm dần</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        </form>
+        <div class="food-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="food-title">Danh sách Combo Food</div>
+                <a th:href="@{/admin/foods/add}" class="add-food-btn">
+                    <i class="fas fa-plus me-1"></i> Thêm Combo Food
+                </a>
             </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div id="branchListView" class="branch-list-section">
-            <div class="page-header">
-                <h1 class="page-title">Danh sách Chi nhánh Rạp</h1>
-                <div class="d-flex gap-2">
-                    <button class="add-branch-btn" data-bs-toggle="modal" data-bs-target="#addBranchModal">
-                        <i class="fas fa-plus me-1"></i> Thêm Chi nhánh
-                    </button>
-                </div>
-            </div>
-            <div class="table-container">
-                <table class="branch-table">
+            <div class="table-responsive">
+                <table class="table food-table">
                     <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Tên chi nhánh</th>
+                        <th>Tên Combo</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
                         <th>Mô tả</th>
-                        <th>Địa chỉ</th>
-                        <th>Chuỗi rạp</th>
+                        <th>Hình ảnh</th>
                         <th>Hành động</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="branch : ${branches}">
-                        <td th:text="${branch.id}"></td>
-                        <td th:text="${branch.name}"></td>
-                        <td th:text="${branch.description}"></td>
-                        <td th:text="${branch.address}"></td>
+                    <tr th:each="food : ${foods}">
+                        <td th:text="${food.id}"></td>
+                        <td th:text="${food.name}"></td>
+                        <td th:text="${food.price}"></td>
+                        <td th:text="${food.size}"></td>
+                        <td th:text="${food.description}"></td>
                         <td>
-                          <span th:each="chain : ${cinemaChains}"
-                                th:if="${chain.id} == ${branch.cinemaChainId}"
-                                th:text="${chain.name}"></span>
+                            <img th:src="@{${food.image}}" alt="Food Image" class="food-poster"/>
                         </td>
                         <td>
                             <div class="actions">
-                                <a th:href="@{/admin/screening-rooms/branch/{id}(id=${branch.id})}" class="action-btn view-btn" title="Xem phòng chiếu">
+                                <a th:href="@{/admin/foods/view/{id}(id=${food.id})}" class="action-btn view-btn" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a th:href="@{/admin/branches/edit/{id}(id=${branch.id})}" class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></a>
-<!--                                <a th:href="@{/admin/branches/delete/{id}(id=${branch.id})}" class="action-btn delete-btn" title="Xóa"-->
-<!--                                   onclick="return confirm('Bạn có chắc muốn xóa chi nhánh này?');">-->
-<!--                                    <i class="fas fa-trash-alt"></i>-->
-<!--                                </a>-->
-                    </div>
+                                <a th:href="@{/admin/foods/edit/{id}(id=${food.id})}" class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></a>
+                            </div>
                         </td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(branches)}">
-                        <td colspan="6" style="text-align: center;">Không có chi nhánh nào để hiển thị.</td>
+                    <tr th:if="${#lists.isEmpty(foods)}">
+                        <td colspan="7" class="no-food">Không có combo nào để hiển thị.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        <!-- Pagination controls -->
-        <div class="d-flex justify-content-center mt-4">
-            <nav th:if="${totalPages > 1}">
-                <ul class="pagination">
-                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/branches(page=${currentPage - 1},size=${pageSize})}">Trước</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                        th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{/admin/branches(page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/branches(page=${currentPage + 1},size=${pageSize})}">Sau</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-    <!-- Modal Thêm chi nhánh -->
-    <div class="modal fade" id="addBranchModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form th:action="@{/admin/branches/add}" method="post" th:object="${branch}">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Thêm chi nhánh mới</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Tên chi nhánh</label>
-                            <input type="text" class="form-control" th:field="*{name}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Mô tả</label>
-                            <textarea class="form-control" th:field="*{description}" rows="2"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Địa chỉ</label>
-                            <input type="text" class="form-control" th:field="*{address}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Chuỗi rạp</label>
-                            <select class="form-select" th:field="*{cinemaChainId}" required>
-                                <option value="">Chọn chuỗi rạp</option>
-                                <option th:each="chain : ${cinemaChains}" th:value="${chain.id}" th:text="${chain.name}"></option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Thêm chi nhánh</button>
-                </div>
-            </form>
+            <!-- Pagination controls -->
+            <div class="d-flex justify-content-center mt-4">
+                <nav th:if="${totalPages > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${currentPage - 1},size=${pageSize}, search=${search}, sort=${sort})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${i},size=${pageSize}, search=${search}, sort=${sort})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${currentPage + 1},size=${pageSize}, search=${search}, sort=${sort})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
-</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sortSelect = document.querySelector('select[name="sort"]');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                let lastValue = searchInput.value;
+                searchInput.addEventListener('input', function() {
+                    if (this.value === '' && lastValue !== '') {
+                        this.form.submit();
+                    }
+                    lastValue = this.value;
+                });
+            }
+        });
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             initializeDashboardBehavior();
         });
@@ -445,4 +525,3 @@
 </div>
 </body>
 </html>
-    
