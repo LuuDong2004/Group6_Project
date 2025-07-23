@@ -117,6 +117,29 @@
         border-radius: 15px;
         border: none;
       }
+
+      /* CSS cho button gradient giống sidebar */
+      .btn-gradient-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+      }
+
+      .btn-gradient-primary:hover {
+        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+      }
+
+      .btn-gradient-primary:focus {
+        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        color: white;
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+      }
     </style>
   </head>
   <body>
@@ -224,7 +247,7 @@
                     <div class="d-grid gap-2">
                       <a
                         th:href="@{/admin/blogs/edit/{id}(id=${blogPost.id})}"
-                        class="btn btn-primary"
+                        class="btn btn-gradient-primary"
                       >
                         <i class="fas fa-edit me-2"></i>Chỉnh sửa
                       </a>
@@ -245,7 +268,7 @@
                       </a>
                       <a
                         th:href="@{/admin/blogs/list}"
-                        class="btn btn-outline-secondary"
+                        class="btn btn-gradient-primary"
                       >
                         <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
                       </a>
@@ -262,19 +285,40 @@
                   </div>
                   <div class="card-body">
                     <div class="mb-3">
-                      <label class="form-label fw-bold">ID:</label>
-                      <p class="mb-0" th:text="${blogPost.id}"></p>
+                      <label class="form-label fw-bold"
+                        >Phim được review:</label
+                      >
+                      <p class="mb-0">
+                        <i class="fas fa-film text-primary me-2"></i>
+                        <span th:text="${blogPost.movieName}"></span>
+                      </p>
                     </div>
                     <div class="mb-3">
                       <label class="form-label fw-bold">Tác giả:</label>
-                      <p class="mb-0" th:text="${blogPost.authorName}"></p>
+                      <p class="mb-0">
+                        <i class="fas fa-user text-secondary me-2"></i>
+                        <span th:text="${blogPost.authorName}"></span>
+                      </p>
                     </div>
                     <div class="mb-3">
                       <label class="form-label fw-bold">Ngày tạo:</label>
-                      <p
-                        class="mb-0"
-                        th:text="${#temporals.format(blogPost.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
-                      ></p>
+                      <p class="mb-0">
+                        <i class="fas fa-calendar text-info me-2"></i>
+                        <span
+                          th:text="${#temporals.format(blogPost.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
+                        ></span>
+                      </p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold"
+                        >Thời gian đọc ước tính:</label
+                      >
+                      <p class="mb-0">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        <span
+                          th:text="${blogPost.estimatedReadTime} + ' phút'"
+                        ></span>
+                      </p>
                     </div>
                     <div class="mb-3">
                       <label class="form-label fw-bold">Tóm tắt:</label>

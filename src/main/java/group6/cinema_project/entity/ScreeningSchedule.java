@@ -43,4 +43,6 @@ public class ScreeningSchedule {
     @Column(name = "status", nullable = false, length = 255)
     private String status;
 
+
+
 }

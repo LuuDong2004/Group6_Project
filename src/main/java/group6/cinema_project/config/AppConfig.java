@@ -9,12 +9,14 @@ import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
-public class AppConfig {
+public class AppConfig implements WebMvcConfigurer {
 
     @Bean
     public ModelMapper modelMapper() {
@@ -30,14 +32,14 @@ public class AppConfig {
         // Define converter to extract names from Set<Director>
         Converter<Set<Director>, Set<String>> directorConverter = context -> context.getSource() == null ? null
                 : context.getSource().stream()
-                .map(Director::getName)
-                .collect(Collectors.toSet());
+                        .map(Director::getName)
+                        .collect(Collectors.toSet());
 
         // Define converter to extract names from Set<Actor>
         Converter<Set<Actor>, Set<String>> actorConverter = context -> context.getSource() == null ? null
                 : context.getSource().stream()
-                .map(Actor::getName)
-                .collect(Collectors.toSet());
+                        .map(Actor::getName)
+                        .collect(Collectors.toSet());
 
         // Configure custom mapping rules when mapping from Movie to MovieDto
         modelMapper.typeMap(Movie.class, MovieDto.class).addMappings(mapper -> {
@@ -56,37 +58,46 @@ public class AppConfig {
         // Configure ScreeningSchedule to ScreeningScheduleDto mapping to skip related
         // entity fields
         // modelMapper.typeMap(group6.cinema_project.entity.ScreeningSchedule.class,
-        //         group6.cinema_project.dto.ScreeningScheduleDto.class).addMappings(mapper -> {
-        //     // Skip all related entity fields to avoid cascade loading issues
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovie);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieImage);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieDuration);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieRating);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieGenre);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomName);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomCapacity);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchName);
-        //     mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchAddress);
+        // group6.cinema_project.dto.ScreeningScheduleDto.class).addMappings(mapper -> {
+        // // Skip all related entity fields to avoid cascade loading issues
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovie);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieImage);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieDuration);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieRating);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setMovieGenre);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomName);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setScreeningRoomCapacity);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchName);
+        // mapper.skip(group6.cinema_project.dto.ScreeningScheduleDto::setBranchAddress);
         // });
 
         // Configure ScreeningRoom to ScreeningRoomDto mapping to skip collections
         modelMapper.typeMap(group6.cinema_project.entity.ScreeningRoom.class,
                 group6.cinema_project.dto.ScreeningRoomDto.class).addMappings(mapper -> {
-            // Skip all collection fields to avoid cascade loading issues
-            mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setSeats);
-            mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setScreeningSchedules);
-            mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchName);
-            mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchAddress);
-        });
+                    // Skip all collection fields to avoid cascade loading issues
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setSeats);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setScreeningSchedules);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchName);
+                    mapper.skip(group6.cinema_project.dto.ScreeningRoomDto::setBranchAddress);
+                });
 
         // Configure Movie to MovieDto mapping to skip collections
         modelMapper.typeMap(group6.cinema_project.entity.Movie.class,
                 group6.cinema_project.dto.MovieDto.class).addMappings(mapper -> {
-            // Skip all collection fields to avoid cascade loading issues
-            mapper.skip(group6.cinema_project.dto.MovieDto::setDirectors);
-            mapper.skip(group6.cinema_project.dto.MovieDto::setActors);
-        });
+                    // Skip all collection fields to avoid cascade loading issues
+                    mapper.skip(group6.cinema_project.dto.MovieDto::setDirectors);
+                    mapper.skip(group6.cinema_project.dto.MovieDto::setActors);
+                });
 
         return modelMapper;
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Cấu hình để serve static files từ external directory với cache control
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:src/main/resources/static/uploads/")
+                .setCachePeriod(0) // Tắt cache để luôn load ảnh mới nhất
+                .resourceChain(false);
     }
 }

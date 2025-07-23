@@ -757,11 +757,11 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="movie : ${movies}">
-                        <td th:text="${movie.id}">#001</td>
+                    <tr th:each="movie, movieStat : ${movies}">
+                        <td th:text="${movieStat.count}"> </td>
                         <td>
                             <div class="movie-info">
-                                <img th:src="${movie.image}"
+                                <img th:src="${movie.image + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}"
                                      th:alt="${movie.name}"
                                      onerror="this.onerror=null;this.src='https://placehold.co/40x60/e2e8f0/94a3b8?text=Poster';"
                                      alt="Movie Poster" class="movie-poster"/>
@@ -769,8 +769,7 @@
                                     <h3 th:text="${movie.name}"></h3>
 
                                     <div class="rating">
-                                        <span class="star">⭐</span>
-                                        <span>N/A</span>
+
                                         <a th:if="${movie.trailer != null and !#strings.isEmpty(movie.trailer)}"
                                            th:href="${movie.trailer}" target="_blank"
                                            style="margin-left: 8px; color: #6366f1; font-size:11px; text-decoration:none;">
@@ -836,21 +835,52 @@
                     </tr>
                     </tbody>
                 </table>
-                <div class="pagination">
+                <div class="pagination" th:if="${totalPages > 1}">
                     <div class="pagination-info">
                         <span th:if="${searchTerm != null and !#strings.isEmpty(searchTerm)}"
-                              th:text="|Tìm thấy ${#lists.size(movies)} phim phù hợp với từ khóa '${searchTerm}'|">
+                              th:text="|Tìm thấy ${totalElements} phim phù hợp với từ khóa '${searchTerm}'|">
                             Tìm thấy 5 phim phù hợp với từ khóa 'action'
                         </span>
                         <span th:if="${searchTerm == null or #strings.isEmpty(searchTerm)}"
-                              th:text="|Hiển thị ${#lists.size(movies)} của ${#lists.size(movies)} phim (Tổng cộng ${#lists.size(movies)} phim)|">
-                            Hiển thị 1 đến 3 của 248 phim
+                              th:text="|Hiển thị ${currentPage * size + 1} đến ${(currentPage + 1) * size > totalElements ? totalElements : (currentPage + 1) * size} của ${totalElements} phim|">
+                            Hiển thị 1 đến 10 của 248 phim
                         </span>
                     </div>
                     <div class="pagination-controls">
-                        <button class="pagination-btn" disabled>Trước</button>
-                        <button class="pagination-btn" active>1</button>
-                        <button class="pagination-btn" disabled>Tiếp</button>
+                        <!-- Nút Previous -->
+                        <a th:if="${currentPage > 0}"
+                           th:href="@{/admin/movies/list(page=${currentPage - 1}, size=${size}, searchTerm=${searchTerm}, filterBy=${filterBy})}"
+                           class="pagination-btn">Trước</a>
+                        <button th:if="${currentPage == 0}" class="pagination-btn" disabled>Trước</button>
+
+                        <!-- Các số trang -->
+                        <th:block th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a th:if="${pageNum != currentPage and pageNum < 5}"
+                               th:href="@{/admin/movies/list(page=${pageNum}, size=${size}, searchTerm=${searchTerm}, filterBy=${filterBy})}"
+                               th:text="${pageNum + 1}"
+                               class="pagination-btn"></a>
+                            <button th:if="${pageNum == currentPage and pageNum < 5}"
+                                    th:text="${pageNum + 1}"
+                                    class="pagination-btn active"></button>
+                        </th:block>
+
+                        <!-- Dấu ... nếu có nhiều trang -->
+                        <span th:if="${totalPages > 5}" class="pagination-btn">...</span>
+
+                        <!-- Trang cuối -->
+                        <a th:if="${totalPages > 5 and currentPage != totalPages - 1}"
+                           th:href="@{/admin/movies/list(page=${totalPages - 1}, size=${size}, searchTerm=${searchTerm}, filterBy=${filterBy})}"
+                           th:text="${totalPages}"
+                           class="pagination-btn"></a>
+                        <button th:if="${totalPages > 5 and currentPage == totalPages - 1}"
+                                th:text="${totalPages}"
+                                class="pagination-btn active"></button>
+
+                        <!-- Nút Next -->
+                        <a th:if="${currentPage < totalPages - 1}"
+                           th:href="@{/admin/movies/list(page=${currentPage + 1}, size=${size}, searchTerm=${searchTerm}, filterBy=${filterBy})}"
+                           class="pagination-btn">Tiếp</a>
+                        <button th:if="${currentPage == totalPages - 1}" class="pagination-btn" disabled>Tiếp</button>
                     </div>
                 </div>
             </div>
@@ -962,6 +992,30 @@
 
             checkViewport();
             window.addEventListener('resize', checkViewport);
+        }
+    </script>
+
+    <!-- Script để force reload ảnh sau khi thêm phim mới -->
+    <script>
+        // Kiểm tra nếu có parameter refresh trong URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('refresh')) {
+            // Force reload tất cả ảnh trong trang
+            const images = document.querySelectorAll('.movie-poster');
+            images.forEach(img => {
+                const src = img.src;
+                if (src.includes('?v=')) {
+                    // Nếu đã có cache-busting parameter, update nó
+                    img.src = src.split('?v=')[0] + '?v=' + new Date().getTime();
+                } else {
+                    // Thêm cache-busting parameter
+                    img.src = src + '?v=' + new Date().getTime();
+                }
+            });
+
+            // Xóa parameter refresh khỏi URL để tránh reload liên tục
+            const newUrl = window.location.pathname + window.location.search.replace(/[?&]refresh=\d+/, '');
+            window.history.replaceState({}, document.title, newUrl);
         }
     </script>
 </body>

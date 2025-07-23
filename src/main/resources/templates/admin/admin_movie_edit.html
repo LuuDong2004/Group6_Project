@@ -686,6 +686,19 @@
 
       <!-- Page Content -->
       <div class="container-fluid p-3 p-md-4">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- Adjusted padding -->
         <!-- Assuming movie object is passed from controller -->
         <form
@@ -967,7 +980,7 @@
                       <p class="mb-1">
                         hoặc <span class="text-primary">chọn tệp</span>
                       </p>
-                      <small>PNG, JPG tối đa 5MB. Đề xuất: 300x450px</small>
+                      <small>PNG hoặc JPG
                       <!-- Removed 'required' for edit form, backend handles if no new image is uploaded -->
                       <input
                         type="file"

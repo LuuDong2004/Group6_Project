@@ -435,6 +435,12 @@ public class AdminBlogServiceImpl implements IAdminBlogService {
             dto.setAuthorUsername(blogPost.getAuthor().getUsername());
         }
 
+        // Thiết lập thông tin phim
+        if (blogPost.getMovie() != null) {
+            dto.setMovieId(blogPost.getMovie().getId());
+            dto.setMovieName(blogPost.getMovie().getName());
+        }
+
         // Tính toán các thuộc tính phụ thuộc
         dto.generateSummary();
         dto.calculateEstimatedReadTime();

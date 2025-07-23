@@ -113,28 +113,34 @@
         margin-bottom: 8px;
       }
       .image-preview {
-        max-width: 200px;
-        max-height: 150px;
+        max-width: 280px;
         border-radius: 10px;
         border: 2px dashed #dee2e6;
-        padding: 10px;
+        padding: 15px;
         display: none;
+        margin: 15px auto; /* Căn giữa ảnh preview với margin trên dưới */
+        background-color: #f8f9fa;
       }
       .image-preview img {
         width: 100%;
         height: auto;
+        max-height: 200px;
+        object-fit: cover;
         border-radius: 8px;
       }
       .file-input-wrapper {
         position: relative;
         overflow: hidden;
-        display: inline-block;
+        display: block; /* Thay đổi từ inline-block thành block */
         cursor: pointer;
         border: 2px dashed #667eea;
         border-radius: 10px;
         padding: 20px;
         text-align: center;
         transition: all 0.3s ease;
+        width: 100%; /* Chiếm toàn bộ chiều rộng */
+        max-width: 300px; /* Giới hạn chiều rộng tối đa */
+        margin: 0 auto; /* Căn giữa */
       }
       .file-input-wrapper:hover {
         background-color: rgba(102, 126, 234, 0.05);
@@ -242,6 +248,33 @@
                     </h5>
                   </div>
                   <div class="card-body">
+                    <!-- Chọn phim -->
+                    <div class="mb-3">
+                      <label for="movieId" class="form-label">
+                        Chọn phim để review <span class="required">*</span>
+                      </label>
+                      <select
+                        class="form-select"
+                        id="movieId"
+                        th:field="*{movieId}"
+                        required
+                      >
+                        <option value="">-- Chọn phim --</option>
+                        <option
+                          th:each="movie : ${movies}"
+                          th:value="${movie.id}"
+                          th:text="${movie.name}"
+                        ></option>
+                      </select>
+                      <div
+                        th:if="${#fields.hasErrors('movieId')}"
+                        class="text-danger small mt-1"
+                      >
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <span th:errors="*{movieId}"></span>
+                      </div>
+                    </div>
+
                     <!-- Tiêu đề -->
                     <div class="mb-3">
                       <label for="title" class="form-label">
@@ -383,6 +416,7 @@
         selector: "#content",
         height: 400,
         menubar: false,
+        statusbar: false, // Ẩn thanh trạng thái dưới cùng
         plugins: [
           "advlist",
           "autolink",
@@ -400,7 +434,6 @@
           "media",
           "table",
           "help",
-          "wordcount",
         ],
         toolbar:
           "undo redo | blocks | " +
@@ -450,8 +483,15 @@
           // Get content from TinyMCE
           tinymce.triggerSave();
 
+          const movieId = document.getElementById("movieId").value;
           const title = document.getElementById("title").value.trim();
           const content = tinymce.get("content").getContent();
+
+          if (!movieId) {
+            e.preventDefault();
+            alert("Vui lòng chọn phim để review");
+            return;
+          }
 
           if (!title) {
             e.preventDefault();

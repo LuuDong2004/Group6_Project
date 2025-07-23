@@ -3,6 +3,7 @@ package group6.cinema_project.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.util.HtmlUtils;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -60,6 +61,16 @@ public class BlogPostDto {
     private String authorUsername;
 
     /**
+     * ID của phim được review.
+     */
+    private Integer movieId;
+
+    /**
+     * Tên phim được review.
+     */
+    private String movieName;
+
+    /**
      * Thời gian tạo bài viết.
      */
     private LocalDateTime createdAt;
@@ -104,12 +115,16 @@ public class BlogPostDto {
     }
 
     /**
-     * Tạo tóm tắt từ nội dung (200 ký tự đầu, loại bỏ HTML tags).
+     * Tạo tóm tắt từ nội dung (200 ký tự đầu, loại bỏ HTML tags và decode HTML
+     * entities).
      */
     public void generateSummary() {
         if (this.content != null && !this.content.trim().isEmpty()) {
             // Loại bỏ HTML tags trước khi tạo tóm tắt
             String plainText = this.content.replaceAll("<[^>]*>", "").trim();
+
+            // Decode HTML entities như &agrave;, &eacute;, etc.
+            plainText = HtmlUtils.htmlUnescape(plainText);
 
             if (plainText.length() > 200) {
                 this.summary = plainText.substring(0, 200) + "...";
@@ -126,8 +141,9 @@ public class BlogPostDto {
      */
     public void calculateEstimatedReadTime() {
         if (this.content != null && !this.content.trim().isEmpty()) {
-            // Loại bỏ HTML tags và đếm từ để tính thời gian đọc
+            // Loại bỏ HTML tags và decode HTML entities trước khi đếm từ
             String plainText = this.content.replaceAll("<[^>]*>", "");
+            plainText = HtmlUtils.htmlUnescape(plainText);
             String[] words = plainText.trim().split("\\s+");
             int wordCount = words.length;
             this.estimatedReadTime = Math.max(1, (int) Math.ceil(wordCount / 200.0));

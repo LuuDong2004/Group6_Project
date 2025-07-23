@@ -20,6 +20,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -31,7 +34,6 @@ import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -62,19 +64,30 @@ public class AdminMovieController {
     @GetMapping("/list")
     public String listMovies(Model model,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
-            @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy) {
-        List<MovieDto> movies;
+            @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MovieDto> moviePage;
 
         // Use the new service methods that include directors and actors for display
+        // with pagination
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            movies = movieService.getFilteredMoviesForDisplay(searchTerm, filterBy);
+            moviePage = movieService.getFilteredMoviesForDisplayWithPagination(searchTerm, filterBy, pageable);
         } else {
-            movies = movieService.getAllMoviesForDisplay();
+            moviePage = movieService.getAllMoviesForDisplayWithPagination(pageable);
         }
 
-        model.addAttribute("movies", movies);
+        model.addAttribute("moviePage", moviePage);
+        model.addAttribute("movies", moviePage.getContent());
         model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
         model.addAttribute("filterBy", filterBy);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", moviePage.getTotalPages());
+        model.addAttribute("totalElements", moviePage.getTotalElements());
+        model.addAttribute("size", size);
+
         return "admin/admin_movie_list";
     }
 
@@ -97,7 +110,8 @@ public class AdminMovieController {
             @RequestParam("image") MultipartFile image,
             @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
             @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
-            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds) {
+            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
+            RedirectAttributes redirectAttributes) {
 
         try {
             MovieDto movie = new MovieDto();
@@ -158,18 +172,26 @@ public class AdminMovieController {
 
             System.out.println("Movie saved successfully: " + movie.getName());
 
+            // Thêm thông báo thành công
+            redirectAttributes.addFlashAttribute("success",
+                    "Phim '" + movie.getName() + "' đã được thêm thành công!");
+
         } catch (ParseException e) {
             System.err.println("Error parsing date: " + e.getMessage());
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Định dạng ngày không hợp lệ");
+            return "redirect:/admin/movies/add";
         } catch (IOException e) {
             System.err.println("Error saving image file: " + e.getMessage());
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi tải lên hình ảnh");
+            return "redirect:/admin/movies/add";
         } catch (Exception e) {
             System.err.println("Error saving movie: " + e.getMessage());
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi thêm phim");
+            return "redirect:/admin/movies/add";
         }
 
-        return "redirect:/admin/movies/list";
+        // Thêm parameter để force refresh cache
+        return "redirect:/admin/movies/list?refresh=" + System.currentTimeMillis();
     }
 
     @GetMapping("/edit/{id}")

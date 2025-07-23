@@ -4,6 +4,7 @@ import group6.cinema_project.dto.BlogPostDto;
 import group6.cinema_project.entity.User;
 import group6.cinema_project.repository.UserRepository;
 import group6.cinema_project.service.Admin.IAdminBlogService;
+import group6.cinema_project.service.IMovieService;
 import group6.cinema_project.config.TinyMCEConfig;
 
 import jakarta.validation.Valid;
@@ -36,6 +37,7 @@ public class AdminBlogController {
     private final IAdminBlogService adminBlogService;
     private final UserRepository userRepository;
     private final TinyMCEConfig tinyMCEConfig;
+    private final IMovieService movieService;
 
     /**
      * Hiển thị danh sách blog posts với tìm kiếm và phân trang.
@@ -62,6 +64,7 @@ public class AdminBlogController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", blogPostPage.getTotalPages());
             model.addAttribute("totalElements", blogPostPage.getTotalElements());
+            model.addAttribute("pageSize", size);
             model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
 
             log.info("Đã tải {} blog posts cho trang {}", blogPostPage.getContent().size(), page);
@@ -86,6 +89,9 @@ public class AdminBlogController {
 
             // Thêm TinyMCE config
             model.addAttribute("tinyMCEUrl", tinyMCEConfig.getTinyMCEUrl());
+
+            // Thêm danh sách phim để chọn
+            model.addAttribute("movies", movieService.getAllMovie());
 
             return "admin/admin_blog_add";
 
@@ -192,6 +198,9 @@ public class AdminBlogController {
 
             // Thêm TinyMCE config
             model.addAttribute("tinyMCEUrl", tinyMCEConfig.getTinyMCEUrl());
+
+            // Thêm danh sách phim để chọn
+            model.addAttribute("movies", movieService.getAllMovie());
 
             return "admin/admin_blog_edit";
 

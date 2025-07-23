@@ -74,30 +74,38 @@
         border-radius: 10px;
         border: 2px solid #dee2e6;
         padding: 5px;
+        margin: 0 auto; /* Căn giữa ảnh hiện tại */
+        display: block; /* Đảm bảo margin auto hoạt động */
       }
       .image-preview {
-        max-width: 200px;
-        max-height: 150px;
+        max-width: 280px;
         border-radius: 10px;
         border: 2px dashed #dee2e6;
-        padding: 10px;
+        padding: 15px;
         display: none;
+        margin: 15px auto; /* Căn giữa ảnh preview với margin trên dưới */
+        background-color: #f8f9fa;
       }
       .image-preview img {
         width: 100%;
         height: auto;
+        max-height: 200px;
+        object-fit: cover;
         border-radius: 8px;
       }
       .file-input-wrapper {
         position: relative;
         overflow: hidden;
-        display: inline-block;
+        display: block; /* Thay đổi từ inline-block thành block */
         cursor: pointer;
         border: 2px dashed #667eea;
         border-radius: 10px;
         padding: 20px;
         text-align: center;
         transition: all 0.3s ease;
+        width: 100%; /* Chiếm toàn bộ chiều rộng */
+        max-width: 300px; /* Giới hạn chiều rộng tối đa */
+        margin: 0 auto; /* Căn giữa */
       }
       .file-input-wrapper:hover {
         background-color: rgba(102, 126, 234, 0.05);
@@ -227,6 +235,32 @@
                     </h5>
                   </div>
                   <div class="card-body">
+                    <!-- Phim được review (không cho phép thay đổi) -->
+                    <div class="mb-3">
+                      <label for="movieName" class="form-label">
+                        Phim được review
+                      </label>
+                      <div class="input-group">
+                        <span class="input-group-text">
+                          <i class="fas fa-film text-primary"></i>
+                        </span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="movieName"
+                          th:value="${blogPost.movieName}"
+                          readonly
+                          style="background-color: #f8f9fa; cursor: not-allowed"
+                        />
+                      </div>
+                      <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Không thể thay đổi phim sau khi tạo blog
+                      </small>
+                      <!-- Hidden input để gửi movieId -->
+                      <input type="hidden" id="movieId" th:field="*{movieId}" />
+                    </div>
+
                     <!-- Tiêu đề -->
                     <div class="mb-3">
                       <label for="title" class="form-label">
@@ -381,6 +415,7 @@
         selector: "#content",
         height: 400,
         menubar: false,
+        statusbar: false, // Ẩn thanh trạng thái dưới cùng
         plugins: [
           "advlist",
           "autolink",
@@ -398,7 +433,6 @@
           "media",
           "table",
           "help",
-          "wordcount",
         ],
         toolbar:
           "undo redo | blocks | " +

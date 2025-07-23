@@ -19,29 +19,31 @@ import java.util.Optional;
 public interface AdminBlogRepository extends JpaRepository<BlogPost, Long> {
 
        /**
-        * Tìm tất cả blog posts với thông tin tác giả, sắp xếp theo ID tăng dần.
+        * Tìm tất cả blog posts với thông tin tác giả và phim, sắp xếp theo ID tăng
+        * dần.
         *
-        * @return Danh sách blog posts với thông tin tác giả
+        * @return Danh sách blog posts với thông tin tác giả và phim
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author ORDER BY b.id ASC")
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie ORDER BY b.id ASC")
        List<BlogPost> findAllWithAuthorOrderByIdAsc();
 
        /**
-        * Tìm blog posts với phân trang và thông tin tác giả, sắp xếp theo ID tăng dần.
+        * Tìm blog posts với phân trang và thông tin tác giả và phim, sắp xếp theo ID
+        * tăng dần.
         *
         * @param pageable Thông tin phân trang
-        * @return Page chứa blog posts với thông tin tác giả
+        * @return Page chứa blog posts với thông tin tác giả và phim
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author ORDER BY b.id ASC")
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie ORDER BY b.id ASC")
        Page<BlogPost> findAllWithAuthorOrderByIdAsc(Pageable pageable);
 
        /**
-        * Tìm blog post theo ID với thông tin tác giả.
-        * 
+        * Tìm blog post theo ID với thông tin tác giả và phim.
+        *
         * @param id ID của blog post
-        * @return Optional chứa blog post với thông tin tác giả
+        * @return Optional chứa blog post với thông tin tác giả và phim
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author WHERE b.id = :id")
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie WHERE b.id = :id")
        Optional<BlogPost> findByIdWithAuthor(@Param("id") Long id);
 
        /**
@@ -51,7 +53,7 @@ public interface AdminBlogRepository extends JpaRepository<BlogPost, Long> {
         * @param title Tiêu đề cần tìm
         * @return Danh sách blog posts có tiêu đề chứa từ khóa
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author " +
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie " +
                      "WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')) " +
                      "ORDER BY b.id ASC")
        List<BlogPost> findByTitleContainingIgnoreCaseWithAuthor(@Param("title") String title);
@@ -62,7 +64,7 @@ public interface AdminBlogRepository extends JpaRepository<BlogPost, Long> {
         * @param authorId ID của tác giả
         * @return Danh sách blog posts của tác giả
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author " +
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie " +
                      "WHERE b.author.id = :authorId " +
                      "ORDER BY b.id ASC")
        List<BlogPost> findByAuthorIdWithAuthor(@Param("authorId") int authorId);
@@ -74,7 +76,7 @@ public interface AdminBlogRepository extends JpaRepository<BlogPost, Long> {
         * @param keyword Từ khóa cần tìm
         * @return Danh sách blog posts chứa từ khóa
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author WHERE " +
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie WHERE " +
                      "LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
                      "b.content LIKE CONCAT('%', :keyword, '%') " +
                      "ORDER BY b.id ASC")
@@ -88,7 +90,7 @@ public interface AdminBlogRepository extends JpaRepository<BlogPost, Long> {
         * @param pageable Thông tin phân trang
         * @return Page chứa blog posts chứa từ khóa
         */
-       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author WHERE " +
+       @Query("SELECT b FROM BlogPost b LEFT JOIN FETCH b.author LEFT JOIN FETCH b.movie WHERE " +
                      "LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
                      "b.content LIKE CONCAT('%', :keyword, '%') " +
                      "ORDER BY b.id ASC")

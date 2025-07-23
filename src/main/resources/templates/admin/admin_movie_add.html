@@ -177,6 +177,37 @@
       </header>
 
       <div class="container-fluid p-4">
+        <!-- Flash Messages -->
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
         <div id="addMovieFormView" class="container py-4">
           <header class="mb-4"></header>
           <form
@@ -441,11 +472,11 @@
                       >
                       <div class="upload-area" id="uploadArea">
                         <i class="fas fa-cloud-upload-alt fa-2x"></i>
-                        <h6>Kéo & Thả poster vào đây</h6>
+                        <h6>Chọn ảnh ở đây</h6>
                         <p class="mb-1">
                           hoặc <span class="text-primary">chọn tệp</span>
                         </p>
-                        <small>PNG, JPG tối đa 5MB. Đề xuất: 300x450px</small>
+                        <small>PNG hoặc JPG </small>
                         <input
                           type="file"
                           id="image"
@@ -607,7 +638,10 @@
                 <i class="fas fa-save me-2"></i>
                 Lưu nháp
               </button>
-              <a th:href="@{/admin/movies}" class="btn btn-outline-danger me-2">
+              <a
+                th:href="@{/admin/movies/list}"
+                class="btn btn-outline-danger me-2"
+              >
                 <i class="fas fa-times me-2"></i>
                 Hủy
               </a>
