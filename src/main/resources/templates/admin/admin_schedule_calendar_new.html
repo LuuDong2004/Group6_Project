@@ -206,18 +206,9 @@
         color: #4f46e5;
         font-weight: 600;
         background: rgba(79, 70, 229, 0.1);
-        padding: 0.4rem 0.8rem;
-        border-radius: 15px;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
         text-align: center;
-        margin: 0.2rem 0;
-        border: 1px solid rgba(79, 70, 229, 0.2);
-        transition: all 0.2s ease;
-      }
-
-      .calendar-day-schedules:hover {
-        background: rgba(79, 70, 229, 0.2);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
       }
 
       /* Timeline Styles */
@@ -228,26 +219,6 @@
         background: white;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         border: 1px solid #e5e7eb;
-        position: relative;
-      }
-
-      /* Thêm grid lines để tạo cảm giác ô riêng biệt */
-      .timeline-container::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 200px;
-        right: 0;
-        bottom: 0;
-        background-image: repeating-linear-gradient(
-          to right,
-          transparent 0,
-          transparent calc(6.25% - 1px),
-          rgba(79, 70, 229, 0.1) calc(6.25% - 1px),
-          rgba(79, 70, 229, 0.1) 6.25%
-        );
-        pointer-events: none;
-        z-index: 1;
       }
 
       .timeline-container::-webkit-scrollbar {
@@ -269,24 +240,21 @@
 
       .schedule-block {
         position: absolute;
-        height: 40px;
+        height: 45px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         color: white;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-        margin: 8px 4px;
+        margin: 2px 1px;
         border: 2px solid rgba(255, 255, 255, 0.2);
         overflow: hidden;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
       }
 
       .schedule-block:hover {
@@ -297,19 +265,14 @@
 
       .room-row {
         position: relative;
-        height: 80px;
+        height: 75px;
         border-bottom: 1px solid #e5e7eb;
         background: white;
-        padding: 10px 0;
-        margin: 2px 0;
+        padding: 5px 0;
       }
 
       .room-row:hover {
         background-color: #f8fafc;
-      }
-
-      .room-row:nth-child(even) {
-        background-color: #fafbfc;
       }
 
       .time-header {
@@ -341,22 +304,17 @@
 
       /* Cải thiện spacing cho time markers */
       #time-markers {
-        padding: 0 15px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 2px solid rgba(79, 70, 229, 0.1);
+        padding: 0 10px;
       }
 
       #time-markers > div {
-        min-width: 55px;
+        min-width: 50px;
         text-align: center;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 8px;
-        padding: 6px 10px;
-        margin: 0 3px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(79, 70, 229, 0.1);
-        font-weight: 600;
-        color: #374151;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin: 0 2px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
 
       /* Cải thiện màu sắc cho các schedule block */

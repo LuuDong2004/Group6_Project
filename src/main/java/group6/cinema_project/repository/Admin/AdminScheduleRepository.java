@@ -42,14 +42,15 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
          * @param screeningRoomId ID phòng chiếu (có thể null)
          * @return Danh sách lịch chiếu đã lọc với thông tin đầy đủ
          */
-        @Query("SELECT DISTINCT ss FROM ScreeningSchedule ss " +
-                        "LEFT JOIN FETCH ss.movie m " +
-                        "LEFT JOIN FETCH ss.screeningRoom sr " +
-                        "LEFT JOIN FETCH ss.branch b " +
-                        "WHERE (:movieId IS NULL OR ss.movie.id = :movieId) " +
-                        "AND (:screeningDate IS NULL OR ss.screeningDate = :screeningDate) " +
-                        "AND (:screeningRoomId IS NULL OR ss.screeningRoom.id = :screeningRoomId) " +
-                        "ORDER BY m.name, ss.screeningDate, ss.startTime")
+        @Query(value = "SELECT DISTINCT ss.* FROM ScreeningSchedule ss " +
+                        "LEFT JOIN Movie m ON ss.movie_id = m.id " +
+                        "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
+                        "LEFT JOIN Branch b ON ss.branch_id = b.id " +
+                        "WHERE (:movieId IS NULL OR ss.movie_id = :movieId) " +
+                        "AND (:screeningDate IS NULL OR CAST(ss.screening_date AS DATE) = CAST(:screeningDate AS DATE)) "
+                        +
+                        "AND (:screeningRoomId IS NULL OR ss.screening_room_id = :screeningRoomId) " +
+                        "ORDER BY m.name, ss.screening_date, ss.start_time", nativeQuery = true)
         List<ScreeningSchedule> findFilteredWithRelatedEntities(
                         @Param("movieId") Integer movieId,
                         @Param("screeningDate") LocalDate screeningDate,
