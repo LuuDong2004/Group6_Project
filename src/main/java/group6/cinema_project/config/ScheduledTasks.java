@@ -1,13 +1,11 @@
 package group6.cinema_project.config;
 
-
 import group6.cinema_project.service.Admin.IAdminScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-
 
 @Configuration
 @EnableScheduling
@@ -18,15 +16,28 @@ public class ScheduledTasks {
 
     /**
      * Cập nhật tự động trạng thái lịch chiếu mỗi 1 phút
-     * Tìm và cập nhật tất cả lịch chiếu đã kết thúc từ ACTIVE thành INACTIVE
+     * - Cập nhật UPCOMING thành ACTIVE khi đến thời gian chiếu
+     * - Cập nhật ACTIVE thành ENDED khi kết thúc chiếu
      */
     @Scheduled(fixedRate = 60000) // Chạy mỗi phút (60,000 ms)
     public void updateScheduleStatuses() {
         log.info("Đang chạy tác vụ cập nhật trạng thái lịch chiếu...");
-        int updatedCount = scheduleService.updateExpiredScheduleStatuses();
 
-        if (updatedCount > 0) {
-            log.info("Đã cập nhật {} lịch chiếu từ ACTIVE thành INACTIVE", updatedCount);
+        // Cập nhật UPCOMING -> ACTIVE
+        int upcomingToActiveCount = scheduleService.updateUpcomingToActiveSchedules();
+        if (upcomingToActiveCount > 0) {
+            log.info("Đã cập nhật {} lịch chiếu từ UPCOMING thành ACTIVE", upcomingToActiveCount);
+        }
+
+        // Cập nhật ACTIVE -> ENDED
+        int activeToEndedCount = scheduleService.updateExpiredScheduleStatuses();
+        if (activeToEndedCount > 0) {
+            log.info("Đã cập nhật {} lịch chiếu từ ACTIVE thành ENDED", activeToEndedCount);
+        }
+
+        int totalUpdated = upcomingToActiveCount + activeToEndedCount;
+        if (totalUpdated > 0) {
+            log.info("Tổng cộng đã cập nhật {} lịch chiếu", totalUpdated);
         }
     }
 }

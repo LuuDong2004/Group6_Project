@@ -17,6 +17,7 @@ import group6.cinema_project.entity.Branch;
 import group6.cinema_project.exception.ScheduleConflictException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
     // Sử dụng AdminScheduleRepository để thao tác với lịch chiếu
@@ -47,7 +49,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     /**
      * Lấy lịch chiếu theo ID
      * Sử dụng: movieScheduleRepository.findById() từ JpaRepository
-     * 
+     *
      * @param id ID của lịch chiếu
      * @return Optional chứa ScreeningScheduleDto hoặc empty nếu không tìm thấy
      */
@@ -55,7 +57,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Transactional(readOnly = true)
     public Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id) {
         return movieScheduleRepository.findById(id)
-                .map(this::convertToDto);
+                .map(this::convertToDtoWithRelatedData);
     }
 
     @Override
@@ -103,9 +105,17 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Override
     @Transactional(readOnly = true)
     public List<ScreeningScheduleDto> getFilteredScreeningSchedulesForDisplay(
-            Integer movieId, LocalDate screeningDate, Integer screeningRoomId) {
-        List<ScreeningSchedule> schedules = movieScheduleRepository.findFilteredWithRelatedEntities(
-                movieId, screeningDate, screeningRoomId);
+            Integer movieId, java.util.Date screeningDate, Integer screeningRoomId) {
+        List<ScreeningSchedule> schedules;
+
+        // Nếu chỉ có ngày chiếu, sử dụng method tối ưu hơn
+        if (movieId == null && screeningRoomId == null && screeningDate != null) {
+            schedules = movieScheduleRepository.findByScreeningDateWithRelatedEntities(screeningDate);
+        } else {
+            schedules = movieScheduleRepository.findFilteredWithRelatedEntities(
+                    movieId, screeningDate, screeningRoomId);
+        }
+
         return schedules.stream()
                 .map(this::convertToDtoWithRelatedData)
                 .collect(Collectors.toList());
@@ -152,9 +162,11 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         }
         if (screeningSchedule.getStartTime() != null) {
             dto.setStartTime(screeningSchedule.getStartTime().toLocalTime());
+            dto.setStartTimeStr(dto.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
         }
         if (screeningSchedule.getEndTime() != null) {
             dto.setEndTime(screeningSchedule.getEndTime().toLocalTime());
+            dto.setEndTimeStr(dto.getEndTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
         }
         dto.setStatus(screeningSchedule.getStatus());
         // availableSeats and display fields are set elsewhere if needed
@@ -174,7 +186,15 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         }
         if (dto.getBranchId() != null) {
             Branch branch = branchRepository.findById(dto.getBranchId()).orElse(null);
-            entity.setBranch(branch);
+            if (branch != null) {
+                entity.setBranch(branch);
+                log.debug("Đã set branch cho lịch chiếu: Branch ID = {}, Branch Name = {}",
+                        branch.getId(), branch.getName());
+            } else {
+                log.warn("Không tìm thấy branch với ID: {}", dto.getBranchId());
+            }
+        } else {
+            log.warn("BranchId trong DTO là null khi convert sang entity");
         }
         if (dto.getScreeningDate() != null) {
             entity.setScreeningDate(java.sql.Date.valueOf(dto.getScreeningDate()));
@@ -267,9 +287,14 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         List<ScreeningSchedule> overlappingSchedules;
         try {
+            // Chuyển đổi LocalDate thành Date
+            java.util.Date dateParam = screeningScheduleDto.getScreeningDate() != null
+                    ? java.sql.Date.valueOf(screeningScheduleDto.getScreeningDate())
+                    : null;
+
             overlappingSchedules = movieScheduleRepository.findOverlappingSchedules(
                     screeningScheduleDto.getScreeningRoomId(),
-                    screeningScheduleDto.getScreeningDate(),
+                    dateParam,
                     startTimeStr,
                     endTimeStr,
                     screeningScheduleDto.getId() // Exclude current schedule for updates
@@ -332,13 +357,17 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         // Check if the date is in the past
         if (screeningDate.isBefore(today)) {
-            throw new IllegalArgumentException("Không thể tạo lịch chiếu cho ngày trong quá khứ: " + screeningDate);
+            String formattedDate = screeningDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            throw new IllegalArgumentException("Không thể tạo lịch chiếu cho ngày trong quá khứ: " + formattedDate);
         }
 
         // If the date is today, check if the time is in the past
         if (screeningDate.equals(today) && startTime.isBefore(currentTime)) {
+            String formattedTime = startTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+            String formattedCurrentTime = currentTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
             throw new IllegalArgumentException(
-                    "Không thể tạo lịch chiếu cho thời gian trong quá khứ: " + startTime + " hôm nay");
+                    "Không thể tạo lịch chiếu cho thời gian trong quá khứ. " +
+                            "Giờ hiện tại: " + formattedCurrentTime + ", giờ được chọn: " + formattedTime);
         }
     }
 
@@ -769,16 +798,25 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         for (Map<String, Object> slot : timeSlots) {
             ScreeningScheduleDto scheduleDto = new ScreeningScheduleDto();
 
+            // Lấy thông tin từ slot
+            String startTimeStr = (String) slot.get("startTime");
+
             // Sao chép thông tin cơ bản từ baseSchedule
             scheduleDto.setMovieId(baseSchedule.getMovieId());
             scheduleDto.setScreeningDate(baseSchedule.getScreeningDate());
             scheduleDto.setStatus(baseSchedule.getStatus());
+            scheduleDto.setBranchId(baseSchedule.getBranchId()); // Thêm dòng này để copy branchId
 
-            // Lấy thông tin từ slot
-            scheduleDto.setStartTime(LocalTime.parse((String) slot.get("startTime")));
-            scheduleDto.setEndTime(LocalTime.parse((String) slot.get("endTime")));
-            scheduleDto.setScreeningRoomId(Integer.valueOf((String) slot.get("roomId")));
-            scheduleDto.setBranchId(Integer.valueOf((String) slot.get("branchId")));
+            log.debug("Tạo lịch chiếu batch - BranchId từ baseSchedule: {}, StartTime: {}",
+                    baseSchedule.getBranchId(), startTimeStr);
+            scheduleDto.setStartTime(LocalTime.parse(startTimeStr));
+
+            // Lấy screeningRoomId
+            String roomIdStr = (String) slot.get("screeningRoomId");
+            scheduleDto.setScreeningRoomId(Integer.valueOf(roomIdStr));
+
+            // Tự động tính endTime dựa trên duration của phim
+            calculateAndSetEndTime(scheduleDto);
 
             // Kiểm tra xung đột lịch chiếu
             validateScheduleConflicts(scheduleDto);

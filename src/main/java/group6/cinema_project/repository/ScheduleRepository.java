@@ -15,12 +15,12 @@ public interface ScheduleRepository extends JpaRepository<ScreeningSchedule, Int
 
     @Query("SELECT s FROM ScreeningSchedule s WHERE s.movie.id = :movieId AND s.screeningDate = :screeningDate")
     List<ScreeningSchedule> findSchedulesByMovieIdAndDate(@Param("movieId") Integer movieId,
-                                                          @Param("screeningDate") Date screeningDate);
+            @Param("screeningDate") Date screeningDate);
 
     @Query("SELECT s FROM ScreeningSchedule s WHERE s.movie.id = :movieId AND s.branch.id = :branchId AND s.screeningDate = :screeningDate")
     List<ScreeningSchedule> findSchedulesByMovieIdAndBranchIdAndDate(@Param("movieId") Integer movieId,
-                                                                     @Param("branchId") Integer branchId,
-                                                                     @Param("screeningDate") Date screeningDate);
+            @Param("branchId") Integer branchId,
+            @Param("screeningDate") Date screeningDate);
 
     @Query("SELECT DISTINCT s.branch FROM ScreeningSchedule s WHERE s.movie.id = :movieId")
     List<Object> findDistinctBranchesByMovieId(@Param("movieId") Integer movieId);
@@ -34,8 +34,7 @@ public interface ScheduleRepository extends JpaRepository<ScreeningSchedule, Int
 
     // Lấy các ngày có lịch chiếu từ ngày hiện tại trở đi
     @Query("SELECT DISTINCT s.screeningDate FROM ScreeningSchedule s WHERE s.movie.id = :movieId AND s.screeningDate >= :currentDate ORDER BY s.screeningDate")
-    List<Date> findDistinctScreeningDatesByMovieIdFromDate(@Param("movieId") Integer movieId, @Param("currentDate") Date currentDate);
+    List<Date> findDistinctScreeningDatesByMovieIdFromDate(@Param("movieId") Integer movieId,
+            @Param("currentDate") Date currentDate);
 
-
-    
 }

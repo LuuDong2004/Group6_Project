@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CinemaAdmin - Lịch chiếu Chi tiết</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        padding: 2rem;
+        min-height: 100vh;
+      }
+
+      /* CSS cho Timeline */
+      .timeline-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .timeline-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+      }
+
+      .back-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+      }
+
+      .filter-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+      }
+
+      .timeline-content {
+        overflow-x: auto;
+        min-height: 500px;
+      }
+
+      /* === KHỐI CSS ĐÃ SỬA LỖI CĂN CHỈNH === */
+      .time-markers {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 2px solid #e2e8f0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        z-index: 10;
+      }
+
+      .time-markers::before {
+        content: "";
+        display: block;
+        width: 200px;
+        flex-shrink: 0;
+      }
+
+      #time-markers-container {
+        position: relative;
+        flex-grow: 1;
+        height: 100%;
+        min-width: 1200px;
+      }
+      /* === KẾT THÚC KHỐI SỬA LỖI === */
+
+      .time-marker {
+        position: absolute;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        padding: 0 4px;
+        text-align: center;
+        min-width: 40px;
+        transform: translateX(-50%);
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .room-row {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+        min-height: 80px;
+      }
+
+      .room-label {
+        width: 200px;
+        background: #f1f5f9;
+        border-right: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        font-weight: 600;
+        color: #374151;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+      }
+
+      .add-schedule-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .add-schedule-btn:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .add-schedule-btn:active {
+        transform: scale(0.95);
+      }
+
+      .room-timeline {
+        flex: 1;
+        position: relative;
+        min-width: 1200px;
+        background-image: repeating-linear-gradient(
+          to right,
+          #e2e8f0,
+          #e2e8f0 1px,
+          transparent 1px,
+          transparent calc(100% / 16)
+        );
+        background-size: calc(100% / 16) 100%;
+      }
+
+      .schedule-block {
+        position: absolute;
+        top: 10px;
+        bottom: 10px;
+        border-radius: 6px;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+      }
+
+      .schedule-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Button edit cho schedule block */
+      .schedule-edit-btn {
+        position: absolute;
+        top: -8px;
+        right: 15px;
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .schedule-edit-btn:hover {
+        background: #2563eb;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Button delete cho schedule block */
+      .schedule-delete-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 20px;
+        height: 20px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .schedule-delete-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .schedule-block:hover .schedule-edit-btn,
+      .schedule-block:hover .schedule-delete-btn {
+        display: flex;
+      }
+
+      /* Màu sắc cho trạng thái phim */
+      .status-active {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+      .status-upcoming {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .status-ended {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 80px;
+        }
+
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .menu-item span {
+          display: none;
+        }
+
+        .main-content {
+          margin-left: 80px;
+          padding: 1rem;
+        }
+
+        .room-label {
+          width: 150px;
+          padding: 0.75rem;
+          font-size: 0.875rem;
+        }
+
+        .time-markers::before {
+          width: 150px;
+        }
+
+        .schedule-block {
+          font-size: 0.65rem;
+          padding: 0 4px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-film text-indigo-600"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="opacity-75">Quản lý rạp chiếu phim</small>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/admin/movies/list}" class="menu-item">
+          <i class="fas fa-film"></i>
+          <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item active">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu tháng</span>
+        </a>
+        <a th:href="@{/admin/blogs/list}" class="menu-item">
+          <i class="fas fa-blog"></i>
+          <span>Blog</span>
+        </a>
+      </nav>
+
+      <div class="mt-auto p-4">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-user text-indigo-600"></i>
+          </div>
+          <div>
+            <div class="text-white fw-medium">Admin</div>
+            <small class="opacity-75">Quản trị viên</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="timeline-container">
+        <div class="timeline-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <a href="#" id="back-to-calendar" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>Quay lại Lịch</span>
+              </a>
+              <div>
+                <h2 id="timeline-title" class="text-xl font-bold mb-0">
+                  Lịch chiếu ngày
+                </h2>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                id="update-schedules-btn"
+                class="btn btn-primary d-flex align-items-center gap-2"
+                title="Cập nhật trạng thái lịch chiếu theo thời gian thực"
+              >
+                <i class="fas fa-sync-alt"></i>
+                <span>Cập nhật lịch chiếu</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="movie-search" class="form-label fw-medium"
+                >Tìm phim trong ngày</label
+              >
+              <input
+                type="text"
+                id="movie-search"
+                class="form-control"
+                placeholder="Nhập tên phim..."
+              />
+            </div>
+            <div class="col-md-4">
+              <label for="status-filter" class="form-label fw-medium"
+                >Lọc theo trạng thái</label
+              >
+              <select id="status-filter" class="form-select">
+                <!-- Options sẽ được thiết lập bởi JavaScript dựa trên ngày -->
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="branch-filter" class="form-label fw-medium"
+                >Chọn Chi nhánh</label
+              >
+              <select id="branch-filter" class="form-select">
+                <option value="">Đang tải chi nhánh...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="timeline-loading" class="loading-spinner">
+          <div class="spinner"></div>
+        </div>
+
+        <div
+          id="timeline-content"
+          class="timeline-content"
+          style="display: none"
+        >
+          <div class="time-markers">
+            <div id="time-markers-container"></div>
+          </div>
+
+          <div id="room-rows-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin/schedule_timeline.js}"></script>
+  </body>
+</html>

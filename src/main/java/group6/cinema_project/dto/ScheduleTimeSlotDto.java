@@ -22,7 +22,12 @@ public class ScheduleTimeSlotDto {
 
     // Helper methods for display
     public String getFormattedTimeRange() {
-        return startTime + " - " + endTime;
+        if (startTime == null || endTime == null) {
+            return "";
+        }
+        return startTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")) +
+                " - " +
+                endTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     public String getStatusClass() {

@@ -5,7 +5,7 @@ import group6.cinema_project.entity.ScreeningSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,20 +14,12 @@ import org.springframework.data.repository.query.Param;
 public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule, Integer> {
 
         /**
-         * Lấy danh sách lịch chiếu theo ID phim
-         * 
-         * @param movieId ID của phim
-         * @return Danh sách lịch chiếu của phim
-         */
-        List<ScreeningSchedule> getScreeningSchedulesByMovieId(Integer movieId);
-
-        /**
          * Lấy tất cả lịch chiếu kèm thông tin liên quan (phim, phòng chiếu, chi nhánh)
          * Sắp xếp theo tên phim, ngày chiếu, giờ bắt đầu
-         * 
+         *
          * @return Danh sách lịch chiếu với thông tin đầy đủ
          */
-        @Query("SELECT DISTINCT ss FROM ScreeningSchedule ss " +
+        @Query("SELECT ss FROM ScreeningSchedule ss " +
                         "LEFT JOIN FETCH ss.movie m " +
                         "LEFT JOIN FETCH ss.screeningRoom sr " +
                         "LEFT JOIN FETCH ss.branch b " +
@@ -36,62 +28,24 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
 
         /**
          * Lấy lịch chiếu có lọc theo điều kiện kèm thông tin liên quan
-         * 
+         *
          * @param movieId         ID phim (có thể null)
          * @param screeningDate   Ngày chiếu (có thể null)
          * @param screeningRoomId ID phòng chiếu (có thể null)
          * @return Danh sách lịch chiếu đã lọc với thông tin đầy đủ
          */
-        @Query(value = "SELECT DISTINCT ss.* FROM ScreeningSchedule ss " +
-                        "LEFT JOIN Movie m ON ss.movie_id = m.id " +
-                        "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
-                        "LEFT JOIN Branch b ON ss.branch_id = b.id " +
-                        "WHERE (:movieId IS NULL OR ss.movie_id = :movieId) " +
-                        "AND (:screeningDate IS NULL OR CAST(ss.screening_date AS DATE) = CAST(:screeningDate AS DATE)) "
-                        +
-                        "AND (:screeningRoomId IS NULL OR ss.screening_room_id = :screeningRoomId) " +
-                        "ORDER BY m.name, ss.screening_date, ss.start_time", nativeQuery = true)
-        List<ScreeningSchedule> findFilteredWithRelatedEntities(
-                        @Param("movieId") Integer movieId,
-                        @Param("screeningDate") LocalDate screeningDate,
-                        @Param("screeningRoomId") Integer screeningRoomId);
-
-        /**
-         * Tìm phim theo trạng thái lịch chiếu (sử dụng JPQL)
-         * 
-         * @param status Trạng thái lịch chiếu
-         * @return Danh sách phim có trạng thái tương ứng
-         */
-        @Query("SELECT DISTINCT m FROM ScreeningSchedule ss " +
-                        "JOIN ss.movie m " +
-                        "WHERE ss.status = :status " +
-                        "ORDER BY m.name")
-        List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatus(@Param("status") String status);
-
-        /**
-         * Tìm phim theo trạng thái lịch chiếu (sử dụng Native SQL - phương án dự phòng)
-         * 
-         * @param status Trạng thái lịch chiếu
-         * @return Danh sách phim có trạng thái tương ứng
-         */
-        @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
-                        "INNER JOIN ScreeningSchedule ss ON m.id = ss.movie_id " +
-                        "WHERE ss.status = :status " +
-                        "ORDER BY m.name", nativeQuery = true)
-        List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatusNative(@Param("status") String status);
-
-        /**
-         * Tìm lịch chiếu theo trạng thái kèm thông tin phim (tối ưu hiệu suất với JOIN
-         * FETCH)
-         * 
-         * @param status Trạng thái lịch chiếu
-         * @return Danh sách lịch chiếu với thông tin phim
-         */
         @Query("SELECT DISTINCT ss FROM ScreeningSchedule ss " +
                         "LEFT JOIN FETCH ss.movie m " +
-                        "WHERE ss.status = :status " +
-                        "ORDER BY m.name")
-        List<ScreeningSchedule> findSchedulesByStatusWithMovie(@Param("status") String status);
+                        "LEFT JOIN FETCH ss.screeningRoom sr " +
+                        "LEFT JOIN FETCH ss.branch b " +
+                        "WHERE (:movieId IS NULL OR ss.movie.id = :movieId) " +
+                        "AND (:screeningDate IS NULL OR ss.screeningDate = :screeningDate) " +
+                        "AND (:screeningRoomId IS NULL OR ss.screeningRoom.id = :screeningRoomId) " +
+                        "ORDER BY m.name, ss.screeningDate, ss.startTime")
+        List<ScreeningSchedule> findFilteredWithRelatedEntities(
+                        @Param("movieId") Integer movieId,
+                        @Param("screeningDate") Date screeningDate,
+                        @Param("screeningRoomId") Integer screeningRoomId);
 
         /**
          * Tìm lịch chiếu theo ID phim kèm thông tin liên quan
@@ -108,27 +62,10 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
         List<ScreeningSchedule> findByMovieIdWithRelatedEntities(@Param("movieId") Integer movieId);
 
         /**
-         * Tìm tất cả lịch chiếu trong cùng phòng chiếu và ngày chiếu
-         * loại trừ lịch chiếu hiện tại (dùng cho cập nhật)
-         * 
-         * @param screeningRoomId ID phòng chiếu
-         * @param screeningDate   Ngày chiếu
-         * @param excludeId       ID lịch chiếu cần loại trừ
-         * @return Danh sách lịch chiếu trong cùng phòng và ngày
-         */
-        @Query("SELECT ss FROM ScreeningSchedule ss " +
-                        "WHERE ss.screeningRoom.id = :screeningRoomId " +
-                        "AND ss.screeningDate = :screeningDate " +
-                        "AND (:excludeId IS NULL OR ss.id != :excludeId)")
-        List<ScreeningSchedule> findByScreeningRoomAndDateExcludingId(
-                        @Param("screeningRoomId") Integer screeningRoomId,
-                        @Param("screeningDate") LocalDate screeningDate,
-                        @Param("excludeId") Integer excludeId);
-
-        /**
          * Tìm lịch chiếu bị trùng lặp thời gian trong cùng phòng chiếu và ngày
          * Sử dụng Native SQL để xử lý kiểu dữ liệu TIME của SQL Server
-         * 
+         * Logic kiểm tra bao gồm cả trường hợp giờ kết thúc trùng với giờ bắt đầu
+         *
          * @param screeningRoomId ID phòng chiếu
          * @param screeningDate   Ngày chiếu
          * @param startTime       Thời gian bắt đầu
@@ -140,10 +77,10 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
                         "WHERE ss.screening_room_id = :screeningRoomId " +
                         "AND ss.screening_date = :screeningDate " +
                         "AND (:excludeId IS NULL OR ss.id != :excludeId) " +
-                        "AND ((ss.start_time < :endTime AND ss.end_time > :startTime))", nativeQuery = true)
+                        "AND ((ss.start_time <= :endTime AND ss.end_time >= :startTime))", nativeQuery = true)
         List<ScreeningSchedule> findOverlappingSchedules(
                         @Param("screeningRoomId") Integer screeningRoomId,
-                        @Param("screeningDate") LocalDate screeningDate,
+                        @Param("screeningDate") Date screeningDate,
                         @Param("startTime") String startTime,
                         @Param("endTime") String endTime,
                         @Param("excludeId") Integer excludeId);
@@ -155,7 +92,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
          * - Trạng thái thủ công là 'ACTIVE' HOẶC
          * - Trạng thái là null/AUTO và được tính toán động là đang hoạt động (đã bắt
          * đầu nhưng chưa kết thúc)
-         * 
+         *
          * @return Danh sách phim đang chiếu
          */
         @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
@@ -173,23 +110,16 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
         List<Movie> findCurrentlyPlayingMovies();
 
         /**
-         * Tìm phim sắp chiếu sử dụng logic đơn giản
-         * Một phim được coi là sắp chiếu nếu có ít nhất một lịch chiếu:
-         * - Trạng thái thủ công là 'UPCOMING' HOẶC
-         * - Trạng thái là null/AUTO và được tính toán động là sắp tới (chưa bắt đầu)
-         * LƯU Ý: Đã loại bỏ logic loại trừ để cho phép phim xuất hiện trong nhiều tab
-         * 
-         * @return Danh sách phim sắp chiếu
+         * Tìm phim theo trạng thái lịch chiếu (sử dụng JPQL)
+         *
+         * @param status Trạng thái lịch chiếu
+         * @return Danh sách phim có trạng thái tương ứng
          */
-        @Query(value = "SELECT DISTINCT m.* FROM Movie m " +
-                        "INNER JOIN ScreeningSchedule ss ON m.id = ss.movie_id " +
-                        "WHERE ((ss.status = 'UPCOMING') " +
-                        "OR (ss.status IS NULL OR ss.status = 'AUTO') AND (" +
-                        "(ss.screening_date > CAST(GETDATE() AS DATE)) " +
-                        "OR (ss.screening_date = CAST(GETDATE() AS DATE) AND ss.start_time > CAST(GETDATE() AS TIME))" +
-                        ")) " +
-                        "ORDER BY m.name", nativeQuery = true)
-        List<Movie> findComingSoonMovies();
+        @Query("SELECT DISTINCT m FROM ScreeningSchedule ss " +
+                        "JOIN ss.movie m " +
+                        "WHERE ss.status = :status " +
+                        "ORDER BY m.name")
+        List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatus(@Param("status") String status);
 
         /**
          * Tìm phim đã ngừng chiếu sử dụng logic kết hợp (trạng thái thủ công + tính
@@ -287,7 +217,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
          * - Status là null/'AUTO' và đã kết thúc theo thời gian thực tế
          */
         @Query(value = "SELECT ss.*, m.name as movie_name, m.image as movie_image, " +
-                        "sr.name as ScreeningSchedule, b.name as branch_name " +
+                        "sr.name as screening_room_name, b.name as branch_name " +
                         "FROM ScreeningSchedule ss " +
                         "LEFT JOIN Movie m ON ss.movie_id = m.id " +
                         "LEFT JOIN ScreeningRoom sr ON ss.screening_room_id = sr.id " +
@@ -366,4 +296,18 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
                         "WHERE ss.status = 'UPCOMING' " +
                         "ORDER BY m.name", nativeQuery = true)
         List<Movie> findMoviesWithUpcomingSchedules();
+
+        /**
+         * Tìm lịch chiếu theo ngày cụ thể với thông tin liên quan
+         *
+         * @param screeningDate Ngày chiếu cần tìm
+         * @return Danh sách lịch chiếu trong ngày với thông tin đầy đủ
+         */
+        @Query("SELECT ss FROM ScreeningSchedule ss " +
+                        "LEFT JOIN FETCH ss.movie m " +
+                        "LEFT JOIN FETCH ss.screeningRoom sr " +
+                        "LEFT JOIN FETCH ss.branch b " +
+                        "WHERE ss.screeningDate = :screeningDate " +
+                        "ORDER BY sr.name, ss.startTime")
+        List<ScreeningSchedule> findByScreeningDateWithRelatedEntities(@Param("screeningDate") Date screeningDate);
 }

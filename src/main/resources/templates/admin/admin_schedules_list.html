@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CinemaAdmin - Tổng quan Lịch chiếu</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        padding: 2rem;
+        min-height: 100vh;
+      }
+
+      /* CSS cho Calendar */
+      .calendar-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .calendar-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .calendar-nav-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+      }
+
+      .calendar-nav-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+      }
+
+      .calendar-day-header {
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .calendar-day {
+        min-height: 120px;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        position: relative;
+      }
+
+      .calendar-day:hover {
+        background-color: #f1f5f9;
+      }
+
+      .calendar-day.has-schedules {
+        background-color: #fef3c7;
+        border: 2px solid #f59e0b;
+      }
+
+      .calendar-day.has-schedules:hover {
+        background-color: #fde68a;
+      }
+
+      /* CSS cho ngày quá khứ */
+      .calendar-day.past-date {
+        background-color: #f1f5f9;
+        opacity: 0.7;
+        border: 1px solid #cbd5e1;
+      }
+
+      .calendar-day.past-date:hover {
+        background-color: #e2e8f0;
+        opacity: 0.8;
+      }
+
+      .calendar-day.past-date .calendar-day-number {
+        color: #64748b;
+      }
+
+      .calendar-day.past-date.has-schedules {
+        background-color: #fef3c7;
+        opacity: 0.6;
+        border: 1px solid #d97706;
+      }
+
+      .calendar-day.past-date.has-schedules:hover {
+        background-color: #fde68a;
+        opacity: 0.7;
+      }
+
+      .calendar-day.past-date.has-schedules .calendar-day-schedules {
+        color: #92400e;
+        background: rgba(217, 119, 6, 0.1);
+      }
+
+      .calendar-day-number {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        padding: 4px 8px;
+        display: inline-block;
+      }
+
+      .calendar-day-schedules {
+        font-size: 0.75rem;
+        color: #059669;
+        font-weight: 500;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 80px;
+        }
+
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .menu-item span {
+          display: none;
+        }
+
+        .main-content {
+          margin-left: 80px;
+          padding: 1rem;
+        }
+
+        .calendar-day {
+          min-height: 80px;
+          padding: 0.5rem;
+        }
+
+        .calendar-day-number {
+          font-size: 0.9rem;
+        }
+
+        .calendar-day-schedules {
+          font-size: 0.65rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-film text-indigo-600"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="opacity-75">Quản lý rạp chiếu phim</small>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/admin/movies/list}" class="menu-item">
+          <i class="fas fa-film"></i>
+          <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item active">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu tháng</span>
+        </a>
+        <a th:href="@{/admin/blogs/list}" class="menu-item">
+          <i class="fas fa-blog"></i>
+          <span>Blog</span>
+        </a>
+      </nav>
+
+      <div class="mt-auto p-4">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-user text-indigo-600"></i>
+          </div>
+          <div>
+            <div class="text-white fw-medium">Admin</div>
+            <small class="opacity-75">Quản trị viên</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="mb-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          Quản Lý Lịch Chiếu Phim
+        </h1>
+      </div>
+
+      <!-- Calendar Container -->
+      <div class="calendar-container">
+        <!-- Calendar Header -->
+        <div class="calendar-header">
+          <button id="prev-month" class="calendar-nav-btn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="text-center">
+            <h2 id="current-month-year" class="text-xl font-bold mb-0"></h2>
+          </div>
+
+          <button id="next-month" class="calendar-nav-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div id="calendar-content" style="display: none">
+          <!-- Day Headers -->
+          <div class="calendar-grid">
+            <div class="calendar-day-header">CN</div>
+            <div class="calendar-day-header">T2</div>
+            <div class="calendar-day-header">T3</div>
+            <div class="calendar-day-header">T4</div>
+            <div class="calendar-day-header">T5</div>
+            <div class="calendar-day-header">T6</div>
+            <div class="calendar-day-header">T7</div>
+          </div>
+
+          <!-- Calendar Days -->
+          <div id="calendar-grid" class="calendar-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin/schedule_calendar_new.js}"></script>
+  </body>
+</html>

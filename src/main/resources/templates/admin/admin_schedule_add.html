@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CinemaAdmin - Thêm Lịch Chiếu Mới</title>
+    <title>CinemaAdmin - Thêm Lịch Chiếu</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -19,13 +19,13 @@
       rel="stylesheet"
     />
 
-    <!-- Admin Schedule Add Page Styles -->
+    <link rel="stylesheet" href="/assets/css/admin_movie_add.css" />
+
     <style>
-      /* Basic styling to ensure page works */
+      /* CSS cho Admin Dashboard */
       body {
         font-family: "Inter", sans-serif;
         background-color: #f8fafc;
-        color: #334155;
       }
 
       .sidebar {
@@ -42,23 +42,12 @@
         z-index: 1000;
       }
 
-      .sidebar.collapsed {
-        width: 80px;
-      }
-
       .sidebar-header {
         padding: 1.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-      .logo-icon-wrapper {
-        background-color: white;
-        border-radius: 50%;
-        padding: 0.5rem;
-        margin-right: 0.75rem;
-      }
-
-      .logo-icon-wrapper .fa-film {
+      .sidebar-header .fa-film {
         color: #6366f1;
       }
 
@@ -87,193 +76,62 @@
       .menu-item i {
         width: 20px;
         margin-right: 0.75rem;
-        text-align: center;
       }
 
-      .main-content-wrapper {
+      .main-content {
         margin-left: 260px;
-        transition: margin-left 0.3s ease;
-        padding-top: 70px;
+        padding: 2rem;
+        min-height: 100vh;
       }
 
-      .main-content-wrapper.expanded {
-        margin-left: 80px;
-      }
-
-      .header-custom {
-        position: fixed;
-        top: 0;
-        left: 260px;
-        right: 0;
-        height: 70px;
-        background-color: white;
-        border-bottom: 1px solid #e5e7eb;
-        z-index: 999;
-        transition: left 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 1.5rem;
-      }
-
-      .main-content-wrapper.expanded .header-custom {
-        left: 80px;
-      }
-
-      .form-section {
-        background-color: white;
+      .page-header {
+        background: white;
         border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
       }
 
-      .form-section .card-header {
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        background: linear-gradient(
-          135deg,
-          #6366f1 0%,
-          #8b5cf6 100%
-        ) !important;
-        color: white;
-      }
-
-      .time-slot-group {
-        border: 1px dashed #cbd5e1;
-        padding: 1rem;
-        border-radius: 0.375rem;
-        margin-bottom: 1rem;
-        background-color: #f8fafc;
-      }
-
-      .form-actions {
-        padding-top: 1.5rem;
-        margin-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-      }
-
-      .btn-primary {
-        background-color: #6366f1;
-        border-color: #6366f1;
-      }
-
-      .btn-primary:hover {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
-      }
-
-      /* Form specific styles */
-      .form-label.fw-semibold {
-        color: #334155;
+      .page-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 2rem;
         margin-bottom: 0.5rem;
       }
 
-      .form-label.required-error {
-        color: #ef4444 !important;
-        font-weight: 600;
-      }
-
-      .form-control,
-      .form-select {
-        border-radius: 0.375rem;
-        border-color: #cbd5e1;
-      }
-
-      .form-control:focus,
-      .form-select:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
-      }
-
-      .input-group-text {
-        background-color: #f1f5f9;
-        border-color: #cbd5e1;
-        color: #64748b;
-      }
-
-      .btn-outline-danger {
-        color: #ef4444;
-        border-color: #ef4444;
-      }
-
-      .btn-outline-danger:hover {
-        color: white;
-        background-color: #ef4444;
-        border-color: #ef4444;
-      }
-
-      .btn-outline-secondary {
-        color: #64748b;
-        border-color: #cbd5e1;
-      }
-
-      .btn-outline-secondary:hover {
-        background-color: #f1f5f9;
-        color: #475569;
-        border-color: #cbd5e1;
-      }
-
-      .btn-outline-primary {
-        color: #6366f1;
-        border-color: #6366f1;
-      }
-
-      .btn-outline-primary:hover {
-        background-color: #6366f1;
-        color: white;
-        border-color: #6366f1;
-      }
-
       /* Responsive */
-      @media (max-width: 992px) {
+      @media (max-width: 768px) {
         .sidebar {
-          width: 80px !important;
+          width: 80px;
         }
+
         .sidebar .sidebar-header h5,
         .sidebar .sidebar-header small,
-        .sidebar .sidebar-menu span {
-          display: none !important;
+        .sidebar .menu-item span {
+          display: none;
         }
-        .sidebar .menu-item {
-          justify-content: center !important;
-        }
-        .sidebar .menu-item i {
-          margin-right: 0 !important;
-        }
-        .sidebar .logo-icon-wrapper {
-          margin-right: 0 !important;
-        }
-        .main-content-wrapper {
-          margin-left: 80px !important;
-        }
-        .header-custom {
-          left: 80px !important;
-        }
-      }
 
-      @media (max-width: 768px) {
-        .form-actions {
-          flex-direction: column;
-          gap: 0.5rem;
-          align-items: stretch;
-        }
-        .form-actions .btn {
-          min-width: auto;
+        .main-content {
+          margin-left: 80px;
+          padding: 1rem;
         }
       }
     </style>
   </head>
 
   <body>
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar">
       <div class="sidebar-header">
         <div class="d-flex align-items-center">
-          <div class="logo-icon-wrapper">
-            <i class="fas fa-film text-2xl"></i>
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-film text-indigo-600"></i>
           </div>
           <div>
-            <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Quản lý Lịch Chiếu</small>
+            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="opacity-75">Quản lý rạp chiếu phim</small>
           </div>
         </div>
       </div>
@@ -292,48 +150,23 @@
           <span>Diễn viên & Đạo diễn</span>
         </a>
         <a th:href="@{/admin/schedules/list}" class="menu-item active">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
           <i class="fas fa-calendar-alt"></i>
           <span>Lịch chiếu tháng</span>
         </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-users"></i>
-          <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i>
-          <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
+        <a th:href="@{/admin/blogs/list}" class="menu-item">
+          <i class="fas fa-blog"></i>
+          <span>Blog</span>
         </a>
       </nav>
 
-      <div
-        class="mt-auto p-4 border-top border-white-50"
-        style="border-color: rgba(255, 255, 255, 0.1) !important"
-      >
+      <div class="mt-auto p-4">
         <div class="d-flex align-items-center">
-          <img
-            src="https://placehold.co/40x40/E0E7FF/4338CA?text=A"
-            alt="User Avatar"
-            width="40"
-            height="40"
-            class="rounded-circle user-avatar-wrapper"
-          />
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-user text-indigo-600"></i>
+          </div>
           <div>
-            <div class="text-white fw-semibold user-info-text">Admin User</div>
-            <small class="text-white-50 user-info-email"
-              >admin@cinema.com</small
-            >
+            <div class="text-white fw-medium">Admin</div>
+            <small class="opacity-75">Quản trị viên</small>
           </div>
         </div>
       </div>
@@ -342,24 +175,19 @@
     <div class="main-content-wrapper" id="mainContentWrapper">
       <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-          <button
-            class="btn btn-link text-slate-500 me-2 hover:text-slate-700"
-            id="sidebarToggle"
-          >
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
             <i class="fas fa-bars fs-5"></i>
           </button>
-          <h4 class="mb-0 fw-semibold text-slate-700" id="main-header-title">
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
             Thêm Lịch Chiếu Mới
           </h4>
         </div>
 
         <div class="d-flex align-items-center">
-          <button
-            class="btn btn-link text-slate-500 hover:text-slate-700 me-1 position-relative"
-          >
+          <button class="btn btn-link text-secondary me-1 position-relative">
             <i class="fas fa-bell fs-5"></i>
             <span
-              class="position-absolute top-0 start-100 translate-middle p-1 bg-red-500 border border-light rounded-circle"
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
               style="
                 font-size: 0.5rem;
                 width: 10px;
@@ -372,7 +200,7 @@
               <span class="visually-hidden">Thông báo mới</span>
             </span>
           </button>
-          <button class="btn btn-link text-slate-500 hover:text-slate-700 me-2">
+          <button class="btn btn-link text-secondary me-2">
             <i class="fas fa-cog fs-5"></i>
           </button>
           <div class="dropdown">
@@ -384,41 +212,35 @@
               aria-expanded="false"
             >
               <img
-                src="https://placehold.co/32x32/E0E7FF/4338CA?text=A"
+                src="https://via.placeholder.com/32"
                 alt="User Avatar"
                 width="32"
                 height="32"
                 class="rounded-circle me-2"
               />
-              <span class="d-none d-sm-inline text-slate-700 fw-medium"
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
                 >Admin User</span
               >
             </a>
             <ul
-              class="dropdown-menu dropdown-menu-end text-small shadow border-0 rounded-lg mt-2"
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
               aria-labelledby="dropdownUser"
             >
               <li>
-                <a
-                  class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
-                  href="#"
-                  ><i class="fas fa-user-circle me-2 text-slate-500"></i>Hồ
-                  sơ</a
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
                 >
               </li>
               <li>
-                <a
-                  class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
-                  href="#"
-                  ><i class="fas fa-sliders-h me-2 text-slate-500"></i>Cài
-                  đặt</a
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
                 >
               </li>
-              <li><hr class="dropdown-divider my-1" /></li>
               <li>
-                <a
-                  class="dropdown-item py-2 px-3 text-red-600 hover:bg-red-50 rounded-md"
-                  href="#"
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a class="dropdown-item text-danger" href="#"
                   ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
                 >
               </li>
@@ -428,219 +250,269 @@
       </header>
 
       <div class="container-fluid p-4">
+        <!-- Flash Messages -->
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
         <div id="addScheduleFormView" class="container py-4">
-          <header class="mb-4"></header>
           <form
             id="scheduleForm"
-            action="/admin/schedules/add-batch"
+            th:action="@{/admin/schedules/add}"
             method="post"
-            th:object="${schedule}"
           >
-            <!-- Add this hidden input for the time slots data -->
-            <input type="hidden" id="timeSlotsJson" name="timeSlots" value="" />
-
             <div class="row">
               <div class="col-12">
                 <div class="form-section">
                   <div class="card-header p-3">
                     <h5 class="mb-0 fw-semibold">
                       <i class="fas fa-info-circle me-2"></i>
-                      Thông tin cơ bản
+                      Thông tin lịch chiếu
                     </h5>
                   </div>
                   <div class="card-body p-3 p-md-4">
                     <div class="row">
-                      <div class="col-md-12 mb-3">
-                        <label for="movieSelect" class="form-label fw-semibold"
-                          >Chọn Phim <span class="text-danger">*</span></label
-                        >
-                        <select
-                          id="movieSelect"
-                          th:field="*{movieId}"
-                          class="form-select"
-                          required
-                        >
-                          <option value="" disabled>-- Chọn phim --</option>
-                          <option
-                            th:each="movie : ${movies}"
-                            th:value="${movie.id}"
-                            th:text="${movie.name}"
-                          >
-                            Movie Name
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label
-                          for="screeningDate"
-                          class="form-label fw-semibold"
-                          >Ngày Chiếu <span class="text-danger">*</span></label
+                      <!-- Chi nhánh -->
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold" for="branchName"
+                          >Chi nhánh</label
                         >
                         <input
-                          type="date"
-                          id="screeningDate"
-                          th:field="*{screeningDate}"
+                          type="text"
                           class="form-control"
-                          required
+                          id="branchName"
+                          th:value="${selectedBranchName}"
+                          placeholder="Chi nhánh"
+                          readonly
+                        />
+                        <input
+                          type="hidden"
+                          name="branchId"
+                          th:value="${selectedBranchId}"
+                          id="branchId"
+                        />
+                      </div>
+
+                      <!-- Phòng chiếu -->
+                      <div class="col-md-4 mb-3">
+                        <label
+                          class="form-label fw-semibold"
+                          for="screeningRoom"
+                          >Phòng chiếu *</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="screeningRoom"
+                          th:value="${selectedRoomName}"
+                          placeholder="Phòng chiếu"
+                          readonly
+                        />
+                        <input
+                          type="hidden"
+                          name="screeningRoomId"
+                          th:value="${selectedRoomId}"
+                          id="screeningRoomId"
+                        />
+                      </div>
+
+                      <!-- Ngày chiếu -->
+                      <div class="col-md-4 mb-3">
+                        <label
+                          class="form-label fw-semibold"
+                          for="screeningDate"
+                          >Ngày chiếu *</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="screeningDateDisplay"
+                          th:value="${formattedDate}"
+                          placeholder="Ngày chiếu"
+                          readonly
+                        />
+                        <input
+                          type="hidden"
+                          name="screeningDate"
+                          th:value="${selectedDate}"
+                          id="screeningDate"
                         />
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div class="form-section">
-                  <div class="card-header p-3">
-                    <h5 class="mb-0 fw-semibold">
-                      <i class="fas fa-clock me-2"></i>
-                      Thông Tin Suất Chiếu & Phòng Chiếu
-                    </h5>
-                  </div>
-                  <div class="card-body p-3 p-md-4">
-                    <!-- Container for all time slots -->
-                    <div id="timeSlotsContainer">
-                      <!-- Initial time slot (original inputs) -->
-                      <div class="time-slot-group mb-3 pb-3 border-bottom">
-                        <div class="row">
-                          <div class="col-md-3 mb-3">
-                            <label
-                              for="startTime"
-                              class="form-label fw-semibold"
-                              >Giờ Bắt Đầu
-                              <span class="text-danger">*</span></label
-                            >
-                            <input
-                              type="time"
-                              id="startTime"
-                              th:field="*{startTime}"
-                              name="startTime"
-                              class="form-control"
-                              th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''"
-                              required
-                            />
-                            <!-- Display validation errors for startTime -->
-                            <div
-                              th:if="${#fields.hasErrors('startTime')}"
-                              class="invalid-feedback"
-                            >
-                              <div
-                                th:each="error : ${#fields.errors('startTime')}"
-                                th:text="${error}"
-                              ></div>
+                    <!-- Phim -->
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold" for="movieSearch"
+                        >Phim *</label
+                      >
+                      <div class="autocomplete-container">
+                        <div class="input-group">
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="movieSearch"
+                            placeholder="Nhập tên phim để tìm kiếm..."
+                            required
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="clearMovieBtn"
+                            style="display: none"
+                          >
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                        <div
+                          class="autocomplete-dropdown"
+                          id="movieDropdown"
+                          style="display: none"
+                        ></div>
+                      </div>
+                      <!-- Thông tin phim đã chọn -->
+                      <div
+                        class="selected-movie-info mt-2"
+                        id="selectedMovieInfo"
+                        style="display: none"
+                      >
+                        <div class="card border-primary">
+                          <div class="card-body p-3">
+                            <div class="row align-items-center">
+                              <div class="col-auto">
+                                <img
+                                  id="selectedMovieImage"
+                                  src=""
+                                  alt="Movie Poster"
+                                  class="img-thumbnail"
+                                  style="
+                                    width: 60px;
+                                    height: 80px;
+                                    object-fit: cover;
+                                  "
+                                />
+                              </div>
+                              <div class="col">
+                                <h6 class="mb-1" id="selectedMovieName"></h6>
+                                <small class="text-muted">
+                                  <span id="selectedMovieGenre"></span> •
+                                  <span id="selectedMovieDuration"></span> phút
+                                  •
+                                  <span id="selectedMovieRating"></span>
+                                </small>
+                              </div>
                             </div>
-                            <small class="form-text text-muted"> </small>
-                          </div>
-                          <div class="col-md-3 mb-3">
-                            <label for="endTime" class="form-label fw-semibold"
-                              >Giờ Kết Thúc
-                              <span class="text-danger">*</span></label
-                            >
-                            <input
-                              type="time"
-                              id="endTime"
-                              th:field="*{endTime}"
-                              name="endTime"
-                              class="form-control"
-                              required
-                            />
-                            <small class="form-text text-muted"> </small>
-                          </div>
-                          <div class="col-md-3 mb-3">
-                            <label
-                              for="screeningRoomSelect"
-                              class="form-label fw-semibold"
-                              >Phòng Chiếu
-                              <span class="text-danger">*</span></label
-                            >
-                            <select
-                              id="screeningRoomSelect"
-                              th:field="*{screeningRoomId}"
-                              name="screeningRoomId"
-                              class="form-select"
-                              required
-                            >
-                              <option value="" disabled>
-                                -- Chọn phòng --
-                              </option>
-                              <option
-                                th:each="room : ${screeningRooms}"
-                                th:value="${room.id}"
-                                th:text="${room.name}"
-                              >
-                                Room Name
-                              </option>
-                            </select>
-                          </div>
-                          <div class="col-md-3 mb-3">
-                            <label
-                              for="branchSelect"
-                              class="form-label fw-semibold"
-                              >Chi Nhánh
-                              <span class="text-danger">*</span></label
-                            >
-                            <select
-                              id="branchSelect"
-                              th:field="*{branchId}"
-                              name="branchId"
-                              class="form-select"
-                              required
-                            >
-                              <option value="" disabled>
-                                -- Chọn chi nhánh --
-                              </option>
-                              <option
-                                th:each="branch : ${branches}"
-                                th:value="${branch.id}"
-                                th:text="${branch.name}"
-                              >
-                                Branch Name
-                              </option>
-                            </select>
                           </div>
                         </div>
                       </div>
-                      <!-- Additional time slots will be added here by JavaScript -->
+                      <input
+                        type="hidden"
+                        name="movieId"
+                        id="selectedMovieId"
+                        required
+                      />
                     </div>
 
-                    <!-- Button to add more time slots -->
-                    <div class="d-flex justify-content-center mt-3">
+                    <div class="row">
+                      <!-- Giờ bắt đầu -->
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold" for="startTime"
+                          >Giờ bắt đầu *</label
+                        >
+                        <input
+                          type="time"
+                          class="form-control"
+                          id="startTime"
+                          name="startTime"
+                          min="08:00"
+                          max="23:59"
+                          required
+                        />
+                        <small class="text-muted"
+                          >Khung giờ: 8:00 - 24:00</small
+                        >
+                      </div>
+
+                      <!-- Giờ kết thúc -->
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold" for="endTime"
+                          >Giờ kết thúc *</label
+                        >
+                        <input
+                          type="time"
+                          class="form-control"
+                          id="endTime"
+                          name="endTime"
+                          readonly
+                        />
+                      </div>
+
+                      <!-- Trạng thái -->
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold" for="status"
+                          >Trạng thái</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="status"
+                          value="Sắp chiếu"
+                          readonly
+                        />
+                        <input type="hidden" name="status" value="UPCOMING" />
+                      </div>
+                    </div>
+
+                    <!-- Thông báo xung đột -->
+                    <div
+                      class="alert alert-warning"
+                      id="conflictAlert"
+                      style="display: none"
+                    >
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      <span id="conflictMessage"></span>
+                    </div>
+
+                    <!-- Button thêm giờ chiếu -->
+                    <div class="mb-3">
                       <button
                         type="button"
+                        class="btn btn-outline-primary btn-sm"
                         id="addTimeSlotBtn"
-                        class="btn btn-outline-primary"
                       >
-                        <i class="fas fa-plus-circle me-2"></i>Thêm Suất Chiếu
+                        <i class="fas fa-plus me-1"></i>
+                        Thêm giờ chiếu
                       </button>
                     </div>
-                  </div>
-                </div>
 
-                <div class="form-section">
-                  <div class="card-header p-3">
-                    <h5 class="mb-0 fw-semibold">
-                      <i class="fas fa-cogs me-2"></i>
-                      Thông tin thêm
-                    </h5>
-                  </div>
-                  <div class="card-body p-3 p-md-4">
-                    <div class="mb-3">
-                      <label for="scheduleStatus" class="form-label fw-semibold"
-                        >Trạng Thái Lịch Chiếu</label
-                      >
-                      <select
-                        id="scheduleStatus"
-                        th:field="*{status}"
-                        class="form-select"
-                      >
-                        <option value="AUTO">
-                          Tự động (dựa trên ngày/giờ)
-                        </option>
-                        <option value="ACTIVE">Đang chiếu (thủ công)</option>
-                        <option value="UPCOMING">Sắp chiếu (thủ công)</option>
-                        <option value="ENDED">Đã kết thúc (thủ công)</option>
-                        <option value="CANCELLED">Đã hủy</option>
-                      </select>
+                    <!-- Container cho các giờ chiếu thêm -->
+                    <div id="additionalTimeSlots">
+                      <!-- Các slot thời gian thêm sẽ được thêm vào đây -->
                     </div>
                   </div>
                 </div>
@@ -650,12 +522,8 @@
             <div
               class="d-flex justify-content-end align-items-center form-actions"
             >
-              <button type="button" class="btn btn-outline-secondary me-2">
-                <i class="fas fa-save me-2"></i>
-                Lưu nháp
-              </button>
               <a
-                th:href="@{/admin/schedules/list}"
+                th:href="@{/admin/schedules/detail(date=${selectedDate})}"
                 class="btn btn-outline-danger me-2"
               >
                 <i class="fas fa-times me-2"></i>
@@ -672,291 +540,18 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Set header title on load
-        const headerTitle = document.getElementById("main-header-title");
-        if (headerTitle) {
-          headerTitle.textContent = "Thêm Lịch Chiếu Mới";
-        }
-
-        // Initialize sidebar behavior
+        // Khởi tạo các chức năng
         initializeDashboardBehavior();
-
-        // Initialize required field validation
-        initializeRequiredFieldValidation();
-
-        // Set minimum date to today
-        const dateInput = document.getElementById("screeningDate");
-        if (dateInput) {
-          const today = new Date().toISOString().split("T")[0];
-          dateInput.setAttribute("min", today);
-          dateInput.addEventListener("change", validateDateTimeNotInPast);
-        }
-
-        // Add real-time validation for time field
-        const timeInput = document.getElementById("startTime");
-        if (timeInput) {
-          timeInput.addEventListener("change", validateDateTimeNotInPast);
-        }
-
-        // Initialize time slot functionality
-        const addTimeSlotBtn = document.getElementById("addTimeSlotBtn");
-        if (addTimeSlotBtn) {
-          addTimeSlotBtn.addEventListener("click", addNewTimeSlot);
-        }
-
-        // Initialize time slot counter for unique IDs
-        window.timeSlotCounter = 1;
-
-        // Add form submission handler - SINGLE EVENT LISTENER
-        const scheduleForm = document.getElementById("scheduleForm");
-        if (scheduleForm) {
-          scheduleForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Always prevent default submission
-
-            console.log("Form submission started"); // Debug log
-
-            let isValid = true;
-
-            // Validate all required fields first
-            if (!validateAllRequiredFields()) {
-              isValid = false;
-              console.log("Required fields validation failed"); // Debug log
-            }
-
-            // Validate date and time are not in the past
-            if (!validateDateTimeNotInPast()) {
-              isValid = false;
-              console.log("Date/time validation failed"); // Debug log
-            }
-
-            // Validate time logic
-            if (!validateTimeLogic()) {
-              isValid = false;
-              console.log("Time logic validation failed"); // Debug log
-            }
-
-            // Validate all additional time slots
-            const additionalSlots =
-              document.querySelectorAll('[id^="timeSlot_"]');
-            additionalSlots.forEach((slot) => {
-              const id = slot.id.split("_")[1];
-              if (!validateAdditionalTimeSlot(id)) {
-                isValid = false;
-                console.log(
-                  "Additional time slot validation failed for slot:",
-                  id
-                ); // Debug log
-              }
-            });
-
-            if (!isValid) {
-              console.log("Form validation failed, not submitting"); // Debug log
-              // Find the first invalid field and focus it for better UX
-              const firstInvalidField = document.querySelector(".is-invalid");
-              if (firstInvalidField) {
-                if (firstInvalidField.tagName === "LABEL") {
-                  const fieldToFocus = document.getElementById(
-                    firstInvalidField.getAttribute("for")
-                  );
-                  if (fieldToFocus) fieldToFocus.focus();
-                } else {
-                  firstInvalidField.focus();
-                }
-              }
-              return false;
-            }
-
-            // If validation passes, collect time slots and submit
-            console.log("Form validation passed, collecting time slots"); // Debug log
-            collectAndSubmitTimeSlots();
-          });
-        }
+        initializeMovieAutocomplete();
+        initializeTimeCalculation();
+        initializeMultipleSchedules();
+        initializeFormValidation();
       });
 
-      // Function to add a new time slot - moved outside the DOMContentLoaded for cleaner organization
-      function addNewTimeSlot() {
-        const container = document.getElementById("timeSlotsContainer");
-        const newSlotId = window.timeSlotCounter++;
-
-        // Create a new time slot group
-        const newSlotGroup = document.createElement("div");
-        newSlotGroup.className = "time-slot-group mb-3 pb-3 border-bottom";
-        newSlotGroup.id = `timeSlot_${newSlotId}`;
-
-        // HTML for the new time slot
-        newSlotGroup.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-semibold mb-0">Suất chiếu #${newSlotId}</h6>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-slot-btn"
-                    onclick="removeTimeSlot('timeSlot_${newSlotId}')">
-              <i class="fas fa-times"></i> Xóa
-            </button>
-          </div>
-          <div class="row">
-            <div class="col-md-3 mb-3">
-              <label for="startTime_${newSlotId}" class="form-label fw-semibold">
-                Giờ Bắt Đầu <span class="text-danger">*</span>
-              </label>
-              <input type="time" id="startTime_${newSlotId}" name="additionalStartTime_${newSlotId}"
-                     class="form-control" required />
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="endTime_${newSlotId}" class="form-label fw-semibold">
-                Giờ Kết Thúc <span class="text-danger">*</span>
-              </label>
-              <input type="time" id="endTime_${newSlotId}" name="additionalEndTime_${newSlotId}"
-                     class="form-control" required />
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="screeningRoomSelect_${newSlotId}" class="form-label fw-semibold">
-                Phòng Chiếu <span class="text-danger">*</span>
-              </label>
-              <select id="screeningRoomSelect_${newSlotId}" name="additionalScreeningRoomId_${newSlotId}"
-                      class="form-select" required>
-                <option value="" disabled selected>-- Chọn phòng --</option>
-                ${Array.from(
-                  document.getElementById("screeningRoomSelect").options
-                )
-                  .map(
-                    (opt) => `<option value="${opt.value}">${opt.text}</option>`
-                  )
-                  .join("")}
-              </select>
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="branchSelect_${newSlotId}" class="form-label fw-semibold">
-                Chi Nhánh <span class="text-danger">*</span>
-              </label>
-              <select id="branchSelect_${newSlotId}" name="additionalBranchId_${newSlotId}"
-                      class="form-select" required>
-                <option value="" disabled selected>-- Chọn chi nhánh --</option>
-                ${Array.from(document.getElementById("branchSelect").options)
-                  .map(
-                    (opt) => `<option value="${opt.value}">${opt.text}</option>`
-                  )
-                  .join("")}
-              </select>
-            </div>
-          </div>
-        `;
-
-        // Add the new slot to the container
-        container.appendChild(newSlotGroup);
-
-        // Add validation to new fields
-        const newRequiredFields = newSlotGroup.querySelectorAll("[required]");
-        newRequiredFields.forEach(initializeRequiredFieldValidationForElement);
-
-        // Add time validation
-        const newStartTime = document.getElementById(`startTime_${newSlotId}`);
-        const newEndTime = document.getElementById(`endTime_${newSlotId}`);
-
-        if (newStartTime && newEndTime) {
-          newStartTime.addEventListener("change", () =>
-            validateAdditionalTimeSlot(newSlotId)
-          );
-          newEndTime.addEventListener("change", () =>
-            validateAdditionalTimeSlot(newSlotId)
-          );
-        }
-      }
-
-      // FIXED: Make removeTimeSlot function globally available
-      function removeTimeSlot(slotId) {
-        const slotToRemove = document.getElementById(slotId);
-        if (slotToRemove) {
-          slotToRemove.remove();
-        }
-      }
-
-      // Function to validate additional time slots
-      function validateAdditionalTimeSlot(slotId) {
-        const startTimeInput = document.getElementById(`startTime_${slotId}`);
-        const endTimeInput = document.getElementById(`endTime_${slotId}`);
-
-        if (!startTimeInput || !endTimeInput) return true;
-        if (!startTimeInput.value || !endTimeInput.value) return true;
-
-        const startTime = startTimeInput.value;
-        const endTime = endTimeInput.value;
-
-        if (startTime >= endTime) {
-          startTimeInput.classList.add("is-invalid");
-          endTimeInput.classList.add("is-invalid");
-
-          let errorDiv = document.getElementById(`timeLogicError_${slotId}`);
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = `timeLogicError_${slotId}`;
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
-            endTimeInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        } else {
-          startTimeInput.classList.remove("is-invalid");
-          endTimeInput.classList.remove("is-invalid");
-
-          const errorDiv = document.getElementById(`timeLogicError_${slotId}`);
-          if (errorDiv) {
-            errorDiv.remove();
-          }
-          return true;
-        }
-      }
-
-      // Update the collectTimeSlots function to include additional time slots
-      function collectTimeSlots() {
-        const timeSlots = [];
-
-        // Add the original time slot
-        const originalStartTime = document.getElementById("startTime").value;
-        const originalEndTime = document.getElementById("endTime").value;
-        const originalRoomId = document.getElementById(
-          "screeningRoomSelect"
-        ).value;
-        const originalBranchId = document.getElementById("branchSelect").value;
-
-        if (
-          originalStartTime &&
-          originalEndTime &&
-          originalRoomId &&
-          originalBranchId
-        ) {
-          timeSlots.push({
-            startTime: originalStartTime,
-            endTime: originalEndTime,
-            roomId: originalRoomId,
-            branchId: originalBranchId,
-          });
-        }
-
-        // Add all additional time slots
-        const additionalSlots = document.querySelectorAll('[id^="timeSlot_"]');
-        additionalSlots.forEach((slot) => {
-          const id = slot.id.split("_")[1];
-          const startTime = document.getElementById(`startTime_${id}`).value;
-          const endTime = document.getElementById(`endTime_${id}`).value;
-          const roomId = document.getElementById(
-            `screeningRoomSelect_${id}`
-          ).value;
-          const branchId = document.getElementById(`branchSelect_${id}`).value;
-
-          if (startTime && endTime && roomId && branchId) {
-            timeSlots.push({
-              startTime: startTime,
-              endTime: endTime,
-              roomId: roomId,
-              branchId: branchId,
-            });
-          }
-        });
-
-        return timeSlots;
-      }
-
+      // Khởi tạo hành vi sidebar
       function initializeDashboardBehavior() {
         const sidebarToggle = document.getElementById("sidebarToggle");
         const sidebar = document.getElementById("sidebar");
@@ -964,294 +559,509 @@
           document.getElementById("mainContentWrapper");
 
         if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-          console.error(
-            "Sidebar toggle elements not found for behavior initialization."
-          );
+          console.error("Sidebar elements not found.");
           return;
         }
 
-        const mediaQuery = window.matchMedia("(max-width: 992px)");
-
-        // Function to explicitly set the sidebar state (collapsed or expanded)
-        function setSidebarView(isCollapsed) {
-          sidebar.classList.toggle("collapsed", isCollapsed);
-          mainContentWrapper.classList.toggle("expanded", isCollapsed);
+        function toggleSidebar() {
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
         }
+        sidebarToggle.addEventListener("click", toggleSidebar);
 
-        // Event listener for the toggle button
-        sidebarToggle.addEventListener("click", () => {
-          const currentlyCollapsed = sidebar.classList.contains("collapsed");
-          setSidebarView(!currentlyCollapsed);
+        function checkViewport() {
+          if (window.innerWidth <= 992) {
+            if (!sidebar.classList.contains("collapsed")) {
+              toggleSidebar();
+            }
+          }
+        }
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
+      }
+
+      // Khởi tạo autocomplete cho phim
+      function initializeMovieAutocomplete() {
+        const movieSearch = document.getElementById("movieSearch");
+        const movieDropdown = document.getElementById("movieDropdown");
+        const selectedMovieInfo = document.getElementById("selectedMovieInfo");
+        const selectedMovieId = document.getElementById("selectedMovieId");
+        const clearMovieBtn = document.getElementById("clearMovieBtn");
+
+        let searchTimeout;
+        let selectedMovie = null;
+
+        // Tìm kiếm phim
+        movieSearch.addEventListener("input", function () {
+          const query = this.value.trim();
+
+          clearTimeout(searchTimeout);
+
+          if (query.length < 2) {
+            movieDropdown.style.display = "none";
+            return;
+          }
+
+          searchTimeout = setTimeout(() => {
+            searchMovies(query);
+          }, 300);
         });
 
-        // Function to handle viewport changes
-        function handleViewportChange(event) {
-          if (event.matches) {
-            setSidebarView(true);
-          }
+        // Xóa phim đã chọn
+        clearMovieBtn.addEventListener("click", function () {
+          clearSelectedMovie();
+        });
+
+        function searchMovies(query) {
+          fetch(
+            `/admin/schedules/api/movies/search?query=${encodeURIComponent(
+              query
+            )}`
+          )
+            .then((response) => response.json())
+            .then((movies) => {
+              displayMovieResults(movies);
+            })
+            .catch((error) => {
+              console.error("Lỗi khi tìm kiếm phim:", error);
+              movieDropdown.style.display = "none";
+            });
         }
 
-        mediaQuery.addEventListener("change", handleViewportChange);
-        handleViewportChange(mediaQuery);
+        function displayMovieResults(movies) {
+          movieDropdown.innerHTML = "";
+
+          if (movies.length === 0) {
+            const noResults = document.createElement("div");
+            noResults.className = "autocomplete-no-results";
+            noResults.textContent = "Không tìm thấy phim nào";
+            movieDropdown.appendChild(noResults);
+          } else {
+            movies.forEach((movie) => {
+              const movieItem = document.createElement("div");
+              movieItem.className = "autocomplete-item";
+              movieItem.innerHTML = `
+                <div class="d-flex align-items-center">
+                  <img src="${movie.image || "/images/default-movie.jpg"}"
+                       alt="${movie.name}"
+                       class="me-2"
+                       style="width: 40px; height: 50px; object-fit: cover;">
+                  <div>
+                    <div class="fw-semibold">${movie.name}</div>
+                    <small class="text-muted">${movie.genre} • ${
+                movie.duration
+              } phút • ${movie.rating}</small>
+                  </div>
+                </div>
+              `;
+              movieItem.addEventListener("click", () => selectMovie(movie));
+              movieDropdown.appendChild(movieItem);
+            });
+          }
+
+          movieDropdown.style.display = "block";
+        }
+
+        function selectMovie(movie) {
+          selectedMovie = movie;
+          movieSearch.value = movie.name;
+          selectedMovieId.value = movie.id;
+
+          // Hiển thị thông tin phim đã chọn
+          document.getElementById("selectedMovieImage").src =
+            movie.image || "/images/default-movie.jpg";
+          document.getElementById("selectedMovieName").textContent = movie.name;
+          document.getElementById("selectedMovieGenre").textContent =
+            movie.genre;
+          document.getElementById("selectedMovieDuration").textContent =
+            movie.duration;
+          document.getElementById("selectedMovieRating").textContent =
+            movie.rating;
+
+          selectedMovieInfo.style.display = "block";
+          clearMovieBtn.style.display = "block";
+          movieDropdown.style.display = "none";
+
+          // Tính toán lại thời gian kết thúc nếu đã có giờ bắt đầu
+          calculateEndTime();
+        }
+
+        function clearSelectedMovie() {
+          selectedMovie = null;
+          movieSearch.value = "";
+          selectedMovieId.value = "";
+          selectedMovieInfo.style.display = "none";
+          clearMovieBtn.style.display = "none";
+          movieDropdown.style.display = "none";
+
+          // Xóa thời gian kết thúc
+          document.getElementById("endTime").value = "";
+        }
+
+        // Đóng dropdown khi click bên ngoài
+        document.addEventListener("click", function (e) {
+          if (
+            !movieSearch.contains(e.target) &&
+            !movieDropdown.contains(e.target)
+          ) {
+            movieDropdown.style.display = "none";
+          }
+        });
       }
 
-      function validateDateTimeNotInPast() {
-        const dateInput = document.getElementById("screeningDate");
-        const timeInput = document.getElementById("startTime");
-
-        if (!dateInput.value || !timeInput.value) {
-          return true; // Let required field validation handle empty values
-        }
-
-        const selectedDate = new Date(dateInput.value);
-        const selectedTime = timeInput.value;
-        const now = new Date();
-        const today = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-        const currentTime =
-          now.getHours().toString().padStart(2, "0") +
-          ":" +
-          now.getMinutes().toString().padStart(2, "0");
-
-        // Check if selected date is in the past
-        if (selectedDate < today) {
-          dateInput.classList.add("is-invalid");
-
-          // Show error message for date
-          let errorDiv = document.getElementById("pastDateError");
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = "pastDateError";
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent = "Không thể chọn ngày trong quá khứ.";
-            dateInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        }
-
-        // Check if selected date is today and time is in the past
-        if (
-          selectedDate.getTime() === today.getTime() &&
-          selectedTime < currentTime
-        ) {
-          timeInput.classList.add("is-invalid");
-
-          // Show error message for time
-          let errorDiv = document.getElementById("pastTimeError");
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = "pastTimeError";
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent =
-              "Không thể chọn thời gian trong quá khứ cho hôm nay.";
-            timeInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        }
-
-        // Remove error styling and messages if validation passes
-        dateInput.classList.remove("is-invalid");
-        timeInput.classList.remove("is-invalid");
-
-        const pastDateError = document.getElementById("pastDateError");
-        if (pastDateError) {
-          pastDateError.remove();
-        }
-
-        const pastTimeError = document.getElementById("pastTimeError");
-        if (pastTimeError) {
-          pastTimeError.remove();
-        }
-
-        return true;
-      }
-
-      function validateTimeLogic() {
+      // Khởi tạo tính toán thời gian
+      function initializeTimeCalculation() {
         const startTimeInput = document.getElementById("startTime");
         const endTimeInput = document.getElementById("endTime");
 
-        if (!startTimeInput.value || !endTimeInput.value) {
-          return true; // Let required field validation handle empty values
-        }
-
-        const startTime = startTimeInput.value;
-        const endTime = endTimeInput.value;
-
-        if (startTime >= endTime) {
-          startTimeInput.classList.add("is-invalid");
-          endTimeInput.classList.add("is-invalid");
-
-          // Show error message
-          let errorDiv = document.getElementById("timeLogicError");
-          if (!errorDiv) {
-            errorDiv = document.createElement("div");
-            errorDiv.id = "timeLogicError";
-            errorDiv.className = "alert alert-danger mt-2";
-            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
-            endTimeInput.parentNode.appendChild(errorDiv);
-          }
-          return false;
-        } else {
-          startTimeInput.classList.remove("is-invalid");
-          endTimeInput.classList.remove("is-invalid");
-
-          // Remove error message
-          const errorDiv = document.getElementById("timeLogicError");
-          if (errorDiv) {
-            errorDiv.remove();
-          }
-          return true;
-        }
-      }
-
-      function initializeRequiredFieldValidationForElement(field) {
-        if (!field) return;
-        const label = document.querySelector(`label[for="${field.id}"]`);
-        const validate = () => validateRequiredField(field, label);
-
-        field.addEventListener("blur", validate);
-        field.addEventListener("input", validate);
-        if (field.tagName === "SELECT") {
-          field.addEventListener("change", validate);
-        }
-      }
-
-      function initializeRequiredFieldValidation() {
-        const requiredFields = document.querySelectorAll(
-          "#scheduleForm [required]"
-        );
-        requiredFields.forEach(initializeRequiredFieldValidationForElement);
-      }
-
-      function validateRequiredField(field, label) {
-        if (!field) return;
-
-        const isSelect = field.tagName === "SELECT";
-        const isEmpty = isSelect ? !field.value : !field.value.trim();
-
-        if (isEmpty) {
-          field.classList.add("is-invalid");
-          if (label) label.classList.add("required-error");
-        } else {
-          field.classList.remove("is-invalid");
-          if (label) label.classList.remove("required-error");
-        }
-      }
-
-      function validateAllRequiredFields() {
-        const requiredFields = document.querySelectorAll(
-          "#scheduleForm [required]"
-        );
-        let allValid = true;
-
-        requiredFields.forEach((field) => {
-          const label = document.querySelector(`label[for="${field.id}"]`);
-          const isSelect = field.tagName === "SELECT";
-          const isEmpty = isSelect ? !field.value : !field.value.trim();
-
-          if (isEmpty) {
-            allValid = false;
-            field.classList.add("is-invalid");
-            if (label) label.classList.add("required-error");
-          } else {
-            field.classList.remove("is-invalid");
-            if (label) label.classList.remove("required-error");
-          }
+        startTimeInput.addEventListener("change", function () {
+          calculateEndTime();
+          checkScheduleConflict();
         });
 
-        return allValid;
+        function calculateEndTime() {
+          const startTime = startTimeInput.value;
+          const selectedMovieId =
+            document.getElementById("selectedMovieId").value;
+
+          if (!startTime || !selectedMovieId) {
+            return;
+          }
+
+          // Kiểm tra thời gian quá khứ cho ngày hôm nay
+          const selectedDate = document.getElementById("screeningDate").value;
+          const today = new Date().toISOString().split("T")[0];
+
+          if (selectedDate === today) {
+            const currentTime = new Date();
+            const [hours, minutes] = startTime.split(":").map(Number);
+            const selectedDateTime = new Date();
+            selectedDateTime.setHours(hours, minutes, 0, 0);
+
+            if (selectedDateTime <= currentTime) {
+              alert("Không thể chọn thời gian trong quá khứ cho ngày hôm nay!");
+              startTimeInput.value = "";
+              endTimeInput.value = "";
+              return;
+            }
+          }
+
+          // Lấy thời lượng phim từ thông tin đã chọn
+          const durationElement = document.getElementById(
+            "selectedMovieDuration"
+          );
+          if (!durationElement) {
+            return;
+          }
+
+          const duration = parseInt(durationElement.textContent);
+          if (isNaN(duration)) {
+            return;
+          }
+
+          // Tính toán thời gian kết thúc
+          const [hours, minutes] = startTime.split(":").map(Number);
+          const startDate = new Date();
+          startDate.setHours(hours, minutes, 0, 0);
+
+          const endDate = new Date(startDate.getTime() + duration * 60000);
+
+          // Kiểm tra xem có vượt quá 1:00 sáng không
+          if (endDate.getHours() >= 1 && endDate.getHours() < 8) {
+            alert(
+              "Lịch chiếu không được kết thúc sau 1:00 sáng. Vui lòng chọn giờ bắt đầu khác."
+            );
+            startTimeInput.value = "";
+            endTimeInput.value = "";
+            return;
+          }
+
+          // Định dạng thời gian kết thúc
+          const endTimeString = endDate.toTimeString().slice(0, 5);
+          endTimeInput.value = endTimeString;
+        }
+
+        window.calculateEndTime = calculateEndTime;
       }
 
-      // Event listener đã được thêm ở trên trong DOMContentLoaded chính - xóa duplicate này
+      // Kiểm tra xung đột lịch chiếu
+      function checkScheduleConflict() {
+        const roomId = document.getElementById("screeningRoomId").value;
+        const date = document.getElementById("screeningDate").value;
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
 
-      // Function to collect and submit time slots
-      function collectAndSubmitTimeSlots() {
-        const timeSlots = [];
-        const form = document.getElementById("scheduleForm");
+        if (!roomId || !date || !startTime || !endTime) {
+          return;
+        }
 
-        console.log("Collecting time slots..."); // Debug log
+        const params = new URLSearchParams({
+          roomId: roomId,
+          date: date,
+          startTime: startTime,
+          endTime: endTime,
+        });
 
-        // Get the original time slot data
-        const originalStartTime = document.getElementById("startTime").value;
-        const originalEndTime = document.getElementById("endTime").value;
-        const originalRoomId = document.getElementById(
-          "screeningRoomSelect"
-        ).value;
-        const originalBranchId = document.getElementById("branchSelect").value;
+        fetch(`/admin/schedules/api/check-conflict?${params}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const conflictAlert = document.getElementById("conflictAlert");
+            const conflictMessage = document.getElementById("conflictMessage");
+            const submitBtn = document.getElementById("submitBtn");
 
-        console.log("Original time slot:", {
-          startTime: originalStartTime,
-          endTime: originalEndTime,
-          roomId: originalRoomId,
-          branchId: originalBranchId,
-        }); // Debug log
-
-        // Add original time slot to the array
-        if (
-          originalStartTime &&
-          originalEndTime &&
-          originalRoomId &&
-          originalBranchId
-        ) {
-          timeSlots.push({
-            startTime: originalStartTime,
-            endTime: originalEndTime,
-            roomId: originalRoomId,
-            branchId: originalBranchId,
+            if (data.hasConflict) {
+              conflictAlert.style.display = "block";
+              conflictMessage.textContent =
+                data.message ||
+                "Phòng chiếu đã có lịch chiếu trong khung giờ này!";
+              submitBtn.disabled = true;
+            } else {
+              conflictAlert.style.display = "none";
+              submitBtn.disabled = false;
+            }
+          })
+          .catch((error) => {
+            console.error("Lỗi khi kiểm tra xung đột:", error);
           });
-        }
+      }
 
-        // Get all additional time slots
-        const additionalSlots = document.querySelectorAll('[id^="timeSlot_"]');
-        console.log("Found additional slots:", additionalSlots.length); // Debug log
+      // Khởi tạo chức năng thêm nhiều lịch chiếu
+      function initializeMultipleSchedules() {
+        const addTimeSlotBtn = document.getElementById("addTimeSlotBtn");
+        const additionalTimeSlots = document.getElementById(
+          "additionalTimeSlots"
+        );
 
-        additionalSlots.forEach((slot) => {
-          const id = slot.id.split("_")[1];
-          const startTime = document.getElementById(`startTime_${id}`).value;
-          const endTime = document.getElementById(`endTime_${id}`).value;
-          const roomId = document.getElementById(
-            `screeningRoomSelect_${id}`
-          ).value;
-          const branchId = document.getElementById(`branchSelect_${id}`).value;
+        let timeSlotCounter = 0;
 
-          console.log(`Additional slot ${id}:`, {
-            startTime: startTime,
-            endTime: endTime,
-            roomId: roomId,
-            branchId: branchId,
-          }); // Debug log
+        // Thêm time slot mới
+        addTimeSlotBtn.addEventListener("click", function () {
+          timeSlotCounter++;
+          const timeSlotDiv = document.createElement("div");
+          timeSlotDiv.className = "row mb-3 time-slot-row border-top pt-3";
+          timeSlotDiv.setAttribute("data-slot-id", timeSlotCounter);
 
-          if (startTime && endTime && roomId && branchId) {
-            timeSlots.push({
-              startTime: startTime,
-              endTime: endTime,
-              roomId: roomId,
-              branchId: branchId,
-            });
-          }
+          timeSlotDiv.innerHTML = `
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Giờ bắt đầu ${timeSlotCounter}</label>
+              <input
+                type="time"
+                class="form-control additional-start-time"
+                name="additionalStartTimes"
+                min="08:00"
+                max="23:59"
+                data-slot-id="${timeSlotCounter}"
+                required
+              />
+              <small class="text-muted">Khung giờ: 8:00 - 24:00</small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Giờ kết thúc ${timeSlotCounter}</label>
+              <input
+                type="time"
+                class="form-control additional-end-time"
+                name="additionalEndTimes"
+                data-slot-id="${timeSlotCounter}"
+                readonly
+              />
+              <small class="text-muted">Tự động tính toán</small>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-sm remove-time-slot"
+                data-slot-id="${timeSlotCounter}"
+              >
+                <i class="fas fa-trash me-1"></i>
+                Xóa
+              </button>
+            </div>
+          `;
+
+          additionalTimeSlots.appendChild(timeSlotDiv);
+
+          // Thêm event listener cho time input mới
+          const newStartTimeInput = timeSlotDiv.querySelector(
+            ".additional-start-time"
+          );
+          newStartTimeInput.addEventListener("change", function () {
+            calculateAdditionalEndTime(this);
+          });
+
+          // Thêm event listener cho nút xóa
+          const removeBtn = timeSlotDiv.querySelector(".remove-time-slot");
+          removeBtn.addEventListener("click", function () {
+            timeSlotDiv.remove();
+          });
         });
 
-        console.log("Total time slots collected:", timeSlots.length); // Debug log
-        console.log("Time slots data:", timeSlots); // Debug log
+        // Tính toán thời gian kết thúc cho time slot thêm
+        function calculateAdditionalEndTime(startTimeInput) {
+          const selectedMovieId =
+            document.getElementById("selectedMovieId").value;
+          const startTime = startTimeInput.value;
 
-        // Validate that we have at least one time slot
-        if (timeSlots.length === 0) {
-          alert("Vui lòng điền đầy đủ thông tin cho ít nhất một suất chiếu!");
-          return false;
+          if (!startTime || !selectedMovieId) {
+            return;
+          }
+
+          // Kiểm tra thời gian quá khứ cho ngày hôm nay
+          const selectedDate = document.getElementById("screeningDate").value;
+          const today = new Date().toISOString().split("T")[0];
+
+          if (selectedDate === today) {
+            const currentTime = new Date();
+            const [hours, minutes] = startTime.split(":").map(Number);
+            const selectedDateTime = new Date();
+            selectedDateTime.setHours(hours, minutes, 0, 0);
+
+            if (selectedDateTime <= currentTime) {
+              alert("Không thể chọn thời gian trong quá khứ cho ngày hôm nay!");
+              startTimeInput.value = "";
+              return;
+            }
+          }
+
+          // Lấy thời lượng phim
+          const durationElement = document.getElementById(
+            "selectedMovieDuration"
+          );
+          if (!durationElement) {
+            return;
+          }
+
+          const duration = parseInt(durationElement.textContent);
+          if (isNaN(duration)) {
+            return;
+          }
+
+          // Tính toán thời gian kết thúc
+          const [hours, minutes] = startTime.split(":").map(Number);
+          const startDate = new Date();
+          startDate.setHours(hours, minutes, 0, 0);
+
+          const endDate = new Date(startDate.getTime() + duration * 60000);
+
+          // Kiểm tra xem có vượt quá 1:00 sáng không
+          if (endDate.getHours() >= 1 && endDate.getHours() < 8) {
+            alert(
+              "Lịch chiếu không được kết thúc sau 1:00 sáng. Vui lòng chọn giờ bắt đầu khác."
+            );
+            startTimeInput.value = "";
+            return;
+          }
+
+          // Cập nhật thời gian kết thúc
+          const slotId = startTimeInput.getAttribute("data-slot-id");
+          const endTimeInput = document.querySelector(
+            `input[data-slot-id="${slotId}"].additional-end-time`
+          );
+          if (endTimeInput) {
+            const endTimeString = endDate.toTimeString().slice(0, 5);
+            endTimeInput.value = endTimeString;
+          }
         }
+      }
 
-        // Set the JSON data to the hidden input
-        const timeSlotsJson = JSON.stringify(timeSlots);
-        document.getElementById("timeSlotsJson").value = timeSlotsJson;
+      // Khởi tạo validation form
+      function initializeFormValidation() {
+        const scheduleForm = document.getElementById("scheduleForm");
 
-        console.log("Setting timeSlotsJson:", timeSlotsJson); // Debug log
+        scheduleForm.addEventListener("submit", function (event) {
+          const movieId = document.getElementById("selectedMovieId").value;
+          const startTime = document.getElementById("startTime").value;
+          const endTime = document.getElementById("endTime").value;
 
-        // Submit the form
-        console.log("Submitting form..."); // Debug log
-        form.submit();
+          if (!movieId) {
+            event.preventDefault();
+            alert("Vui lòng chọn phim!");
+            return false;
+          }
+
+          if (!startTime) {
+            event.preventDefault();
+            alert("Vui lòng chọn giờ bắt đầu!");
+            return false;
+          }
+
+          // Kiểm tra thời gian quá khứ trước khi submit
+          const selectedDate = document.getElementById("screeningDate").value;
+          const today = new Date().toISOString().split("T")[0];
+
+          if (selectedDate === today) {
+            const currentTime = new Date();
+            const [hours, minutes] = startTime.split(":").map(Number);
+            const selectedDateTime = new Date();
+            selectedDateTime.setHours(hours, minutes, 0, 0);
+
+            if (selectedDateTime <= currentTime) {
+              event.preventDefault();
+              alert("Không thể tạo lịch chiếu cho thời gian trong quá khứ!");
+              return false;
+            }
+          }
+
+          if (!endTime) {
+            event.preventDefault();
+            alert("Thời gian kết thúc chưa được tính toán!");
+            return false;
+          }
+
+          // Kiểm tra validation cho các lịch chiếu thêm
+          const additionalStartTimes = document.querySelectorAll(
+            ".additional-start-time"
+          );
+          const additionalEndTimes = document.querySelectorAll(
+            ".additional-end-time"
+          );
+
+          for (let i = 0; i < additionalStartTimes.length; i++) {
+            const additionalStart = additionalStartTimes[i].value;
+            const additionalEnd = additionalEndTimes[i].value;
+
+            if (!additionalStart) {
+              event.preventDefault();
+              alert(`Vui lòng nhập giờ bắt đầu cho lịch chiếu thêm ${i + 1}!`);
+              return false;
+            }
+
+            // Kiểm tra thời gian quá khứ cho additional time slots
+            if (selectedDate === today) {
+              const currentTime = new Date();
+              const [hours, minutes] = additionalStart.split(":").map(Number);
+              const selectedDateTime = new Date();
+              selectedDateTime.setHours(hours, minutes, 0, 0);
+
+              if (selectedDateTime <= currentTime) {
+                event.preventDefault();
+                alert(
+                  `Lịch chiếu thêm ${
+                    i + 1
+                  }: Không thể chọn thời gian trong quá khứ!`
+                );
+                return false;
+              }
+            }
+
+            if (!additionalEnd) {
+              event.preventDefault();
+              alert(
+                `Thời gian kết thúc cho lịch chiếu thêm ${
+                  i + 1
+                } chưa được tính toán!`
+              );
+              return false;
+            }
+          }
+
+          // Kiểm tra xung đột một lần nữa trước khi submit
+          const submitBtn = document.getElementById("submitBtn");
+          if (submitBtn.disabled) {
+            event.preventDefault();
+            alert("Không thể thêm lịch chiếu do có xung đột thời gian!");
+            return false;
+          }
+        });
       }
     </script>
   </body>
