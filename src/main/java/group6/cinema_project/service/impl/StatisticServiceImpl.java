@@ -1,5 +1,6 @@
 package group6.cinema_project.service.impl;
 
+import group6.cinema_project.dto.StatisticDto;
 import group6.cinema_project.entity.Booking;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningSchedule;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 public class StatisticServiceImpl {
@@ -66,4 +68,16 @@ public class StatisticServiceImpl {
                 ));
     }
 
+    public List<StatisticDto> getUserMovieStatistics() {
+        List<Object[]> rawStats = bookingRepository.getStatisticsRaw();
+        List<StatisticDto> result = new java.util.ArrayList<>();
+        for (Object[] row : rawStats) {
+            String userName = row[0] != null ? row[0].toString() : null;
+            String movieName = row[1] != null ? row[1].toString() : null;
+            long totalTickets = row[2] != null ? Long.parseLong(row[2].toString()) : 0;
+            double totalAmount = row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0;
+            result.add(new StatisticDto(userName, movieName, totalTickets, totalAmount));
+        }
+        return result;
+    }
 }

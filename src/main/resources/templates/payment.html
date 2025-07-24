@@ -121,9 +121,6 @@
                         <button type="button" class="btn btn-outline-secondary" id="applyDiscount">Áp dụng</button>
                     </div>
                     <div id="discountMsg" class="mt-2 text-success"></div>
-                    <div th:if="${discountCodes != null}">
-                        <small class="text-muted">Mã demo: <span th:each="code : ${discountCodes}" th:text="${code} + ' '"></span></small>
-                    </div>
                 </div>
 
                 <!-- Payment Form -->

@@ -162,11 +162,11 @@
                 <th>Số lượng vé</th>
                 <th>Giá tiền</th>
             </tr>
-            <tr th:each="booking : ${bookings}">
-                <td th:text="${booking.user.userName} ?: 'N/A'"></td>
-                <td th:text="${booking.screeningSchedule?.movie?.name} ?: 'N/A'"></td>
-                <td th:text="${booking.screeningSchedule != null ? ticketCounts[booking.screeningSchedule.id] : 0}"></td>
-                <td th:text="${booking.totalAmount} + ' VND' ?: 'N/A'"></td>
+            <tr th:each="stat : ${statistics}">
+                <td th:text="${stat.userName}"></td>
+                <td th:text="${stat.movieName}"></td>
+                <td th:text="${stat.totalTickets}"></td>
+                <td th:text="${stat.totalAmount} + ' VND'"></td>
             </tr>
         </table>
         <div class="chart-container">

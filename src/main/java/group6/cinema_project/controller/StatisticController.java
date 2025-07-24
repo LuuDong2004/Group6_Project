@@ -15,10 +15,7 @@ public class StatisticController {
 
     @GetMapping("/admin/statistics")
     public String showStatistics(Model model) {
-        model.addAttribute("bookings", statisticServiceImpl.getAllBookings());
-        model.addAttribute("movies", statisticServiceImpl.getAllMovies());
-        model.addAttribute("movieRevenueStats", statisticServiceImpl.getMovieRevenueStats());
-        model.addAttribute("ticketCounts", statisticServiceImpl.getTicketCountByScreeningSchedule());
+        model.addAttribute("statistics", statisticServiceImpl.getUserMovieStatistics());
         return "admin/admin_statistic";
     }
 }

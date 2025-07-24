@@ -32,4 +32,5 @@ public class Ticket {
     public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
     public ScreeningSchedule getScreeningSchedule() { return screeningSchedule; }
     public void setScreeningSchedule(ScreeningSchedule screeningSchedule) { this.screeningSchedule = screeningSchedule; }
+
 }
