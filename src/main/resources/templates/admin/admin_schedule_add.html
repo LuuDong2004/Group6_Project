@@ -1,362 +1,366 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaAdmin - Thêm Lịch Chiếu Mới</title>
 
     <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-            rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-            rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
     />
 
     <!-- Admin Schedule Add Page Styles -->
     <style>
-        /* Basic styling to ensure page works */
-        body {
-            font-family: "Inter", sans-serif;
-            background-color: #f8fafc;
-            color: #334155;
-        }
+      /* Basic styling to ensure page works */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+      }
 
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+
+      .sidebar.collapsed {
+        width: 80px;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .logo-icon-wrapper {
+        background-color: white;
+        border-radius: 50%;
+        padding: 0.5rem;
+        margin-right: 0.75rem;
+      }
+
+      .logo-icon-wrapper .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+
+      .form-section {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+      }
+
+      .form-section .card-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          #6366f1 0%,
+          #8b5cf6 100%
+        ) !important;
+        color: white;
+      }
+
+      .time-slot-group {
+        border: 1px dashed #cbd5e1;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+        background-color: #f8fafc;
+      }
+
+      .form-actions {
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .btn-primary {
+        background-color: #6366f1;
+        border-color: #6366f1;
+      }
+
+      .btn-primary:hover {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+      }
+
+      /* Form specific styles */
+      .form-label.fw-semibold {
+        color: #334155;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-label.required-error {
+        color: #ef4444 !important;
+        font-weight: 600;
+      }
+
+      .form-control,
+      .form-select {
+        border-radius: 0.375rem;
+        border-color: #cbd5e1;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+      }
+
+      .input-group-text {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #64748b;
+      }
+
+      .btn-outline-danger {
+        color: #ef4444;
+        border-color: #ef4444;
+      }
+
+      .btn-outline-danger:hover {
+        color: white;
+        background-color: #ef4444;
+        border-color: #ef4444;
+      }
+
+      .btn-outline-secondary {
+        color: #64748b;
+        border-color: #cbd5e1;
+      }
+
+      .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
+
+      .btn-outline-primary {
+        color: #6366f1;
+        border-color: #6366f1;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: #6366f1;
+        color: white;
+        border-color: #6366f1;
+      }
+
+      /* Responsive */
+      @media (max-width: 992px) {
         .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease;
-            z-index: 1000;
+          width: 80px !important;
         }
-
-        .sidebar.collapsed {
-            width: 80px;
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .sidebar-menu span {
+          display: none !important;
         }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .sidebar .menu-item {
+          justify-content: center !important;
         }
-
-        .logo-icon-wrapper {
-            background-color: white;
-            border-radius: 50%;
-            padding: 0.5rem;
-            margin-right: 0.75rem;
+        .sidebar .menu-item i {
+          margin-right: 0 !important;
         }
-
-        .logo-icon-wrapper .fa-film {
-            color: #6366f1;
+        .sidebar .logo-icon-wrapper {
+          margin-right: 0 !important;
         }
-
-        .sidebar-menu {
-            flex-grow: 1;
-            padding-top: 1rem;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .menu-item:hover,
-        .menu-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 3px solid white;
-            padding-left: calc(1.5rem - 3px);
-        }
-
-        .menu-item i {
-            width: 20px;
-            margin-right: 0.75rem;
-            text-align: center;
-        }
-
         .main-content-wrapper {
-            margin-left: 260px;
-            transition: margin-left 0.3s ease;
-            padding-top: 70px;
+          margin-left: 80px !important;
         }
-
-        .main-content-wrapper.expanded {
-            margin-left: 80px;
-        }
-
         .header-custom {
-            position: fixed;
-            top: 0;
-            left: 260px;
-            right: 0;
-            height: 70px;
-            background-color: white;
-            border-bottom: 1px solid #e5e7eb;
-            z-index: 999;
-            transition: left 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
+          left: 80px !important;
         }
+      }
 
-        .main-content-wrapper.expanded .header-custom {
-            left: 80px;
-        }
-
-        .form-section {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        .form-section .card-header {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            background: linear-gradient(
-                    135deg,
-                    #6366f1 0%,
-                    #8b5cf6 100%
-            ) !important;
-            color: white;
-        }
-
-        .time-slot-group {
-            border: 1px dashed #cbd5e1;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-            background-color: #f8fafc;
-        }
-
+      @media (max-width: 768px) {
         .form-actions {
-            padding-top: 1.5rem;
-            margin-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: stretch;
         }
-
-        .btn-primary {
-            background-color: #6366f1;
-            border-color: #6366f1;
+        .form-actions .btn {
+          min-width: auto;
         }
-
-        .btn-primary:hover {
-            background-color: #4f46e5;
-            border-color: #4f46e5;
-        }
-
-        /* Form specific styles */
-        .form-label.fw-semibold {
-            color: #334155;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-label.required-error {
-            color: #ef4444 !important;
-            font-weight: 600;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 0.375rem;
-            border-color: #cbd5e1;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
-        }
-
-        .input-group-text {
-            background-color: #f1f5f9;
-            border-color: #cbd5e1;
-            color: #64748b;
-        }
-
-        .btn-outline-danger {
-            color: #ef4444;
-            border-color: #ef4444;
-        }
-
-        .btn-outline-danger:hover {
-            color: white;
-            background-color: #ef4444;
-            border-color: #ef4444;
-        }
-
-        .btn-outline-secondary {
-            color: #64748b;
-            border-color: #cbd5e1;
-        }
-
-        .btn-outline-secondary:hover {
-            background-color: #f1f5f9;
-            color: #475569;
-            border-color: #cbd5e1;
-        }
-
-        .btn-outline-primary {
-            color: #6366f1;
-            border-color: #6366f1;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: #6366f1;
-            color: white;
-            border-color: #6366f1;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 80px !important;
-            }
-            .sidebar .sidebar-header h5,
-            .sidebar .sidebar-header small,
-            .sidebar .sidebar-menu span {
-                display: none !important;
-            }
-            .sidebar .menu-item {
-                justify-content: center !important;
-            }
-            .sidebar .menu-item i {
-                margin-right: 0 !important;
-            }
-            .sidebar .logo-icon-wrapper {
-                margin-right: 0 !important;
-            }
-            .main-content-wrapper {
-                margin-left: 80px !important;
-            }
-            .header-custom {
-                left: 80px !important;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .form-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-                align-items: stretch;
-            }
-            .form-actions .btn {
-                min-width: auto;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
+  <body>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
         <div class="d-flex align-items-center">
-            <div class="logo-icon-wrapper">
-                <i class="fas fa-film text-2xl"></i>
-            </div>
-            <div>
-                <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-                <small class="text-white-50">Quản lý Lịch Chiếu</small>
-            </div>
+          <div class="logo-icon-wrapper">
+            <i class="fas fa-film text-2xl"></i>
+          </div>
+          <div>
+            <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="text-white-50">Quản lý Lịch Chiếu</small>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <nav class="sidebar-menu">
+      <nav class="sidebar-menu">
         <a th:href="@{/admin/dashboard}" class="menu-item">
-            <i class="fas fa-home"></i>
-            <span>Bảng điều khiển</span>
+          <i class="fas fa-home"></i>
+          <span>Bảng điều khiển</span>
         </a>
         <a th:href="@{/admin/movies/list}" class="menu-item">
-            <i class="fas fa-film"></i>
-            <span>Phim</span>
+          <i class="fas fa-film"></i>
+          <span>Phim</span>
         </a>
         <a th:href="@{/admin/directors/list}" class="menu-item">
-            <i class="fas fa-user-friends"></i>
-            <span>Diễn viên & Đạo diễn</span>
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
         </a>
         <a th:href="@{/admin/schedules/list}" class="menu-item active">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Lịch chiếu</span>
+          <i class="fas fa-list"></i>
+          <span>Danh sách lịch chiếu</span>
+        </a>
+        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu tháng</span>
         </a>
         <a href="#" class="menu-item">
-            <i class="fas fa-ticket-alt"></i>
-            <span>Đặt vé</span>
+          <i class="fas fa-ticket-alt"></i>
+          <span>Đặt vé</span>
         </a>
         <a href="#" class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>Người dùng</span>
+          <i class="fas fa-users"></i>
+          <span>Người dùng</span>
         </a>
         <a href="#" class="menu-item">
-            <i class="fas fa-chart-pie"></i>
-            <span>Phân tích</span>
+          <i class="fas fa-chart-pie"></i>
+          <span>Phân tích</span>
         </a>
         <a href="#" class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span>Cài đặt</span>
+          <i class="fas fa-cog"></i>
+          <span>Cài đặt</span>
         </a>
-    </nav>
+      </nav>
 
-    <div
-            class="mt-auto p-4 border-top border-white-50"
-            style="border-color: rgba(255, 255, 255, 0.1) !important"
-    >
+      <div
+        class="mt-auto p-4 border-top border-white-50"
+        style="border-color: rgba(255, 255, 255, 0.1) !important"
+      >
         <div class="d-flex align-items-center">
-            <img
-                    src="https://placehold.co/40x40/E0E7FF/4338CA?text=A"
-                    alt="User Avatar"
-                    width="40"
-                    height="40"
-                    class="rounded-circle user-avatar-wrapper"
-            />
-            <div>
-                <div class="text-white fw-semibold user-info-text">Admin User</div>
-                <small class="text-white-50 user-info-email"
-                >admin@cinema.com</small
-                >
-            </div>
+          <img
+            src="https://placehold.co/40x40/E0E7FF/4338CA?text=A"
+            alt="User Avatar"
+            width="40"
+            height="40"
+            class="rounded-circle user-avatar-wrapper"
+          />
+          <div>
+            <div class="text-white fw-semibold user-info-text">Admin User</div>
+            <small class="text-white-50 user-info-email"
+              >admin@cinema.com</small
+            >
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<div class="main-content-wrapper" id="mainContentWrapper">
-    <header class="header-custom shadow-sm">
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-            <button
-                    class="btn btn-link text-slate-500 me-2 hover:text-slate-700"
-                    id="sidebarToggle"
-            >
-                <i class="fas fa-bars fs-5"></i>
-            </button>
-            <h4 class="mb-0 fw-semibold text-slate-700" id="main-header-title">
-                Thêm Lịch Chiếu Mới
-            </h4>
+          <button
+            class="btn btn-link text-slate-500 me-2 hover:text-slate-700"
+            id="sidebarToggle"
+          >
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-slate-700" id="main-header-title">
+            Thêm Lịch Chiếu Mới
+          </h4>
         </div>
 
         <div class="d-flex align-items-center">
-            <button
-                    class="btn btn-link text-slate-500 hover:text-slate-700 me-1 position-relative"
-            >
-                <i class="fas fa-bell fs-5"></i>
-                <span
-                        class="position-absolute top-0 start-100 translate-middle p-1 bg-red-500 border border-light rounded-circle"
-                        style="
+          <button
+            class="btn btn-link text-slate-500 hover:text-slate-700 me-1 position-relative"
+          >
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-red-500 border border-light rounded-circle"
+              style="
                 font-size: 0.5rem;
                 width: 10px;
                 height: 10px;
@@ -364,371 +368,320 @@
                 align-items: center;
                 justify-content: center;
               "
-                >
+            >
               <span class="visually-hidden">Thông báo mới</span>
             </span>
-            </button>
-            <button class="btn btn-link text-slate-500 hover:text-slate-700 me-2">
-                <i class="fas fa-cog fs-5"></i>
-            </button>
-            <div class="dropdown">
-                <a
-                        href="#"
-                        class="d-flex align-items-center text-decoration-none dropdown-toggle"
-                        id="dropdownUser"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                >
-                    <img
-                            src="https://placehold.co/32x32/E0E7FF/4338CA?text=A"
-                            alt="User Avatar"
-                            width="32"
-                            height="32"
-                            class="rounded-circle me-2"
-                    />
-                    <span class="d-none d-sm-inline text-slate-700 fw-medium"
-                    >Admin User</span
-                    >
-                </a>
-                <ul
-                        class="dropdown-menu dropdown-menu-end text-small shadow border-0 rounded-lg mt-2"
-                        aria-labelledby="dropdownUser"
-                >
-                    <li>
-                        <a
-                                class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
-                                href="#"
-                        ><i class="fas fa-user-circle me-2 text-slate-500"></i>Hồ
-                            sơ</a
-                        >
-                    </li>
-                    <li>
-                        <a
-                                class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
-                                href="#"
-                        ><i class="fas fa-sliders-h me-2 text-slate-500"></i>Cài
-                            đặt</a
-                        >
-                    </li>
-                    <li><hr class="dropdown-divider my-1" /></li>
-                    <li>
-                        <a
-                                class="dropdown-item py-2 px-3 text-red-600 hover:bg-red-50 rounded-md"
-                                href="#"
-                        ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
-                        >
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </header>
-
-    <div class="container-fluid p-4">
-        <div id="addScheduleFormView" class="container py-4">
-            <header class="mb-4"></header>
-            <form
-                    id="scheduleForm"
-                    action="/admin/schedules/add-batch"
-                    method="post"
-                    th:object="${schedule}"
+          </button>
+          <button class="btn btn-link text-slate-500 hover:text-slate-700 me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
-                <!-- Add this hidden input for the time slots data -->
-                <input type="hidden" id="timeSlotsJson" name="timeSlots" value="" />
-
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-section">
-                            <div class="card-header p-3">
-                                <h5 class="mb-0 fw-semibold">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Thông tin cơ bản
-                                </h5>
-                            </div>
-                            <div class="card-body p-3 p-md-4">
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <label for="movieSelect" class="form-label fw-semibold"
-                                        >Chọn Phim <span class="text-danger">*</span></label
-                                        >
-                                        <select
-                                                id="movieSelect"
-                                                th:field="*{movieId}"
-                                                class="form-select"
-                                                required
-                                        >
-                                            <option value="" disabled>-- Chọn phim --</option>
-                                            <option
-                                                    th:each="movie : ${movies}"
-                                                    th:value="${movie.id}"
-                                                    th:text="${movie.name}"
-                                            >
-                                                Movie Name
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label
-                                                for="screeningDate"
-                                                class="form-label fw-semibold"
-                                        >Ngày Chiếu <span class="text-danger">*</span></label
-                                        >
-                                        <input
-                                                type="date"
-                                                id="screeningDate"
-                                                th:field="*{screeningDate}"
-                                                class="form-control"
-                                                required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="card-header p-3">
-                                <h5 class="mb-0 fw-semibold">
-                                    <i class="fas fa-clock me-2"></i>
-                                    Thông Tin Suất Chiếu & Phòng Chiếu
-                                </h5>
-                            </div>
-                            <div class="card-body p-3 p-md-4">
-                                <!-- Container for all time slots -->
-                                <div id="timeSlotsContainer">
-                                    <!-- Initial time slot (original inputs) -->
-                                    <div class="time-slot-group mb-3 pb-3 border-bottom">
-                                        <div class="row">
-                                            <div class="col-md-3 mb-3">
-                                                <label
-                                                        for="startTime"
-                                                        class="form-label fw-semibold"
-                                                >Giờ Bắt Đầu
-                                                    <span class="text-danger">*</span></label
-                                                >
-                                                <input
-                                                        type="time"
-                                                        id="startTime"
-                                                        th:field="*{startTime}"
-                                                        name="startTime"
-                                                        class="form-control"
-                                                        th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''"
-                                                        required
-                                                />
-                                                <!-- Display validation errors for startTime -->
-                                                <div
-                                                        th:if="${#fields.hasErrors('startTime')}"
-                                                        class="invalid-feedback"
-                                                >
-                                                    <div
-                                                            th:each="error : ${#fields.errors('startTime')}"
-                                                            th:text="${error}"
-                                                    ></div>
-                                                </div>
-                                                <small class="form-text text-muted"> </small>
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label for="endTime" class="form-label fw-semibold"
-                                                >Giờ Kết Thúc
-                                                    <span class="text-danger">*</span></label
-                                                >
-                                                <input
-                                                        type="time"
-                                                        id="endTime"
-                                                        th:field="*{endTime}"
-                                                        name="endTime"
-                                                        class="form-control"
-                                                        required
-                                                />
-                                                <small class="form-text text-muted"> </small>
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label
-                                                        for="screeningRoomSelect"
-                                                        class="form-label fw-semibold"
-                                                >Phòng Chiếu
-                                                    <span class="text-danger">*</span></label
-                                                >
-                                                <select
-                                                        id="screeningRoomSelect"
-                                                        th:field="*{screeningRoomId}"
-                                                        name="screeningRoomId"
-                                                        class="form-select"
-                                                        required
-                                                >
-                                                    <option value="" disabled>
-                                                        -- Chọn phòng --
-                                                    </option>
-                                                    <option
-                                                            th:each="room : ${screeningRooms}"
-                                                            th:value="${room.id}"
-                                                            th:text="${room.name}"
-                                                    >
-                                                        Room Name
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label
-                                                        for="branchSelect"
-                                                        class="form-label fw-semibold"
-                                                >Chi Nhánh
-                                                    <span class="text-danger">*</span></label
-                                                >
-                                                <select
-                                                        id="branchSelect"
-                                                        th:field="*{branchId}"
-                                                        name="branchId"
-                                                        class="form-select"
-                                                        required
-                                                >
-                                                    <option value="" disabled>
-                                                        -- Chọn chi nhánh --
-                                                    </option>
-                                                    <option
-                                                            th:each="branch : ${branches}"
-                                                            th:value="${branch.id}"
-                                                            th:text="${branch.name}"
-                                                    >
-                                                        Branch Name
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Additional time slots will be added here by JavaScript -->
-                                </div>
-
-                                <!-- Button to add more time slots -->
-                                <div class="d-flex justify-content-center mt-3">
-                                    <button
-                                            type="button"
-                                            id="addTimeSlotBtn"
-                                            class="btn btn-outline-primary"
-                                    >
-                                        <i class="fas fa-plus-circle me-2"></i>Thêm Suất Chiếu
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="card-header p-3">
-                                <h5 class="mb-0 fw-semibold">
-                                    <i class="fas fa-cogs me-2"></i>
-                                    Thông tin thêm
-                                </h5>
-                            </div>
-                            <div class="card-body p-3 p-md-4">
-                                <div class="mb-3">
-                                    <label for="scheduleStatus" class="form-label fw-semibold"
-                                    >Trạng Thái Lịch Chiếu</label
-                                    >
-                                    <select
-                                            id="scheduleStatus"
-                                            th:field="*{status}"
-                                            class="form-select"
-                                    >
-                                        <option value="AUTO">
-                                            Tự động (dựa trên ngày/giờ)
-                                        </option>
-                                        <option value="ACTIVE">Đang chiếu (thủ công)</option>
-                                        <option value="UPCOMING">Sắp chiếu (thủ công)</option>
-                                        <option value="ENDED">Đã kết thúc (thủ công)</option>
-                                        <option value="CANCELLED">Đã hủy</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                        class="d-flex justify-content-end align-items-center form-actions"
+              <img
+                src="https://placehold.co/32x32/E0E7FF/4338CA?text=A"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-slate-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0 rounded-lg mt-2"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a
+                  class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
+                  href="#"
+                  ><i class="fas fa-user-circle me-2 text-slate-500"></i>Hồ
+                  sơ</a
                 >
-                    <button type="button" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-save me-2"></i>
-                        Lưu nháp
-                    </button>
-                    <a
-                            th:href="@{/admin/schedules/list}"
-                            class="btn btn-outline-danger me-2"
-                    >
-                        <i class="fas fa-times me-2"></i>
-                        Hủy
-                    </a>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-plus me-2"></i>
-                        Thêm Lịch Chiếu
-                    </button>
-                </div>
-            </form>
+              </li>
+              <li>
+                <a
+                  class="dropdown-item py-2 px-3 hover:bg-slate-100 rounded-md"
+                  href="#"
+                  ><i class="fas fa-sliders-h me-2 text-slate-500"></i>Cài
+                  đặt</a
+                >
+              </li>
+              <li><hr class="dropdown-divider my-1" /></li>
+              <li>
+                <a
+                  class="dropdown-item py-2 px-3 text-red-600 hover:bg-red-50 rounded-md"
+                  href="#"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
-    </div>
-</div>
+      </header>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
+      <div class="container-fluid p-4">
+        <div id="addScheduleFormView" class="container py-4">
+          <header class="mb-4"></header>
+          <form
+            id="scheduleForm"
+            action="/admin/schedules/add-batch"
+            method="post"
+            th:object="${schedule}"
+          >
+            <!-- Add this hidden input for the time slots data -->
+            <input type="hidden" id="timeSlotsJson" name="timeSlots" value="" />
+
+            <div class="row">
+              <div class="col-12">
+                <div class="form-section">
+                  <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                      <i class="fas fa-info-circle me-2"></i>
+                      Thông tin cơ bản
+                    </h5>
+                  </div>
+                  <div class="card-body p-3 p-md-4">
+                    <div class="row">
+                      <div class="col-md-12 mb-3">
+                        <label for="movieSelect" class="form-label fw-semibold"
+                          >Chọn Phim <span class="text-danger">*</span></label
+                        >
+                        <select
+                          id="movieSelect"
+                          th:field="*{movieId}"
+                          class="form-select"
+                          required
+                        >
+                          <option value="" disabled>-- Chọn phim --</option>
+                          <option
+                            th:each="movie : ${movies}"
+                            th:value="${movie.id}"
+                            th:text="${movie.name}"
+                          >
+                            Movie Name
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label
+                          for="screeningDate"
+                          class="form-label fw-semibold"
+                          >Ngày Chiếu <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="date"
+                          id="screeningDate"
+                          th:field="*{screeningDate}"
+                          class="form-control"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                      <i class="fas fa-clock me-2"></i>
+                      Thông Tin Suất Chiếu & Phòng Chiếu
+                    </h5>
+                  </div>
+                  <div class="card-body p-3 p-md-4">
+                    <!-- Container for all time slots -->
+                    <div id="timeSlotsContainer">
+                      <!-- Initial time slot (original inputs) -->
+                      <div class="time-slot-group mb-3 pb-3 border-bottom">
+                        <div class="row">
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="startTime"
+                              class="form-label fw-semibold"
+                              >Giờ Bắt Đầu
+                              <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="time"
+                              id="startTime"
+                              th:field="*{startTime}"
+                              name="startTime"
+                              class="form-control"
+                              th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''"
+                              required
+                            />
+                            <!-- Display validation errors for startTime -->
+                            <div
+                              th:if="${#fields.hasErrors('startTime')}"
+                              class="invalid-feedback"
+                            >
+                              <div
+                                th:each="error : ${#fields.errors('startTime')}"
+                                th:text="${error}"
+                              ></div>
+                            </div>
+                            <small class="form-text text-muted"> </small>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label for="endTime" class="form-label fw-semibold"
+                              >Giờ Kết Thúc
+                              <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="time"
+                              id="endTime"
+                              th:field="*{endTime}"
+                              name="endTime"
+                              class="form-control"
+                              required
+                            />
+                            <small class="form-text text-muted"> </small>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="screeningRoomSelect"
+                              class="form-label fw-semibold"
+                              >Phòng Chiếu
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              id="screeningRoomSelect"
+                              th:field="*{screeningRoomId}"
+                              name="screeningRoomId"
+                              class="form-select"
+                              required
+                            >
+                              <option value="" disabled>
+                                -- Chọn phòng --
+                              </option>
+                              <option
+                                th:each="room : ${screeningRooms}"
+                                th:value="${room.id}"
+                                th:text="${room.name}"
+                              >
+                                Room Name
+                              </option>
+                            </select>
+                          </div>
+                          <div class="col-md-3 mb-3">
+                            <label
+                              for="branchSelect"
+                              class="form-label fw-semibold"
+                              >Chi Nhánh
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              id="branchSelect"
+                              th:field="*{branchId}"
+                              name="branchId"
+                              class="form-select"
+                              required
+                            >
+                              <option value="" disabled>
+                                -- Chọn chi nhánh --
+                              </option>
+                              <option
+                                th:each="branch : ${branches}"
+                                th:value="${branch.id}"
+                                th:text="${branch.name}"
+                              >
+                                Branch Name
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Additional time slots will be added here by JavaScript -->
+                    </div>
+
+                    <!-- Button to add more time slots -->
+                    <div class="d-flex justify-content-center mt-3">
+                      <button
+                        type="button"
+                        id="addTimeSlotBtn"
+                        class="btn btn-outline-primary"
+                      >
+                        <i class="fas fa-plus-circle me-2"></i>Thêm Suất Chiếu
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                      <i class="fas fa-cogs me-2"></i>
+                      Thông tin thêm
+                    </h5>
+                  </div>
+                  <div class="card-body p-3 p-md-4">
+                    <div class="mb-3">
+                      <label for="scheduleStatus" class="form-label fw-semibold"
+                        >Trạng Thái Lịch Chiếu</label
+                      >
+                      <select
+                        id="scheduleStatus"
+                        th:field="*{status}"
+                        class="form-select"
+                      >
+                        <option value="AUTO">
+                          Tự động (dựa trên ngày/giờ)
+                        </option>
+                        <option value="ACTIVE">Đang chiếu (thủ công)</option>
+                        <option value="UPCOMING">Sắp chiếu (thủ công)</option>
+                        <option value="ENDED">Đã kết thúc (thủ công)</option>
+                        <option value="CANCELLED">Đã hủy</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="d-flex justify-content-end align-items-center form-actions"
+            >
+              <button type="button" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-save me-2"></i>
+                Lưu nháp
+              </button>
+              <a
+                th:href="@{/admin/schedules/list}"
+                class="btn btn-outline-danger me-2"
+              >
+                <i class="fas fa-times me-2"></i>
+                Hủy
+              </a>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-plus me-2"></i>
+                Thêm Lịch Chiếu
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
         // Set header title on load
         const headerTitle = document.getElementById("main-header-title");
         if (headerTitle) {
-            headerTitle.textContent = "Thêm Lịch Chiếu Mới";
+          headerTitle.textContent = "Thêm Lịch Chiếu Mới";
         }
 
         // Initialize sidebar behavior
         initializeDashboardBehavior();
-
-        // Add form validation on submit
-        const scheduleForm = document.getElementById("scheduleForm");
-        if (scheduleForm) {
-            scheduleForm.addEventListener("submit", function (event) {
-                let isValid = true;
-
-                // Validate all required fields first
-                if (!validateAllRequiredFields()) {
-                    isValid = false;
-                }
-
-                // Validate date and time are not in the past
-                if (!validateDateTimeNotInPast()) {
-                    isValid = false;
-                }
-
-                // Validate time logic
-                if (!validateTimeLogic()) {
-                    isValid = false;
-                }
-
-                // Validate all additional time slots
-                const additionalSlots =
-                    document.querySelectorAll('[id^="timeSlot_"]');
-                additionalSlots.forEach((slot) => {
-                    const id = slot.id.split("_")[1];
-                    if (!validateAdditionalTimeSlot(id)) {
-                        isValid = false;
-                    }
-                });
-
-                if (!isValid) {
-                    event.preventDefault(); // Prevent form submission
-                    // Find the first invalid field and focus it for better UX
-                    const firstInvalidField = document.querySelector(".is-invalid");
-                    if (firstInvalidField) {
-                        // For labels, find the associated input
-                        if (firstInvalidField.tagName === "LABEL") {
-                            const fieldToFocus = document.getElementById(
-                                firstInvalidField.getAttribute("for")
-                            );
-                            if (fieldToFocus) fieldToFocus.focus();
-                        } else {
-                            firstInvalidField.focus();
-                        }
-                    }
-                    return false;
-                }
-            });
-        }
 
         // Initialize required field validation
         initializeRequiredFieldValidation();
@@ -736,32 +689,94 @@
         // Set minimum date to today
         const dateInput = document.getElementById("screeningDate");
         if (dateInput) {
-            const today = new Date().toISOString().split("T")[0];
-            dateInput.setAttribute("min", today);
-            dateInput.addEventListener("change", validateDateTimeNotInPast);
+          const today = new Date().toISOString().split("T")[0];
+          dateInput.setAttribute("min", today);
+          dateInput.addEventListener("change", validateDateTimeNotInPast);
         }
 
         // Add real-time validation for time field
         const timeInput = document.getElementById("startTime");
         if (timeInput) {
-            timeInput.addEventListener("change", validateDateTimeNotInPast);
+          timeInput.addEventListener("change", validateDateTimeNotInPast);
         }
 
-        // FIXED: Initialize time slot functionality directly here - not in nested DOMContentLoaded
-        // Add time slot button event listener
+        // Initialize time slot functionality
         const addTimeSlotBtn = document.getElementById("addTimeSlotBtn");
         if (addTimeSlotBtn) {
-            addTimeSlotBtn.addEventListener("click", addNewTimeSlot);
+          addTimeSlotBtn.addEventListener("click", addNewTimeSlot);
         }
 
         // Initialize time slot counter for unique IDs
         window.timeSlotCounter = 1;
 
-        // REMOVED: The nested DOMContentLoaded event that was causing the issue
-    });
+        // Add form submission handler - SINGLE EVENT LISTENER
+        const scheduleForm = document.getElementById("scheduleForm");
+        if (scheduleForm) {
+          scheduleForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Always prevent default submission
 
-    // Function to add a new time slot - moved outside the DOMContentLoaded for cleaner organization
-    function addNewTimeSlot() {
+            console.log("Form submission started"); // Debug log
+
+            let isValid = true;
+
+            // Validate all required fields first
+            if (!validateAllRequiredFields()) {
+              isValid = false;
+              console.log("Required fields validation failed"); // Debug log
+            }
+
+            // Validate date and time are not in the past
+            if (!validateDateTimeNotInPast()) {
+              isValid = false;
+              console.log("Date/time validation failed"); // Debug log
+            }
+
+            // Validate time logic
+            if (!validateTimeLogic()) {
+              isValid = false;
+              console.log("Time logic validation failed"); // Debug log
+            }
+
+            // Validate all additional time slots
+            const additionalSlots =
+              document.querySelectorAll('[id^="timeSlot_"]');
+            additionalSlots.forEach((slot) => {
+              const id = slot.id.split("_")[1];
+              if (!validateAdditionalTimeSlot(id)) {
+                isValid = false;
+                console.log(
+                  "Additional time slot validation failed for slot:",
+                  id
+                ); // Debug log
+              }
+            });
+
+            if (!isValid) {
+              console.log("Form validation failed, not submitting"); // Debug log
+              // Find the first invalid field and focus it for better UX
+              const firstInvalidField = document.querySelector(".is-invalid");
+              if (firstInvalidField) {
+                if (firstInvalidField.tagName === "LABEL") {
+                  const fieldToFocus = document.getElementById(
+                    firstInvalidField.getAttribute("for")
+                  );
+                  if (fieldToFocus) fieldToFocus.focus();
+                } else {
+                  firstInvalidField.focus();
+                }
+              }
+              return false;
+            }
+
+            // If validation passes, collect time slots and submit
+            console.log("Form validation passed, collecting time slots"); // Debug log
+            collectAndSubmitTimeSlots();
+          });
+        }
+      });
+
+      // Function to add a new time slot - moved outside the DOMContentLoaded for cleaner organization
+      function addNewTimeSlot() {
         const container = document.getElementById("timeSlotsContainer");
         const newSlotId = window.timeSlotCounter++;
 
@@ -802,12 +817,12 @@
                       class="form-select" required>
                 <option value="" disabled selected>-- Chọn phòng --</option>
                 ${Array.from(
-            document.getElementById("screeningRoomSelect").options
-        )
-            .map(
-                (opt) => `<option value="${opt.value}">${opt.text}</option>`
-            )
-            .join("")}
+                  document.getElementById("screeningRoomSelect").options
+                )
+                  .map(
+                    (opt) => `<option value="${opt.value}">${opt.text}</option>`
+                  )
+                  .join("")}
               </select>
             </div>
             <div class="col-md-3 mb-3">
@@ -818,10 +833,10 @@
                       class="form-select" required>
                 <option value="" disabled selected>-- Chọn chi nhánh --</option>
                 ${Array.from(document.getElementById("branchSelect").options)
-            .map(
-                (opt) => `<option value="${opt.value}">${opt.text}</option>`
-            )
-            .join("")}
+                  .map(
+                    (opt) => `<option value="${opt.value}">${opt.text}</option>`
+                  )
+                  .join("")}
               </select>
             </div>
           </div>
@@ -839,25 +854,25 @@
         const newEndTime = document.getElementById(`endTime_${newSlotId}`);
 
         if (newStartTime && newEndTime) {
-            newStartTime.addEventListener("change", () =>
-                validateAdditionalTimeSlot(newSlotId)
-            );
-            newEndTime.addEventListener("change", () =>
-                validateAdditionalTimeSlot(newSlotId)
-            );
+          newStartTime.addEventListener("change", () =>
+            validateAdditionalTimeSlot(newSlotId)
+          );
+          newEndTime.addEventListener("change", () =>
+            validateAdditionalTimeSlot(newSlotId)
+          );
         }
-    }
+      }
 
-    // FIXED: Make removeTimeSlot function globally available
-    function removeTimeSlot(slotId) {
+      // FIXED: Make removeTimeSlot function globally available
+      function removeTimeSlot(slotId) {
         const slotToRemove = document.getElementById(slotId);
         if (slotToRemove) {
-            slotToRemove.remove();
+          slotToRemove.remove();
         }
-    }
+      }
 
-    // Function to validate additional time slots
-    function validateAdditionalTimeSlot(slotId) {
+      // Function to validate additional time slots
+      function validateAdditionalTimeSlot(slotId) {
         const startTimeInput = document.getElementById(`startTime_${slotId}`);
         const endTimeInput = document.getElementById(`endTime_${slotId}`);
 
@@ -868,173 +883,173 @@
         const endTime = endTimeInput.value;
 
         if (startTime >= endTime) {
-            startTimeInput.classList.add("is-invalid");
-            endTimeInput.classList.add("is-invalid");
+          startTimeInput.classList.add("is-invalid");
+          endTimeInput.classList.add("is-invalid");
 
-            let errorDiv = document.getElementById(`timeLogicError_${slotId}`);
-            if (!errorDiv) {
-                errorDiv = document.createElement("div");
-                errorDiv.id = `timeLogicError_${slotId}`;
-                errorDiv.className = "alert alert-danger mt-2";
-                errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
-                endTimeInput.parentNode.appendChild(errorDiv);
-            }
-            return false;
+          let errorDiv = document.getElementById(`timeLogicError_${slotId}`);
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = `timeLogicError_${slotId}`;
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
+            endTimeInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
         } else {
-            startTimeInput.classList.remove("is-invalid");
-            endTimeInput.classList.remove("is-invalid");
+          startTimeInput.classList.remove("is-invalid");
+          endTimeInput.classList.remove("is-invalid");
 
-            const errorDiv = document.getElementById(`timeLogicError_${slotId}`);
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-            return true;
+          const errorDiv = document.getElementById(`timeLogicError_${slotId}`);
+          if (errorDiv) {
+            errorDiv.remove();
+          }
+          return true;
         }
-    }
+      }
 
-    // Update the collectTimeSlots function to include additional time slots
-    function collectTimeSlots() {
+      // Update the collectTimeSlots function to include additional time slots
+      function collectTimeSlots() {
         const timeSlots = [];
 
         // Add the original time slot
         const originalStartTime = document.getElementById("startTime").value;
         const originalEndTime = document.getElementById("endTime").value;
         const originalRoomId = document.getElementById(
-            "screeningRoomSelect"
+          "screeningRoomSelect"
         ).value;
         const originalBranchId = document.getElementById("branchSelect").value;
 
         if (
-            originalStartTime &&
-            originalEndTime &&
-            originalRoomId &&
-            originalBranchId
+          originalStartTime &&
+          originalEndTime &&
+          originalRoomId &&
+          originalBranchId
         ) {
-            timeSlots.push({
-                startTime: originalStartTime,
-                endTime: originalEndTime,
-                roomId: originalRoomId,
-                branchId: originalBranchId,
-            });
+          timeSlots.push({
+            startTime: originalStartTime,
+            endTime: originalEndTime,
+            roomId: originalRoomId,
+            branchId: originalBranchId,
+          });
         }
 
         // Add all additional time slots
         const additionalSlots = document.querySelectorAll('[id^="timeSlot_"]');
         additionalSlots.forEach((slot) => {
-            const id = slot.id.split("_")[1];
-            const startTime = document.getElementById(`startTime_${id}`).value;
-            const endTime = document.getElementById(`endTime_${id}`).value;
-            const roomId = document.getElementById(
-                `screeningRoomSelect_${id}`
-            ).value;
-            const branchId = document.getElementById(`branchSelect_${id}`).value;
+          const id = slot.id.split("_")[1];
+          const startTime = document.getElementById(`startTime_${id}`).value;
+          const endTime = document.getElementById(`endTime_${id}`).value;
+          const roomId = document.getElementById(
+            `screeningRoomSelect_${id}`
+          ).value;
+          const branchId = document.getElementById(`branchSelect_${id}`).value;
 
-            if (startTime && endTime && roomId && branchId) {
-                timeSlots.push({
-                    startTime: startTime,
-                    endTime: endTime,
-                    roomId: roomId,
-                    branchId: branchId,
-                });
-            }
+          if (startTime && endTime && roomId && branchId) {
+            timeSlots.push({
+              startTime: startTime,
+              endTime: endTime,
+              roomId: roomId,
+              branchId: branchId,
+            });
+          }
         });
 
         return timeSlots;
-    }
+      }
 
-    function initializeDashboardBehavior() {
+      function initializeDashboardBehavior() {
         const sidebarToggle = document.getElementById("sidebarToggle");
         const sidebar = document.getElementById("sidebar");
         const mainContentWrapper =
-            document.getElementById("mainContentWrapper");
+          document.getElementById("mainContentWrapper");
 
         if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-            console.error(
-                "Sidebar toggle elements not found for behavior initialization."
-            );
-            return;
+          console.error(
+            "Sidebar toggle elements not found for behavior initialization."
+          );
+          return;
         }
 
         const mediaQuery = window.matchMedia("(max-width: 992px)");
 
         // Function to explicitly set the sidebar state (collapsed or expanded)
         function setSidebarView(isCollapsed) {
-            sidebar.classList.toggle("collapsed", isCollapsed);
-            mainContentWrapper.classList.toggle("expanded", isCollapsed);
+          sidebar.classList.toggle("collapsed", isCollapsed);
+          mainContentWrapper.classList.toggle("expanded", isCollapsed);
         }
 
         // Event listener for the toggle button
         sidebarToggle.addEventListener("click", () => {
-            const currentlyCollapsed = sidebar.classList.contains("collapsed");
-            setSidebarView(!currentlyCollapsed);
+          const currentlyCollapsed = sidebar.classList.contains("collapsed");
+          setSidebarView(!currentlyCollapsed);
         });
 
         // Function to handle viewport changes
         function handleViewportChange(event) {
-            if (event.matches) {
-                setSidebarView(true);
-            }
+          if (event.matches) {
+            setSidebarView(true);
+          }
         }
 
         mediaQuery.addEventListener("change", handleViewportChange);
         handleViewportChange(mediaQuery);
-    }
+      }
 
-    function validateDateTimeNotInPast() {
+      function validateDateTimeNotInPast() {
         const dateInput = document.getElementById("screeningDate");
         const timeInput = document.getElementById("startTime");
 
         if (!dateInput.value || !timeInput.value) {
-            return true; // Let required field validation handle empty values
+          return true; // Let required field validation handle empty values
         }
 
         const selectedDate = new Date(dateInput.value);
         const selectedTime = timeInput.value;
         const now = new Date();
         const today = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
         );
         const currentTime =
-            now.getHours().toString().padStart(2, "0") +
-            ":" +
-            now.getMinutes().toString().padStart(2, "0");
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0");
 
         // Check if selected date is in the past
         if (selectedDate < today) {
-            dateInput.classList.add("is-invalid");
+          dateInput.classList.add("is-invalid");
 
-            // Show error message for date
-            let errorDiv = document.getElementById("pastDateError");
-            if (!errorDiv) {
-                errorDiv = document.createElement("div");
-                errorDiv.id = "pastDateError";
-                errorDiv.className = "alert alert-danger mt-2";
-                errorDiv.textContent = "Không thể chọn ngày trong quá khứ.";
-                dateInput.parentNode.appendChild(errorDiv);
-            }
-            return false;
+          // Show error message for date
+          let errorDiv = document.getElementById("pastDateError");
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = "pastDateError";
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent = "Không thể chọn ngày trong quá khứ.";
+            dateInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
         }
 
         // Check if selected date is today and time is in the past
         if (
-            selectedDate.getTime() === today.getTime() &&
-            selectedTime < currentTime
+          selectedDate.getTime() === today.getTime() &&
+          selectedTime < currentTime
         ) {
-            timeInput.classList.add("is-invalid");
+          timeInput.classList.add("is-invalid");
 
-            // Show error message for time
-            let errorDiv = document.getElementById("pastTimeError");
-            if (!errorDiv) {
-                errorDiv = document.createElement("div");
-                errorDiv.id = "pastTimeError";
-                errorDiv.className = "alert alert-danger mt-2";
-                errorDiv.textContent =
-                    "Không thể chọn thời gian trong quá khứ cho hôm nay.";
-                timeInput.parentNode.appendChild(errorDiv);
-            }
-            return false;
+          // Show error message for time
+          let errorDiv = document.getElementById("pastTimeError");
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = "pastTimeError";
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent =
+              "Không thể chọn thời gian trong quá khứ cho hôm nay.";
+            timeInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
         }
 
         // Remove error styling and messages if validation passes
@@ -1043,56 +1058,56 @@
 
         const pastDateError = document.getElementById("pastDateError");
         if (pastDateError) {
-            pastDateError.remove();
+          pastDateError.remove();
         }
 
         const pastTimeError = document.getElementById("pastTimeError");
         if (pastTimeError) {
-            pastTimeError.remove();
+          pastTimeError.remove();
         }
 
         return true;
-    }
+      }
 
-    function validateTimeLogic() {
+      function validateTimeLogic() {
         const startTimeInput = document.getElementById("startTime");
         const endTimeInput = document.getElementById("endTime");
 
         if (!startTimeInput.value || !endTimeInput.value) {
-            return true; // Let required field validation handle empty values
+          return true; // Let required field validation handle empty values
         }
 
         const startTime = startTimeInput.value;
         const endTime = endTimeInput.value;
 
         if (startTime >= endTime) {
-            startTimeInput.classList.add("is-invalid");
-            endTimeInput.classList.add("is-invalid");
+          startTimeInput.classList.add("is-invalid");
+          endTimeInput.classList.add("is-invalid");
 
-            // Show error message
-            let errorDiv = document.getElementById("timeLogicError");
-            if (!errorDiv) {
-                errorDiv = document.createElement("div");
-                errorDiv.id = "timeLogicError";
-                errorDiv.className = "alert alert-danger mt-2";
-                errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
-                endTimeInput.parentNode.appendChild(errorDiv);
-            }
-            return false;
+          // Show error message
+          let errorDiv = document.getElementById("timeLogicError");
+          if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = "timeLogicError";
+            errorDiv.className = "alert alert-danger mt-2";
+            errorDiv.textContent = "Giờ kết thúc phải sau giờ bắt đầu.";
+            endTimeInput.parentNode.appendChild(errorDiv);
+          }
+          return false;
         } else {
-            startTimeInput.classList.remove("is-invalid");
-            endTimeInput.classList.remove("is-invalid");
+          startTimeInput.classList.remove("is-invalid");
+          endTimeInput.classList.remove("is-invalid");
 
-            // Remove error message
-            const errorDiv = document.getElementById("timeLogicError");
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-            return true;
+          // Remove error message
+          const errorDiv = document.getElementById("timeLogicError");
+          if (errorDiv) {
+            errorDiv.remove();
+          }
+          return true;
         }
-    }
+      }
 
-    function initializeRequiredFieldValidationForElement(field) {
+      function initializeRequiredFieldValidationForElement(field) {
         if (!field) return;
         const label = document.querySelector(`label[for="${field.id}"]`);
         const validate = () => validateRequiredField(field, label);
@@ -1100,174 +1115,144 @@
         field.addEventListener("blur", validate);
         field.addEventListener("input", validate);
         if (field.tagName === "SELECT") {
-            field.addEventListener("change", validate);
+          field.addEventListener("change", validate);
         }
-    }
+      }
 
-    function initializeRequiredFieldValidation() {
+      function initializeRequiredFieldValidation() {
         const requiredFields = document.querySelectorAll(
-            "#scheduleForm [required]"
+          "#scheduleForm [required]"
         );
         requiredFields.forEach(initializeRequiredFieldValidationForElement);
-    }
+      }
 
-    function validateRequiredField(field, label) {
+      function validateRequiredField(field, label) {
         if (!field) return;
 
         const isSelect = field.tagName === "SELECT";
         const isEmpty = isSelect ? !field.value : !field.value.trim();
 
         if (isEmpty) {
-            field.classList.add("is-invalid");
-            if (label) label.classList.add("required-error");
+          field.classList.add("is-invalid");
+          if (label) label.classList.add("required-error");
         } else {
-            field.classList.remove("is-invalid");
-            if (label) label.classList.remove("required-error");
+          field.classList.remove("is-invalid");
+          if (label) label.classList.remove("required-error");
         }
-    }
+      }
 
-    function validateAllRequiredFields() {
+      function validateAllRequiredFields() {
         const requiredFields = document.querySelectorAll(
-            "#scheduleForm [required]"
+          "#scheduleForm [required]"
         );
         let allValid = true;
 
         requiredFields.forEach((field) => {
-            const label = document.querySelector(`label[for="${field.id}"]`);
-            const isSelect = field.tagName === "SELECT";
-            const isEmpty = isSelect ? !field.value : !field.value.trim();
+          const label = document.querySelector(`label[for="${field.id}"]`);
+          const isSelect = field.tagName === "SELECT";
+          const isEmpty = isSelect ? !field.value : !field.value.trim();
 
-            if (isEmpty) {
-                allValid = false;
-                field.classList.add("is-invalid");
-                if (label) label.classList.add("required-error");
-            } else {
-                field.classList.remove("is-invalid");
-                if (label) label.classList.remove("required-error");
-            }
+          if (isEmpty) {
+            allValid = false;
+            field.classList.add("is-invalid");
+            if (label) label.classList.add("required-error");
+          } else {
+            field.classList.remove("is-invalid");
+            if (label) label.classList.remove("required-error");
+          }
         });
 
         return allValid;
-    }
+      }
 
-    // Add this near the beginning of your script section
-    document.addEventListener("DOMContentLoaded", function () {
-        // Your existing code...
+      // Event listener đã được thêm ở trên trong DOMContentLoaded chính - xóa duplicate này
 
-        // Add form submission handler to process time slots
-        const scheduleForm = document.getElementById("scheduleForm");
-        if (scheduleForm) {
-            scheduleForm.addEventListener("submit", function (event) {
-                event.preventDefault(); // Prevent default submission
-
-                // First validate the form
-                let isValid = true;
-
-                // Validate all required fields
-                if (!validateAllRequiredFields()) {
-                    isValid = false;
-                }
-
-                // Validate date and time are not in the past
-                if (!validateDateTimeNotInPast()) {
-                    isValid = false;
-                }
-
-                // Validate time logic for initial slot
-                if (!validateTimeLogic()) {
-                    isValid = false;
-                }
-
-                // Validate all additional time slots
-                const additionalSlots =
-                    document.querySelectorAll('[id^="timeSlot_"]');
-                additionalSlots.forEach((slot) => {
-                    const id = slot.id.split("_")[1];
-                    if (!validateAdditionalTimeSlot(id)) {
-                        isValid = false;
-                    }
-                });
-
-                if (!isValid) {
-                    // Focus on the first invalid field for better UX
-                    const firstInvalidField = document.querySelector(".is-invalid");
-                    if (firstInvalidField) {
-                        if (firstInvalidField.tagName === "LABEL") {
-                            const fieldToFocus = document.getElementById(
-                                firstInvalidField.getAttribute("for")
-                            );
-                            if (fieldToFocus) fieldToFocus.focus();
-                        } else {
-                            firstInvalidField.focus();
-                        }
-                    }
-                    return false;
-                }
-
-                // If valid, collect all time slots and submit
-                collectAndSubmitTimeSlots();
-            });
-        }
-
-        // Your existing code...
-    });
-
-    // Add this function to collect and submit time slots
-    function collectAndSubmitTimeSlots() {
+      // Function to collect and submit time slots
+      function collectAndSubmitTimeSlots() {
         const timeSlots = [];
         const form = document.getElementById("scheduleForm");
+
+        console.log("Collecting time slots..."); // Debug log
 
         // Get the original time slot data
         const originalStartTime = document.getElementById("startTime").value;
         const originalEndTime = document.getElementById("endTime").value;
         const originalRoomId = document.getElementById(
-            "screeningRoomSelect"
+          "screeningRoomSelect"
         ).value;
         const originalBranchId = document.getElementById("branchSelect").value;
 
+        console.log("Original time slot:", {
+          startTime: originalStartTime,
+          endTime: originalEndTime,
+          roomId: originalRoomId,
+          branchId: originalBranchId,
+        }); // Debug log
+
         // Add original time slot to the array
         if (
-            originalStartTime &&
-            originalEndTime &&
-            originalRoomId &&
-            originalBranchId
+          originalStartTime &&
+          originalEndTime &&
+          originalRoomId &&
+          originalBranchId
         ) {
-            timeSlots.push({
-                startTime: originalStartTime,
-                endTime: originalEndTime,
-                roomId: originalRoomId,
-                branchId: originalBranchId,
-            });
+          timeSlots.push({
+            startTime: originalStartTime,
+            endTime: originalEndTime,
+            roomId: originalRoomId,
+            branchId: originalBranchId,
+          });
         }
 
         // Get all additional time slots
         const additionalSlots = document.querySelectorAll('[id^="timeSlot_"]');
-        additionalSlots.forEach((slot) => {
-            const id = slot.id.split("_")[1];
-            const startTime = document.getElementById(`startTime_${id}`).value;
-            const endTime = document.getElementById(`endTime_${id}`).value;
-            const roomId = document.getElementById(
-                `screeningRoomSelect_${id}`
-            ).value;
-            const branchId = document.getElementById(`branchSelect_${id}`).value;
+        console.log("Found additional slots:", additionalSlots.length); // Debug log
 
-            if (startTime && endTime && roomId && branchId) {
-                timeSlots.push({
-                    startTime: startTime,
-                    endTime: endTime,
-                    roomId: roomId,
-                    branchId: branchId,
-                });
-            }
+        additionalSlots.forEach((slot) => {
+          const id = slot.id.split("_")[1];
+          const startTime = document.getElementById(`startTime_${id}`).value;
+          const endTime = document.getElementById(`endTime_${id}`).value;
+          const roomId = document.getElementById(
+            `screeningRoomSelect_${id}`
+          ).value;
+          const branchId = document.getElementById(`branchSelect_${id}`).value;
+
+          console.log(`Additional slot ${id}:`, {
+            startTime: startTime,
+            endTime: endTime,
+            roomId: roomId,
+            branchId: branchId,
+          }); // Debug log
+
+          if (startTime && endTime && roomId && branchId) {
+            timeSlots.push({
+              startTime: startTime,
+              endTime: endTime,
+              roomId: roomId,
+              branchId: branchId,
+            });
+          }
         });
 
+        console.log("Total time slots collected:", timeSlots.length); // Debug log
+        console.log("Time slots data:", timeSlots); // Debug log
+
+        // Validate that we have at least one time slot
+        if (timeSlots.length === 0) {
+          alert("Vui lòng điền đầy đủ thông tin cho ít nhất một suất chiếu!");
+          return false;
+        }
+
         // Set the JSON data to the hidden input
-        document.getElementById("timeSlotsJson").value =
-            JSON.stringify(timeSlots);
+        const timeSlotsJson = JSON.stringify(timeSlots);
+        document.getElementById("timeSlotsJson").value = timeSlotsJson;
+
+        console.log("Setting timeSlotsJson:", timeSlotsJson); // Debug log
 
         // Submit the form
+        console.log("Submitting form..."); // Debug log
         form.submit();
-    }
-</script>
-</body>
+      }
+    </script>
+  </body>
 </html>

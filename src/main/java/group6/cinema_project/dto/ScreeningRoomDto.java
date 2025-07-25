@@ -3,9 +3,13 @@ package group6.cinema_project.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import lombok.Setter;
 
+import java.util.List;
+@Getter
+@Setter
 @Data
 @NoArgsConstructor
 public class ScreeningRoomDto {
@@ -15,9 +19,11 @@ public class ScreeningRoomDto {
     private String name;
     private int capacity; // sức chứa
 
-    private String row;
-
+    private int row;
+    private String type;
     private BranchDto branch;
+    private String status;
+
     @Size(max = 255, message = "Description cannot exceed 255 characters")
     private String description;
 
@@ -28,4 +34,7 @@ public class ScreeningRoomDto {
     private List<ScreeningScheduleDto> screeningSchedules;
     private String branchName;
     private String branchAddress;
+
+    private int seatsPerRow; // số ghế mỗi hàng
+
 }

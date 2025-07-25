@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CinemaAdmin - Lịch Chiếu Tháng</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar {
+        width: 320px; /* Tăng width để chứa thêm filters */
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .sidebar.collapsed {
+        width: 80px;
+      }
+
+      .sidebar.collapsed .sidebar-header h5,
+      .sidebar.collapsed .sidebar-header small,
+      .sidebar.collapsed .sidebar-menu span,
+      .sidebar.collapsed .filter-section,
+      .sidebar.collapsed .stats-section,
+      .sidebar.collapsed .mt-auto .text-white,
+      .sidebar.collapsed .mt-auto small {
+        display: none;
+      }
+
+      .sidebar.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      /* Filter Section trong Sidebar */
+      .filter-section {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .filter-section h6 {
+        color: white;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .filter-btn {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        text-align: left;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .filter-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .filter-btn:hover::before {
+        left: 100%;
+      }
+
+      .filter-btn:hover,
+      .filter-btn.active {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .filter-btn.active {
+        background: rgba(255, 255, 255, 0.9);
+        color: #4f46e5;
+        border-color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+      }
+
+      .filter-btn i {
+        width: 16px;
+        margin-right: 0.5rem;
+      }
+
+      /* Stats Section */
+      .stats-section {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+      }
+
+      .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .stat-value {
+        color: white;
+        font-weight: 600;
+      }
+
+      .main-content-wrapper {
+        margin-left: 320px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 320px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+
+      /* Calendar Styles */
+      .calendar-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .calendar-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 50%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 80%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+      }
+
+      .month-navigation {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .month-nav-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        padding: 0.75rem 1.25rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        height: 50px;
+        cursor: pointer;
+      }
+
+      .month-nav-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .month-nav-btn:active {
+        transform: translateY(-1px) scale(1.02);
+      }
+
+      .current-month {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        margin: 0 1.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+        letter-spacing: 0.5px;
+      }
+
+      .calendar-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .view-toggle {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 0.6rem 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .view-toggle:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+      }
+
+      .view-toggle.active {
+        background: rgba(255, 255, 255, 0.9);
+        color: #4f46e5;
+        border-color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.6rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        color: white;
+        text-decoration: none;
+      }
+
+      .calendar-grid {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(79, 70, 229, 0.1);
+      }
+
+      .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .weekday {
+        padding: 1.2rem;
+        text-align: center;
+        font-weight: 700;
+        color: #4f46e5;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+      }
+
+      .weekday::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #4f46e5, transparent);
+        opacity: 0.5;
+      }
+
+      .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        padding: 2px;
+      }
+
+      .calendar-day {
+        background: white;
+        min-height: 130px;
+        padding: 1rem;
+        position: relative;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        border: 1px solid transparent;
+      }
+
+      .calendar-day:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+      }
+
+      .calendar-day.other-month {
+        background: #f8fafc;
+        color: #94a3b8;
+        opacity: 0.6;
+      }
+
+      .calendar-day.today {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 2px solid #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      }
+
+      .calendar-day.today .day-number {
+        color: #1d4ed8;
+        font-weight: 800;
+      }
+
+      .day-number {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+        position: relative;
+      }
+
+      .calendar-day.today .day-number::after {
+        content: "";
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+        border-radius: 1px;
+      }
+
+      .schedule-slot {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .schedule-slot::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .schedule-slot:hover::before {
+        left: 100%;
+      }
+
+      .schedule-slot:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      }
+
+      .schedule-slot.playing {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        border-color: rgba(5, 150, 105, 0.3);
+      }
+
+      .schedule-slot.playing:hover {
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+      }
+
+      .schedule-slot.coming-soon {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        border-color: rgba(217, 119, 6, 0.3);
+      }
+
+      .schedule-slot.coming-soon:hover {
+        box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+      }
+
+      .schedule-slot.stopped {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        border-color: rgba(220, 38, 38, 0.3);
+      }
+
+      .schedule-slot.stopped:hover {
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      }
+
+      .slot-time {
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .slot-movie {
+        font-size: 0.7rem;
+        opacity: 0.95;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .sidebar {
+          width: 280px;
+        }
+        .main-content-wrapper {
+          margin-left: 280px;
+        }
+        .header-custom {
+          left: 280px;
+        }
+      }
+
+      @media (max-width: 992px) {
+        .sidebar {
+          transform: translateX(-100%);
+          width: 320px;
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content-wrapper {
+          margin-left: 0;
+        }
+        .header-custom {
+          left: 0;
+        }
+        .calendar-day {
+          min-height: 80px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .calendar-days {
+          grid-template-columns: 1fr;
+        }
+        .calendar-weekdays {
+          display: none;
+        }
+        .calendar-day {
+          border-bottom: 1px solid #e2e8f0;
+          min-height: auto;
+          padding: 1rem;
+        }
+        .day-number {
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-film text-primary"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="text-white-50">Hệ thống quản lý</small>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/admin/movies/list}" class="menu-item">
+          <i class="fas fa-film"></i>
+          <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item">
+          <i class="fas fa-list"></i>
+          <span>Danh sách lịch chiếu</span>
+        </a>
+        <a th:href="@{/admin/schedules/calendar}" class="menu-item active">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu tháng</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-ticket-alt"></i>
+          <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-users"></i>
+          <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-chart-pie"></i>
+          <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-cog"></i>
+          <span>Cài đặt</span>
+        </a>
+      </nav>
+
+      <!-- Bộ lọc lịch chiếu -->
+      <div class="filter-section">
+        <h6><i class="fas fa-filter me-2"></i>Bộ lọc lịch chiếu</h6>
+        <button class="filter-btn active" data-filter="all">
+          <i class="fas fa-th"></i>Tất cả
+        </button>
+        <button class="filter-btn" data-filter="playing">
+          <i class="fas fa-play-circle"></i>Đang chiếu
+        </button>
+        <button class="filter-btn" data-filter="coming-soon">
+          <i class="fas fa-clock"></i>Sắp chiếu
+        </button>
+        <button class="filter-btn" data-filter="stopped">
+          <i class="fas fa-stop-circle"></i>Ngừng chiếu
+        </button>
+      </div>
+
+      <!-- Thống kê nhanh -->
+      <div class="stats-section">
+        <h6><i class="fas fa-chart-bar me-2"></i>Thống kê tháng này</h6>
+        <div class="stat-item">
+          <span class="stat-label">Tổng lịch chiếu:</span>
+          <span class="stat-value" th:text="${totalSchedules}">156</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Đang chiếu:</span>
+          <span class="stat-value" th:text="${playingCount}">89</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Sắp chiếu:</span>
+          <span class="stat-value" th:text="${comingSoonCount}">45</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ngừng chiếu:</span>
+          <span class="stat-value" th:text="${stoppedCount}">22</span>
+        </div>
+      </div>
+
+      <div
+        class="mt-auto p-4 border-top border-white-50"
+        style="border-color: rgba(255, 255, 255, 0.1) !important"
+      >
+        <div class="d-flex align-items-center">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="User Avatar"
+            width="40"
+            height="40"
+            class="rounded-circle me-3"
+          />
+          <div>
+            <div class="text-white fw-semibold">Admin User</div>
+            <small class="text-white-50">admin@cinema.com</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700">Lịch Chiếu Tháng</h4>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <div class="container-fluid p-4">
+        <!-- Flash Messages -->
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <!-- Calendar Header -->
+        <div class="calendar-header">
+          <div class="month-navigation">
+            <button class="month-nav-btn" id="prevMonth">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h2
+              class="current-month"
+              id="currentMonth"
+              th:text="${currentMonthName + ', ' + currentYear}"
+            >
+              Tháng 12, 2024
+            </h2>
+            <button class="month-nav-btn" id="nextMonth">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="calendar-controls">
+            <button class="view-toggle active">
+              <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
+            </button>
+            <a th:href="@{/admin/schedules/list}" class="view-toggle">
+              <i class="fas fa-list me-2"></i>Danh sách
+            </a>
+            <a th:href="@{/admin/schedules/add}" class="btn btn-primary">
+              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
+            </a>
+          </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+          <!-- Weekdays Header -->
+          <div class="calendar-weekdays">
+            <div class="weekday">Chủ nhật</div>
+            <div class="weekday">Thứ hai</div>
+            <div class="weekday">Thứ ba</div>
+            <div class="weekday">Thứ tư</div>
+            <div class="weekday">Thứ năm</div>
+            <div class="weekday">Thứ sáu</div>
+            <div class="weekday">Thứ bảy</div>
+          </div>
+
+          <!-- Calendar Days -->
+          <div class="calendar-days" id="calendarDays">
+            <!-- Days sẽ được generate bằng JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeDashboardBehavior();
+        initializeCalendar();
+        initializeFilters();
+      });
+
+      function initializeDashboardBehavior() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const mainContentWrapper =
+          document.getElementById("mainContentWrapper");
+
+        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        function checkViewport() {
+          if (window.innerWidth <= 992) {
+            if (!sidebar.classList.contains("collapsed")) {
+              toggleSidebar();
+            }
+          }
+        }
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
+      }
+
+      // Calendar functionality
+      let currentDate = new Date();
+      let currentFilter = "all";
+      let scheduleData = {}; // Dữ liệu lịch chiếu từ server
+
+      // Lấy dữ liệu từ server
+      const calendarDataFromServer = /*[[${calendarData}]]*/ {};
+      if (calendarDataFromServer && calendarDataFromServer.schedulesByDate) {
+        scheduleData = calendarDataFromServer.schedulesByDate;
+      }
+
+      // Lấy thông tin tháng hiện tại từ server
+      const serverYear = /*[[${currentYear}]]*/ new Date().getFullYear();
+      const serverMonth = /*[[${currentMonth}]]*/ new Date().getMonth() + 1;
+      currentDate = new Date(serverYear, serverMonth - 1, 1);
+
+      function initializeCalendar() {
+        updateCalendarDisplay();
+
+        document.getElementById("prevMonth").addEventListener("click", () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          loadCalendarData();
+        });
+
+        document.getElementById("nextMonth").addEventListener("click", () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          loadCalendarData();
+        });
+      }
+
+      function updateCalendarDisplay() {
+        updateMonthHeader();
+        generateCalendarDays();
+      }
+
+      // Function để load dữ liệu calendar từ server
+      function loadCalendarData() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+
+        // Hiển thị loading state
+        const calendarDays = document.getElementById("calendarDays");
+        calendarDays.innerHTML =
+          '<div class="text-center p-4">Đang tải dữ liệu...</div>';
+
+        // Tạo URL với filter
+        let url = `/admin/schedules/api/calendar-data?year=${year}&month=${month}`;
+        if (currentFilter !== "all") {
+          // Map frontend filter sang backend status
+          const statusMap = {
+            playing: "ACTIVE",
+            "coming-soon": "UPCOMING",
+            stopped: "ENDED",
+          };
+          const backendStatus = statusMap[currentFilter] || currentFilter;
+          url += `&status=${backendStatus}`;
+        }
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              scheduleData = data.schedules;
+              updateCalendarDisplay();
+              updateStats(data.stats);
+            } else {
+              console.error("Error loading calendar data:", data.error);
+              calendarDays.innerHTML =
+                '<div class="text-center p-4 text-danger">Lỗi khi tải dữ liệu</div>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching calendar data:", error);
+            calendarDays.innerHTML =
+              '<div class="text-center p-4 text-danger">Lỗi kết nối</div>';
+          });
+      }
+
+      // Function để cập nhật thống kê
+      function updateStats(stats) {
+        if (stats) {
+          const totalElement = document.querySelector(".stat-item .stat-value");
+          const playingElement = document.querySelectorAll(
+            ".stat-item .stat-value"
+          )[1];
+          const comingSoonElement = document.querySelectorAll(
+            ".stat-item .stat-value"
+          )[2];
+          const stoppedElement = document.querySelectorAll(
+            ".stat-item .stat-value"
+          )[3];
+
+          if (totalElement) totalElement.textContent = stats.total || 0;
+          if (playingElement) playingElement.textContent = stats.playing || 0;
+          if (comingSoonElement)
+            comingSoonElement.textContent = stats.comingSoon || 0;
+          if (stoppedElement) stoppedElement.textContent = stats.stopped || 0;
+        }
+      }
+
+      function updateMonthHeader() {
+        const monthNames = [
+          "Tháng 1",
+          "Tháng 2",
+          "Tháng 3",
+          "Tháng 4",
+          "Tháng 5",
+          "Tháng 6",
+          "Tháng 7",
+          "Tháng 8",
+          "Tháng 9",
+          "Tháng 10",
+          "Tháng 11",
+          "Tháng 12",
+        ];
+
+        const monthHeader = document.getElementById("currentMonth");
+        monthHeader.textContent = `${
+          monthNames[currentDate.getMonth()]
+        }, ${currentDate.getFullYear()}`;
+      }
+
+      function generateCalendarDays() {
+        const calendarDays = document.getElementById("calendarDays");
+        calendarDays.innerHTML = "";
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Ngày đầu tiên của tháng
+        const firstDay = new Date(year, month, 1);
+        // Ngày cuối cùng của tháng
+        const lastDay = new Date(year, month + 1, 0);
+
+        // Ngày bắt đầu hiển thị (có thể là tháng trước)
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+        // Tạo 42 ô (6 tuần x 7 ngày)
+        for (let i = 0; i < 42; i++) {
+          const cellDate = new Date(startDate);
+          cellDate.setDate(startDate.getDate() + i);
+
+          const dayElement = createDayElement(cellDate, month);
+          calendarDays.appendChild(dayElement);
+        }
+      }
+
+      function createDayElement(date, currentMonth) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day";
+
+        const isCurrentMonth = date.getMonth() === currentMonth;
+        const isToday = isDateToday(date);
+
+        if (!isCurrentMonth) {
+          dayDiv.classList.add("other-month");
+        }
+
+        if (isToday) {
+          dayDiv.classList.add("today");
+        }
+
+        // Số ngày
+        const dayNumber = document.createElement("div");
+        dayNumber.className = "day-number";
+        dayNumber.textContent = date.getDate();
+        dayDiv.appendChild(dayNumber);
+
+        // Lịch chiếu cho ngày này
+        const dateKey = formatDateKey(date);
+        const schedules = scheduleData[dateKey] || [];
+
+        schedules.forEach((schedule) => {
+          if (currentFilter === "all" || currentFilter === schedule.status) {
+            const slotDiv = createScheduleSlot(schedule);
+            dayDiv.appendChild(slotDiv);
+          }
+        });
+
+        return dayDiv;
+      }
+
+      function createScheduleSlot(schedule) {
+        const slotDiv = document.createElement("div");
+        slotDiv.className = `schedule-slot ${schedule.status}`;
+        slotDiv.title = `${schedule.time} - ${schedule.movie}`;
+
+        const timeSpan = document.createElement("div");
+        timeSpan.className = "slot-time";
+        timeSpan.textContent = schedule.time;
+
+        const movieSpan = document.createElement("div");
+        movieSpan.className = "slot-movie";
+        movieSpan.textContent = schedule.movie;
+
+        slotDiv.appendChild(timeSpan);
+        slotDiv.appendChild(movieSpan);
+
+        // Thêm click event để xem chi tiết
+        slotDiv.addEventListener("click", () => {
+          alert(
+            `Chi tiết lịch chiếu:\nThời gian: ${schedule.time}\nPhim: ${
+              schedule.movie
+            }\nTrạng thái: ${getStatusText(schedule.status)}`
+          );
+        });
+
+        return slotDiv;
+      }
+
+      function getStatusText(status) {
+        const statusMap = {
+          playing: "Đang chiếu",
+          "coming-soon": "Sắp chiếu",
+          stopped: "Ngừng chiếu",
+        };
+        return statusMap[status] || status;
+      }
+
+      function isDateToday(date) {
+        const today = new Date();
+        return (
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear()
+        );
+      }
+
+      function formatDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function initializeFilters() {
+        const filterButtons = document.querySelectorAll(".filter-btn");
+
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            // Xóa active class từ tất cả buttons
+            filterButtons.forEach((btn) => btn.classList.remove("active"));
+            // Thêm active class cho button được click
+            button.classList.add("active");
+
+            // Cập nhật filter hiện tại
+            currentFilter = button.dataset.filter;
+
+            // Cập nhật lại calendar với filter mới
+            loadCalendarData();
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

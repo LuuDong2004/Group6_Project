@@ -33,6 +33,9 @@ public class Booking {
     private Date expiryDate; // ngày hiệu lực của booking
     @Column(name = "notes")
     private String notes;
+    @Column(name = "voucher_code")
+    private String voucherCode;
+
 
 
 

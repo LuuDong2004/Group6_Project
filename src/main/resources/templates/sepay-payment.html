@@ -63,8 +63,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>Mã booking:</strong> <span th:text="${bookingId}"></span></p>
+                        <p><strong>Ngân hàng:</strong> <span>MB bank</span></p>
                         <p><strong>Stk:</strong> <span th:text="${stk}"></span></p>
-                        <p><strong>Mã transaction:</strong> <span th:text="${transactionId}"></span></p>
+                        <p><strong>Tên:</strong> <span> LUU VAN DONG</span></p>
+<!--                        <p><strong>Mã transaction:</strong> <span th:text="${transactionId}"></span></p>-->
+                        <p style="white-space: nowrap;"><strong>Nội dung:</strong> <span th:text="|Thanh toán vé xem phim ${transactionId}|"></span></p>
                         <p><strong>Số tiền:</strong> <span th:text="${#numbers.formatCurrency(amount)}"></span></p>
                     </div>
                 </div>

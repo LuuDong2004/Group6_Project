@@ -1,9 +1,9 @@
 package group6.cinema_project.service.Admin.impl;
 
 import group6.cinema_project.repository.Admin.AdminMovieRepository;
-import group6.cinema_project.repository.Admin.AdminRoomRepository;
 import group6.cinema_project.repository.Admin.AdminScheduleRepository;
 import group6.cinema_project.repository.Admin.AdminBranchRepository;
+import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
 import group6.cinema_project.service.Admin.IAdminScheduleService;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
@@ -36,7 +36,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
     private final AdminScheduleRepository movieScheduleRepository;
     private final AdminMovieRepository movieRepository;
-    private final AdminRoomRepository screeningRoomRepository;
+    private final AdminScreeningRoomRepository screeningRoomRepository;
     private final AdminBranchRepository branchRepository;
     List<ScheduleGroupedByDateDto> groupedSchedules;
 

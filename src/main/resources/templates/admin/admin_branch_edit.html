@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa Chi nhánh - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #3b82f6; --secondary-color: #64748b; --success-color: #10b981; --danger-color: #ef4444; --warning-color: #f59e0b; --info-color: #06b6d4; --light-color: #f8fafc; --dark-color: #1e293b; --border-color: #e2e8f0; --shadow-color: rgba(0, 0, 0, 0.1); }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f1f5f9; margin: 0; padding: 0; }
+        .sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; z-index: 1000; transition: all 0.3s ease; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-header h5 { margin: 0; font-weight: 600; font-size: 1.1rem; }
+        .sidebar-header small { opacity: 0.8; font-size: 0.85rem; }
+        .sidebar-menu { padding: 1rem 0; }
+        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: rgba(255, 255, 255, 0.9); text-decoration: none; transition: all 0.2s; border-left: 3px solid transparent; }
+        .menu-item:hover { background: rgba(255, 255, 255, 0.1); color: white; border-left-color: white; text-decoration: none; }
+        .menu-item.active { background: rgba(255, 255, 255, 0.15); color: white; border-left-color: white; }
+        .menu-item i { margin-right: 0.75rem; width: 20px; text-align: center; }
+        .main-content-wrapper { margin-left: 250px; transition: all 0.3s ease; }
+        .main-content-wrapper.expanded { margin-left: 80px; }
+        .header-custom { position: fixed; top: 0; right: 0; left: 250px; background: white; padding: 1rem 2rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 999; transition: all 0.3s ease; }
+        .header-custom.expanded { left: 80px; }
+        .page-content { margin-top: 80px; padding: 2rem; }
+        .edit-branch-section { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 2rem; }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0; }
+        .back-btn { background: #f1f5f9; color: #64748b; border: none; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+        .back-btn:hover { background: #e2e8f0; color: #475569; text-decoration: none; }
+        .form-container { max-width: 600px; }
+        .form-label { font-weight: 600; color: #374151; margin-bottom: 0.5rem; }
+        .form-control, .form-select { border: 1px solid #d1d5db; border-radius: 8px; padding: 0.75rem; transition: all 0.2s; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .btn-primary { background: #3b82f6; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); }
+        .btn-secondary { background: #6b7280; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+        .btn-secondary:hover { background: #4b5563; }
+        .alert { border-radius: 8px; border: none; }
+        .alert-success { background: #d1fae5; color: #065f46; }
+        .alert-danger { background: #fee2e2; color: #991b1b; }
+        @media (max-width: 768px) { .sidebar { width: 80px; } .sidebar .sidebar-header h5, .sidebar .sidebar-header small, .sidebar .sidebar-menu span, .sidebar .mt-auto .text-white, .sidebar .mt-auto small { display: none; } .sidebar .sidebar-menu .menu-item { justify-content: center; } .sidebar .sidebar-menu .menu-item i { margin-right: 0; font-size: 1.25rem; } .main-content-wrapper { margin-left: 80px; } .header-custom { left: 80px; padding: 0 1rem; } .header-custom .flex-grow-1 { display: none; } .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+<div class="main-content-wrapper" id="mainContentWrapper">
+    <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+            <a href="/admin/branches" class="btn btn-link text-secondary me-2"><i class="fas fa-arrow-left"></i></a>
+            <h4 class="mb-0 fw-semibold text-gray-700">Sửa Chi nhánh</h4>
+        </div>
+    </header>
+    <div class="page-content">
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="edit-branch-section">
+            <div class="page-header">
+                <h1 class="page-title">Sửa thông tin chi nhánh</h1>
+                <a href="/admin/branches" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại
+                </a>
+            </div>
+            <div class="form-container">
+                <form th:action="@{/admin/branches/edit/{id}(id=${branch.id})}" method="post" th:object="${branch}">
+                    <div class="mb-3">
+                        <label class="form-label">Tên chi nhánh</label>
+                        <input type="text" class="form-control" th:field="*{name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control" th:field="*{description}" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control" th:field="*{address}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Chuỗi rạp</label>
+                        <select class="form-select" th:field="*{cinemaChainId}" required>
+                            <option value="0">Chọn chuỗi rạp</option>
+                            <option th:each="chain : ${cinemaChains}" th:value="${chain.id}" th:text="${chain.name}"></option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Cập nhật chi nhánh
+                        </button>
+                        <a href="/admin/branches" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Sidebar toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content-wrapper');
+        const header = document.querySelector('.header-custom');
+
+        // Check if sidebar should be collapsed
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+            header.classList.add('expanded');
+        }
+
+        // Toggle sidebar
+        const toggleBtn = document.querySelector('.sidebar-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                header.classList.toggle('expanded');
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -29,9 +29,7 @@ public class BookingController {
     @Autowired
     private UserRepository userRepository;
 
-    /**
-     * Tạo booking mới
-     */
+
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<?> createBooking(@RequestBody BookingRequest request) {

@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -30,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
-
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +40,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin/movies")
 @RequiredArgsConstructor
 public class AdminMovieController {
-    private final IAdminMovieService  movieService;
+    private final IAdminMovieService movieService;
     private final IAdminActorService actorService;
     private final IAdminDirectorService directorService;
-
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/movies/";
 

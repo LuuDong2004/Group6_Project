@@ -162,18 +162,14 @@ public class ScheduleController {
         }
     }
 
-    /**
-     * Lọc bỏ các lịch chiếu có thời gian bắt đầu đã qua
-     */
+
     private List<ScreeningScheduleDto> filterPastSchedules(List<ScreeningScheduleDto> schedules, Date currentDateTime) {
         return schedules.stream()
                 .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Kiểm tra xem lịch chiếu có phải là quá khứ không
-     */
+
     private boolean isScheduleInPast(ScreeningScheduleDto schedule, Date currentDateTime) {
         if (schedule.getScreeningDate() == null || schedule.getStartTime() == null) {
             return false;

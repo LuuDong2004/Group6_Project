@@ -42,7 +42,7 @@ public class MovieController {
         return "movies";
     }
 
-    // Hàm dùng nội bộ để lấy recommendedMovies cho user hiện tại
+    // Hàm dùng để lấy recommendedMovies cho user hiện tại
     private List<MovieDto> recommendMoviesInternal() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

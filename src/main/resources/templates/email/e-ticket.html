@@ -451,7 +451,11 @@
 
                 <div class="qr-section">
                     <h4>Mã QR vé xem phim</h4>
-                    <img th:src="'data:image/png;base64,' + ${qrBase64}" alt="QR Code" style="width:140px;"/>
+                    <div style="text-align:center;">
+                        <img th:if="${qrCodeBase64 != null}" th:src="'data:image/png;base64,' + ${qrCodeBase64}" alt="QR Code"/>
+                        <img th:if="${qrCodeBase64 == null and qrCodeUrl != null}" th:src="${qrCodeUrl}" alt="QR Code"/>
+                        <div th:if="${qrCodeBase64 == null and qrCodeUrl == null}">Không có mã QR</div>
+                    </div>
                     <div style="font-size:12px; color:#888;">Quét mã này tại quầy vé hoặc cổng vào phòng chiếu</div>
                 </div>
             </div>

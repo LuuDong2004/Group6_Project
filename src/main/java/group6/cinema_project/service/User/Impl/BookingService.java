@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
+
 @Service
 @Transactional
 public class BookingService implements IBookingService {
@@ -60,6 +61,9 @@ public class BookingService implements IBookingService {
     @Autowired
     private FoodRepository foodRepository;
 
+    @Autowired
+    private VoucherServiceImpl voucherService;
+
     @Override
     public List<BookingDto> createBooking(BookingRequest request) {
         try {
@@ -85,13 +89,15 @@ public class BookingService implements IBookingService {
             booking.setStatus("PENDING");
             booking.setDate(LocalDate.now());
             booking.setNotes(request.getNotes());
+            booking.setVoucherCode(request.getVoucherCode());
+
 
             // Lưu booking
             booking = bookingRepository.save(booking);
 
             // Đặt các ghế đã chọn
             for (Integer seatId : request.getSeatIds()) {
-                seatReservationService.reserveSeat(seatId, request.getScheduleId(), 1, (int) booking.getId());
+                seatReservationService.reserveSeat(seatId, request.getScheduleId(), user.getId(), (int) booking.getId());
             }
 
             // Lưu thông tin food vào bảng BookingFood
@@ -126,12 +132,14 @@ public class BookingService implements IBookingService {
                 }
             }
 
+
             // Chuyển đổi sang DTO và trả về
             BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
             // Map schedule với mapToDto để set các trường chuỗi thời gian
             if (booking.getSchedule() != null) {
                 bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
             }
+            bookingDto.setVoucherCode(booking.getVoucherCode());
             List<BookingDto> result = new ArrayList<>();
             result.add(bookingDto);
             return result;
@@ -303,6 +311,8 @@ public class BookingService implements IBookingService {
             bookingFoodRepository.save(food);
         }
 
+
+
         // Gửi email vé điện tử sau khi thanh toán thành công
         try {
             BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
@@ -342,5 +352,12 @@ public class BookingService implements IBookingService {
                 if ("PENDING".equals(f.getStatus())) bookingFoodRepository.delete(f);
             }
         }
+    }
+
+    @Override
+    public void updateBookingAmount(Integer bookingId, double newAmount) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow();
+        booking.setAmount(newAmount);
+        bookingRepository.save(booking);
     }
 }

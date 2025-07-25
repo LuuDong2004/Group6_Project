@@ -12,8 +12,8 @@ public interface IScheduleService {
     // Lấy lịch chiếu theo movieId và ngày cụ thể
     List<ScreeningScheduleDto> getScheduleByMovieIdAndDate(Integer movieId, Date screeningDate);
 
-    // Lấy lịch chiếu theo movieId, branchId và ngày
-    List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date screeningDate);
+    // Lấy lịch chiếu theo movieId, branchId và khoảng ngày
+    List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date startOfDay, Date endOfDay);
 
     // Lấy danh sách các rạp có lịch chiếu cho bộ phim
     List<BranchDto> getDistinctBranchesByMovieId(Integer movieId);

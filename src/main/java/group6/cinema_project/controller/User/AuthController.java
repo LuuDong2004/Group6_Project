@@ -1,5 +1,6 @@
 package group6.cinema_project.controller.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -32,12 +28,12 @@ import group6.cinema_project.dto.PasswordResetConfirmDto;
 import group6.cinema_project.dto.UserDto;
 
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
+@RequestMapping("/")
 public class AuthController {
 
     @Autowired
@@ -53,6 +49,11 @@ public class AuthController {
                             Model model,
                             HttpServletRequest request) {
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            // Nếu đã đăng nhập, redirect về trang chủ
+            return "redirect:/";
+        }
 
         if (error != null) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
@@ -70,8 +71,6 @@ public class AuthController {
 
         model.addAttribute("user", new UserRegistrationDto());
 
-
-
         return "sign_in";
     }
 
@@ -81,48 +80,22 @@ public class AuthController {
         return "sign_in";
     }
 
-    @PostMapping("/login")
-    public String loginUser(@ModelAttribute("loginUser") UserLoginDto loginDto, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            UserDto user = userService.getUserByEmail(loginDto.getEmail());
-            if (user == null) {
-                model.addAttribute("error", "Email hoặc mật khẩu không đúng!");
-                return "sign_in";
-            }
-            if (!"LOCAL".equalsIgnoreCase(user.getProvider())) {
-                model.addAttribute("error", "Tài khoản này chỉ có thể đăng nhập bằng Google!");
-                return "sign_in";
-            }
-            userService.loginUser(loginDto); // kiểm tra mật khẩu
-            redirectAttributes.addFlashAttribute("success", "Đăng nhập thành công!");
-            return "redirect:/dashboard";
-        } catch (Exception e) {
-            model.addAttribute("error", "Email hoặc mật khẩu không đúng!");
-            return "sign_in";
-        }
-    }
-
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDto registrationDto,
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes) {
+
+        // Kiểm tra validation errors
         if (result.hasErrors()) {
             return "sign_in";
         }
+
         try {
-            // Kiểm tra trùng email/số điện thoại
-            if (userService.isEmailExists(registrationDto.getEmail())) {
-                model.addAttribute("error", "Email đã tồn tại!");
-                return "sign_in";
-            }
-            if (userService.isPhoneExists(registrationDto.getPhone())) {
-                model.addAttribute("error", "Số điện thoại đã tồn tại!");
-                return "sign_in";
-            }
             userService.registerUser(registrationDto);
             redirectAttributes.addFlashAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-            return "redirect:/login";
+            return "redirect:/users/login";
+
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "sign_in";
@@ -136,11 +109,16 @@ public class AuthController {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
 
+            // Debug logging
+            System.out.println("Current authentication: " + auth);
+            System.out.println("Current user email: " + email);
+            System.out.println("Authentication type: " + auth.getClass().getSimpleName());
+
             UserDto user = userService.getUserByEmail(email);
             model.addAttribute("user", user);
 
             // Lấy booking PAID trong 3 tháng gần nhất, đã sắp xếp theo ngày suất chiếu mới nhất
-            List<BookingDto> allPaidBookings = new java.util.ArrayList<>();
+            List<BookingDto> allPaidBookings = new ArrayList<>();
             try {
                 if (user != null) {
                     java.time.LocalDate threeMonthsAgo = java.time.LocalDate.now().minusMonths(3);
@@ -161,14 +139,20 @@ public class AuthController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
 
+            // Add CSRF token info for debugging
             if (auth.getPrincipal() instanceof group6.cinema_project.security.oauth2.CustomOAuth2User) {
+                System.out.println("OAuth2 user detected in profile page");
                 model.addAttribute("isOAuth2User", true);
             } else {
+                System.out.println("Local user detected in profile page");
                 model.addAttribute("isOAuth2User", false);
             }
 
             return "userDetail";
+
         } catch (Exception e) {
+            System.err.println("Error in profilePage: " + e.getMessage());
+            e.printStackTrace();
             model.addAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
             return "redirect:/login";
         }
@@ -265,14 +249,11 @@ public class AuthController {
         if (result.hasErrors()) {
             return "forgot_password";
         }
+
         try {
-            UserDto user = userService.getUserByEmail(requestDto.getEmail());
-            if (user == null || !"LOCAL".equalsIgnoreCase(user.getProvider())) {
-                redirectAttributes.addFlashAttribute("success", "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
-                return "redirect:/login";
-            }
             userService.requestPasswordReset(requestDto);
-            redirectAttributes.addFlashAttribute("success", "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
+            redirectAttributes.addFlashAttribute("success",
+                    "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
             return "redirect:/login";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());

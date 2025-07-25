@@ -1,3 +1,4 @@
+
 package group6.cinema_project.repository.Admin;
 
 import group6.cinema_project.entity.Movie;
@@ -9,46 +10,97 @@ import java.util.List;
 
 @Repository
 public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
-    // Filter by movie name (title)
+
+    /**
+     * Lọc phim theo tên (không phân biệt hoa thường)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong tên phim
+     * @return Danh sách phim có tên chứa từ khóa
+     */
     @Query("SELECT m FROM Movie m WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByNameContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by description
+    /**
+     * Lọc phim theo mô tả (không phân biệt hoa thường)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong mô tả phim
+     * @return Danh sách phim có mô tả chứa từ khóa
+     */
     @Query("SELECT m FROM Movie m WHERE LOWER(m.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByDescriptionContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by genre
+    /**
+     * Lọc phim theo thể loại (không phân biệt hoa thường)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong thể loại phim
+     * @return Danh sách phim có thể loại chứa từ khóa
+     */
     @Query("SELECT m FROM Movie m WHERE LOWER(m.genre) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByGenreContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by rating
+    /**
+     * Lọc phim theo xếp hạng (không phân biệt hoa thường)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong xếp hạng phim
+     * @return Danh sách phim có xếp hạng chứa từ khóa
+     */
     @Query("SELECT m FROM Movie m WHERE LOWER(m.rating) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByRatingContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by language
+    /**
+     * Lọc phim theo ngôn ngữ (không phân biệt hoa thường)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong ngôn ngữ phim
+     * @return Danh sách phim có ngôn ngữ chứa từ khóa
+     */
     @Query("SELECT m FROM Movie m WHERE LOWER(m.language) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByLanguageContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by release year
+    /**
+     * Lọc phim theo năm phát hành
+     *
+     * @param year Năm phát hành cần tìm
+     * @return Danh sách phim phát hành trong năm đó
+     */
     @Query("SELECT m FROM Movie m WHERE YEAR(m.releaseDate) = :year")
     List<Movie> findByReleaseYear(@Param("year") Integer year);
 
-    // Filter by director name (through junction table)
+    /**
+     * Lọc phim theo tên đạo diễn (thông qua bảng liên kết)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong tên đạo diễn
+     * @return Danh sách phim có đạo diễn với tên chứa từ khóa
+     */
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.directors d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByDirectorNameContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Filter by actor name (through junction table)
+    /**
+     * Lọc phim theo tên diễn viên (thông qua bảng liên kết)
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong tên diễn viên
+     * @return Danh sách phim có diễn viên với tên chứa từ khóa
+     */
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.actors a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<Movie> findByActorNameContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
-    // Fetch all movies with directors and actors eagerly loaded for display
+    /**
+     * Lấy tất cả phim kèm thông tin đạo diễn và diễn viên (eager loading) để hiển
+     * thị
+     *
+     * @return Danh sách phim với thông tin đầy đủ về đạo diễn và diễn viên
+     */
     @Query("SELECT DISTINCT m FROM Movie m " +
             "LEFT JOIN FETCH m.directors " +
             "LEFT JOIN FETCH m.actors " +
             "ORDER BY m.name")
     List<Movie> findAllWithDirectorsAndActors();
 
-    // Fetch movies with directors and actors for filtered search
+    /**
+     * Lấy phim theo tên kèm thông tin đạo diễn và diễn viên cho tìm kiếm có lọc
+     *
+     * @param searchTerm Từ khóa tìm kiếm trong tên phim
+     * @return Danh sách phim có tên chứa từ khóa với thông tin đầy đủ
+     */
     @Query("SELECT DISTINCT m FROM Movie m " +
             "LEFT JOIN FETCH m.directors " +
             "LEFT JOIN FETCH m.actors " +

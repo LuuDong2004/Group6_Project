@@ -2,20 +2,21 @@ package group6.cinema_project.service.Admin;
 
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.entity.Branch;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IAdminBranchService {
-    Optional<BranchDto> getBranchById(Integer id);
-
-    BranchDto saveOrUpdateBranch(BranchDto branchDto);
-
-    void deleteBranch(Integer id);
-
+    List<BranchDto> findAll();
+    BranchDto findById(int id);
+    BranchDto save(BranchDto branchDto);
+    void deleteById(int id);
+    List<BranchDto> findByCinemaChainId(int cinemaChainId);
+    Page<BranchDto> getBranchesPage(int page, int size);
+    boolean isNameDuplicate(String name, Integer id);
+    Page<Branch> getBranchesPage(int page, int size, String name, String address, String cinemaChain);
     List<BranchDto> getAllBranches();
 
-    List<Branch> getAllBranchEntities();
 
-    List<BranchDto> getFilteredBranches(String searchTerm);
 }

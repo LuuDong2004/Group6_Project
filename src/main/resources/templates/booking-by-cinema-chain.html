@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt vé xem phim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/static/assets/css/style.css}">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .header { background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%); color: white; padding: 32px 0 20px 0; text-align: center; border-radius: 0; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .booking-steps { display: flex; justify-content: center; background: #f8f9fa; padding: 15px; border-bottom: 1px solid #e9ecef; }
+        .step { display: flex; align-items: center; margin: 0 20px; font-size: 14px; color: #6c757d; }
+        .step.active { color: #e91e63; font-weight: bold; }
+        .step-number { width: 25px; height: 25px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-size: 12px; }
+        .step.active .step-number { background: #e91e63; color: white; }
+        .content { padding: 0 0 40px 0; max-width: 1400px; margin: 0 auto; }
+        .section { margin-bottom: 40px; }
+        .section-title { font-size: 18px; color: #333; margin-bottom: 15px; display: flex; align-items: center; }
+        .section-title::before { content: ''; width: 4px; height: 20px; background: #e91e63; margin-right: 10px; }
+        .cinema-chains { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .chain-card { border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: white; text-decoration: none; color: #333; }
+        .chain-card:hover { border-color: #e91e63; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(233,30,99,0.2); }
+        .chain-logo { width: 60px; height: 60px; background: #e91e63; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .cinemas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .cinema-card { border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.3s ease; background: white; text-decoration: none; color: #333; }
+        .cinema-card:hover { border-color: #e91e63; box-shadow: 0 3px 10px rgba(233,30,99,0.15); }
+        .cinema-name { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .cinema-address { font-size: 12px; color: #666; }
+        .date-selector { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .date-item { min-width: 80px; padding: 15px 10px; border: 1px solid #e9ecef; border-radius: 8px; text-align: center; background: white; transition: all 0.3s ease; text-decoration: none; color: #333; }
+        .date-item:hover { border-color: #e91e63; background: #fce4ec; }
+        .date-day { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .date-weekday { font-size: 12px; text-transform: uppercase; }
+        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .movie-card { border: 1px solid #e9ecef; border-radius: 10px; overflow: hidden; background: white; text-decoration: none; color: #333; transition: all 0.3s ease; }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-color: #e91e63; }
+        .movie-poster { width: 100%; height: 250px; background: linear-gradient(45deg, #e91e63, #ad1457); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold; }
+        .movie-info { padding: 15px; }
+        .movie-title { font-weight: bold; margin-bottom: 5px; color: #333; }
+        .movie-details { font-size: 12px; color: #666; margin-bottom: 10px; }
+        .movie-rating { display: inline-block; background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+        .showtimes { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .showtime-slot { padding: 12px; border: 1px solid #e91e63; border-radius: 6px; text-align: center; background: white; transition: all 0.3s ease; text-decoration: none; color: #e91e63; font-weight: bold; }
+        .showtime-slot:hover { background: #e91e63; color: white; }
+        .showtime-time { font-weight: bold; margin-bottom: 3px; }
+        .showtime-info { font-size: 10px; opacity: 0.8; }
+        .hidden { display: none; }
+        @media (max-width: 768px) { .booking-steps { flex-wrap: wrap; } .step { margin: 5px 10px; } .content { padding: 0 0 20px 0; } .cinema-chains, .cinemas-grid, .movies-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container py-4">
+    <div class="header">
+        <h1>🎬 Đặt vé xem phim</h1>
+        <p>Trải nghiệm điện ảnh tuyệt vời</p>
+    </div>
+    <div class="booking-steps">
+        <div class="step" th:classappend="${step == 1} ? 'active'">
+            <div class="step-number">1</div>
+            <span>Chọn chuỗi rạp</span>
+        </div>
+        <div class="step" th:classappend="${step == 2} ? 'active'">
+            <div class="step-number">2</div>
+            <span>Chọn rạp</span>
+        </div>
+        <div class="step" th:classappend="${step == 3} ? 'active'">
+            <div class="step-number">3</div>
+            <span>Chọn ngày</span>
+        </div>
+        <div class="step" th:classappend="${step == 4} ? 'active'">
+            <div class="step-number">4</div>
+            <span>Chọn phim</span>
+        </div>
+        <div class="step" th:classappend="${step == 5} ? 'active'">
+            <div class="step-number">5</div>
+            <span>Chọn suất chiếu</span>
+        </div>
+    </div>
+    <div class="content">
+        <!-- Step 1: Chọn chuỗi rạp -->
+        <div th:if="${step == 1}" class="section">
+            <h2 class="section-title">Chọn chuỗi rạp</h2>
+            <div class="cinema-chains">
+                <a th:each="chain : ${chains}" th:href="@{'/booking/by-cinema/chain/' + ${chain.id}}" class="chain-card">
+                    <div class="chain-logo" th:text="${#strings.substring(chain.name,0,3).toUpperCase()}"></div>
+                    <h3 th:text="${chain.name}"></h3>
+                    <p th:text="${chain.description}"></p>
+                </a>
+            </div>
+        </div>
+        <!-- Step 2: Chọn rạp -->
+        <div th:if="${step == 2}" class="section">
+            <h2 class="section-title">Chọn rạp chiếu</h2>
+            <div class="cinemas-grid">
+                <a th:each="branch : ${branches}" th:href="@{'/booking/by-cinema/chain/' + ${chainId} + '/branch/' + ${branch.id}}" class="cinema-card">
+                    <div class="cinema-name" th:text="${branch.name}"></div>
+                    <div class="cinema-address" th:text="${branch.address}"></div>
+                </a>
+            </div>
+        </div>
+        <!-- Step 3: Chọn ngày -->
+        <div th:if="${step == 3}" class="section">
+            <h2 class="section-title">Chọn ngày chiếu</h2>
+            <div class="date-selector">
+                <a th:each="date,iter : ${dates}"
+                   th:if="${datesWithShowtimes.contains(date)}"
+                   th:href="@{'/booking/by-cinema/chain/' + ${chainId} + '/branch/' + ${branchId} + '/date/' + ${date}}"
+                   class="date-item"
+                   th:classappend="${date} == ${selectedDate} ? 'bg-danger text-white' : ''">
+                    <div class="date-day" th:text="${#temporals.format(date, 'dd')}"></div>
+                    <div class="date-weekday"
+                         th:text="${iter.index == 0 ? 'Hôm nay' : (iter.index == 1 ? 'Ngày mai' : #temporals.format(date, 'EEEE', 'vi'))}"></div>
+                </a>
+            </div>
+        </div>
+        <!-- Step 4: Chọn phim và lịch chiếu -->
+        <div th:if="${step == 4}" class="section">
+            <h2 class="section-title">Chọn phim & lịch chiếu</h2>
+            <div th:if="${#lists.isEmpty(movies)}">
+                <div class="alert alert-warning">Không có phim nào chiếu ngày này tại rạp này.</div>
+            </div>
+            <div th:each="movie : ${movies}" class="mb-4">
+                <div class="card mb-2">
+                    <div class="row g-0">
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <div class="movie-poster" th:text="${movie.name}"></div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${movie.name}"></h5>
+                                <div class="movie-details" th:text="${movie.genre} + ' • ' + ${movie.duration} + ' phút'"></div>
+                                <span class="movie-rating" th:text="${movie.rating}"></span>
+                                <div class="showtimes mt-3">
+                                    <a th:each="sch : ${movieSchedules[movie.id]}" th:href="@{'/seat/' + ${movie.id} + '/' + ${sch.id} + '/' + ${sch.screeningRoom.id}}" class="showtime-slot">
+                                        <div class="showtime-time" th:text="${sch.startTime}"></div>
+                                        <div class="showtime-info" th:text="${sch.screeningRoom.name}"></div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Step 5: Chọn suất chiếu -->
+        <div th:if="${step == 5}" class="section">
+            <h2 class="section-title">Chọn suất chiếu</h2>
+            <div class="showtimes">
+                <a th:each="sch : ${schedules}" th:href="@{'/seat/' + ${movieId} + '/' + ${sch.id} + '/' + ${sch.screeningRoom.id}}" class="showtime-slot">
+                    <div class="showtime-time" th:text="${#temporals.format(sch.screeningDate, 'dd/MM')} + ' ' + ${sch.startTime}"></div>
+                    <div class="showtime-info" th:text="${sch.screeningRoom.name}"></div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

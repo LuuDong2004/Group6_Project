@@ -6,7 +6,6 @@ import group6.cinema_project.dto.BookingRequest;
 import java.util.List;
 
 public interface IBookingService {
-
     List<BookingDto> createBooking(BookingRequest request);
     List<BookingDto> getBookingsByUserId(Integer userId);
     List<BookingDto> getPaidBookingsByUserIdAndDateAfter(Integer userId, java.time.LocalDate fromDate);
@@ -16,4 +15,5 @@ public interface IBookingService {
     void confirmBookingPaid(int bookingId);
     void cancelPendingBooking(Integer bookingId);
     List<BookingDto> getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(Integer userId, java.time.LocalDate fromDate);
+    void updateBookingAmount(Integer bookingId, double newAmount);
 }

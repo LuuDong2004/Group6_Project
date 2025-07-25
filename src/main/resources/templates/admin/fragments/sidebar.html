@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Sidebar Fragment */-->
+<div th:fragment="sidebar" class="sidebar-custom" id="sidebar">
+    <div class="sidebar-header">
+        <a href="/admin" class="d-flex align-items-center text-white text-decoration-none">
+            <i class="fas fa-film fa-lg me-2"></i>
+            <span class="fs-5 fw-semibold">MyShowz Admin</span>
+        </a>
+    </div>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="/admin" class="nav-link text-white" aria-current="page">
+                <i class="fas fa-tachometer-alt me-2"></i>Bảng điều khiển
+            </a>
+        </li>
+        <li>
+            <a href="/admin/movies/list" class="nav-link text-white">
+                <i class="fas fa-video me-2"></i>Quản lý Phim
+            </a>
+        </li>
+        <li>
+            <a href="/admin/schedules/list" class="nav-link text-white">
+                <i class="fas fa-calendar-alt me-2"></i>Quản lý Lịch chiếu
+            </a>
+        </li>
+        <li>
+            <a href="/admin/actors/list" class="nav-link text-white">
+                <i class="fas fa-user-friends me-2"></i>Quản lý Diễn viên
+            </a>
+        </li>
+        <li>
+            <a href="/admin/directors/list" class="nav-link text-white">
+                <i class="fas fa-user-tie me-2"></i>Quản lý Đạo diễn
+            </a>
+        </li>
+        <li>
+            <a href="/admin/foods/list" class="nav-link text-white">
+                <i class="fas fa-cookie-bite me-2"></i>Quản lý Đồ ăn
+            </a>
+        </li>
+        <li>
+            <a href="/admin/blogs/list" class="nav-link text-white">
+                <i class="fas fa-blog me-2"></i>Quản lý Blog
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-footer">
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://via.placeholder.com/32" alt="" width="32" height="32" class="rounded-circle me-2">
+                <strong>Admin</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser2">
+                <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                <li><a class="dropdown-item" href="#">Hồ sơ</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin/logout">Đăng xuất</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html> 

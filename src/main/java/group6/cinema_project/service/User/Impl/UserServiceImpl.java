@@ -75,8 +75,9 @@ public class UserServiceImpl implements IUserService {
         user.setPhone(registrationDto.getPhone());
         user.setEmail(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        user.setDateOfBirth(registrationDto.getDateOfBirth());
-        user.setAddress(registrationDto.getAddress());
+        // Nếu không có dateOfBirth hoặc address thì set null
+        user.setDateOfBirth(registrationDto.getDateOfBirth() != null ? registrationDto.getDateOfBirth() : null);
+        user.setAddress(registrationDto.getAddress() != null ? registrationDto.getAddress() : null);
         user.setRole(Role.USER); // Default role
         user.setProvider(AuthProvider.LOCAL); // Đăng ký thường là LOCAL
 

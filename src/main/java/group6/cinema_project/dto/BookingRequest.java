@@ -13,4 +13,5 @@ public class BookingRequest {
     private Map<String, Integer> foodItems;  // Danh sách đồ ăn và số lượng
     private double totalAmount;  // Tổng số tiền
     private String notes;  // Ghi chú đặt vé
+    private String voucherCode;
 }

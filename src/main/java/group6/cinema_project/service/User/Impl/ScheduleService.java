@@ -77,27 +77,18 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
-    public List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date screeningDate) {
-        // Đảm bảo screeningDate được chuẩn hóa (chỉ lưu phần ngày)
-        Date normalizedDate = normalizeDateToMidnight(screeningDate);
+    public List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date startOfDay, Date endOfDay) {
+        List<ScreeningSchedule> schedules;
+        if (startOfDay == null || endOfDay == null) {
+            // Lấy tất cả lịch chiếu của branch (không lọc ngày)
+            schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, null, null);
+        } else {
+            schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, startOfDay, endOfDay);
+        }
         Date currentDateTime = new Date();
-        Date currentDate = normalizeDateToMidnight(currentDateTime);
-
-        // Không cho phép truy vấn ngày quá khứ
-        if (normalizedDate.before(currentDate)) {
-            return new ArrayList<>(); // Trả về danh sách rỗng thay vì throw exception
-        }
-
-        List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, normalizedDate);
-
-        // Nếu là ngày hiện tại, lọc bỏ các lịch chiếu có giờ bắt đầu đã qua
-        if (isSameDay(normalizedDate, currentDate)) {
-            schedules = schedules.stream()
-                    .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
-                    .collect(Collectors.toList());
-        }
-
+        // Lọc bỏ các lịch chiếu quá khứ
         return schedules.stream()
+                .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }

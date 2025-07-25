@@ -1,12 +1,16 @@
 package group6.cinema_project.dto;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 @Data
+@Getter
+@Setter
 public class BookingDto {
     private Integer id;
     private UserDto user;
@@ -19,5 +23,5 @@ public class BookingDto {
     private ScreeningScheduleDto schedule;
     private List<String> seatNames;
     private List<BookedFoodDto> foodList;
-
+    private String voucherCode;
 }

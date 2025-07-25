@@ -112,6 +112,15 @@
             </div>
         </div>
         
+        <div class="qr-code-container">
+            <h3>Mã QR vé xem phim</h3>
+            <div style="text-align:center;">
+                <img th:if="${qrCodeBase64 != null}" th:src="'data:image/png;base64,' + ${qrCodeBase64}" alt="QR Code"/>
+                <img th:if="${qrCodeBase64 == null and qrCodeUrl != null}" th:src="${qrCodeUrl}" alt="QR Code"/>
+                <div th:if="${qrCodeBase64 == null and qrCodeUrl == null}">Không có mã QR</div>
+            </div>
+        </div>
+        
         <div class="alert alert-warning mt-2" style="font-size: 1rem;">
             <i class="fas fa-exclamation-triangle me-2"></i>
             <b>Lưu ý:</b> Vui lòng giữ mã đặt vé và kiểm tra email để lấy vé điện tử!

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Người dùng - Cinema Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 70px;
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --border-color: #e2e8f0;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: white;
+        }
+
+        .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-left-color: white;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content-wrapper.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Header */
+        .header-custom {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 999;
+            transition: left 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+
+        .main-content-wrapper.expanded .header-custom {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--light-color);
+            border-radius: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        /* Form Styles */
+        .add-user-section {
+            padding: 2rem;
+            margin-top: var(--header-height);
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        }
+
+        .form-actions {
+            padding: 1.5rem;
+            background-color: var(--light-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-outline-danger {
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            background: transparent;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Form Validation Styles */
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+        }
+
+        .form-select.is-invalid {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+        }
+
+        .form-select.is-invalid:focus {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+        }
+
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: var(--danger-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content-wrapper {
+                margin-left: 0;
+            }
+            
+            .header-custom {
+                left: 0;
+            }
+        }
+
+        /* Alert Styles */
+        .alert {
+            border-radius: 0.5rem;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center">
+                <div class="bg-white rounded-circle p-2 me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
+                    <small class="text-white-50">Thêm Người dùng</small>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/admin" class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>Bảng điều khiển</span>
+            </a>
+            <a href="/admin/movies/list" class="menu-item">
+                <i class="fas fa-film"></i>
+                <span>Phim</span>
+            </a>
+            <a href="/admin/foods/list" class="menu-item">
+                <i class="fas fa-hamburger"></i>
+                <span>Combo Food</span>
+            </a>
+            <a href="/admin/schedules/list" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Lịch chiếu</span>
+            </a>
+            <a href="/admin/users/list" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Quản lý người dùng</span>
+            </a>
+            <a href="/admin/users/management" class="menu-item">
+                <i class="fas fa-user-cog"></i>
+                <span>Phần quyền</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Đặt vé</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-chart-pie"></i>
+                <span>Phân tích</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài đặt</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content-wrapper" id="mainContentWrapper">
+        <!-- Header -->
+        <header class="header-custom">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Thêm Người dùng mới</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="add-user-section">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="form-section">
+                <div class="card-header p-3">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Thông tin Người dùng mới
+                    </h5>
+                </div>
+                <form th:action="@{/admin/users/add}" method="post" th:object="${user}" id="addUserForm">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="userName">Tên người dùng *</label>
+                                <input type="text" class="form-control" id="userName" name="userName" 
+                                       placeholder="Nhập tên người dùng" th:field="*{userName}" 
+                                       th:class="${#fields.hasErrors('userName')} ? 'form-control is-invalid' : 'form-control'" required />
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="email">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="Nhập email" th:field="*{email}" 
+                                       th:class="${#fields.hasErrors('email')} ? 'form-control is-invalid' : 'form-control'" required />
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="password">Mật khẩu *</label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Nhập mật khẩu" th:field="*{password}" 
+                                       th:class="${#fields.hasErrors('password')} ? 'form-control is-invalid' : 'form-control'" required />
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="confirmPassword">Xác nhận mật khẩu *</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                       placeholder="Xác nhận mật khẩu" required />
+                                <div class="invalid-feedback" id="confirmPasswordError"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="phone">Điện thoại *</label>
+                                <input type="text" class="form-control" id="phone" name="phone" 
+                                       placeholder="Nhập số điện thoại" th:field="*{phone}" 
+                                       th:class="${#fields.hasErrors('phone')} ? 'form-control is-invalid' : 'form-control'" required />
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="dateOfBirth">Ngày sinh *</label>
+                                <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" 
+                                       th:field="*{dateOfBirth}" 
+                                       th:class="${#fields.hasErrors('dateOfBirth')} ? 'form-control is-invalid' : 'form-control'" required />
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="address">Địa chỉ *</label>
+                            <input type="text" class="form-control" id="address" name="address" 
+                                   placeholder="Nhập địa chỉ" th:field="*{address}" 
+                                   th:class="${#fields.hasErrors('address')} ? 'form-control is-invalid' : 'form-control'" required />
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="role">Vai trò *</label>
+                            <select class="form-select" id="role" name="role" th:field="*{role}" 
+                                    th:class="${#fields.hasErrors('role')} ? 'form-select is-invalid' : 'form-select'" required>
+                                <option value="">Chọn vai trò</option>
+                                <option th:each="role : ${allRoles}" 
+                                        th:value="${role}" 
+                                        th:text="${role == 'USER' ? 'Người dùng' : role == 'STAFF' ? 'Nhân viên' : 'Quản trị viên'}">
+                                </option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <a th:href="@{/admin/users/list}" class="btn btn-outline-danger me-2">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>Thêm người dùng
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            initializeDashboardBehavior();
+            initializeFormValidation();
+        });
+
+        function initializeDashboardBehavior() {
+            const sidebarToggle = document.getElementById("sidebarToggle");
+            const sidebar = document.getElementById("sidebar");
+            const mainContentWrapper = document.getElementById("mainContentWrapper");
+
+            if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+
+            function toggleSidebar() {
+                sidebar.classList.toggle("collapsed");
+                mainContentWrapper.classList.toggle("expanded");
+            }
+
+            sidebarToggle.addEventListener("click", toggleSidebar);
+
+            function checkViewport() {
+                if (window.innerWidth <= 992) {
+                    if (!sidebar.classList.contains("collapsed")) {
+                        toggleSidebar();
+                    }
+                }
+            }
+
+            checkViewport();
+            window.addEventListener("resize", checkViewport);
+        }
+
+        function initializeFormValidation() {
+            const form = document.getElementById('addUserForm');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            form.addEventListener('submit', function(e) {
+                // Check if all required fields are filled
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ các trường bắt buộc!');
+                    return false;
+                }
+
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert('Mật khẩu xác nhận không khớp!');
+                    confirmPassword.focus();
+                    return false;
+                }
+
+                if (password.value.length < 6) {
+                    e.preventDefault();
+                    alert('Mật khẩu phải có ít nhất 6 ký tự!');
+                    password.focus();
+                    return false;
+                }
+
+                // Email validation
+                const email = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email.value)) {
+                    e.preventDefault();
+                    alert('Email không hợp lệ!');
+                    email.focus();
+                    return false;
+                }
+
+                // Phone validation (Vietnamese phone number)
+                const phone = document.getElementById('phone');
+                const phoneRegex = /^[0-9]{10,11}$/;
+                if (!phoneRegex.test(phone.value.replace(/\s/g, ''))) {
+                    e.preventDefault();
+                    alert('Số điện thoại không hợp lệ!');
+                    phone.focus();
+                    return false;
+                }
+            });
+
+            // Real-time password confirmation check
+            confirmPassword.addEventListener('input', function() {
+                const confirmPasswordError = document.getElementById('confirmPasswordError');
+                if (password.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Mật khẩu không khớp');
+                    confirmPassword.classList.add('is-invalid');
+                    confirmPasswordError.textContent = 'Mật khẩu không khớp';
+                } else {
+                    confirmPassword.setCustomValidity('');
+                    confirmPassword.classList.remove('is-invalid');
+                    confirmPasswordError.textContent = '';
+                }
+            });
+
+            // Real-time validation for required fields
+            form.querySelectorAll('[required]').forEach(field => {
+                field.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html> 

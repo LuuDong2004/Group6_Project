@@ -6,18 +6,27 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 @NoArgsConstructor
 @Data
 public class ScreeningScheduleDto {
     private Integer id;
     // IDs for input/output
+    @NotNull(message = "Phim không được để trống")
     private Integer movieId;
+    @NotNull(message = "Phòng chiếu không được để trống")
     private Integer screeningRoomId;
+    @NotNull(message = "Chi nhánh không được để trống")
     private Integer branchId;
+    @NotNull(message = "Ngày chiếu không được để trống")
     private LocalDate screeningDate;
+    @NotNull(message = "Giờ bắt đầu không được để trống")
     private LocalTime startTime;
+    @NotNull(message = "Giờ kết thúc không được để trống")
     private LocalTime endTime;
+    @NotBlank(message = "Trạng thái không được để trống")
     private String status;
     private int availableSeats;
 

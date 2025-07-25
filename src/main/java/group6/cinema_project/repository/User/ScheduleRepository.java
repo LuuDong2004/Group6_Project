@@ -17,10 +17,11 @@ public interface ScheduleRepository extends JpaRepository<ScreeningSchedule, Int
     List<ScreeningSchedule> findSchedulesByMovieIdAndDate(@Param("movieId") Integer movieId,
                                                           @Param("screeningDate") Date screeningDate);
 
-    @Query("SELECT s FROM ScreeningSchedule s WHERE s.movie.id = :movieId AND s.branch.id = :branchId AND s.screeningDate = :screeningDate")
+    @Query("SELECT s FROM ScreeningSchedule s WHERE (:movieId IS NULL OR s.movie.id = :movieId) AND s.branch.id = :branchId AND s.screeningDate >= :startOfDay AND s.screeningDate < :endOfDay")
     List<ScreeningSchedule> findSchedulesByMovieIdAndBranchIdAndDate(@Param("movieId") Integer movieId,
                                                                      @Param("branchId") Integer branchId,
-                                                                     @Param("screeningDate") Date screeningDate);
+                                                                     @Param("startOfDay") Date startOfDay,
+                                                                     @Param("endOfDay") Date endOfDay);
 
     @Query("SELECT DISTINCT s.branch FROM ScreeningSchedule s WHERE s.movie.id = :movieId")
     List<Object> findDistinctBranchesByMovieId(@Param("movieId") Integer movieId);

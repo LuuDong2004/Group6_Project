@@ -29,4 +29,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query("SELECT DISTINCT m.genre FROM Movie m")
     List<String> findAllGenres();
+
+    List<Movie> findTop8ByOrderByRatingDesc();
+    List<Movie> findTop8ByOrderByReleaseDateDesc();
 }

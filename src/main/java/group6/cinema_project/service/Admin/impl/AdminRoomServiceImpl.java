@@ -3,7 +3,7 @@ import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.entity.ScreeningRoom;
 
-import group6.cinema_project.repository.Admin.AdminRoomRepository;
+import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
 import group6.cinema_project.service.Admin.IAdminRoomService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class AdminRoomServiceImpl implements IAdminRoomService {
-    private final AdminRoomRepository screeningRoomRepository;
+    private final AdminScreeningRoomRepository screeningRoomRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -98,7 +98,6 @@ public class AdminRoomServiceImpl implements IAdminRoomService {
 
         // Don't map any relationships or collections to avoid cascade loading
         // These fields will remain null/empty, which is fine for dropdown purposes
-
         return dto;
     }
 }

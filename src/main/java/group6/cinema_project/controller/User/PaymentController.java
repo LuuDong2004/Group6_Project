@@ -5,6 +5,7 @@ import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.TransactionSepayDto;
 import group6.cinema_project.service.User.IBookingService;
 import group6.cinema_project.service.User.IPaymentService;
+import group6.cinema_project.service.User.IVoucherService;
 
 import group6.cinema_project.service.User.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import group6.cinema_project.entity.Qa.Voucher;
 
 
 @Controller
@@ -38,16 +40,40 @@ public class PaymentController {
     private IBookingService bookingService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private IVoucherService voucherService;
 
 
     @GetMapping
-    public String showPaymentPage(@RequestParam Integer bookingId, Model model) {
+    public String showPaymentPage(@RequestParam Integer bookingId,
+                                  @RequestParam(required = false) String voucherCode,
+                                  Model model) {
         try {
             BookingDto booking = bookingService.getBookingById(bookingId);
             if (booking == null) {
                 return "redirect:/error?message=Booking not found";
             }
+            double originalAmount = booking.getAmount();
+            double discount = 0;
+            String voucherMessage = null;
+            if (voucherCode != null && !voucherCode.isBlank()) {
+                Voucher voucher = voucherService.validateVoucher(voucherCode);
+                if (voucher != null) {
+                    if (voucher.getDiscountPercent() > 0) {
+                        discount = originalAmount * voucher.getDiscountPercent() / 100;
+                    } else if (voucher.getDiscountAmount() > 0) {
+                        discount = voucher.getDiscountAmount();
+                    }
+                    voucherMessage = "Áp dụng mã thành công! Giảm: " + String.format("%,.0f", discount) + " VND";
+                } else {
+                    voucherMessage = "Mã không hợp lệ hoặc đã hết hạn.";
+                }
+            }
+            double finalAmount = Math.max(0, originalAmount - discount);
             model.addAttribute("booking", booking);
+            model.addAttribute("voucherCode", voucherCode);
+            model.addAttribute("voucherMessage", voucherMessage);
+            model.addAttribute("finalAmount", finalAmount);
             return "payment";
         } catch (Exception e) {
             return "redirect:/error?message=" + e.getMessage();
@@ -80,8 +106,47 @@ public class PaymentController {
     }
 
     @PostMapping("/process")
-    public String createQrCodePost(@RequestParam Integer bookingId, Model model) {
+    public String createQrCodePost(@RequestParam Integer bookingId,
+                                   @RequestParam(required = false) String voucherCode,
+                                   Model model) {
+        BookingDto booking = bookingService.getBookingById(bookingId);
+        double originalAmount = booking.getAmount();
+        double discount = 0;
+        if (voucherCode != null && !voucherCode.isBlank()) {
+            Voucher voucher = voucherService.validateVoucher(voucherCode);
+            if (voucher != null) {
+                if (voucher.getDiscountPercent() > 0) {
+                    discount = originalAmount * voucher.getDiscountPercent() / 100;
+                } else if (voucher.getDiscountAmount() > 0) {
+                    discount = voucher.getDiscountAmount();
+                }
+            }
+        }
+        double finalAmount = Math.max(0, originalAmount - discount);
+        bookingService.updateBookingAmount(bookingId, finalAmount);
+        // Lấy lại booking từ DB để đảm bảo amount đã cập nhật
+        BookingDto updatedBooking = bookingService.getBookingById(bookingId);
+        model.addAttribute("booking", updatedBooking);
         return createQrCode(bookingId, model);
+    }
+
+    @PostMapping("/apply-voucher")
+    @ResponseBody
+    public Map<String, Object> applyVoucher(@RequestParam String code) {
+        Voucher voucher = voucherService.validateVoucher(code);
+        if (voucher != null) {
+            return Map.of(
+                "success", true,
+                "discountAmount", voucher.getDiscountAmount(),
+                "discountPercent", voucher.getDiscountPercent(),
+                "message", "Áp dụng mã thành công!"
+            );
+        } else {
+            return Map.of(
+                "success", false,
+                "message", "Mã không hợp lệ hoặc đã hết hạn."
+            );
+        }
     }
 
     @PostMapping("/sepay/webhook")
@@ -116,6 +181,9 @@ public class PaymentController {
         model.addAttribute("transactionId", transactionId);
         model.addAttribute("paymentMethod", paymentMethod);
         model.addAttribute("amount", amount);
+        if (booking.getVoucherCode() != null && !booking.getVoucherCode().isBlank()) {
+            voucherService.markVoucherUsed(1L);
+        }
         return "payment-success";
     }
 

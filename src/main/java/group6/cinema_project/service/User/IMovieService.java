@@ -12,4 +12,5 @@ public interface IMovieService {
     List<MovieDto> filterMovies(String genre, Integer year, String sort, String search);
     List<MovieDto> getTopMovies7Days();
     List<String> getAllGenres();
+
 }

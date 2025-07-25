@@ -20,6 +20,8 @@ import group6.cinema_project.repository.User.SepayRepository;
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.entity.BookingFood;
 import group6.cinema_project.repository.User.BookingFoodRepository;
+import group6.cinema_project.service.User.IVoucherService;
+
 
 
 import java.time.LocalDate;
@@ -44,7 +46,10 @@ public class PaymentServiceImpl implements IPaymentService {
     private IBookingService bookingService;
     @Autowired
     private BookingFoodRepository bookingFoodRepository;
-
+    @Autowired
+    private IVoucherService voucherService;
+    @Autowired
+    private IVoucherService iVoucherService;
 
 
     @Override
@@ -66,6 +71,10 @@ public class PaymentServiceImpl implements IPaymentService {
         if (transactionSepay.getStatus().equalsIgnoreCase("COMPLETED")) {
             booking.setStatus("PAID");
             bookingRepository.save(booking);
+            // Đánh dấu voucher đã dùng nếu có
+            if (booking.getVoucherCode() != null && !booking.getVoucherCode().isBlank()) {
+                voucherService.markVoucherUsed(1L);
+            }
 
             // Cập nhật trạng thái các SeatReservation liên quan
             List<SeatReservation> reservations = seatReservationRepository.findByBookingId(booking.getId());
