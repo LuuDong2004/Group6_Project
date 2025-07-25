@@ -19,20 +19,6 @@ SQL Server (Microsoft SQL Server)
 Apply to PaymentContr...
 Run
 3. Cấu hình kết nối SQL Server
-Mở file src/main/resources/application.properties (hoặc application.yml) và cấu hình như sau:
-Apply to PaymentContr...
-> Lưu ý:
-> - Thay YOUR_SQLSERVER_USERNAME và YOUR_SQLSERVER_PASSWORD bằng thông tin của bạn.
-> - Đảm bảo SQL Server đã tạo database cinema_db hoặc đổi tên cho phù hợp.
-4. Chạy ứng dụng
-Apply to PaymentContr...
-Run
-Hoặc chạy file jar:
-Apply to PaymentContr...
-Run
-5. Truy cập giao diện web
-Người dùng: http://localhost:8080/web/index.html
-Admin: http://localhost:8080/admin
 📝 Đóng góp
 Fork dự án, tạo branch mới, commit và gửi pull request.
 Mọi đóng góp đều được hoan nghênh!
