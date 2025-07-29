@@ -13,6 +13,9 @@ public interface IAdminMovieService {
 
     void deleteMovie(Integer id);
 
+    // Soft delete restore method - Phương thức khôi phục phim đã bị soft delete
+    void restoreMovie(Integer id);
+
     List<MovieDto> getAllMovie();
 
     // New methods for display with directors and actors

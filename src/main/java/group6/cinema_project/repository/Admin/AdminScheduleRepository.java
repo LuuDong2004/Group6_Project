@@ -125,7 +125,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
          * Tìm phim đã ngừng chiếu sử dụng logic kết hợp (trạng thái thủ công + tính
          * toán động)
          * Một phim được coi là đã ngừng chiếu nếu TẤT CẢ lịch chiếu của nó:
-         * - Trạng thái thủ công là 'ENDED' hoặc 'CANCELLED' HOẶC
+         * - Trạng thái thủ công là 'ENDED'
          * - Trạng thái là null/AUTO và được tính toán động là đã kết thúc (tất cả suất
          * chiếu đã hoàn thành)
          * 

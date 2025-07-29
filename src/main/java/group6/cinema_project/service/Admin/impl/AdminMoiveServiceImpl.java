@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -97,10 +98,41 @@ public class AdminMoiveServiceImpl implements IAdminMovieService {
     @Override
     @Transactional
     public void deleteMovie(Integer id) {
-        if (!adminMovieRepository.existsById(id)) {
+        // Tìm phim bao gồm cả đã bị soft delete để có thể xử lý
+        Optional<Movie> movieOpt = adminMovieRepository.findByIdIncludingDeleted(id);
+        if (movieOpt.isEmpty()) {
             throw new IllegalArgumentException("Cannot delete. Movie not found with ID: " + id);
         }
-        adminMovieRepository.deleteById(id);
+
+        Movie movie = movieOpt.get();
+        if (movie.getIsDeleted()) {
+            throw new IllegalArgumentException("Movie is already deleted with ID: " + id);
+        }
+
+        // Thực hiện soft delete
+        movie.setIsDeleted(true);
+        movie.setDeletedAt(LocalDateTime.now());
+        adminMovieRepository.save(movie);
+    }
+
+    @Override
+    @Transactional
+    public void restoreMovie(Integer id) {
+        // Tìm phim bao gồm cả đã bị soft delete
+        Optional<Movie> movieOpt = adminMovieRepository.findByIdIncludingDeleted(id);
+        if (movieOpt.isEmpty()) {
+            throw new IllegalArgumentException("Cannot restore. Movie not found with ID: " + id);
+        }
+
+        Movie movie = movieOpt.get();
+        if (!movie.getIsDeleted()) {
+            throw new IllegalArgumentException("Movie is not deleted, cannot restore with ID: " + id);
+        }
+
+        // Khôi phục phim
+        movie.setIsDeleted(false);
+        movie.setDeletedAt(null);
+        adminMovieRepository.save(movie);
     }
 
     @Override

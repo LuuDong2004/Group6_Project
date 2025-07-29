@@ -276,28 +276,44 @@
         </div>
       </div>
 
-      <nav class="sidebar-menu">
+     <nav class="sidebar-menu">
         <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
+            <i class="fas fa-home"></i>
+            <span>Bảng điều khiển</span>
         </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
+        <a th:href="@{/admin/movies/list}" class="menu-item active">
+            <i class="fas fa-film"></i>
+            <span>Phim</span>
         </a>
         <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
+            <i class="fas fa-user-friends"></i>
+            <span>Diễn viên & Đạo diễn</span>
         </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item active">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
+        <a th:href="@{/admin/schedules/list}" class="menu-item">
+            <i class="fas fa-list"></i>
+            <span>Danh sách lịch chiếu</span>
         </a>
         <a th:href="@{/admin/blogs/list}" class="menu-item">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
+            <i class="fas fa-blog"></i>
+            <span>Blog</span>
         </a>
-      </nav>
+        <a href="#" class="menu-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+    </nav>
 
       <div class="mt-auto p-4">
         <div class="d-flex align-items-center">

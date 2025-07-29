@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
 
@@ -30,8 +31,14 @@ public class Movie {
 
     private String trailer;
 
-
     private String description;
+
+    // Soft delete fields - Các trường để hỗ trợ soft delete
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false; // Mặc định là false (chưa bị xóa)
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // Thời gian thực hiện soft delete
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

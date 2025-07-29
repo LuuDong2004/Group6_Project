@@ -149,32 +149,44 @@
               <i class="fas fa-film me-2"></i>Cinema Admin
             </h4>
           </div>
-          <nav class="nav flex-column px-3">
-            <a th:href="@{/admin/dashboard}" class="nav-link">
-              <i class="fas fa-home me-2"></i>Bảng điều khiển
-            </a>
-            <a th:href="@{/admin/movies/list}" class="nav-link">
-              <i class="fas fa-film me-2"></i>Phim
-            </a>
-            <a th:href="@{/admin/directors/list}" class="nav-link">
-              <i class="fas fa-user-friends me-2"></i>Diễn viên & Đạo diễn
-            </a>
-            <a th:href="@{/admin/schedules/list}" class="nav-link">
-              <i class="fas fa-list me-2"></i>Danh sách lịch chiếu
-            </a>
-            <a th:href="@{/admin/schedules/calendar}" class="nav-link">
-              <i class="fas fa-calendar-alt me-2"></i>Lịch chiếu tháng
-            </a>
-            <a th:href="@{/admin/blogs/list}" class="nav-link active">
-              <i class="fas fa-blog me-2"></i>Quản lý Blog
-            </a>
-            <a href="#" class="nav-link">
-              <i class="fas fa-ticket-alt me-2"></i>Đặt vé
-            </a>
-            <a href="#" class="nav-link">
-              <i class="fas fa-users me-2"></i>Khách hàng
-            </a>
-          </nav>
+          <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
+            <i class="fas fa-home"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/admin/movies/list}" class="menu-item active">
+            <i class="fas fa-film"></i>
+            <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+            <i class="fas fa-user-friends"></i>
+            <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item">
+            <i class="fas fa-list"></i>
+            <span>Danh sách lịch chiếu</span>
+        </a>
+        <a th:href="@{/admin/blogs/list}" class="menu-item">
+            <i class="fas fa-blog"></i>
+            <span>Blog</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+    </nav>
         </div>
 
         <!-- Main Content -->
