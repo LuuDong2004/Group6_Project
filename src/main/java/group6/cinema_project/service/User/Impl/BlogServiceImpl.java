@@ -1,13 +1,10 @@
 
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.entity.BlogPost;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import group6.cinema_project.repository.BlogRepository;
-import group6.cinema_project.service.IBlogService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,9 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import group6.cinema_project.dto.BlogPostDto;
+import group6.cinema_project.entity.BlogPost;
+import group6.cinema_project.repository.User.BlogRepository;
+import group6.cinema_project.service.User.IBlogService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation của IBlogService.

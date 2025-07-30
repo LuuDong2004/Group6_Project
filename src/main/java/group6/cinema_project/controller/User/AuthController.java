@@ -5,13 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import group6.cinema_project.dto.BookingDto;
-import group6.cinema_project.dto.Login.ChangePasswordDto;
-import group6.cinema_project.dto.Login.PasswordResetRequestDto;
-import group6.cinema_project.dto.Login.UserLoginDto;
-import group6.cinema_project.dto.Login.UserRegistrationDto;
-import group6.cinema_project.service.User.IBookingService;
-import group6.cinema_project.service.User.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,15 +12,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
-import group6.cinema_project.dto.PasswordResetConfirmDto;
-
+import group6.cinema_project.dto.BookingDto;
+import group6.cinema_project.dto.Login.ChangePasswordDto;
+import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
+import group6.cinema_project.dto.Login.PasswordResetRequestDto;
+import group6.cinema_project.dto.Login.UserLoginDto;
+import group6.cinema_project.dto.Login.UserRegistrationDto;
 import group6.cinema_project.dto.UserDto;
-
-
+import group6.cinema_project.service.User.IBookingService;
+import group6.cinema_project.service.User.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;

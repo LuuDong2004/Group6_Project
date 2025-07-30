@@ -2,7 +2,8 @@
 package group6.cinema_project.controller.User;
 
 import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.service.IBlogService;
+import group6.cinema_project.service.User.IBlogService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

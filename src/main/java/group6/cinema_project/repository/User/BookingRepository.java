@@ -1,13 +1,11 @@
 package group6.cinema_project.repository.User;
 
-import group6.cinema_project.entity.Booking;
-import group6.cinema_project.entity.User;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import group6.cinema_project.entity.Booking;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {

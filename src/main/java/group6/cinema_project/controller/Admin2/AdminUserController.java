@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import group6.cinema_project.dto.AdminPasswordResetDto;
+import group6.cinema_project.dto.Login.AdminPasswordResetDto;
 import group6.cinema_project.dto.UserDto;
 
 import jakarta.validation.Valid;

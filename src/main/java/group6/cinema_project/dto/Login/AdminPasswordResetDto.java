@@ -1,4 +1,4 @@
-package group6.cinema_project.dto;
+package group6.cinema_project.dto.Login;
 
 import jakarta.validation.constraints.NotNull;
 

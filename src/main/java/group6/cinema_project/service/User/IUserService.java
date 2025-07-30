@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import group6.cinema_project.dto.AdminPasswordResetDto;
+import group6.cinema_project.dto.Login.AdminPasswordResetDto;
 import group6.cinema_project.dto.Login.ChangePasswordDto;
-import group6.cinema_project.dto.PasswordResetConfirmDto;
+import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
 import group6.cinema_project.dto.Login.PasswordResetRequestDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.dto.Login.UserLoginDto;

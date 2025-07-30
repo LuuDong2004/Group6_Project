@@ -1,8 +1,7 @@
-package group6.cinema_project.service;
+package group6.cinema_project.service.User.Impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import group6.cinema_project.repository.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +13,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.User.UserRepository;
 
 
 @Service

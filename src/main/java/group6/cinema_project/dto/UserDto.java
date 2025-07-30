@@ -1,18 +1,19 @@
 package group6.cinema_project.dto;
 
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import group6.cinema_project.entity.Enum.Role;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 public class UserDto {
     private int id;
-    private String username;
+    private String userName;
 
     private String password;
 

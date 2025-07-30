@@ -1,20 +1,11 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.AdminPasswordResetDto;
-import group6.cinema_project.dto.Login.ChangePasswordDto;
-import group6.cinema_project.dto.Login.PasswordResetRequestDto;
-import group6.cinema_project.dto.Login.UserLoginDto;
-import group6.cinema_project.dto.Login.UserRegistrationDto;
-import group6.cinema_project.dto.PasswordResetConfirmDto;
-import group6.cinema_project.dto.UserDto;
-import group6.cinema_project.entity.Enum.AuthProvider;
-import group6.cinema_project.entity.Enum.Role;
-import group6.cinema_project.entity.PasswordResetToken;
-import group6.cinema_project.entity.User;
-import group6.cinema_project.repository.User.PasswordResetTokenRepository;
-import group6.cinema_project.repository.User.UserRepository;
-import group6.cinema_project.service.User.IUserService;
-import group6.cinema_project.service.User.MailService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,11 +15,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import group6.cinema_project.dto.Login.AdminPasswordResetDto;
+import group6.cinema_project.dto.Login.ChangePasswordDto;
+import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
+import group6.cinema_project.dto.Login.PasswordResetRequestDto;
+import group6.cinema_project.dto.Login.UserLoginDto;
+import group6.cinema_project.dto.Login.UserRegistrationDto;
+import group6.cinema_project.dto.UserDto;
+import group6.cinema_project.entity.Enum.AuthProvider;
+import group6.cinema_project.entity.Enum.Role;
+import group6.cinema_project.entity.PasswordResetToken;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.User.PasswordResetTokenRepository;
+import group6.cinema_project.repository.User.UserRepository;
+import group6.cinema_project.service.User.IUserService;
+import group6.cinema_project.service.User.MailService;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -114,8 +115,8 @@ public class UserServiceImpl implements IUserService {
         User existingUser = userOpt.get();
 
         // Check if new username/phone already exists (excluding current user)
-        if (!existingUser.getUserName().equals(userDto.getUsername()) &&
-                isUsernameExists(userDto.getUsername())) {
+        if (!existingUser.getUserName().equals(userDto.getUserName()) &&
+                isUsernameExists(userDto.getUserName())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
@@ -125,7 +126,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         // Update user fields (không update email và password)
-        existingUser.setUserName(userDto.getUsername());
+        existingUser.setUserName(userDto.getUserName());
         existingUser.setPhone(userDto.getPhone());
         existingUser.setDateOfBirth(userDto.getDateOfBirth());
         existingUser.setAddress(userDto.getAddress());
@@ -225,8 +226,8 @@ public class UserServiceImpl implements IUserService {
         User existingUser = userOpt.get();
 
         // Check if new username/email/phone already exists (excluding current user)
-        if (!existingUser.getUserName().equals(userDto.getUsername()) &&
-                isUsernameExists(userDto.getUsername())) {
+        if (!existingUser.getUserName().equals(userDto.getUserName()) &&
+                isUsernameExists(userDto.getUserName())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
@@ -241,7 +242,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         // Update user fields
-        existingUser.setUserName(userDto.getUsername());
+        existingUser.setUserName(userDto.getUserName());
         existingUser.setEmail(userDto.getEmail());
         existingUser.setPhone(userDto.getPhone());
         existingUser.setDateOfBirth(userDto.getDateOfBirth());
@@ -450,7 +451,7 @@ public class UserServiceImpl implements IUserService {
     private UserDto convertToDto(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
-        dto.setUsername(user.getUserName());
+        dto.setUserName(user.getUserName());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setPassword(null); // Không expose password
@@ -464,7 +465,7 @@ public class UserServiceImpl implements IUserService {
     private User convertToEntity(UserDto userDto) {
         User user = new User();
         user.setId(userDto.getId());
-        user.setUserName(userDto.getUsername());
+        user.setUserName(userDto.getUserName());
         user.setEmail(userDto.getEmail());
         user.setPhone(userDto.getPhone());
         user.setPassword(userDto.getPassword());

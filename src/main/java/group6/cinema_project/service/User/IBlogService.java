@@ -1,11 +1,12 @@
-package group6.cinema_project.service;
-
-import group6.cinema_project.dto.BlogPostDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+package group6.cinema_project.service.User;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import group6.cinema_project.dto.BlogPostDto;
 
 /**
  * Interface cho Blog Service.
