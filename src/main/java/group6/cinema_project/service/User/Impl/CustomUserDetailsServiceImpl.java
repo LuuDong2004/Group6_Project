@@ -1,4 +1,5 @@
 package group6.cinema_project.service.User.Impl;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import group6.cinema_project.entity.User;
 import group6.cinema_project.repository.User.UserRepository;
-
 
 @Service
 public class CustomUserDetailsServiceImpl implements UserDetailsService {
@@ -37,22 +37,26 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         }
 
         if (requestUri != null && !requestUri.isEmpty()) {
-            if ("/admin/secret-login".equals(requestUri) && (user.getRole() == null || !user.getRole().toString().equalsIgnoreCase("ADMIN"))) {
+            if ("/admin/secret-login".equals(requestUri)
+                    && (user.getRole() == null || !user.getRole().toString().equalsIgnoreCase("ADMIN"))) {
                 throw new UsernameNotFoundException("Bạn không phải là admin");
             }
-            if (user.getRole() != null && user.getRole().toString().equalsIgnoreCase("ADMIN") && "/login".equals(requestUri)) {
+            if (user.getRole() != null && user.getRole().toString().equalsIgnoreCase("ADMIN")
+                    && "/login".equals(requestUri)) {
                 throw new UsernameNotFoundException("Admin must login via /admin/secret-login");
             }
         }
         // Nếu không lấy được requestUri (ví dụ OAuth2), KHÔNG chặn!
 
         System.out.println("CustomUserDetailsService - Loading user: " + user.getEmail());
-        System.out.println("User password length: " + (user.getPassword() != null ? user.getPassword().length() : "null"));
+        System.out.println(
+                "User password length: " + (user.getPassword() != null ? user.getPassword().length() : "null"));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
 
-        // For OAuth2 users (null or empty password), use a special password that won't be checked
+        // For OAuth2 users (null or empty password), use a special password that won't
+        // be checked
         String password = user.getPassword();
         if (password == null || password.isEmpty()) {
             // Use a placeholder password for OAuth2 users

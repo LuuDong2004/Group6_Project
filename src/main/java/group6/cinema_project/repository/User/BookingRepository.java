@@ -1,6 +1,7 @@
 package group6.cinema_project.repository.User;
 
 import java.util.List;
+import group6.cinema_project.entity.Booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -70,6 +70,7 @@ public class AdminMovieController {
             @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        List<MovieDto> movies;
 
         // Tạo Pageable object với page và size
         Pageable pageable = PageRequest.of(page, size);

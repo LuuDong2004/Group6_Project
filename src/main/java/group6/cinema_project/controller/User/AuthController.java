@@ -30,6 +30,10 @@ import group6.cinema_project.dto.Login.UserRegistrationDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.service.User.IBookingService;
 import group6.cinema_project.service.User.IUserService;
+import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
+
+import group6.cinema_project.dto.UserDto;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;

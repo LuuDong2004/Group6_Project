@@ -10,6 +10,12 @@ import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
 
+import java.time.LocalDate;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 public interface IAdminScheduleService {
         Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id);
 

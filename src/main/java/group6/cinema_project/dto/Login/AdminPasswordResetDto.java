@@ -20,7 +20,8 @@ public class AdminPasswordResetDto {
         this.userId = userId;
     }
 
-    public AdminPasswordResetDto(Integer userId, boolean sendEmail, String customPassword, boolean generateRandomPassword) {
+    public AdminPasswordResetDto(Integer userId, boolean sendEmail, String customPassword,
+            boolean generateRandomPassword) {
         this.userId = userId;
         this.sendEmail = sendEmail;
         this.customPassword = customPassword;
