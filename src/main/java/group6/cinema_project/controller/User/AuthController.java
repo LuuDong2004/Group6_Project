@@ -22,11 +22,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
-import group6.cinema_project.dto.PasswordResetConfirmDto;
+import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
 
 import group6.cinema_project.dto.UserDto;
-
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -44,10 +42,10 @@ public class AuthController {
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,
-                            @RequestParam(value = "logout", required = false) String logout,
-                            @RequestParam(value = "continue", required = false) String continueUrl,
-                            Model model,
-                            HttpServletRequest request) {
+            @RequestParam(value = "logout", required = false) String logout,
+            @RequestParam(value = "continue", required = false) String continueUrl,
+            Model model,
+            HttpServletRequest request) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
@@ -62,7 +60,7 @@ public class AuthController {
         if (logout != null) {
             model.addAttribute("message", "Đăng xuất thành công!");
         }
-        //luu thong tin url neu co
+        // luu thong tin url neu co
         if (continueUrl != null && !continueUrl.trim().isEmpty()) {
             request.getSession().setAttribute("continueAfterLogin", continueUrl);
         }
@@ -82,9 +80,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDto registrationDto,
-                               BindingResult result,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         // Kiểm tra validation errors
         if (result.hasErrors()) {
@@ -117,12 +115,14 @@ public class AuthController {
             UserDto user = userService.getUserByEmail(email);
             model.addAttribute("user", user);
 
-            // Lấy booking PAID trong 3 tháng gần nhất, đã sắp xếp theo ngày suất chiếu mới nhất
+            // Lấy booking PAID trong 3 tháng gần nhất, đã sắp xếp theo ngày suất chiếu mới
+            // nhất
             List<BookingDto> allPaidBookings = new ArrayList<>();
             try {
                 if (user != null) {
                     java.time.LocalDate threeMonthsAgo = java.time.LocalDate.now().minusMonths(3);
-                    allPaidBookings = bookingService.getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(user.getId(), threeMonthsAgo);
+                    allPaidBookings = bookingService
+                            .getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(user.getId(), threeMonthsAgo);
                 }
             } catch (Exception ex) {
                 System.err.println("Không thể lấy lịch sử đặt vé: " + ex.getMessage());
@@ -133,7 +133,9 @@ public class AuthController {
             int totalPages = (int) Math.ceil((double) total / pageSize);
             int fromIndex = (page - 1) * pageSize;
             int toIndex = Math.min(fromIndex + pageSize, total);
-            java.util.List<group6.cinema_project.dto.BookingDto> bookings = (fromIndex < total) ? allPaidBookings.subList(fromIndex, toIndex) : java.util.Collections.emptyList();
+            java.util.List<group6.cinema_project.dto.BookingDto> bookings = (fromIndex < total)
+                    ? allPaidBookings.subList(fromIndex, toIndex)
+                    : java.util.Collections.emptyList();
 
             model.addAttribute("bookings", bookings);
             model.addAttribute("currentPage", page);
@@ -243,9 +245,9 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String requestPasswordReset(@Valid @ModelAttribute("resetRequest") PasswordResetRequestDto requestDto,
-                                       BindingResult result,
-                                       Model model,
-                                       RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "forgot_password";
         }
@@ -276,9 +278,9 @@ public class AuthController {
 
     @PostMapping("/reset-password/confirm")
     public String confirmPasswordReset(@Valid @ModelAttribute("resetConfirm") PasswordResetConfirmDto confirmDto,
-                                       BindingResult result,
-                                       Model model,
-                                       RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "reset_password";
         }
@@ -296,13 +298,15 @@ public class AuthController {
     // API endpoints for AJAX calls
     @PostMapping("/api/forgot-password")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> requestPasswordResetApi(@RequestBody PasswordResetRequestDto requestDto) {
+    public ResponseEntity<Map<String, Object>> requestPasswordResetApi(
+            @RequestBody PasswordResetRequestDto requestDto) {
         Map<String, Object> response = new HashMap<>();
 
         try {
             userService.requestPasswordReset(requestDto);
             response.put("success", true);
-            response.put("message", "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
+            response.put("message",
+                    "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success", false);
@@ -313,7 +317,8 @@ public class AuthController {
 
     @PostMapping("/api/reset-password/confirm")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> confirmPasswordResetApi(@RequestBody PasswordResetConfirmDto confirmDto) {
+    public ResponseEntity<Map<String, Object>> confirmPasswordResetApi(
+            @RequestBody PasswordResetConfirmDto confirmDto) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -342,9 +347,10 @@ public class AuthController {
                 // Check if it's OAuth2 user
                 if (auth.getPrincipal() instanceof group6.cinema_project.security.oauth2.CustomOAuth2User) {
                     System.out.println("AuthController.logout - OAuth2 user detected");
-                    group6.cinema_project.security.oauth2.CustomOAuth2User oauth2User =
-                            (group6.cinema_project.security.oauth2.CustomOAuth2User) auth.getPrincipal();
-                    System.out.println("AuthController.logout - OAuth2 provider: " + oauth2User.getUser().getProvider());
+                    group6.cinema_project.security.oauth2.CustomOAuth2User oauth2User = (group6.cinema_project.security.oauth2.CustomOAuth2User) auth
+                            .getPrincipal();
+                    System.out
+                            .println("AuthController.logout - OAuth2 provider: " + oauth2User.getUser().getProvider());
                 }
             }
 

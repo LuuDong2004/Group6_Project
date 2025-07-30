@@ -3,7 +3,6 @@ package group6.cinema_project.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
@@ -51,4 +50,3 @@ public class ScreeningScheduleDto {
     private String endTimeStr;
     private String screeningDateStr;
 }
-
