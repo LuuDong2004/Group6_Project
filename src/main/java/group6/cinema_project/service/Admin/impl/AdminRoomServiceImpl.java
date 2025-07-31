@@ -1,18 +1,18 @@
 package group6.cinema_project.service.Admin.impl;
-import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.dto.ScreeningRoomDto;
-import group6.cinema_project.entity.ScreeningRoom;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
-import group6.cinema_project.service.Admin.IAdminRoomService;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import group6.cinema_project.dto.BranchDto;
+import group6.cinema_project.dto.ScreeningRoomDto;
+import group6.cinema_project.entity.ScreeningRoom;
+import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
+import group6.cinema_project.service.Admin.IAdminRoomService;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -89,11 +89,16 @@ public class AdminRoomServiceImpl implements IAdminRoomService {
         dto.setName(room.getName());
         dto.setCapacity(room.getCapacity());
         dto.setDescription(room.getDescription());
+        dto.setType(room.getType());
+        dto.setStatus(room.getStatus());
+        dto.setRows(room.getRows());
+        dto.setSeatsPerRow(room.getSeatsPerRow());
 
         if (room.getBranch() != null) {
             BranchDto branchDto = new BranchDto();
             branchDto.setId(room.getBranch().getId());
-            dto.setBranchDto(branchDto);
+            branchDto.setName(room.getBranch().getName());
+            dto.setBranch(branchDto);
         }
 
         // Don't map any relationships or collections to avoid cascade loading

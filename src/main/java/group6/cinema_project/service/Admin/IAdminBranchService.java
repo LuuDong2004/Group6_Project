@@ -1,11 +1,11 @@
 package group6.cinema_project.service.Admin;
 
-import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.entity.Branch;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-import java.util.Optional;
+import group6.cinema_project.dto.BranchDto;
+import group6.cinema_project.entity.Branch;
 
 public interface IAdminBranchService {
     List<BranchDto> findAll();

@@ -254,6 +254,16 @@
             background: #fef3c7;
             color: #92400e;
         }
+        .action-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .action-btn.disabled:hover {
+            background-color: #6c757d;
+            color: white;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 80px;
@@ -388,12 +398,13 @@
                                 <th>ID</th>
                                 <th>Tên phòng</th>
                                 <th>Sức chứa</th>
-                                <th>Loại phòng</th>
+                                <th>Loại</th>
                                 <th>Trạng thái</th>
                                 <th>Số hàng</th>
-                                <th>Ghế/hàng</th>
+                                <th>Số ghế/hàng</th>
                                 <th>Mô tả</th>
-                                <th>Hành động</th>
+                                <th>Trạng thái chỉnh sửa</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -410,11 +421,18 @@
                                 <td th:text="${room.seatsPerRow}"></td>
                                 <td th:text="${room.description}"></td>
                                 <td>
+                                    <span th:text="${room.canEdit ? 'Cho phép chỉnh sửa' : 'Không cho phép chỉnh sửa'}"></span>
+                                </td>
+                                <td>
                                     <div class="actions">
-                                        <a th:href="@{/admin/screening-rooms/view/{id}(id=${room.id})}" class="action-btn view-btn" title="Xem chi tiết">
+                                        <a th:href="@{/admin/screening-rooms/view/{id}(id=${room.id})}" class="action-btn view-btn" >
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a th:href="@{/admin/screening-rooms/edit/{id}(id=${room.id})}" class="action-btn edit-btn" title="Sửa">
+                                        <a th:href="@{/admin/screening-rooms/edit/{id}(id=${room.id})}" 
+                                           class="action-btn edit-btn" 
+                                           th:classappend="${!room.canEdit} ? 'disabled'"
+                                           th:title="'Sửa'"
+                                           th:onclick="${!room.canEdit} ? 'alert(\'Không thể chỉnh sửa phòng chiếu vì có suất chiếu đang hoạt động!\'); return false;' : ''">
                                             <i class="fas fa-pencil-alt"></i>
                                         </a>
 <!--                                        <a th:href="@{/admin/screening-rooms/delete/{id}(id=${room.id})}" class="action-btn delete-btn" title="Xóa"-->
@@ -425,7 +443,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(screeningRooms)}">
-                                <td colspan="9" style="text-align: center;">Không có phòng chiếu nào để hiển thị.</td>
+                                <td colspan="10" style="text-align: center;">Không có phòng chiếu nào để hiển thị.</td>
                             </tr>
                         </tbody>
                     </table>

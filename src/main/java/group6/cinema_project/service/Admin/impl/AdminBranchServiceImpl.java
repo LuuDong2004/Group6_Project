@@ -1,25 +1,23 @@
 package group6.cinema_project.service.Admin.impl;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.entity.Branch;
-
 import group6.cinema_project.repository.Admin.AdminBranchRepository;
 import group6.cinema_project.repository.Admin.AdminCinemaChainRepository;
 import group6.cinema_project.service.Admin.IAdminBranchService;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.PageRequest;
-import org.modelmapper.ModelMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +35,14 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
     @Override
     public List<BranchDto> findAll() {
         return branchRepository.findAll().stream()
-                .map(branch -> modelMapper.map(branch, BranchDto.class))
+                .map(BranchDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Override
     public BranchDto findById(int id) {
         Optional<Branch> branch = branchRepository.findById(id);
-        return branch.map(b -> modelMapper.map(b, BranchDto.class)).orElse(null);
+        return branch.map(BranchDto::fromEntity).orElse(null);
     }
 
     @Override
@@ -59,7 +57,7 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
         branch.setCinemaChain(cinemaChainRepository.findById(branchDto.getCinemaChainId()).orElse(null));
 
         Branch saved = branchRepository.save(branch);
-        return modelMapper.map(saved, BranchDto.class);
+        return BranchDto.fromEntity(saved);
     }
 
     @Override
@@ -70,14 +68,14 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
     @Override
     public List<BranchDto> findByCinemaChainId(int cinemaChainId) {
         return branchRepository.findByCinemaChainId(cinemaChainId).stream()
-                .map(branch -> modelMapper.map(branch, BranchDto.class))
+                .map(BranchDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Page<BranchDto> getBranchesPage(int page, int size) {
         Page<Branch> branchPage = branchRepository.findAll(PageRequest.of(page, size));
-        List<BranchDto> branchDtos = branchPage.getContent().stream().map(branch -> modelMapper.map(branch, BranchDto.class)).collect(Collectors.toList());
+        List<BranchDto> branchDtos = branchPage.getContent().stream().map(BranchDto::fromEntity).collect(Collectors.toList());
         return new PageImpl<>(branchDtos, branchPage.getPageable(), branchPage.getTotalElements());
     }
 
@@ -86,24 +84,25 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
         boolean hasSearch = (name != null && !name.trim().isEmpty()) || (address != null && !address.trim().isEmpty()) || (cinemaChain != null && !cinemaChain.trim().isEmpty());
         if (hasSearch) {
             return branchRepository.searchBranches(
-                    (name == null || name.isBlank()) ? null : name,
-                    (address == null || address.isBlank()) ? null : address,
-                    (cinemaChain == null || cinemaChain.isBlank()) ? null : cinemaChain,
-                    PageRequest.of(page, size)
+                (name == null || name.isBlank()) ? null : name,
+                (address == null || address.isBlank()) ? null : address,
+                (cinemaChain == null || cinemaChain.isBlank()) ? null : cinemaChain,
+                PageRequest.of(page, size)
             );
         } else {
             return branchRepository.findAll(PageRequest.of(page, size));
         }
     }
-        @Override
-        public boolean isNameDuplicate (String name, Integer id){
-            List<Branch> branches = branchRepository.findByName(name);
-            if (id == null) {
-                return !branches.isEmpty();
-            } else {
-                return branches.stream().anyMatch(b -> b.getId() != id);
-            }
+
+    @Override
+    public boolean isNameDuplicate(String name, Integer id) {
+        List<Branch> branches = branchRepository.findByName(name);
+        if (id == null) {
+            return !branches.isEmpty();
+        } else {
+            return branches.stream().anyMatch(b -> b.getId() != id);
         }
+    }
         @Override
         public List<BranchDto> getAllBranches () {
             return branchRepository.findAll().stream()

@@ -1,21 +1,23 @@
 package group6.cinema_project.controller.Admin2;
 import java.util.List;
 
-import group6.cinema_project.service.Admin.IAdminBranchService;
-import group6.cinema_project.service.Admin.IAdminCinemaChainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.entity.CinemaChain;
-
+import group6.cinema_project.service.Admin.IAdminBranchService;
+import group6.cinema_project.service.Admin.IAdminCinemaChainService;
 import jakarta.validation.Valid;
 
 
@@ -30,11 +32,11 @@ public class AdminBranchController {
 
     @GetMapping("")
     public String listBranches(Model model,
-                               @RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "5") int size,
-                               @RequestParam(value = "name", required = false) String name,
-                               @RequestParam(value = "address", required = false) String address,
-                               @RequestParam(value = "cinemaChain", required = false) String cinemaChain) {
+                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                @RequestParam(value = "size", defaultValue = "5") int size,
+                                @RequestParam(value = "name", required = false) String name,
+                                @RequestParam(value = "address", required = false) String address,
+                                @RequestParam(value = "cinemaChain", required = false) String cinemaChain) {
         name = (name != null && !name.trim().isEmpty()) ? name.trim() : null;
         address = (address != null && !address.trim().isEmpty()) ? address.trim() : null;
         cinemaChain = (cinemaChain != null && !cinemaChain.trim().isEmpty()) ? cinemaChain.trim() : null;
@@ -78,17 +80,6 @@ public class AdminBranchController {
         }
         adminBranchService.save(branchDto);
         redirectAttributes.addFlashAttribute("success", "Thêm chi nhánh thành công!");
-        return "redirect:/admin/branches";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String deleteBranch(@PathVariable int id, RedirectAttributes redirectAttributes) {
-        try {
-            adminBranchService.deleteById(id);
-            redirectAttributes.addFlashAttribute("success", "Xóa chi nhánh thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Không thể xóa chi nhánh. Chi nhánh có thể đang được sử dụng.");
-        }
         return "redirect:/admin/branches";
     }
 

@@ -1,22 +1,25 @@
 package group6.cinema_project.service.Admin.impl;
 
-import group6.cinema_project.dto.ScreeningRoomDto;
-import group6.cinema_project.entity.ScreeningRoom;
-import group6.cinema_project.entity.Seat;
-import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
-import group6.cinema_project.repository.Admin.AdminSeatRepository;
-import group6.cinema_project.service.Admin.IAdminScreeningRoomService;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import group6.cinema_project.dto.ScreeningRoomDto;
+import group6.cinema_project.entity.ScreeningRoom;
+import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.Seat;
+import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
+import group6.cinema_project.repository.Admin.AdminSeatRepository;
+import group6.cinema_project.service.Admin.IAdminScreeningRoomService;
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -55,36 +58,45 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
             if (screeningRoomRepository.existsByBranchIdAndNameIgnoreCaseAndIdNot(branchId, roomDto.getName(), roomDto.getId())) {
                 throw new RuntimeException("Tên phòng chiếu đã tồn tại trong chi nhánh này!");
             }
+            
+            // Kiểm tra xem phòng có suất chiếu đang hoạt động không
+            if (hasActiveSchedules(roomDto.getId())) {
+                throw new RuntimeException("Không thể chỉnh sửa phòng chiếu vì có suất chiếu đang hoạt động!");
+            }
         }
         ScreeningRoom room = modelMapper.map(roomDto, ScreeningRoom.class);
         ScreeningRoom saved = screeningRoomRepository.save(room);
 
-        // Xóa ghế cũ nếu cập nhật phòng chiếu
+        // Xóa ghế cũ nếu cập nhật phòng chiếu (chỉ xóa ghế chưa được đặt)
         if (room.getId() != 0) {
             List<Seat> oldSeats = seatRepository.findSeatsByScreeningRoomId(saved.getId());
-            seatRepository.deleteAll(oldSeats);
+            // Chỉ xóa những ghế chưa được đặt (không có SeatReservation)
+            List<Seat> availableSeats = oldSeats.stream()
+                .filter(seat -> !seatRepository.hasReservations(seat.getId()))
+                .collect(Collectors.toList());
+            seatRepository.deleteAll(availableSeats);
         }
 
         // Tạo ghế mới
-        int rows = roomDto.getRow();
+        int rows = roomDto.getRows();
         int seatsPerRow = roomDto.getSeatsPerRow();
-        int standardRows = rows / 4; // 25%
-        int vipRows = rows / 2;      // 50%
-        int coupleRows = rows - standardRows - vipRows; // còn lại
+        int standardRows = rows / 4; // 25% hàng ghế thường
+        int vipRows = rows / 2;      // 50% hàng ghế VIP
+        int coupleRows = rows - standardRows - vipRows; // còn lại là hàng ghế đôi
         List<Seat> seats = new java.util.ArrayList<>();
         for (int i = 0; i < rows; i++) {
             char rowChar = (char) ('A' + i);
             String seatType;
             if (i < standardRows) {
-                seatType = "Standard";
+                seatType = "Standard"; // Ghế thường
             } else if (i < standardRows + vipRows) {
-                seatType = "VIP";
+                seatType = "VIP"; // Ghế VIP
             } else {
-                seatType = "Couple";
+                seatType = "Couple"; // Ghế đôi
             }
             for (int j = 1; j <= seatsPerRow; j++) {
                 Seat seat = new Seat();
-                seat.setRow(String.valueOf(rowChar)); // lưu số thứ tự hàng, nếu muốn lưu ký tự thì sửa thành String.valueOf(rowChar)
+                seat.setRow(String.valueOf(rowChar)); // Lưu ký tự hàng
                 seat.setName(rowChar + String.valueOf(j));
                 seat.setRoom(saved);
                 // Nếu entity Seat có seatType thì set:
@@ -122,7 +134,7 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
         room.setDescription(roomDto.getDescription());
         room.setType(roomDto.getType());
         room.setStatus(roomDto.getStatus());
-        room.setRows(roomDto.getRow());
+        room.setRows(roomDto.getRows());
         room.setSeatsPerRow(roomDto.getSeatsPerRow());
         // branch update nếu cần
         ScreeningRoom saved = screeningRoomRepository.save(room);
@@ -130,8 +142,21 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
     }
 
     @Override
+    @Transactional
     public boolean deleteRoom(int id) {
         if (!screeningRoomRepository.existsById(id)) return false;
+        
+        // Kiểm tra xem có ghế nào đang được đặt không
+        List<Seat> seats = seatRepository.findSeatsByScreeningRoomId(id);
+        boolean hasReservedSeats = seats.stream()
+            .anyMatch(seat -> seatRepository.hasReservations(seat.getId()));
+        
+        if (hasReservedSeats) {
+            throw new RuntimeException("Không thể xóa phòng chiếu vì có ghế đang được đặt!");
+        }
+        
+        // Xóa tất cả ghế trước khi xóa phòng
+        seatRepository.deleteAll(seats);
         screeningRoomRepository.deleteById(id);
         return true;
     }
@@ -153,5 +178,27 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
         );
         List<ScreeningRoomDto> roomDtos = roomPage.getContent().stream().map(room -> modelMapper.map(room, ScreeningRoomDto.class)).collect(Collectors.toList());
         return new PageImpl<>(roomDtos, roomPage.getPageable(), roomPage.getTotalElements());
+    }
+    
+    // Kiểm tra xem phòng chiếu có suất chiếu đang hoạt động không
+    private boolean hasActiveSchedules(int roomId) {
+        Date currentDate = new Date();
+        java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
+        Integer result = screeningRoomRepository.hasActiveSchedules(roomId, currentDate, currentTime);
+        return result != null && result == 1;
+    }
+    
+    @Override
+    // Lấy danh sách suất chiếu đang hoạt động của phòng
+    public List<ScreeningSchedule> getActiveSchedules(int roomId) {
+        Date currentDate = new Date();
+        java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
+        return screeningRoomRepository.getActiveSchedules(roomId, currentDate, currentTime);
+    }
+    
+    @Override
+    // Kiểm tra xem phòng chiếu có thể chỉnh sửa được không
+    public boolean canEditRoom(int roomId) {
+        return !hasActiveSchedules(roomId);
     }
 }

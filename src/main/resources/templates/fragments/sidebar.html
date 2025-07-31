@@ -28,41 +28,65 @@
                 <i class="fas fa-code-branch me-2"></i>
                 <span>Chi nhánh</span>
             </a>
-            <a href="/admin/movies/list" class="menu-item">
-                <i class="fas fa-film me-2"></i>
-                <span>Phim</span>
-            </a>
             <a href="/admin/schedules/list" class="menu-item">
                 <i class="fas fa-calendar-alt me-2"></i>
                 <span>Lịch chiếu</span>
             </a>
-
+            <a th:href="@{/admin/schedules/calendar}" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Lịch chiếu tháng</span>
+            </a>
+            <a th:href="@{/admin/movies/list}" class="menu-item active">
+                <i class="fas fa-film"></i>
+                <span>Phim</span>
+            </a>
             <a href="/admin/foods/list" class="menu-item">
                 <i class="fas fa-hamburger me-2"></i>
                 <span>Combo Food</span>
             </a>
+            <a th:href="@{/admin/directors/list}" class="menu-item">
+                <i class="fas fa-user-friends"></i>
+                <span>Diễn viên & Đạo diễn</span>
+            </a>
+            <a th:href="@{/admin/schedules/list}" class="menu-item">
+                <i class="fas fa-list"></i>
+                <span>Danh sách lịch chiếu</span>
+            </a>
 
-            <!--        <a href="/admin/users/list" class="menu-item">-->
-            <!--            <i class="fas fa-users"></i>-->
-            <!--            <span>Quản lý người dùng</span>-->
-            <!--        </a>-->
+            <a th:href="@{/admin/blogs/list}" class="menu-item">
+                <i class="fas fa-blog"></i>
+                <span>Blog</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Đặt vé</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Người dùng</span>
+            </a>
             <a href="/admin/users/management" class="menu-item">
                 <i class="fas fa-user-cog me-2"></i>
                 <span>Phân quyền</span>
             </a>
             <a href="#" class="menu-item">
-                <i class="fas fa-ticket-alt me-2"></i>
-                <span>Đặt vé</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-chart-pie me-2"></i>
+                <i class="fas fa-chart-pie"></i>
                 <span>Phân tích</span>
             </a>
             <a href="#" class="menu-item">
-                <i class="fas fa-cog me-2"></i>
+                <i class="fas fa-cog"></i>
                 <span>Cài đặt</span>
             </a>
-        </nav>
+
+
+
+
+            <!--        <a href="/admin/users/list" class="menu-item">-->
+            <!--            <i class="fas fa-users"></i>-->
+            <!--            <span>Quản lý người dùng</span>-->
+            <!--        </a>-->
+           
+           
         <div class="mt-auto p-4 border-top border-white-50" style="border-color: rgba(255,255,255,0.1) !important;">
             <div class="d-flex align-items-center">
                 <img src="https://via.placeholder.com/40" alt="User Avatar" width="40" height="40"

@@ -408,7 +408,7 @@
                         <div class="mb-3">
                             <label class="form-label">Chuỗi rạp</label>
                             <select class="form-select" th:field="*{cinemaChainId}" required>
-                                <option value="">Chọn chuỗi rạp</option>
+                                <option value="0">Chọn chuỗi rạp</option>
                                 <option th:each="chain : ${cinemaChains}" th:value="${chain.id}" th:text="${chain.name}"></option>
                             </select>
                         </div>

@@ -1,9 +1,11 @@
 package group6.cinema_project.service.Admin;
 
-import group6.cinema_project.dto.ScreeningRoomDto;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
-import java.util.List;
+import group6.cinema_project.dto.ScreeningRoomDto;
+import group6.cinema_project.entity.ScreeningSchedule;
 
 public interface IAdminScreeningRoomService {
 //    List<ScreeningRoomDto> getAllRooms();
@@ -26,4 +28,11 @@ public interface IAdminScreeningRoomService {
     ScreeningRoomDto saveOrUpdate(ScreeningRoomDto roomDto);
     boolean deleteRoom(int id);
     Page<ScreeningRoomDto> getRoomsPage(int branchId, int page, int size, String name, String type, String status, Integer rows, Integer seatsPerRow);
+    
+    // Kiểm tra xem phòng chiếu có thể chỉnh sửa được không
+    boolean canEditRoom(int roomId);
+    
+    // Lấy danh sách suất chiếu đang hoạt động của phòng
+    List<ScreeningSchedule> getActiveSchedules(int roomId);
 }
+

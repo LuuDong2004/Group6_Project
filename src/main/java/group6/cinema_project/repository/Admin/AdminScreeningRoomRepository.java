@@ -1,6 +1,9 @@
 package group6.cinema_project.repository.Admin;
 
-import group6.cinema_project.entity.ScreeningRoom;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,11 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import group6.cinema_project.entity.ScreeningRoom;
 
 @Repository
-public interface AdminScreeningRoomRepository extends JpaRepository<ScreeningRoom,Integer> {
+public interface AdminScreeningRoomRepository extends JpaRepository<ScreeningRoom, Integer> {
     boolean existsByName(String name);
     boolean existsByBranchId(int branchId);
     boolean existsByBranchIdAndName(int branchId, String name);
@@ -54,4 +56,27 @@ public interface AdminScreeningRoomRepository extends JpaRepository<ScreeningRoo
      * @return Danh sách phòng chiếu có tên chứa từ khóa tìm kiếm
      */
     List<ScreeningRoom> findByNameContainingIgnoreCase(String name);
+
+    // Kiểm tra xem phòng chiếu có suất chiếu đang hoạt động không
+    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END FROM ScreeningSchedule ss " +
+           "WHERE ss.screening_room_id = :roomId " +
+           "AND ss.status = 'ACTIVE' " +
+           "AND (ss.screening_date > :currentDate " +
+           "OR (ss.screening_date = :currentDate AND CAST(ss.end_time AS TIME) > CAST(:currentTime AS TIME)))", 
+           nativeQuery = true)
+    Integer hasActiveSchedules(@Param("roomId") Integer roomId, 
+                              @Param("currentDate") Date currentDate, 
+                              @Param("currentTime") java.sql.Time currentTime);
+    
+    // Lấy danh sách suất chiếu đang hoạt động của phòng
+    @Query(value = "SELECT * FROM ScreeningSchedule ss " +
+           "WHERE ss.screening_room_id = :roomId " +
+           "AND ss.status = 'ACTIVE' " +
+           "AND (ss.screening_date > :currentDate " +
+           "OR (ss.screening_date = :currentDate AND CAST(ss.end_time AS TIME) > CAST(:currentTime AS TIME))) " +
+           "ORDER BY ss.screening_date ASC, ss.start_time ASC", 
+           nativeQuery = true)
+    List<group6.cinema_project.entity.ScreeningSchedule> getActiveSchedules(@Param("roomId") Integer roomId, 
+                                                                           @Param("currentDate") Date currentDate, 
+                                                                           @Param("currentTime") java.sql.Time currentTime);
 }
