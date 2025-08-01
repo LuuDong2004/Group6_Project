@@ -27,7 +27,7 @@
       }
 
       .sidebar {
-        width: 320px; /* Tăng width để chứa thêm filters */
+        width: 280px; /* Giảm width vì không cần filters */
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
         position: fixed;
@@ -48,8 +48,6 @@
       .sidebar.collapsed .sidebar-header h5,
       .sidebar.collapsed .sidebar-header small,
       .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .filter-section,
-      .sidebar.collapsed .stats-section,
       .sidebar.collapsed .mt-auto .text-white,
       .sidebar.collapsed .mt-auto small {
         display: none;
@@ -95,108 +93,8 @@
         text-align: center;
       }
 
-      /* Filter Section trong Sidebar */
-      .filter-section {
-        padding: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .filter-section h6 {
-        color: white;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .filter-btn {
-        display: block;
-        width: 100%;
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 0.75rem;
-        background: rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.8);
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        text-align: left;
-        transition: all 0.3s ease;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .filter-btn::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.1),
-          transparent
-        );
-        transition: left 0.5s ease;
-      }
-
-      .filter-btn:hover::before {
-        left: 100%;
-      }
-
-      .filter-btn:hover,
-      .filter-btn.active {
-        background: rgba(255, 255, 255, 0.25);
-        color: white;
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-
-      .filter-btn.active {
-        background: rgba(255, 255, 255, 0.9);
-        color: #4f46e5;
-        border-color: rgba(255, 255, 255, 0.9);
-        font-weight: 600;
-      }
-
-      .filter-btn i {
-        width: 16px;
-        margin-right: 0.5rem;
-      }
-
-      /* Stats Section */
-      .stats-section {
-        padding: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .stat-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        font-size: 0.85rem;
-      }
-
-      .stat-label {
-        color: rgba(255, 255, 255, 0.8);
-      }
-
-      .stat-value {
-        color: white;
-        font-weight: 600;
-      }
-
       .main-content-wrapper {
-        margin-left: 320px;
+        margin-left: 280px;
         transition: margin-left 0.3s ease;
         padding-top: 70px;
       }
@@ -208,7 +106,7 @@
       .header-custom {
         position: fixed;
         top: 0;
-        left: 320px;
+        left: 280px;
         right: 0;
         height: 70px;
         background-color: white;
@@ -228,58 +126,28 @@
       /* Calendar Styles */
       .calendar-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
         padding: 2rem;
         margin-bottom: 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .calendar-header::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(
-            circle at 20% 50%,
-            rgba(255, 255, 255, 0.1) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            circle at 80% 20%,
-            rgba(255, 255, 255, 0.1) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            circle at 40% 80%,
-            rgba(255, 255, 255, 0.1) 0%,
-            transparent 50%
-          );
-        pointer-events: none;
       }
 
       .month-navigation {
         display: flex;
         align-items: center;
         gap: 1.5rem;
-        position: relative;
-        z-index: 1;
       }
 
       .month-nav-btn {
         background: rgba(255, 255, 255, 0.2);
         color: white;
         border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 15px;
+        border-radius: 10px;
         padding: 0.75rem 1.25rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
         font-weight: 500;
         display: flex;
         align-items: center;
@@ -292,12 +160,6 @@
       .month-nav-btn:hover {
         background: rgba(255, 255, 255, 0.3);
         border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-      }
-
-      .month-nav-btn:active {
-        transform: translateY(-1px) scale(1.02);
       }
 
       .current-month {
@@ -305,28 +167,21 @@
         font-weight: 700;
         color: white;
         margin: 0 1.5rem;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        position: relative;
-        z-index: 1;
-        letter-spacing: 0.5px;
       }
 
       .calendar-controls {
         display: flex;
         gap: 1rem;
         align-items: center;
-        position: relative;
-        z-index: 1;
       }
 
       .view-toggle {
         background: rgba(255, 255, 255, 0.15);
         border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 0.6rem 1.2rem;
         color: rgba(255, 255, 255, 0.9);
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
         font-weight: 500;
         text-decoration: none;
         font-size: 0.9rem;
@@ -337,7 +192,6 @@
         border-color: rgba(255, 255, 255, 0.4);
         color: white;
         text-decoration: none;
-        transform: translateY(-2px);
       }
 
       .view-toggle.active {
@@ -350,12 +204,12 @@
       .btn-primary {
         background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 0.6rem 1.5rem;
         color: white;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
         text-decoration: none;
         display: inline-flex;
         align-items: center;
@@ -363,8 +217,7 @@
       }
 
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
         color: white;
         text-decoration: none;
@@ -372,8 +225,8 @@
 
       .calendar-grid {
         background: white;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         overflow: hidden;
         border: 1px solid rgba(79, 70, 229, 0.1);
       }
@@ -396,18 +249,6 @@
         position: relative;
       }
 
-      .weekday::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 30px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #4f46e5, transparent);
-        opacity: 0.5;
-      }
-
       .calendar-days {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -421,15 +262,15 @@
         min-height: 130px;
         padding: 1rem;
         position: relative;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         border-radius: 8px;
         border: 1px solid transparent;
+        cursor: pointer;
       }
 
       .calendar-day:hover {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background: #f8fafc;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         border-color: rgba(79, 70, 229, 0.2);
       }
 
@@ -440,14 +281,34 @@
       }
 
       .calendar-day.today {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: #dbeafe;
         border: 2px solid #3b82f6;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
       }
 
       .calendar-day.today .day-number {
         color: #1d4ed8;
         font-weight: 800;
+      }
+
+      .calendar-day.past-date {
+        background: #f1f5f9;
+        opacity: 0.5;
+        filter: grayscale(0.3);
+      }
+
+      .calendar-day.past-date:hover {
+        background: #e2e8f0;
+        opacity: 0.7;
+      }
+
+      .calendar-day.past-date .day-number {
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      .calendar-day.past-date .schedule-count {
+        opacity: 0.7;
+        background: #64748b;
       }
 
       .day-number {
@@ -458,101 +319,15 @@
         position: relative;
       }
 
-      .calendar-day.today .day-number::after {
-        content: "";
-        position: absolute;
-        bottom: -4px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-        border-radius: 1px;
-      }
-
-      .schedule-slot {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      .schedule-count {
+        background: #4f46e5;
         color: white;
         padding: 0.5rem 0.75rem;
-        border-radius: 10px;
-        font-size: 0.75rem;
-        margin-bottom: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .schedule-slot::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.2),
-          transparent
-        );
-        transition: left 0.5s ease;
-      }
-
-      .schedule-slot:hover::before {
-        left: 100%;
-      }
-
-      .schedule-slot:hover {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-      }
-
-      .schedule-slot.playing {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        border-color: rgba(5, 150, 105, 0.3);
-      }
-
-      .schedule-slot.playing:hover {
-        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-      }
-
-      .schedule-slot.coming-soon {
-        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-        border-color: rgba(217, 119, 6, 0.3);
-      }
-
-      .schedule-slot.coming-soon:hover {
-        box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
-      }
-
-      .schedule-slot.stopped {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-        border-color: rgba(220, 38, 38, 0.3);
-      }
-
-      .schedule-slot.stopped:hover {
-        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
-      }
-
-      .slot-time {
-        font-weight: 700;
+        border-radius: 8px;
         font-size: 0.8rem;
-        margin-bottom: 0.25rem;
-        position: relative;
-        z-index: 1;
-      }
-
-      .slot-movie {
-        font-size: 0.7rem;
-        opacity: 0.95;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        position: relative;
-        z-index: 1;
-        font-weight: 500;
+        margin-top: 0.5rem;
+        text-align: center;
+        font-weight: 600;
       }
 
       /* Responsive */
@@ -659,44 +434,6 @@
           <span>Cài đặt</span>
         </a>
       </nav>
-
-      <!-- Bộ lọc lịch chiếu -->
-      <div class="filter-section">
-        <h6><i class="fas fa-filter me-2"></i>Bộ lọc lịch chiếu</h6>
-        <button class="filter-btn active" data-filter="all">
-          <i class="fas fa-th"></i>Tất cả
-        </button>
-        <button class="filter-btn" data-filter="playing">
-          <i class="fas fa-play-circle"></i>Đang chiếu
-        </button>
-        <button class="filter-btn" data-filter="coming-soon">
-          <i class="fas fa-clock"></i>Sắp chiếu
-        </button>
-        <button class="filter-btn" data-filter="stopped">
-          <i class="fas fa-stop-circle"></i>Ngừng chiếu
-        </button>
-      </div>
-
-      <!-- Thống kê nhanh -->
-      <div class="stats-section">
-        <h6><i class="fas fa-chart-bar me-2"></i>Thống kê tháng này</h6>
-        <div class="stat-item">
-          <span class="stat-label">Tổng lịch chiếu:</span>
-          <span class="stat-value" th:text="${totalSchedules}">156</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Đang chiếu:</span>
-          <span class="stat-value" th:text="${playingCount}">89</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Sắp chiếu:</span>
-          <span class="stat-value" th:text="${comingSoonCount}">45</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Ngừng chiếu:</span>
-          <span class="stat-value" th:text="${stoppedCount}">22</span>
-        </div>
-      </div>
 
       <div
         class="mt-auto p-4 border-top border-white-50"
@@ -881,6 +618,12 @@
         initializeDashboardBehavior();
         initializeCalendar();
         initializeFilters();
+
+        // Đảm bảo dữ liệu được hiển thị ngay cả khi có dữ liệu từ server
+        if (Object.keys(scheduleData).length > 0) {
+          console.log("Updating calendar display with existing data");
+          updateCalendarDisplay();
+        }
       });
 
       function initializeDashboardBehavior() {
@@ -918,6 +661,7 @@
       const calendarDataFromServer = /*[[${calendarData}]]*/ {};
       if (calendarDataFromServer && calendarDataFromServer.schedulesByDate) {
         scheduleData = calendarDataFromServer.schedulesByDate;
+        console.log("Loaded schedule data from server:", scheduleData);
       }
 
       // Lấy thông tin tháng hiện tại từ server
@@ -926,6 +670,7 @@
       currentDate = new Date(serverYear, serverMonth - 1, 1);
 
       function initializeCalendar() {
+        // Đảm bảo hiển thị dữ liệu ngay khi load trang
         updateCalendarDisplay();
 
         document.getElementById("prevMonth").addEventListener("click", () => {
@@ -954,18 +699,8 @@
         calendarDays.innerHTML =
           '<div class="text-center p-4">Đang tải dữ liệu...</div>';
 
-        // Tạo URL với filter
+        // Tạo URL để lấy dữ liệu
         let url = `/admin/schedules/api/calendar-data?year=${year}&month=${month}`;
-        if (currentFilter !== "all") {
-          // Map frontend filter sang backend status
-          const statusMap = {
-            playing: "ACTIVE",
-            "coming-soon": "UPCOMING",
-            stopped: "ENDED",
-          };
-          const backendStatus = statusMap[currentFilter] || currentFilter;
-          url += `&status=${backendStatus}`;
-        }
 
         fetch(url)
           .then((response) => response.json())
@@ -987,26 +722,9 @@
           });
       }
 
-      // Function để cập nhật thống kê
+      // Function để cập nhật thống kê - không cần nữa vì đã xóa stats section
       function updateStats(stats) {
-        if (stats) {
-          const totalElement = document.querySelector(".stat-item .stat-value");
-          const playingElement = document.querySelectorAll(
-            ".stat-item .stat-value"
-          )[1];
-          const comingSoonElement = document.querySelectorAll(
-            ".stat-item .stat-value"
-          )[2];
-          const stoppedElement = document.querySelectorAll(
-            ".stat-item .stat-value"
-          )[3];
-
-          if (totalElement) totalElement.textContent = stats.total || 0;
-          if (playingElement) playingElement.textContent = stats.playing || 0;
-          if (comingSoonElement)
-            comingSoonElement.textContent = stats.comingSoon || 0;
-          if (stoppedElement) stoppedElement.textContent = stats.stopped || 0;
-        }
+        // Không làm gì cả
       }
 
       function updateMonthHeader() {
@@ -1063,6 +781,7 @@
 
         const isCurrentMonth = date.getMonth() === currentMonth;
         const isToday = isDateToday(date);
+        const isPastDate = isDateInPast(date);
 
         if (!isCurrentMonth) {
           dayDiv.classList.add("other-month");
@@ -1072,61 +791,50 @@
           dayDiv.classList.add("today");
         }
 
+        if (isPastDate) {
+          dayDiv.classList.add("past-date");
+        }
+
+        // Thêm click event để chuyển đến trang phù hợp
+        dayDiv.addEventListener("click", () => {
+          const dateString = formatDateKey(date);
+          const schedules = scheduleData[dateString] || [];
+
+          // Nếu ngày quá khứ, luôn chuyển đến trang xem chi tiết
+          if (isPastDate) {
+            window.location.href = `/admin/schedules/list/date?date=${dateString}`;
+          }
+          // Nếu ngày hiện tại/tương lai và đã có lịch chiếu, chuyển đến trang thêm lịch chiếu
+          else if (schedules.length > 0) {
+            window.location.href = `/admin/schedules/add?date=${dateString}`;
+          }
+          // Nếu ngày hiện tại/tương lai nhưng chưa có lịch chiếu, chuyển đến trang danh sách với thông báo
+          else {
+            window.location.href = `/admin/schedules/list/date?date=${dateString}`;
+          }
+        });
+
+        // Thêm cursor pointer để hiển thị có thể click
+        dayDiv.style.cursor = "pointer";
+
         // Số ngày
         const dayNumber = document.createElement("div");
         dayNumber.className = "day-number";
         dayNumber.textContent = date.getDate();
         dayDiv.appendChild(dayNumber);
 
-        // Lịch chiếu cho ngày này
+        // Hiển thị số lượng suất chiếu cho ngày này
         const dateKey = formatDateKey(date);
         const schedules = scheduleData[dateKey] || [];
 
-        schedules.forEach((schedule) => {
-          if (currentFilter === "all" || currentFilter === schedule.status) {
-            const slotDiv = createScheduleSlot(schedule);
-            dayDiv.appendChild(slotDiv);
-          }
-        });
+        if (schedules.length > 0) {
+          const countDiv = document.createElement("div");
+          countDiv.className = "schedule-count";
+          countDiv.textContent = `${schedules.length} suất chiếu`;
+          dayDiv.appendChild(countDiv);
+        }
 
         return dayDiv;
-      }
-
-      function createScheduleSlot(schedule) {
-        const slotDiv = document.createElement("div");
-        slotDiv.className = `schedule-slot ${schedule.status}`;
-        slotDiv.title = `${schedule.time} - ${schedule.movie}`;
-
-        const timeSpan = document.createElement("div");
-        timeSpan.className = "slot-time";
-        timeSpan.textContent = schedule.time;
-
-        const movieSpan = document.createElement("div");
-        movieSpan.className = "slot-movie";
-        movieSpan.textContent = schedule.movie;
-
-        slotDiv.appendChild(timeSpan);
-        slotDiv.appendChild(movieSpan);
-
-        // Thêm click event để xem chi tiết
-        slotDiv.addEventListener("click", () => {
-          alert(
-            `Chi tiết lịch chiếu:\nThời gian: ${schedule.time}\nPhim: ${
-              schedule.movie
-            }\nTrạng thái: ${getStatusText(schedule.status)}`
-          );
-        });
-
-        return slotDiv;
-      }
-
-      function getStatusText(status) {
-        const statusMap = {
-          playing: "Đang chiếu",
-          "coming-soon": "Sắp chiếu",
-          stopped: "Ngừng chiếu",
-        };
-        return statusMap[status] || status;
       }
 
       function isDateToday(date) {
@@ -1138,6 +846,14 @@
         );
       }
 
+      function isDateInPast(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time để so sánh chỉ ngày
+        const compareDate = new Date(date);
+        compareDate.setHours(0, 0, 0, 0);
+        return compareDate < today;
+      }
+
       function formatDateKey(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -1146,22 +862,7 @@
       }
 
       function initializeFilters() {
-        const filterButtons = document.querySelectorAll(".filter-btn");
-
-        filterButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            // Xóa active class từ tất cả buttons
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            // Thêm active class cho button được click
-            button.classList.add("active");
-
-            // Cập nhật filter hiện tại
-            currentFilter = button.dataset.filter;
-
-            // Cập nhật lại calendar với filter mới
-            loadCalendarData();
-          });
-        });
+        // Không cần filter nữa vì đã xóa filter section
       }
     </script>
   </body>

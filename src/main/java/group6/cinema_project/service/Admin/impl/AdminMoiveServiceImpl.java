@@ -10,7 +10,8 @@ import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.entity.Movie;
 
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -131,17 +131,20 @@ public class AdminMoiveServiceImpl implements IAdminMovieService {
             switch (filterBy.toLowerCase()) {
                 case "name":
                 case "title":
-                    movies = adminMovieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    movies = adminMovieRepository
+                            .findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
                 case "description":
                     movies = adminMovieRepository
                             .findByDescriptionContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
                 case "genre":
-                    movies = adminMovieRepository.findByGenreContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    movies = adminMovieRepository
+                            .findByGenreContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
                 case "rating":
-                    movies = adminMovieRepository.findByRatingContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    movies = adminMovieRepository
+                            .findByRatingContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
                 case "language":
                     movies = adminMovieRepository
@@ -168,7 +171,8 @@ public class AdminMoiveServiceImpl implements IAdminMovieService {
                     break;
                 default:
                     // Default to searching by name if filterBy is not recognized
-                    movies = adminMovieRepository.findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
+                    movies = adminMovieRepository
+                            .findByNameContainingIgnoreCaseWithDirectorsAndActors(searchTerm.trim());
                     break;
             }
         }
@@ -241,5 +245,66 @@ public class AdminMoiveServiceImpl implements IAdminMovieService {
         return dto;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MovieDto> getAllMoviesForDisplayWithPagination(Pageable pageable) {
+        Page<Movie> moviePage = adminMovieRepository.findAllWithDirectorsAndActorsPageable(pageable);
+        return moviePage.map(this::convertToDisplayDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MovieDto> getFilteredMoviesForDisplayWithPagination(String searchTerm, String filterBy,
+            Pageable pageable) {
+        Page<Movie> moviePage;
+
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            moviePage = adminMovieRepository.findAllWithDirectorsAndActorsPageable(pageable);
+        } else {
+            switch (filterBy.toLowerCase()) {
+                case "name":
+                case "title":
+                    moviePage = adminMovieRepository
+                            .findByNameContainingIgnoreCaseWithDirectorsAndActorsPageable(searchTerm.trim(), pageable);
+                    break;
+                case "description":
+                    moviePage = adminMovieRepository
+                            .findByDescriptionContainingIgnoreCaseWithDirectorsAndActorsPageable(searchTerm.trim(),
+                                    pageable);
+                    break;
+                case "genre":
+                    moviePage = adminMovieRepository
+                            .findByGenreContainingIgnoreCaseWithDirectorsAndActorsPageable(searchTerm.trim(), pageable);
+                    break;
+                case "rating":
+                    moviePage = adminMovieRepository.findByRatingContainingIgnoreCaseWithDirectorsAndActorsPageable(
+                            searchTerm.trim(), pageable);
+                    break;
+                case "language":
+                    moviePage = adminMovieRepository.findByLanguageContainingIgnoreCaseWithDirectorsAndActorsPageable(
+                            searchTerm.trim(), pageable);
+                    break;
+                case "releaseyear":
+                    moviePage = adminMovieRepository.findByReleaseYearWithDirectorsAndActorsPageable(searchTerm.trim(),
+                            pageable);
+                    break;
+                case "director":
+                    moviePage = adminMovieRepository
+                            .findByDirectorNameContainingIgnoreCaseWithDirectorsAndActorsPageable(searchTerm.trim(),
+                                    pageable);
+                    break;
+                case "actor":
+                    moviePage = adminMovieRepository.findByActorNameContainingIgnoreCaseWithDirectorsAndActorsPageable(
+                            searchTerm.trim(), pageable);
+                    break;
+                default:
+                    moviePage = adminMovieRepository
+                            .findByNameContainingIgnoreCaseWithDirectorsAndActorsPageable(searchTerm.trim(), pageable);
+                    break;
+            }
+        }
+
+        return moviePage.map(this::convertToDisplayDto);
+    }
 
 }

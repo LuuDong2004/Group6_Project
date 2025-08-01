@@ -30,9 +30,9 @@ public class Movie {
 
     private String trailer;
 
-
     private String description;
 
+    private String status;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore

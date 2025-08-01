@@ -1,6 +1,5 @@
 package group6.cinema_project.dto;
 
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,9 +31,6 @@ public class MovieDto {
     @Min(value = 1, message = "Thời lượng phim phải lớn hơn 0.")
     private Integer duration;
 
-
-
-
     @NotNull(message = "Ngày phát hành không được để trống.")
     @PastOrPresent(message = "Ngày phát hành không được là một ngày trong tương lai.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -49,6 +45,8 @@ public class MovieDto {
 
     private String language;
     private String trailer;
+    private String status;
+
     // Danh sách tên các đạo diễn, không phải đối tượng Director
     private Set<String> directors;
 

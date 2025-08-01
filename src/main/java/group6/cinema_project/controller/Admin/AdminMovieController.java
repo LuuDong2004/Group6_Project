@@ -4,6 +4,9 @@ import group6.cinema_project.service.Admin.IAdminActorService;
 import group6.cinema_project.service.Admin.IAdminDirectorService;
 import group6.cinema_project.service.Admin.IAdminMovieService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -61,20 +64,38 @@ public class AdminMovieController {
 
     @GetMapping("/list")
     public String listMovies(Model model,
-                             @RequestParam(value = "searchTerm", required = false) String searchTerm,
-                             @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy) {
-        List<MovieDto> movies;
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
 
-        // Use the new service methods that include directors and actors for display
+        // Tạo Pageable object với page và size
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MovieDto> moviePage;
+
+        // Sử dụng các phương thức pagination mới
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            movies = movieService.getFilteredMoviesForDisplay(searchTerm, filterBy);
+            moviePage = movieService.getFilteredMoviesForDisplayWithPagination(searchTerm, filterBy, pageable);
         } else {
-            movies = movieService.getAllMoviesForDisplay();
+            moviePage = movieService.getAllMoviesForDisplayWithPagination(pageable);
         }
 
-        model.addAttribute("movies", movies);
+        // Thêm thông tin pagination vào model
+        model.addAttribute("moviePage", moviePage);
+        model.addAttribute("movies", moviePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", moviePage.getTotalPages());
+        model.addAttribute("totalElements", moviePage.getTotalElements());
+        model.addAttribute("size", size);
         model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
         model.addAttribute("filterBy", filterBy);
+
+        // Tính toán các trang hiển thị trong pagination
+        int startPage = Math.max(0, page - 2);
+        int endPage = Math.min(moviePage.getTotalPages() - 1, page + 2);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+
         return "admin/admin_movie_list";
     }
 
@@ -88,16 +109,16 @@ public class AdminMovieController {
 
     @PostMapping("/add")
     public String adminMovieAddPost(Model model,
-                                    @RequestParam("name") String name,
-                                    @RequestParam("description") String description,
-                                    @RequestParam("duration") int duration,
-                                    @RequestParam("rating") String rating,
-                                    @RequestParam("releaseDate") String releaseDate,
-                                    @RequestParam(value = "genres", required = false) List<String> genres,
-                                    @RequestParam("image") MultipartFile image,
-                                    @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
-                                    @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
-                                    @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds) {
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("duration") int duration,
+            @RequestParam("rating") String rating,
+            @RequestParam("releaseDate") String releaseDate,
+            @RequestParam(value = "genres", required = false) List<String> genres,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
+            @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
+            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds) {
 
         try {
             MovieDto movie = new MovieDto();
@@ -198,17 +219,17 @@ public class AdminMovieController {
 
     @PostMapping("/edit/{id}")
     public String updateMovie(@PathVariable Integer id, Model model,
-                              @RequestParam("name") String name,
-                              @RequestParam("description") String description,
-                              @RequestParam("duration") int duration,
-                              @RequestParam("rating") String rating,
-                              @RequestParam("releaseDate") String releaseDate,
-                              @RequestParam(value = "genres", required = false) List<String> genres,
-                              @RequestParam(value = "image", required = false) MultipartFile image,
-                              @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
-                              @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
-                              @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
-                              RedirectAttributes redirectAttributes) {
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("duration") int duration,
+            @RequestParam("rating") String rating,
+            @RequestParam("releaseDate") String releaseDate,
+            @RequestParam(value = "genres", required = false) List<String> genres,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
+            @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
+            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
+            RedirectAttributes redirectAttributes) {
 
         try {
             // Get existing movie

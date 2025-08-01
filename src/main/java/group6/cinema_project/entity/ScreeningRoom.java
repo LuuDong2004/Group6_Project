@@ -3,9 +3,10 @@ package group6.cinema_project.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
 
 @Data
 @Entity
@@ -20,20 +21,21 @@ public class ScreeningRoom {
     @Column(name = "capacity", nullable = false, length = 10, columnDefinition = "INT")
     private int capacity; // sức chứa
 
-    @Column(name = "description",nullable = false, length = 250, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "description", nullable = false, length = 250, columnDefinition = "NVARCHAR(255)")
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "branch_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Branch branch;
 
     @Column(name = "type", length = 20, columnDefinition = "NVARCHAR(20)")
     private String type;
 
-    @Column(name = "status",length = 20, columnDefinition = "NVARCHAR(20)")
+    @Column(name = "status", length = 20, columnDefinition = "NVARCHAR(20)")
     private String status;
-
 
     // Thêm các field mới
     @Column(name = "rows", nullable = false)

@@ -1,11 +1,13 @@
 package group6.cinema_project.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.Date;
+
 @Data
 @Entity
 @Table(name = "Booking")
@@ -13,12 +15,17 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "screening_schedule_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ScreeningSchedule schedule;
 
     @Column(name = "booking_code")
@@ -35,13 +42,5 @@ public class Booking {
     private String notes;
     @Column(name = "voucher_code")
     private String voucherCode;
-
-
-
-
-
-
-
-
 
 }

@@ -2,6 +2,7 @@
 package group6.cinema_project.controller.Admin;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.MovieWithSchedulesDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
 import group6.cinema_project.dto.ScheduleTimeSlotDto;
@@ -26,10 +27,18 @@ import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.Comparator;
+import java.util.Locale;
+
+import group6.cinema_project.entity.Movie;
+import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.ScreeningRoom;
+import group6.cinema_project.entity.Branch;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,9 +65,9 @@ public class AdminScheduleController {
 
     @GetMapping("/list")
     public String listSchedules(Model model,
-                                @RequestParam(value = "movieId", required = false) Integer movieId,
-                                @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
-                                @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
+            @RequestParam(value = "movieId", required = false) Integer movieId,
+            @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
+            @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
 
         log.info("Loading schedule list with filters - movieId: {}, screeningDate: {}, screeningRoomId: {}",
                 movieId, screeningDate, screeningRoomId);
@@ -96,8 +105,10 @@ public class AdminScheduleController {
         }
 
         try {
-            // Load dropdown data for filters
-            model.addAttribute("movies", movieService.getAllMovie());
+            // Load dropdown data for filters - convert MovieDto to MovieWithSchedulesDto
+            List<MovieDto> movieDtos = movieService.getAllMovie();
+            List<MovieWithSchedulesDto> moviesWithSchedules = convertMovieDtosToMoviesWithSchedules(movieDtos);
+            model.addAttribute("movies", moviesWithSchedules);
         } catch (Exception e) {
             model.addAttribute("movies", java.util.Collections.emptyList());
             if (!model.containsAttribute("error")) {
@@ -119,7 +130,205 @@ public class AdminScheduleController {
         model.addAttribute("selectedScreeningDate", screeningDate);
         model.addAttribute("selectedScreeningRoomId", screeningRoomId);
 
-        return "admin/admin_schedule_list";
+        return "admin/admin_schedules_list";
+    }
+
+    /**
+     * Hiển thị lịch chiếu chi tiết theo ngày
+     * Endpoint này được gọi khi click vào một ngày trong calendar
+     */
+    @GetMapping("/list/date")
+    public String listSchedulesByDate(Model model,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
+            @RequestParam(value = "status", required = false) String status) {
+
+        log.info("Loading schedules for date: {} with status filter: {}", selectedDate, status);
+
+        try {
+            // Nếu không có ngày được chọn, sử dụng ngày hiện tại
+            if (selectedDate == null) {
+                selectedDate = LocalDate.now();
+            }
+
+            // Chuyển đổi LocalDate thành Date để tương thích với service
+            Date startOfDay = Date.from(selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endOfDay = Date.from(selectedDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+            // Lấy danh sách phim có lịch chiếu trong ngày
+            List<MovieWithSchedulesDto> moviesWithSchedules = getMoviesWithSchedulesByDate(startOfDay, endOfDay,
+                    status);
+
+            // Format ngày để hiển thị
+            String formattedDate = formatDateForDisplay(selectedDate);
+
+            // Thêm dữ liệu vào model
+            model.addAttribute("movies", moviesWithSchedules);
+            model.addAttribute("selectedDate", selectedDate);
+            model.addAttribute("selectedDateFormatted", formattedDate);
+            model.addAttribute("selectedStatus", status);
+
+            // Thêm thông báo nếu không có lịch chiếu nào
+            if (moviesWithSchedules.isEmpty()) {
+                model.addAttribute("message", "Chưa có lịch chiếu nào cho ngày " + formattedDate
+                        + ". Bạn có thể tạo lịch chiếu mới bằng cách nhấn nút 'Thêm lịch chiếu' bên dưới.");
+            }
+
+            log.info("Successfully loaded {} movies with schedules for date: {}", moviesWithSchedules.size(),
+                    selectedDate);
+
+        } catch (Exception e) {
+            log.error("Error loading schedules for date: " + selectedDate, e);
+            model.addAttribute("error", "Lỗi khi tải lịch chiếu: " + e.getMessage());
+            model.addAttribute("movies", Collections.emptyList());
+            model.addAttribute("selectedDate", selectedDate != null ? selectedDate : LocalDate.now());
+            model.addAttribute("selectedDateFormatted",
+                    formatDateForDisplay(selectedDate != null ? selectedDate : LocalDate.now()));
+        }
+
+        return "admin/admin_schedules_list";
+    }
+
+    /**
+     * Phương thức hỗ trợ để convert MovieDto thành MovieWithSchedulesDto với
+     * schedules rỗng
+     */
+    private List<MovieWithSchedulesDto> convertMovieDtosToMoviesWithSchedules(List<MovieDto> movieDtos) {
+        return movieDtos.stream().map(movieDto -> {
+            MovieWithSchedulesDto movieWithSchedules = new MovieWithSchedulesDto();
+            movieWithSchedules.setId(movieDto.getId());
+            movieWithSchedules.setName(movieDto.getName());
+            movieWithSchedules.setImage(movieDto.getImage());
+            movieWithSchedules.setDuration(movieDto.getDuration());
+            movieWithSchedules.setRating(movieDto.getRating());
+            movieWithSchedules.setGenre(movieDto.getGenre());
+            movieWithSchedules.setLanguage(movieDto.getLanguage());
+            movieWithSchedules.setDescription(movieDto.getDescription());
+            movieWithSchedules.setStatus(movieDto.getStatus());
+            movieWithSchedules.setReleaseDate(movieDto.getReleaseDate());
+            movieWithSchedules.setTrailer(movieDto.getTrailer());
+            movieWithSchedules.setSchedules(new ArrayList<>()); // Danh sách schedules rỗng
+            return movieWithSchedules;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Phương thức hỗ trợ để lấy danh sách phim với lịch chiếu theo ngày
+     */
+    private List<MovieWithSchedulesDto> getMoviesWithSchedulesByDate(Date startOfDay, Date endOfDay, String status) {
+        List<MovieWithSchedulesDto> result = new ArrayList<>();
+
+        try {
+            // Lấy tất cả phim
+            List<MovieDto> allMovies = movieService.getAllMovie();
+
+            for (MovieDto movieDto : allMovies) {
+                // Lấy lịch chiếu của phim theo ID
+                List<ScreeningScheduleDto> schedulesDtos = movieScheduleService.getSchedulesByMovieId(movieDto.getId());
+
+                // Lọc lịch chiếu theo ngày
+                List<ScreeningScheduleDto> filteredSchedules = schedulesDtos.stream()
+                        .filter(schedule -> {
+                            LocalDate scheduleDate = schedule.getScreeningDate();
+                            LocalDate targetDate = startOfDay.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                            return scheduleDate.equals(targetDate);
+                        })
+                        .map(schedule -> {
+                            // Tự động set status cho lịch chiếu trong quá khứ
+                            LocalDate scheduleDate = schedule.getScreeningDate();
+                            LocalDate today = LocalDate.now();
+                            if (scheduleDate.isBefore(today)) {
+                                schedule.setStatus("ENDED");
+                            }
+                            return schedule;
+                        })
+                        .collect(Collectors.toList());
+
+                // Lọc theo status nếu có
+                if (status != null && !status.isEmpty() && !status.equals("all")) {
+                    filteredSchedules = filteredSchedules.stream()
+                            .filter(schedule -> {
+                                String scheduleStatus = schedule.getStatus();
+                                return scheduleStatus != null && scheduleStatus.equalsIgnoreCase(status);
+                            })
+                            .collect(Collectors.toList());
+                }
+
+                // Chỉ thêm phim nếu có lịch chiếu
+                if (!filteredSchedules.isEmpty()) {
+                    MovieWithSchedulesDto movieWithSchedules = new MovieWithSchedulesDto();
+                    movieWithSchedules.setId(movieDto.getId());
+                    movieWithSchedules.setName(movieDto.getName());
+                    movieWithSchedules.setImage(movieDto.getImage());
+                    movieWithSchedules.setDuration(movieDto.getDuration());
+                    movieWithSchedules.setRating(movieDto.getRating());
+                    movieWithSchedules.setGenre(movieDto.getGenre());
+                    movieWithSchedules.setLanguage(movieDto.getLanguage());
+                    movieWithSchedules.setDescription(movieDto.getDescription());
+                    movieWithSchedules.setStatus(movieDto.getStatus());
+                    movieWithSchedules.setReleaseDate(movieDto.getReleaseDate());
+                    movieWithSchedules.setTrailer(movieDto.getTrailer());
+
+                    // Chuyển đổi DTO thành Entity để tương thích với template
+                    List<ScreeningSchedule> scheduleEntities = convertScheduleDtosToEntities(filteredSchedules);
+                    movieWithSchedules.setSchedules(scheduleEntities);
+
+                    result.add(movieWithSchedules);
+                }
+            }
+
+            // Sắp xếp theo tên phim
+            result.sort(Comparator.comparing(MovieWithSchedulesDto::getName));
+
+        } catch (Exception e) {
+            log.error("Error getting movies with schedules", e);
+            throw new RuntimeException("Lỗi khi lấy danh sách phim và lịch chiếu", e);
+        }
+
+        return result;
+    }
+
+    /**
+     * Chuyển đổi ScreeningScheduleDto thành ScreeningSchedule entity
+     */
+    private List<ScreeningSchedule> convertScheduleDtosToEntities(List<ScreeningScheduleDto> scheduleDtos) {
+        return scheduleDtos.stream()
+                .map(dto -> {
+                    ScreeningSchedule entity = new ScreeningSchedule();
+                    entity.setId(dto.getId());
+                    entity.setScreeningDate(java.sql.Date.valueOf(dto.getScreeningDate()));
+                    entity.setStartTime(dto.getStartTime() != null ? java.sql.Time.valueOf(dto.getStartTime()) : null);
+                    entity.setEndTime(dto.getEndTime() != null ? java.sql.Time.valueOf(dto.getEndTime()) : null);
+                    entity.setStatus(dto.getStatus());
+
+                    // Tạo các entity liên quan nếu cần
+                    if (dto.getScreeningRoomName() != null) {
+                        ScreeningRoom room = new ScreeningRoom();
+                        room.setName(dto.getScreeningRoomName());
+                        entity.setScreeningRoom(room);
+                    }
+
+                    if (dto.getBranchName() != null) {
+                        Branch branch = new Branch();
+                        branch.setName(dto.getBranchName());
+                        entity.setBranch(branch);
+                    }
+
+                    return entity;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Phương thức hỗ trợ để format ngày hiển thị
+     */
+    private String formatDateForDisplay(LocalDate date) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", new Locale("vi", "VN"));
+            return date.format(formatter);
+        } catch (Exception e) {
+            log.warn("Error formatting date, using default format", e);
+            return date.toString();
+        }
     }
 
     /**
@@ -127,99 +336,30 @@ public class AdminScheduleController {
      */
     @GetMapping
     public String defaultSchedulePage() {
-        return "redirect:/admin/schedules/list";
-    }
-
-    /**
-     * Test endpoint to verify the service works without Invoice issues
-     */
-    @GetMapping("/test")
-    public String testSchedules(Model model) {
-        try {
-            List<ScreeningScheduleDto> schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
-            model.addAttribute("schedules", schedules);
-            model.addAttribute("message", "Successfully loaded " + schedules.size() + " schedules");
-
-            // Add empty collections for dropdowns to prevent template errors
-            model.addAttribute("movies", java.util.Collections.emptyList());
-            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
-            model.addAttribute("selectedMovieId", null);
-            model.addAttribute("selectedScreeningDate", null);
-            model.addAttribute("selectedScreeningRoomId", null);
-
-            return "admin/admin_schedule_list";
-        } catch (Exception e) {
-            model.addAttribute("error", "Error loading schedules: " + e.getMessage());
-            model.addAttribute("schedules", java.util.Collections.emptyList());
-            model.addAttribute("movies", java.util.Collections.emptyList());
-            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
-            model.addAttribute("selectedMovieId", null);
-            model.addAttribute("selectedScreeningDate", null);
-            model.addAttribute("selectedScreeningRoomId", null);
-            return "admin/admin_schedule_list";
-        }
-    }
-
-    /**
-     * Debug endpoint to check what data is available
-     */
-    @GetMapping("/debug")
-    public String debugSchedules(Model model) {
-        StringBuilder debugInfo = new StringBuilder();
-
-        try {
-            List<ScreeningScheduleDto> schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
-            debugInfo.append("Schedules loaded: ").append(schedules.size()).append("<br>");
-
-            if (!schedules.isEmpty()) {
-                ScreeningScheduleDto firstSchedule = schedules.get(0);
-                debugInfo.append("First schedule ID: ").append(firstSchedule.getId()).append("<br>");
-                debugInfo.append("Movie name: ").append(firstSchedule.getMovieName()).append("<br>");
-                debugInfo.append("Room name: ").append(firstSchedule.getScreeningRoomName()).append("<br>");
-            }
-
-            model.addAttribute("schedules", schedules);
-        } catch (Exception e) {
-            debugInfo.append("Schedule error: ").append(e.getMessage()).append("<br>");
-            model.addAttribute("schedules", java.util.Collections.emptyList());
-        }
-
-        try {
-            var movies = movieService.getAllMovie();
-            debugInfo.append("Movies loaded: ").append(movies.size()).append("<br>");
-            model.addAttribute("movies", movies);
-        } catch (Exception e) {
-            debugInfo.append("Movies error: ").append(e.getMessage()).append("<br>");
-            model.addAttribute("movies", java.util.Collections.emptyList());
-        }
-
-        try {
-            var rooms = screeningRoomService.getAllScreeningRooms();
-            debugInfo.append("Screening rooms loaded: ").append(rooms.size()).append("<br>");
-            model.addAttribute("screeningRooms", rooms);
-        } catch (Exception e) {
-            debugInfo.append("Screening rooms error: ").append(e.getMessage()).append("<br>");
-            model.addAttribute("screeningRooms", java.util.Collections.emptyList());
-        }
-
-        model.addAttribute("message", debugInfo.toString());
-        model.addAttribute("selectedMovieId", null);
-        model.addAttribute("selectedScreeningDate", null);
-        model.addAttribute("selectedScreeningRoomId", null);
-
-        return "admin/admin_schedule_list";
+        return "redirect:/admin/schedules/calendar";
     }
 
     /**
      * Display the add schedule form
      */
     @GetMapping("/add")
-    public String showAddScheduleForm(Model model) {
-        log.info("Loading add schedule form");
+    public String showAddScheduleForm(Model model,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate) {
+        log.info("Loading add schedule form with date: {}", selectedDate);
 
         try {
-            // Add empty DTO for form binding
-            model.addAttribute("schedule", new ScreeningScheduleDto());
+            // Create DTO for form binding
+            ScreeningScheduleDto scheduleDto = new ScreeningScheduleDto();
+
+            // Set ngày chiếu nếu có date parameter
+            if (selectedDate != null) {
+                scheduleDto.setScreeningDate(selectedDate);
+            }
+
+            // Luôn set trạng thái là "UPCOMING" (Sắp chiếu) cho lịch chiếu mới
+            scheduleDto.setStatus("UPCOMING");
+
+            model.addAttribute("schedule", scheduleDto);
 
             // Load dropdown data
             model.addAttribute("movies", movieService.getAllMovie());
@@ -227,7 +367,7 @@ public class AdminScheduleController {
             model.addAttribute("branches", branchService.getAllBranches());
 
             log.info("Successfully loaded add schedule form");
-            return "admin/admin_schedule_add";
+            return "admin/admin_schedules_add";
 
         } catch (Exception e) {
             log.error("Error loading add schedule form", e);
@@ -238,9 +378,9 @@ public class AdminScheduleController {
 
     @PostMapping("/add")
     public String addSchedule(@Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-                              BindingResult bindingResult,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Processing add schedule request for movie ID: {}", scheduleDto.getMovieId());
 
         if (bindingResult.hasErrors()) {
@@ -253,7 +393,7 @@ public class AdminScheduleController {
             } catch (Exception e) {
                 log.error("Error reloading dropdown data", e);
             }
-            return "admin/admin_schedule_add";
+            return "admin/admin_schedules_add";
         }
 
         try {
@@ -262,7 +402,11 @@ public class AdminScheduleController {
             log.info("Successfully added schedule with ID: {}", savedSchedule.getId());
 
             redirectAttributes.addFlashAttribute("success", "Thêm lịch chiếu thành công!");
-            return "redirect:/admin/schedules/list";
+
+            // Redirect về trang list với ngày đã chọn để hiển thị lịch chiếu vừa thêm
+            String redirectUrl = "redirect:/admin/schedules/list/date?date=" + scheduleDto.getScreeningDate();
+            log.info("Redirecting to: {}", redirectUrl);
+            return redirectUrl;
 
         } catch (group6.cinema_project.exception.ScheduleConflictException e) {
             log.warn("Schedule conflict detected: {}", e.getDetailedMessage());
@@ -292,7 +436,7 @@ public class AdminScheduleController {
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
             }
-            return "admin/admin_schedule_add";
+            return "admin/admin_schedules_add";
         }
     }
 
@@ -331,10 +475,10 @@ public class AdminScheduleController {
      */
     @PostMapping("/edit/{id}")
     public String editSchedule(@PathVariable("id") Integer id,
-                               @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-                               BindingResult bindingResult,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+            @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Processing edit schedule request for ID: {}", id);
 
         // Set the ID to ensure we're updating the correct record
@@ -359,7 +503,11 @@ public class AdminScheduleController {
             log.info("Successfully updated schedule with ID: {}", updatedSchedule.getId());
 
             redirectAttributes.addFlashAttribute("success", "Cập nhật lịch chiếu thành công!");
-            return "redirect:/admin/schedules/list";
+
+            // Redirect về trang list với ngày của lịch chiếu đã sửa
+            String redirectUrl = "redirect:/admin/schedules/list/date?date=" + scheduleDto.getScreeningDate();
+            log.info("Redirecting to: {}", redirectUrl);
+            return redirectUrl;
 
         } catch (IllegalStateException e) {
             log.warn("Cannot update a movie schedule is currently playing");
@@ -405,11 +553,20 @@ public class AdminScheduleController {
         log.info("Processing delete schedule request for ID: {}", id);
 
         try {
+            // Lấy thông tin lịch chiếu trước khi xóa để biết ngày
+            Optional<ScreeningScheduleDto> scheduleOpt = movieScheduleService.getScreeningScheduleById(id);
+            String redirectUrl = "redirect:/admin/schedules/list"; // default fallback
+
+            if (scheduleOpt.isPresent()) {
+                ScreeningScheduleDto schedule = scheduleOpt.get();
+                redirectUrl = "redirect:/admin/schedules/list/date?date=" + schedule.getScreeningDate();
+            }
+
             movieScheduleService.deleteScreeningSchedule(id);
             log.info("Successfully deleted schedule with ID: {}", id);
 
             redirectAttributes.addFlashAttribute("success", "Xóa lịch chiếu thành công!");
-            return "redirect:/admin/schedules/list";
+            return redirectUrl;
 
         } catch (IllegalStateException e) {
             log.warn("Cannot delete a movie schedule is currently playing");
@@ -423,88 +580,13 @@ public class AdminScheduleController {
     }
 
     /**
-     * Display movies currently playing (ACTIVE status)
-     */
-    @GetMapping("/list/playing")
-    public String listPlayingMovies(Model model) {
-        log.info("Loading currently playing movies");
-
-        try {
-            movieScheduleService.updateUpcomingToActiveSchedules();
-            movieScheduleService.updateExpiredScheduleStatuses();
-
-            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ACTIVE");
-            model.addAttribute("movies", movies);
-            model.addAttribute("currentTab", "PLAYING");
-            model.addAttribute("tabTitle", "Đang chiếu");
-
-            log.info("Successfully loaded {} currently playing movies", movies.size());
-            return "admin/admin_schedules_list_playing";
-
-        } catch (Exception e) {
-            log.error("Error loading currently playing movies", e);
-            model.addAttribute("error", "Lỗi khi tải danh sách phim đang chiếu: " + e.getMessage());
-            model.addAttribute("movies", java.util.Collections.emptyList());
-            return "admin/admin_schedules_list_playing";
-        }
-    }
-
-    /**
-     * Display movies coming soon (UPCOMING status)
-     */
-    @GetMapping("/list/comingsoon")
-    public String listComingSoonMovies(Model model) {
-        log.info("Loading coming soon movies");
-
-        try {
-            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("UPCOMING");
-            model.addAttribute("movies", movies);
-            model.addAttribute("currentTab", "comingsoon");
-            model.addAttribute("tabTitle", "Sắp chiếu");
-
-            log.info("Successfully loaded {} coming soon movies", movies.size());
-            return "admin/admin_schedules_list_comingsoon";
-
-        } catch (Exception e) {
-            log.error("Error loading coming soon movies", e);
-            model.addAttribute("error", "Lỗi khi tải danh sách phim sắp chiếu: " + e.getMessage());
-            model.addAttribute("movies", java.util.Collections.emptyList());
-            return "admin/admin_schedules_list_comingsoon";
-        }
-    }
-
-    /**
-     * Display movies that have stopped showing (ENDED status)
-     */
-    @GetMapping("/list/stopped")
-    public String listStoppedMovies(Model model) {
-        log.info("Loading stopped showing movies");
-
-        try {
-            List<MovieDto> movies = movieScheduleService.getMoviesByScheduleStatus("ENDED");
-            model.addAttribute("movies", movies);
-            model.addAttribute("currentTab", "stopped");
-            model.addAttribute("tabTitle", "Ngừng chiếu");
-
-            log.info("Successfully loaded {} stopped showing movies", movies.size());
-            return "admin/admin_schedules_list_stopped";
-
-        } catch (Exception e) {
-            log.error("Error loading stopped showing movies", e);
-            model.addAttribute("error", "Lỗi khi tải danh sách phim ngừng chiếu: " + e.getMessage());
-            model.addAttribute("movies", java.util.Collections.emptyList());
-            return "admin/admin_schedules_list_stopped";
-        }
-    }
-
-    /**
      * Display detailed schedules for a specific movie
      */
     @GetMapping("/detail/{movieId}")
     public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId,
-                                          @RequestParam(value = "status", required = false) String status,
-                                          @RequestParam(value = "backUrl", required = false) String backUrl,
-                                          Model model) {
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "backUrl", required = false) String backUrl,
+            Model model) {
 
         log.info("Đang tải chi tiết lịch chiếu cho phim ID: {} với bộ lọc trạng thái: {}", movieId, status);
 
@@ -612,33 +694,6 @@ public class AdminScheduleController {
                 filteredTimeSlots);
     }
 
-    @PostMapping("/update-statuses")
-    public String updateScheduleStatuses(RedirectAttributes redirectAttributes) {
-        log.info("Processing request to update movie schedule statuses");
-
-        try {
-            int upcomingToActiveCount = movieScheduleService.updateUpcomingToActiveSchedules();
-            int activeToEndedCount = movieScheduleService.updateExpiredScheduleStatuses();
-            int totalUpdated = upcomingToActiveCount + activeToEndedCount;
-
-            if (totalUpdated > 0) {
-                redirectAttributes.addFlashAttribute("success",
-                        "Đã cập nhật trạng thái cho " + totalUpdated + " lịch chiếu (" +
-                                upcomingToActiveCount + " từ sắp chiếu thành đang chiếu, " +
-                                activeToEndedCount + " từ đang chiếu thành đã kết thúc)");
-            } else {
-                redirectAttributes.addFlashAttribute("message", "Không có lịch chiếu nào cần cập nhật trạng thái");
-            }
-
-            return "redirect:/admin/schedules/list";
-
-        } catch (Exception e) {
-            log.error("Error updating schedule statuses", e);
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật trạng thái lịch chiếu: " + e.getMessage());
-            return "redirect:/admin/schedules/list";
-        }
-    }
-
     @PostMapping("/add-batch")
     public String addBatchSchedules(
             @RequestParam("movieId") Integer movieId,
@@ -706,8 +761,8 @@ public class AdminScheduleController {
      */
     @GetMapping("/calendar")
     public String showCalendarView(Model model,
-                                   @RequestParam(value = "year", required = false) Integer year,
-                                   @RequestParam(value = "month", required = false) Integer month) {
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month) {
         log.info("Loading calendar view - year: {}, month: {}", year, month);
 
         try {
@@ -815,6 +870,160 @@ public class AdminScheduleController {
         calendarData.put("totalSchedules", schedules.size());
 
         return calendarData;
+    }
+
+    /**
+     * API endpoint để search movies cho autocomplete
+     */
+    @GetMapping("/api/movies/search")
+    @ResponseBody
+    public List<Map<String, Object>> searchMovies(@RequestParam("q") String query) {
+        log.info("API request for movie search with query: {}", query);
+
+        try {
+            List<MovieDto> movies = movieService.getFilteredMoviesForDisplay(query, "name");
+
+            return movies.stream()
+                    .limit(10) // Giới hạn 10 kết quả
+                    .map(movie -> {
+                        Map<String, Object> movieData = new HashMap<>();
+                        movieData.put("id", movie.getId());
+                        movieData.put("name", movie.getName());
+                        movieData.put("duration", movie.getDuration());
+                        movieData.put("genre", movie.getGenre());
+                        movieData.put("rating", movie.getRating());
+                        return movieData;
+                    })
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error searching movies", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * API endpoint để lấy thông tin chi tiết một phim
+     */
+    @GetMapping("/api/movies/{id}")
+    @ResponseBody
+    public Map<String, Object> getMovieById(@PathVariable("id") Integer id) {
+        log.info("API request for movie details with ID: {}", id);
+
+        try {
+            Optional<MovieDto> movieOpt = movieService.getMovieById(id);
+
+            if (movieOpt.isPresent()) {
+                MovieDto movie = movieOpt.get();
+                Map<String, Object> movieData = new HashMap<>();
+                movieData.put("id", movie.getId());
+                movieData.put("name", movie.getName());
+                movieData.put("duration", movie.getDuration());
+                movieData.put("genre", movie.getGenre());
+                movieData.put("rating", movie.getRating());
+                return movieData;
+            } else {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Không tìm thấy phim");
+                return error;
+            }
+
+        } catch (Exception e) {
+            log.error("Error getting movie details", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Lỗi khi lấy thông tin phim");
+            return error;
+        }
+    }
+
+    /**
+     * API endpoint để kiểm tra xung đột lịch chiếu
+     */
+    @PostMapping("/api/check-conflict")
+    @ResponseBody
+    public Map<String, Object> checkScheduleConflict(@RequestBody Map<String, Object> conflictData) {
+        log.info("API request for schedule conflict check: {}", conflictData);
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Parse dữ liệu từ request
+            String screeningDateStr = (String) conflictData.get("screeningDate");
+            String startTimeStr = (String) conflictData.get("startTime");
+            String endTimeStr = (String) conflictData.get("endTime");
+
+            // Parse screeningRoomId an toàn từ String hoặc Integer
+            Integer screeningRoomId = null;
+            Object roomIdObj = conflictData.get("screeningRoomId");
+            if (roomIdObj instanceof String) {
+                try {
+                    screeningRoomId = Integer.parseInt((String) roomIdObj);
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid screeningRoomId format: {}", roomIdObj);
+                }
+            } else if (roomIdObj instanceof Integer) {
+                screeningRoomId = (Integer) roomIdObj;
+            }
+
+            // Parse movieId an toàn từ String hoặc Integer
+            Integer movieId = null;
+            Object movieIdObj = conflictData.get("movieId");
+            if (movieIdObj instanceof String) {
+                try {
+                    movieId = Integer.parseInt((String) movieIdObj);
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid movieId format: {}", movieIdObj);
+                }
+            } else if (movieIdObj instanceof Integer) {
+                movieId = (Integer) movieIdObj;
+            }
+
+            if (screeningDateStr == null || startTimeStr == null || endTimeStr == null || screeningRoomId == null
+                    || movieId == null) {
+                response.put("hasConflict", false);
+                response.put("message", "Dữ liệu không đầy đủ để kiểm tra xung đột");
+                return response;
+            }
+
+            // Parse excludeId nếu có (cho edit mode)
+            Integer excludeId = null;
+            Object excludeIdObj = conflictData.get("excludeId");
+            if (excludeIdObj instanceof String) {
+                try {
+                    excludeId = Integer.parseInt((String) excludeIdObj);
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid excludeId format: {}", excludeIdObj);
+                }
+            } else if (excludeIdObj instanceof Integer) {
+                excludeId = (Integer) excludeIdObj;
+            }
+
+            // Tạo DTO để kiểm tra xung đột
+            ScreeningScheduleDto scheduleDto = new ScreeningScheduleDto();
+            scheduleDto.setId(excludeId); // Set ID để loại trừ khỏi conflict check
+            scheduleDto.setMovieId(movieId); // Set movieId để validate
+            scheduleDto.setScreeningDate(LocalDate.parse(screeningDateStr));
+            scheduleDto.setStartTime(LocalTime.parse(startTimeStr));
+            scheduleDto.setEndTime(LocalTime.parse(endTimeStr));
+            scheduleDto.setScreeningRoomId(screeningRoomId);
+
+            // Kiểm tra xung đột
+            try {
+                movieScheduleService.validateScheduleConflicts(scheduleDto);
+                response.put("hasConflict", false);
+                response.put("message", "Không có xung đột lịch chiếu");
+            } catch (ScheduleConflictException e) {
+                response.put("hasConflict", true);
+                response.put("message", e.getMessage());
+            }
+
+        } catch (Exception e) {
+            log.error("Error checking schedule conflict", e);
+            response.put("hasConflict", false);
+            response.put("message", "Lỗi khi kiểm tra xung đột: " + e.getMessage());
+        }
+
+        return response;
     }
 
     /**

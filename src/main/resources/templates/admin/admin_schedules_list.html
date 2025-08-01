@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CinemaAdmin - Lịch Chiếu Chi Tiết</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar {
+        width: 320px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .sidebar.collapsed {
+        width: 80px;
+      }
+
+      .sidebar.collapsed .sidebar-header h5,
+      .sidebar.collapsed .sidebar-header small,
+      .sidebar.collapsed .sidebar-menu span,
+      .sidebar.collapsed .mt-auto .text-white,
+      .sidebar.collapsed .mt-auto small {
+        display: none;
+      }
+
+      .sidebar.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .main-content-wrapper {
+        margin-left: 320px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 320px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+
+      /* Date Header Styles */
+      .date-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .date-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 50%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+      }
+
+      .date-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .date-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Filter Buttons */
+      .filter-container {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(79, 70, 229, 0.1);
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        background: rgba(79, 70, 229, 0.1);
+        color: #4f46e5;
+        border: 2px solid rgba(79, 70, 229, 0.2);
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+      }
+
+      .filter-btn:hover {
+        background: rgba(79, 70, 229, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      }
+
+      .filter-btn.active {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border-color: #4f46e5;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+      }
+
+      .filter-btn.upcoming {
+        background: rgba(217, 119, 6, 0.1);
+        color: #d97706;
+        border-color: rgba(217, 119, 6, 0.2);
+      }
+
+      .filter-btn.upcoming.active {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        color: white;
+        border-color: #d97706;
+      }
+
+      .filter-btn.playing {
+        background: rgba(5, 150, 105, 0.1);
+        color: #059669;
+        border-color: rgba(5, 150, 105, 0.2);
+      }
+
+      .filter-btn.playing.active {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border-color: #059669;
+      }
+
+      .filter-btn.ended {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.2);
+      }
+
+      .filter-btn.ended.active {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        border-color: #dc2626;
+      }
+
+      /* Movie Cards */
+      .movies-container {
+        display: grid;
+        gap: 2rem;
+      }
+
+      .movie-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(79, 70, 229, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .movie-header {
+        display: flex;
+        padding: 1.5rem;
+        gap: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .movie-poster {
+        width: 120px;
+        height: 180px;
+        border-radius: 15px;
+        object-fit: cover;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .movie-info {
+        flex: 1;
+      }
+
+      .movie-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+      }
+
+      .movie-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .movie-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+
+      .movie-description {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      .schedules-section {
+        padding: 1.5rem;
+      }
+
+      .schedules-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .schedule-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .schedule-item:hover {
+        border-color: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+      }
+
+      .schedule-time {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #4f46e5;
+        margin-bottom: 0.5rem;
+      }
+
+      .schedule-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .schedule-detail {
+        font-size: 0.85rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .status-upcoming {
+        background: rgba(217, 119, 6, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(217, 119, 6, 0.2);
+      }
+
+      .status-active {
+        background: rgba(5, 150, 105, 0.1);
+        color: #059669;
+        border: 1px solid rgba(5, 150, 105, 0.2);
+      }
+
+      .status-ended {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+      }
+
+      /* Responsive */
+      @media (max-width: 992px) {
+        .sidebar {
+          transform: translateX(-100%);
+          width: 320px;
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content-wrapper {
+          margin-left: 0;
+        }
+        .header-custom {
+          left: 0;
+        }
+        .filter-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+        .filter-btn {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .movie-header {
+          flex-direction: column;
+          text-align: center;
+        }
+        .movie-poster {
+          align-self: center;
+        }
+        .schedule-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+          <div class="bg-white rounded-circle p-2 me-3">
+            <i class="fas fa-film text-primary"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
+            <small class="text-white-50">Hệ thống quản lý</small>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Bảng điều khiển</span>
+        </a>
+        <a th:href="@{/admin/movies/list}" class="menu-item">
+          <i class="fas fa-film"></i>
+          <span>Phim</span>
+        </a>
+        <a th:href="@{/admin/directors/list}" class="menu-item">
+          <i class="fas fa-user-friends"></i>
+          <span>Diễn viên & Đạo diễn</span>
+        </a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item active">
+          <i class="fas fa-list"></i>
+          <span>Danh sách lịch chiếu</span>
+        </a>
+        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Lịch chiếu tháng</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-ticket-alt"></i>
+          <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-users"></i>
+          <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-chart-pie"></i>
+          <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-cog"></i>
+          <span>Cài đặt</span>
+        </a>
+      </nav>
+
+      <div
+        class="mt-auto p-4 border-top border-white-50"
+        style="border-color: rgba(255, 255, 255, 0.1) !important"
+      >
+        <div class="d-flex align-items-center">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="User Avatar"
+            width="40"
+            height="40"
+            class="rounded-circle me-3"
+          />
+          <div>
+            <div class="text-white fw-semibold">Admin User</div>
+            <small class="text-white-50">admin@cinema.com</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700">Lịch Chiếu Chi Tiết</h4>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <a
+            th:href="@{/admin/schedules/calendar}"
+            class="btn btn-outline-primary me-2"
+          >
+            <i class="fas fa-calendar-alt me-2"></i>Quay lại lịch
+          </a>
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <div class="container-fluid p-4">
+        <!-- Flash Messages -->
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div
+          th:if="${message}"
+          class="alert alert-info alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-info-circle me-2"></i>
+          <span th:text="${message}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <!-- Date Header -->
+        <div class="date-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="date-title" th:text="${selectedDateFormatted}">
+                Thứ Hai, 15 Tháng 1, 2024
+              </h1>
+              <p class="date-subtitle">Lịch chiếu phim chi tiết trong ngày</p>
+            </div>
+            <!-- Button thêm lịch chiếu luôn hiển thị -->
+            <div>
+              <a
+                th:href="@{/admin/schedules/add(date=${selectedDate})}"
+                class="btn btn-primary"
+                th:if="${selectedDate != null}"
+              >
+                <i class="fas fa-plus me-2"></i>Thêm lịch chiếu mới
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-container">
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">
+              <i class="fas fa-th"></i>
+              <span>Tất cả</span>
+            </button>
+            <button class="filter-btn upcoming" data-filter="upcoming">
+              <i class="fas fa-clock"></i>
+              <span>Sắp chiếu</span>
+            </button>
+            <button class="filter-btn playing" data-filter="active">
+              <i class="fas fa-play-circle"></i>
+              <span>Đang chiếu</span>
+            </button>
+            <button class="filter-btn ended" data-filter="ended">
+              <i class="fas fa-stop-circle"></i>
+              <span>Đã chiếu</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Movies Container -->
+        <div class="movies-container" id="moviesContainer">
+          <!-- Movies sẽ được load bằng JavaScript hoặc từ server -->
+          <div
+            th:if="${movies == null or #lists.isEmpty(movies)}"
+            class="text-center py-5"
+          >
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Không có lịch chiếu nào trong ngày này</h5>
+            <p class="text-muted">
+              Vui lòng chọn ngày khác hoặc thêm lịch chiếu mới.
+            </p>
+            <a
+              th:href="@{/admin/schedules/add(date=${selectedDate})}"
+              class="btn btn-primary"
+            >
+              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
+            </a>
+          </div>
+
+          <!-- Thêm button thêm lịch chiếu ở cuối danh sách nếu có phim -->
+          <div
+            th:if="${movies != null and not #lists.isEmpty(movies)}"
+            class="text-center mt-4"
+          >
+            <a
+              th:href="@{/admin/schedules/add(date=${selectedDate})}"
+              class="btn btn-outline-primary btn-lg"
+              th:if="${selectedDate != null}"
+            >
+              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu cho ngày này
+            </a>
+          </div>
+
+          <!-- Movie Cards -->
+          <div
+            th:each="movie : ${movies}"
+            class="movie-card"
+            th:data-status="${movie.status}"
+          >
+            <div class="movie-header">
+              <img
+                th:src="${movie.image}"
+                th:alt="${movie.name}"
+                class="movie-poster"
+                onerror="this.src='https://via.placeholder.com/120x180?text=No+Image'"
+              />
+              <div class="movie-info">
+                <h3 class="movie-title" th:text="${movie.name}">Tên Phim</h3>
+                <div class="movie-details">
+                  <div class="movie-detail-item">
+                    <i class="fas fa-clock text-primary"></i>
+                    <span th:text="${movie.duration + ' phút'}">120 phút</span>
+                  </div>
+                  <div class="movie-detail-item">
+                    <i class="fas fa-star text-warning"></i>
+                    <span th:text="${movie.rating}">8.5</span>
+                  </div>
+                  <div class="movie-detail-item">
+                    <i class="fas fa-tags text-info"></i>
+                    <span th:text="${movie.genre}">Hành động</span>
+                  </div>
+                  <div class="movie-detail-item">
+                    <i class="fas fa-language text-success"></i>
+                    <span th:text="${movie.language}">Tiếng Việt</span>
+                  </div>
+                </div>
+                <p class="movie-description" th:text="${movie.description}">
+                  Mô tả phim...
+                </p>
+              </div>
+            </div>
+
+            <div class="schedules-section">
+              <h4 class="schedules-title">
+                <i class="fas fa-calendar-check text-primary"></i>
+                Lịch chiếu trong ngày
+              </h4>
+
+              <div
+                th:if="${movie.schedules == null or #lists.isEmpty(movie.schedules)}"
+                class="text-center py-3"
+              >
+                <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-0">Không có lịch chiếu nào</p>
+              </div>
+
+              <div
+                th:if="${movie.schedules != null and not #lists.isEmpty(movie.schedules)}"
+                class="schedule-grid"
+              >
+                <div
+                  th:each="schedule : ${movie.schedules}"
+                  class="schedule-item"
+                  th:data-status="${schedule.status}"
+                  th:onclick="'showScheduleDetails(' + ${schedule.id} + ')'"
+                >
+                  <div
+                    class="schedule-time"
+                    th:text="${schedule.startTime != null and schedule.endTime != null ?
+                             (schedule.startTime.toString().substring(0,5) + ' - ' + schedule.endTime.toString().substring(0,5)) :
+                             'Chưa xác định thời gian'}"
+                  >
+                    09:00 - 11:30
+                  </div>
+                  <div class="schedule-details">
+                    <div class="schedule-detail">
+                      <i class="fas fa-door-open text-primary"></i>
+                      <span
+                        th:text="${schedule.screeningRoom?.name ?: 'Chưa xác định'}"
+                        >Phòng 1</span
+                      >
+                    </div>
+                    <div class="schedule-detail">
+                      <i class="fas fa-map-marker-alt text-danger"></i>
+                      <span
+                        th:text="${schedule.branch?.name ?: 'Chưa xác định'}"
+                        >Chi nhánh A</span
+                      >
+                    </div>
+                    <div class="schedule-detail">
+                      <span
+                        class="status-badge"
+                        th:classappend="${schedule.status == 'UPCOMING' ? 'status-upcoming' :
+                                           (schedule.status == 'ACTIVE' ? 'status-active' : 'status-ended')}"
+                      >
+                        <i class="fas fa-circle"></i>
+                        <span
+                          th:text="${schedule.status == 'UPCOMING' ? 'Sắp chiếu' :
+                                       (schedule.status == 'ACTIVE' ? 'Đang chiếu' : 'Đã chiếu')}"
+                        >
+                          Đang chiếu
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Lấy ngày được chọn từ server
+      const selectedDate = new Date(
+        '[[${ selectedDate != null ? selectedDate : #dates.format(#dates.createNow(), "yyyy-MM-dd") }]]'
+      );
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time để so sánh chỉ ngày
+      selectedDate.setHours(0, 0, 0, 0);
+
+      const isPastDate = selectedDate < today;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeDashboardBehavior();
+        initializeFilters();
+        handlePastDateFilters();
+      });
+
+      function initializeDashboardBehavior() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const mainContentWrapper =
+          document.getElementById("mainContentWrapper");
+
+        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        function checkViewport() {
+          if (window.innerWidth <= 992) {
+            if (!sidebar.classList.contains("collapsed")) {
+              toggleSidebar();
+            }
+          }
+        }
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
+      }
+
+      function handlePastDateFilters() {
+        if (isPastDate) {
+          // Ẩn button "Sắp chiếu" và "Đang chiếu" cho ngày quá khứ
+          const upcomingBtn = document.querySelector(
+            '.filter-btn[data-filter="upcoming"]'
+          );
+          const activeBtn = document.querySelector(
+            '.filter-btn[data-filter="active"]'
+          );
+
+          if (upcomingBtn) {
+            upcomingBtn.style.display = "none";
+          }
+          if (activeBtn) {
+            activeBtn.style.display = "none";
+          }
+
+          // Nếu button hiện tại đang active là upcoming hoặc active, chuyển về "all"
+          const currentActive = document.querySelector(".filter-btn.active");
+          if (
+            currentActive &&
+            (currentActive.dataset.filter === "upcoming" ||
+              currentActive.dataset.filter === "active")
+          ) {
+            currentActive.classList.remove("active");
+            document
+              .querySelector('.filter-btn[data-filter="all"]')
+              .classList.add("active");
+          }
+        }
+      }
+
+      function initializeFilters() {
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        const movieCards = document.querySelectorAll(".movie-card");
+
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            // Xóa active class từ tất cả buttons
+            filterButtons.forEach((btn) => btn.classList.remove("active"));
+            // Thêm active class cho button được click
+            button.classList.add("active");
+
+            const filter = button.dataset.filter;
+            filterMovies(filter);
+          });
+        });
+      }
+
+      function filterMovies(filter) {
+        const movieCards = document.querySelectorAll(".movie-card");
+
+        movieCards.forEach((card) => {
+          if (filter === "all") {
+            card.style.display = "block";
+          } else {
+            // Kiểm tra xem movie có schedule với status tương ứng không
+            const scheduleItems = card.querySelectorAll(".schedule-item");
+            let hasMatchingSchedule = false;
+
+            scheduleItems.forEach((item) => {
+              const status = item.dataset.status;
+              if (
+                (filter === "upcoming" && status === "UPCOMING") ||
+                (filter === "active" && status === "ACTIVE") ||
+                (filter === "ended" &&
+                  (status === "ENDED" || status === "CANCELLED"))
+              ) {
+                hasMatchingSchedule = true;
+              }
+            });
+
+            card.style.display = hasMatchingSchedule ? "block" : "none";
+          }
+        });
+      }
+
+      function showScheduleDetails(scheduleId) {
+        // Hiển thị chi tiết lịch chiếu
+        alert("Xem chi tiết lịch chiếu ID: " + scheduleId);
+        // Có thể mở modal hoặc chuyển đến trang chi tiết
+      }
+    </script>
+  </body>
+</html>

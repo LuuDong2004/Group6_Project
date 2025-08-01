@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CinemaAdmin - Chỉnh Sửa Lịch Chiếu</title>
+    <title>CinemaAdmin - Thêm Lịch Chiếu</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -20,27 +20,21 @@
     />
 
     <style>
-      * {
-        font-family: "Inter", sans-serif;
-      }
-
       body {
+        font-family: "Inter", sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
-        margin: 0;
-        padding: 0;
       }
 
       .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
         width: 280px;
         background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        min-height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
         z-index: 1000;
-        overflow-y: auto;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
       }
 
       .sidebar-header {
@@ -67,34 +61,32 @@
         background: rgba(255, 255, 255, 0.1);
         color: white;
         border-left-color: #3498db;
-        text-decoration: none;
       }
 
       .menu-item i {
         width: 20px;
-        margin-right: 12px;
-        font-size: 16px;
+        margin-right: 1rem;
+        text-align: center;
       }
 
       .main-content {
         margin-left: 280px;
         padding: 2rem;
-        min-height: 100vh;
       }
 
       .content-header {
         background: white;
-        padding: 2rem;
         border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
         margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
 
       .form-container {
         background: white;
-        padding: 2.5rem;
         border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
 
       .form-group {
@@ -105,15 +97,13 @@
         font-weight: 600;
         color: #2c3e50;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
+        display: block;
       }
 
       .form-control {
         border: 2px solid #e9ecef;
         border-radius: 10px;
         padding: 0.75rem 1rem;
-        font-size: 0.95rem;
         transition: all 0.3s ease;
       }
 
@@ -122,31 +112,27 @@
         box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
       }
 
-      .btn {
+      .btn-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
         border-radius: 10px;
-        padding: 0.75rem 1.5rem;
+        padding: 0.75rem 2rem;
         font-weight: 600;
         transition: all 0.3s ease;
       }
 
-      .btn-primary {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        border: none;
-      }
-
       .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
       }
 
       .btn-secondary {
         background: #6c757d;
         border: none;
-      }
-
-      .btn-secondary:hover {
-        background: #5a6268;
-        transform: translateY(-2px);
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
       }
 
       .autocomplete-container {
@@ -160,8 +146,7 @@
         right: 0;
         background: white;
         border: 1px solid #ddd;
-        border-top: none;
-        border-radius: 0 0 10px 10px;
+        border-radius: 8px;
         max-height: 200px;
         overflow-y: auto;
         z-index: 1000;
@@ -169,14 +154,12 @@
       }
 
       .autocomplete-suggestion {
-        padding: 12px 15px;
+        padding: 0.75rem 1rem;
         cursor: pointer;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background-color 0.2s;
+        border-bottom: 1px solid #f8f9fa;
       }
 
-      .autocomplete-suggestion:hover,
-      .autocomplete-suggestion.active {
+      .autocomplete-suggestion:hover {
         background-color: #f8f9fa;
       }
 
@@ -185,28 +168,23 @@
       }
 
       .conflict-warning {
-        background: #fff3cd;
+        background-color: #fff3cd;
         border: 1px solid #ffeaa7;
         color: #856404;
-        padding: 12px 15px;
+        padding: 0.75rem;
         border-radius: 8px;
-        margin: 15px 0;
+        margin-top: 0.5rem;
         display: none;
       }
 
-      .conflict-warning.show {
-        display: block;
+      .is-invalid {
+        border-color: #dc3545;
       }
 
-      .alert {
-        border-radius: 10px;
-        border: none;
-        padding: 1rem 1.5rem;
-      }
-
-      .alert-info {
-        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-        color: white;
+      .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
       }
 
       .form-control:disabled {
@@ -223,11 +201,11 @@
       <div class="sidebar-header">
         <div class="d-flex align-items-center">
           <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-edit text-primary"></i>
+            <i class="fas fa-calendar-plus text-primary"></i>
           </div>
           <div>
             <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Chỉnh Sửa Lịch Chiếu</small>
+            <small class="text-white-50">Thêm Lịch Chiếu</small>
           </div>
         </div>
       </div>
@@ -258,14 +236,41 @@
           <span>Blog</span>
         </a>
         <a href="#" class="menu-item">
+          <i class="fas fa-ticket-alt"></i>
+          <span>Đặt vé</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-users"></i>
+          <span>Người dùng</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-chart-pie"></i>
+          <span>Phân tích</span>
+        </a>
+        <a href="#" class="menu-item">
           <i class="fas fa-cog"></i>
           <span>Cài đặt</span>
         </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Đăng xuất</span>
-        </a>
       </nav>
+
+      <div
+        class="mt-auto p-4 border-top border-white-50"
+        style="border-color: rgba(255, 255, 255, 0.1) !important"
+      >
+        <div class="d-flex align-items-center">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="User Avatar"
+            width="40"
+            height="40"
+            class="rounded-circle me-3"
+          />
+          <div>
+            <div class="text-white fw-semibold">Admin User</div>
+            <small class="text-white-50">admin@cinema.com</small>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Main Content -->
@@ -275,10 +280,10 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h1 class="h3 mb-0 text-gray-800 fw-bold">
-              <i class="fas fa-edit me-2 text-primary"></i>
-              Chỉnh Sửa Lịch Chiếu
+              <i class="fas fa-calendar-plus me-2 text-primary"></i>
+              Thêm Lịch Chiếu Mới
             </h1>
-            <p class="text-muted mb-0">Cập nhật thông tin lịch chiếu</p>
+            <p class="text-muted mb-0">Tạo lịch chiếu cho phim</p>
           </div>
           <div>
             <a
@@ -299,14 +304,20 @@
 
       <!-- Form Container -->
       <div class="form-container">
-        <!-- Hiển thị thông báo lỗi -->
+        <!-- Hiển thị thông báo lỗi nếu có -->
         <div th:if="${error}" class="alert alert-danger" role="alert">
-          <i class="fas fa-exclamation-circle me-2"></i>
+          <i class="fas fa-exclamation-triangle me-2"></i>
           <span th:text="${error}"></span>
         </div>
 
+        <!-- Hiển thị thông báo thành công nếu có -->
+        <div th:if="${success}" class="alert alert-success" role="alert">
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+        </div>
+
         <form
-          th:action="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
+          th:action="@{/admin/schedules/add}"
           th:object="${schedule}"
           method="post"
           id="scheduleForm"
@@ -323,6 +334,7 @@
                   class="form-control"
                   id="screeningDate"
                   th:field="*{screeningDate}"
+                  readonly
                   required
                 />
                 <div
@@ -340,18 +352,15 @@
                 <label for="status" class="form-label">
                   <i class="fas fa-info-circle me-2"></i>Trạng thái
                 </label>
-                <select
-                  class="form-control"
-                  id="status"
-                  th:field="*{status}"
-                  required
-                >
-                  <option value="">-- Chọn trạng thái --</option>
-                  <option value="UPCOMING">Sắp chiếu</option>
-                  <option value="ACTIVE">Đang chiếu</option>
-                  <option value="COMPLETED">Đã hoàn thành</option>
-                  <option value="CANCELLED">Đã hủy</option>
+                <select class="form-control" id="status" required readonly>
+                  <option value="UPCOMING" selected>Sắp chiếu</option>
                 </select>
+                <!-- Hidden input để đảm bảo giá trị được submit -->
+                <input type="hidden" th:field="*{status}" value="UPCOMING" />
+                <small class="text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Lịch chiếu mới luôn có trạng thái "Sắp chiếu"
+                </small>
                 <div
                   th:if="${#fields.hasErrors('status')}"
                   class="invalid-feedback d-block"
@@ -454,9 +463,9 @@
                   <option
                     th:each="branch : ${branches}"
                     th:value="${branch.id}"
-                    th:text="${branch.name + ' - ' + branch.address}"
+                    th:text="${branch.name}"
                   >
-                    Chi nhánh 1 - Địa chỉ
+                    Chi nhánh 1
                   </option>
                 </select>
                 <div
@@ -474,7 +483,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="startTime" class="form-label">
-                  <i class="fas fa-play me-2"></i>Thời gian bắt đầu
+                  <i class="fas fa-clock me-2"></i>Thời gian bắt đầu
                 </label>
                 <input
                   type="time"
@@ -525,11 +534,14 @@
           <div class="row mt-4">
             <div class="col-12">
               <div class="d-flex justify-content-end gap-3">
-                <a th:href="@{/admin/schedules/list}" class="btn btn-secondary">
+                <a
+                  th:href="@{/admin/schedules/calendar}"
+                  class="btn btn-secondary"
+                >
                   <i class="fas fa-times me-2"></i>Hủy
                 </a>
                 <button type="submit" class="btn btn-primary" id="submitBtn">
-                  <i class="fas fa-save me-2"></i>Cập nhật lịch chiếu
+                  <i class="fas fa-save me-2"></i>Lưu lịch chiếu
                 </button>
               </div>
             </div>
@@ -544,29 +556,8 @@
         initializeAutocomplete();
         initializeConflictCheck();
         initializeFormValidation();
-        loadExistingMovieData();
+        setDefaultStatus();
       });
-
-      // Tải dữ liệu phim hiện tại khi edit
-      function loadExistingMovieData() {
-        const selectedMovieId =
-          document.getElementById("selectedMovieId").value;
-        if (selectedMovieId) {
-          // Lấy thông tin phim để hiển thị
-          fetch(`/admin/schedules/api/movies/${selectedMovieId}`)
-            .then((response) => response.json())
-            .then((movie) => {
-              document.getElementById("movieSearch").value = movie.title;
-              document.getElementById("selectedMovieName").textContent =
-                movie.title;
-              document.getElementById("selectedMovieDisplay").style.display =
-                "block";
-            })
-            .catch((error) => {
-              console.error("Lỗi khi tải thông tin phim:", error);
-            });
-        }
-      }
 
       // Khởi tạo autocomplete cho phim
       function initializeAutocomplete() {
@@ -586,47 +577,67 @@
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
             if (query.length >= 2) {
-              fetch(
-                `/admin/schedules/api/movies/search?query=${encodeURIComponent(
-                  query
-                )}`
-              )
-                .then((response) => response.json())
-                .then((movies) => {
-                  movieSuggestions.innerHTML = "";
-                  if (movies.length > 0) {
-                    movies.forEach((movie) => {
-                      const suggestion = document.createElement("div");
-                      suggestion.className = "autocomplete-suggestion";
-                      suggestion.innerHTML = `
-                        <strong>${movie.title}</strong><br>
-                        <small class="text-muted">Thời lượng: ${movie.duration} phút</small>
-                      `;
-                      suggestion.addEventListener("click", function () {
-                        movieSearch.value = movie.title;
-                        selectedMovieId.value = movie.id;
-                        selectedMovieName.textContent = movie.title;
-                        selectedMovieDisplay.style.display = "block";
-                        movieSuggestions.style.display = "none";
-                      });
-                      movieSuggestions.appendChild(suggestion);
-                    });
-                    movieSuggestions.style.display = "block";
-                  } else {
-                    movieSuggestions.style.display = "none";
-                  }
-                })
-                .catch((error) => {
-                  console.error("Lỗi khi tìm kiếm phim:", error);
-                  movieSuggestions.style.display = "none";
-                });
+              searchMovies(query);
             } else {
               movieSuggestions.style.display = "none";
             }
           }, 300);
         });
 
-        // Ẩn suggestions khi click ra ngoài
+        function searchMovies(query) {
+          fetch(
+            `/admin/schedules/api/movies/search?q=${encodeURIComponent(query)}`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              displaySuggestions(data);
+            })
+            .catch((error) => {
+              console.error("Lỗi khi tìm kiếm phim:", error);
+            });
+        }
+
+        function displaySuggestions(movies) {
+          movieSuggestions.innerHTML = "";
+
+          if (movies.length === 0) {
+            movieSuggestions.innerHTML =
+              '<div class="autocomplete-suggestion">Không tìm thấy phim nào</div>';
+          } else {
+            movies.forEach((movie) => {
+              const suggestion = document.createElement("div");
+              suggestion.className = "autocomplete-suggestion";
+              suggestion.innerHTML = `
+                <div>
+                  <strong>${movie.name}</strong>
+                  <br>
+                  <small class="text-muted">Thời lượng: ${movie.duration} phút | Thể loại: ${movie.genre}</small>
+                </div>
+              `;
+
+              suggestion.addEventListener("click", function () {
+                selectMovie(movie);
+              });
+
+              movieSuggestions.appendChild(suggestion);
+            });
+          }
+
+          movieSuggestions.style.display = "block";
+        }
+
+        function selectMovie(movie) {
+          movieSearch.value = movie.name;
+          selectedMovieId.value = movie.id;
+          selectedMovieName.textContent = movie.name;
+          selectedMovieDisplay.style.display = "block";
+          movieSuggestions.style.display = "none";
+
+          // Tự động tính thời gian kết thúc dựa trên thời lượng phim
+          calculateEndTime(movie.duration);
+        }
+
+        // Ẩn suggestions khi click bên ngoài
         document.addEventListener("click", function (e) {
           if (
             !movieSearch.contains(e.target) &&
@@ -635,6 +646,25 @@
             movieSuggestions.style.display = "none";
           }
         });
+      }
+
+      // Tự động tính thời gian kết thúc
+      function calculateEndTime(duration) {
+        const startTimeInput = document.getElementById("startTime");
+        const endTimeInput = document.getElementById("endTime");
+
+        if (startTimeInput.value && duration) {
+          const startTime = new Date(`2000-01-01T${startTimeInput.value}:00`);
+          const endTime = new Date(startTime.getTime() + duration * 60000); // duration in minutes
+
+          const hours = endTime.getHours().toString().padStart(2, "0");
+          const minutes = endTime.getMinutes().toString().padStart(2, "0");
+
+          endTimeInput.value = `${hours}:${minutes}`;
+
+          // Kiểm tra xung đột sau khi tính thời gian
+          checkConflict();
+        }
       }
 
       // Kiểm tra xung đột lịch chiếu
@@ -649,6 +679,23 @@
             element.addEventListener("change", checkConflict);
           }
         );
+
+        // Cũng kiểm tra khi thay đổi thời gian bắt đầu để tự động tính thời gian kết thúc
+        startTime.addEventListener("change", function () {
+          const selectedMovieId =
+            document.getElementById("selectedMovieId").value;
+          if (selectedMovieId) {
+            // Lấy thông tin phim để tính thời gian kết thúc
+            fetch(`/admin/schedules/api/movies/${selectedMovieId}`)
+              .then((response) => response.json())
+              .then((movie) => {
+                calculateEndTime(movie.duration);
+              })
+              .catch((error) => {
+                console.error("Lỗi khi lấy thông tin phim:", error);
+              });
+          }
+        });
       }
 
       function checkConflict() {
@@ -657,10 +704,9 @@
         const endTime = document.getElementById("endTime").value;
         const screeningRoomId =
           document.getElementById("screeningRoomId").value;
-        const scheduleId = document
-          .querySelector("form")
-          .action.split("/")
-          .pop(); // Lấy ID từ URL
+        const conflictWarning = document.getElementById("conflictWarning");
+        const conflictMessage = document.getElementById("conflictMessage");
+        const submitBtn = document.getElementById("submitBtn");
 
         if (screeningDate && startTime && endTime && screeningRoomId) {
           const selectedMovieId =
@@ -668,8 +714,10 @@
 
           if (!selectedMovieId) {
             // Không có movieId thì không thể check conflict
-            const conflictWarning = document.getElementById("conflictWarning");
-            conflictWarning.classList.remove("show");
+            conflictWarning.style.display = "none";
+            submitBtn.disabled = false;
+            submitBtn.innerHTML =
+              '<i class="fas fa-save me-2"></i>Lưu lịch chiếu';
             return;
           }
 
@@ -679,7 +727,6 @@
             endTime: endTime,
             screeningRoomId: screeningRoomId,
             movieId: selectedMovieId,
-            excludeId: scheduleId, // Loại trừ chính lịch chiếu đang edit
           };
 
           fetch("/admin/schedules/api/check-conflict", {
@@ -690,17 +737,18 @@
             body: JSON.stringify(conflictData),
           })
             .then((response) => response.json())
-            .then((result) => {
-              const conflictWarning =
-                document.getElementById("conflictWarning");
-              const conflictMessage =
-                document.getElementById("conflictMessage");
-
-              if (result.hasConflict) {
-                conflictMessage.textContent = result.message;
-                conflictWarning.classList.add("show");
+            .then((data) => {
+              if (data.hasConflict) {
+                conflictMessage.textContent = data.message;
+                conflictWarning.style.display = "block";
+                submitBtn.disabled = true;
+                submitBtn.innerHTML =
+                  '<i class="fas fa-exclamation-triangle me-2"></i>Có xung đột lịch chiếu';
               } else {
-                conflictWarning.classList.remove("show");
+                conflictWarning.style.display = "none";
+                submitBtn.disabled = false;
+                submitBtn.innerHTML =
+                  '<i class="fas fa-save me-2"></i>Lưu lịch chiếu';
               }
             })
             .catch((error) => {
@@ -723,6 +771,28 @@
             return false;
           }
         });
+      }
+
+      // Set trạng thái mặc định - luôn là "Sắp chiếu"
+      function setDefaultStatus() {
+        const statusSelect = document.getElementById("status");
+        // Luôn set trạng thái là "Sắp chiếu"
+        statusSelect.value = "UPCOMING";
+
+        // Đảm bảo ngày được hiển thị đúng nếu có từ URL parameter
+        setDateFromUrlParameter();
+      }
+
+      // Lấy ngày từ URL parameter và set vào form
+      function setDateFromUrlParameter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get("date");
+        const screeningDateInput = document.getElementById("screeningDate");
+
+        if (dateParam && screeningDateInput) {
+          screeningDateInput.value = dateParam;
+          console.log("Set date from URL parameter:", dateParam);
+        }
       }
     </script>
   </body>
