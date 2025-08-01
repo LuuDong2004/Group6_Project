@@ -184,21 +184,27 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
     private boolean hasActiveSchedules(int roomId) {
         Date currentDate = new Date();
         java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
+        //System.out.println("DEBUG: Checking active schedules for room " + roomId + " at " + currentDate + " " + currentTime);
         Integer result = screeningRoomRepository.hasActiveSchedules(roomId, currentDate, currentTime);
+        //System.out.println("DEBUG: Repository returned: " + result);
         return result != null && result == 1;
     }
     
-    @Override
     // Lấy danh sách suất chiếu đang hoạt động của phòng
+    @Override
     public List<ScreeningSchedule> getActiveSchedules(int roomId) {
         Date currentDate = new Date();
         java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
         return screeningRoomRepository.getActiveSchedules(roomId, currentDate, currentTime);
     }
     
-    @Override
     // Kiểm tra xem phòng chiếu có thể chỉnh sửa được không
+    @Override
     public boolean canEditRoom(int roomId) {
-        return !hasActiveSchedules(roomId);
+        boolean hasActive = hasActiveSchedules(roomId);
+        //System.out.println("DEBUG: Room " + roomId + " has active schedules: " + hasActive);
+        return !hasActive;
     }
+    
+
 }
