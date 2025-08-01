@@ -1,6 +1,5 @@
 package group6.cinema_project.service.Admin.impl;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import group6.cinema_project.entity.CinemaChain;
-
 
 @Service
 public class AdminCinemaChainServiceImpl implements IAdminCinemaChainService {
@@ -48,6 +46,7 @@ public class AdminCinemaChainServiceImpl implements IAdminCinemaChainService {
             return cinemaChainRepository.findAll(PageRequest.of(page, size));
         }
     }
+
     @Override
     public boolean isNameDuplicate(String name, Integer id) {
         List<CinemaChain> chains = cinemaChainRepository.findByName(name);

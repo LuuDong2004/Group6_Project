@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class AdminBranchServiceImpl implements IAdminBranchService {
 
-
     @Autowired
     private AdminBranchRepository branchRepository;
     @Autowired
@@ -75,20 +74,21 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
     @Override
     public Page<BranchDto> getBranchesPage(int page, int size) {
         Page<Branch> branchPage = branchRepository.findAll(PageRequest.of(page, size));
-        List<BranchDto> branchDtos = branchPage.getContent().stream().map(BranchDto::fromEntity).collect(Collectors.toList());
+        List<BranchDto> branchDtos = branchPage.getContent().stream().map(BranchDto::fromEntity)
+                .collect(Collectors.toList());
         return new PageImpl<>(branchDtos, branchPage.getPageable(), branchPage.getTotalElements());
     }
 
     @Override
     public Page<Branch> getBranchesPage(int page, int size, String name, String address, String cinemaChain) {
-        boolean hasSearch = (name != null && !name.trim().isEmpty()) || (address != null && !address.trim().isEmpty()) || (cinemaChain != null && !cinemaChain.trim().isEmpty());
+        boolean hasSearch = (name != null && !name.trim().isEmpty()) || (address != null && !address.trim().isEmpty())
+                || (cinemaChain != null && !cinemaChain.trim().isEmpty());
         if (hasSearch) {
             return branchRepository.searchBranches(
-                (name == null || name.isBlank()) ? null : name,
-                (address == null || address.isBlank()) ? null : address,
-                (cinemaChain == null || cinemaChain.isBlank()) ? null : cinemaChain,
-                PageRequest.of(page, size)
-            );
+                    (name == null || name.isBlank()) ? null : name,
+                    (address == null || address.isBlank()) ? null : address,
+                    (cinemaChain == null || cinemaChain.isBlank()) ? null : cinemaChain,
+                    PageRequest.of(page, size));
         } else {
             return branchRepository.findAll(PageRequest.of(page, size));
         }
@@ -103,13 +103,11 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
             return branches.stream().anyMatch(b -> b.getId() != id);
         }
     }
-        @Override
-        public List<BranchDto> getAllBranches () {
-            return branchRepository.findAll().stream()
-                    .map(branch -> modelMapper.map(branch, BranchDto.class))
-                    .collect(Collectors.toList());
-        }
 
-
+    @Override
+    public List<BranchDto> getAllBranches() {
+        return branchRepository.findAll().stream()
+                .map(branch -> modelMapper.map(branch, BranchDto.class))
+                .collect(Collectors.toList());
     }
-
+}

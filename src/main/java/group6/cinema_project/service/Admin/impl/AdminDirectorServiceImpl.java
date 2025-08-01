@@ -1,6 +1,5 @@
 package group6.cinema_project.service.Admin.impl;
 
-
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.repository.Admin.AdminDirectorRepository;
 import group6.cinema_project.service.Admin.IAdminDirectorService;
@@ -12,11 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AdminDiretorServiceImpl implements IAdminDirectorService {
+public class AdminDirectorServiceImpl implements IAdminDirectorService {
 
     private final AdminDirectorRepository directorRepository;
 
@@ -76,7 +74,5 @@ public class AdminDiretorServiceImpl implements IAdminDirectorService {
         }
         return directors;
     }
-
-
 
 }

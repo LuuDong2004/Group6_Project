@@ -4,7 +4,6 @@ package group6.cinema_project.controller.Admin;
 
 import group6.cinema_project.entity.Director;
 
-import group6.cinema_project.service.Admin.IAdminActorService;
 import group6.cinema_project.service.Admin.IAdminDirectorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

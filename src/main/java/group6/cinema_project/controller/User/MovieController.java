@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.*;
 
 import group6.cinema_project.dto.BookingDto;
@@ -46,7 +45,8 @@ public class MovieController {
     private List<MovieDto> recommendMoviesInternal() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated() || authentication.getName().equals("anonymousUser")) {
+            if (authentication == null || !authentication.isAuthenticated()
+                    || authentication.getName().equals("anonymousUser")) {
                 return movieService.getTopMovies7Days();
             }
             String email = authentication.getName();
@@ -66,7 +66,8 @@ public class MovieController {
                     String genre = null;
                     if (booking.getSchedule().getMovieId() != null) {
                         movieId = booking.getSchedule().getMovieId();
-                    } else if (booking.getSchedule().getMovie() != null && booking.getSchedule().getMovie().getId() != null) {
+                    } else if (booking.getSchedule().getMovie() != null
+                            && booking.getSchedule().getMovie().getId() != null) {
                         movieId = booking.getSchedule().getMovie().getId();
                     }
                     if (movieId != null) {
@@ -74,7 +75,8 @@ public class MovieController {
                     }
                     if (booking.getSchedule().getMovieGenre() != null) {
                         genre = booking.getSchedule().getMovieGenre();
-                    } else if (booking.getSchedule().getMovie() != null && booking.getSchedule().getMovie().getGenre() != null) {
+                    } else if (booking.getSchedule().getMovie() != null
+                            && booking.getSchedule().getMovie().getGenre() != null) {
                         genre = booking.getSchedule().getMovie().getGenre();
                     }
                     if (genre != null) {
@@ -98,7 +100,8 @@ public class MovieController {
                 }
             }
             recommend.sort((m1, m2) -> m2.getRating().compareTo(m1.getRating()));
-            if (recommend.size() > 5) recommend = recommend.subList(0, 5);
+            if (recommend.size() > 5)
+                recommend = recommend.subList(0, 5);
             if (recommend.isEmpty()) {
                 recommend = movieService.getTopMovies7Days();
             }
@@ -111,7 +114,7 @@ public class MovieController {
     @GetMapping("/loadMore")
     @ResponseBody
     public ResponseEntity<List<MovieDto>> loadMoreMovies(@RequestParam(defaultValue = "1") int page,
-                                                         @RequestParam(defaultValue = "8") int size) {
+            @RequestParam(defaultValue = "8") int size) {
         List<MovieDto> movies = movieService.getMoviesWithPagination(page, size);
         return ResponseEntity.ok(movies);
     }
@@ -130,8 +133,7 @@ public class MovieController {
             @RequestParam(value = "genre", required = false) String genre,
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "page", defaultValue = "0") int page
-    ) {
+            @RequestParam(value = "page", defaultValue = "0") int page) {
         List<MovieDto> movies = movieService.filterMovies(genre, null, sort, search);
         int pageSize = 8;
         int total = movies.size();
@@ -158,7 +160,8 @@ public class MovieController {
     public ResponseEntity<List<MovieDto>> recommendMovies() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated() || authentication.getName().equals("anonymousUser")) {
+            if (authentication == null || !authentication.isAuthenticated()
+                    || authentication.getName().equals("anonymousUser")) {
                 // Nếu chưa đăng nhập, trả về top phim rating cao nhất gần đây
                 List<MovieDto> topMovies = movieService.getTopMovies7Days();
                 return ResponseEntity.ok(topMovies);
@@ -182,10 +185,12 @@ public class MovieController {
                 if (booking.getSchedule() != null) {
                     Integer movieId = null;
                     String genre = null;
-                    // Ưu tiên lấy movieId từ schedule.movieId, nếu không có thì lấy từ schedule.movie.id
+                    // Ưu tiên lấy movieId từ schedule.movieId, nếu không có thì lấy từ
+                    // schedule.movie.id
                     if (booking.getSchedule().getMovieId() != null) {
                         movieId = booking.getSchedule().getMovieId();
-                    } else if (booking.getSchedule().getMovie() != null && booking.getSchedule().getMovie().getId() != null) {
+                    } else if (booking.getSchedule().getMovie() != null
+                            && booking.getSchedule().getMovie().getId() != null) {
                         movieId = booking.getSchedule().getMovie().getId();
                     }
                     if (movieId != null) {
@@ -194,7 +199,8 @@ public class MovieController {
                     // Lấy genre từ schedule.movieGenre hoặc schedule.movie.genre
                     if (booking.getSchedule().getMovieGenre() != null) {
                         genre = booking.getSchedule().getMovieGenre();
-                    } else if (booking.getSchedule().getMovie() != null && booking.getSchedule().getMovie().getGenre() != null) {
+                    } else if (booking.getSchedule().getMovie() != null
+                            && booking.getSchedule().getMovie().getGenre() != null) {
                         genre = booking.getSchedule().getMovie().getGenre();
                     }
                     if (genre != null) {
@@ -207,7 +213,7 @@ public class MovieController {
             }
             // Gợi ý phim cùng thể loại, loại trừ phim đã xem
             List<MovieDto> allMovies = movieService.getAllMovie();
-            List<MovieDto> recommend = new java.util.ArrayList<>();
+            List<MovieDto> recommend = new ArrayList<>();
             for (MovieDto movie : allMovies) {
                 if (movie.getGenre() != null && !watchedMovieIds.contains(movie.getId())) {
                     for (String g : genres) {
@@ -221,7 +227,8 @@ public class MovieController {
             // Sắp xếp theo rating giảm dần
             recommend.sort((m1, m2) -> m2.getRating().compareTo(m1.getRating()));
             // Lấy tối đa 5 phim
-            if (recommend.size() > 5) recommend = recommend.subList(0, 5);
+            if (recommend.size() > 5)
+                recommend = recommend.subList(0, 5);
             // Nếu không có phim nào phù hợp, fallback top rating
             if (recommend.isEmpty()) {
                 recommend = movieService.getTopMovies7Days();

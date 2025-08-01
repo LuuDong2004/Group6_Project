@@ -24,18 +24,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Optional;
-import java.util.Comparator;
-import java.util.Locale;
 
-import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.Branch;
@@ -408,7 +403,7 @@ public class AdminScheduleController {
             log.info("Redirecting to: {}", redirectUrl);
             return redirectUrl;
 
-        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+        } catch (ScheduleConflictException e) {
             log.warn("Schedule conflict detected: {}", e.getDetailedMessage());
 
             // Add specific conflict error to binding result

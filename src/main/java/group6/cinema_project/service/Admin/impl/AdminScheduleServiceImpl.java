@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -556,14 +557,14 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                     .collect(Collectors.toList()));
 
             // Check for overlaps (should be none)
-            java.util.Set<Integer> currentlyPlayingIds = currentlyPlaying.stream()
+            Set<Integer> currentlyPlayingIds = currentlyPlaying.stream()
                     .map(MovieDto::getId).collect(Collectors.toSet());
-            java.util.Set<Integer> comingSoonIds = comingSoon.stream()
+            Set<Integer> comingSoonIds = comingSoon.stream()
                     .map(MovieDto::getId).collect(Collectors.toSet());
-            java.util.Set<Integer> stoppedShowingIds = stoppedShowing.stream()
+            Set<Integer> stoppedShowingIds = stoppedShowing.stream()
                     .map(MovieDto::getId).collect(Collectors.toSet());
 
-            java.util.List<String> overlaps = new ArrayList<>();
+            List<String> overlaps = new ArrayList<>();
             currentlyPlayingIds.retainAll(comingSoonIds);
             if (!currentlyPlayingIds.isEmpty()) {
                 overlaps.add("Currently Playing & Coming Soon: " + currentlyPlayingIds);

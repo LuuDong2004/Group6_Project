@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AdminMoiveServiceImpl implements IAdminMovieService {
+public class AdminMovieServiceImpl implements IAdminMovieService {
     private final AdminMovieRepository adminMovieRepository;
     private final AdminActorRepository actorRepository; // Thêm repo này
     private final AdminDirectorRepository directorRepository;
