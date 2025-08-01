@@ -352,9 +352,44 @@
             .food-card { padding: 1rem; }
             .food-table th, .food-table td { font-size: 0.95rem; }
         }
-    </style>
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .alert ul {
+        padding-left: 1.5rem;
+    }
+
+    .alert li {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Hiệu ứng hover cho số lượng */
+    td span[title] {
+        cursor: help;
+        transition: all 0.2s ease;
+    }
+
+    td span[title]:hover {
+        transform: scale(1.1);
+    }
+</style>
 </head>
 <body>
+    
     <!-- Sidebar content -->
 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
     <!-- Main content -->
@@ -411,10 +446,31 @@
         <div class="food-card">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="food-title">Danh sách Combo Food</div>
+
                 <a th:href="@{/admin/foods/add}" class="add-food-btn">
                     <i class="fas fa-plus me-1"></i> Thêm Combo Food
                 </a>
             </div>
+            
+            <!-- Thêm thông báo cảnh báo tổng quan -->
+            <div th:if="${#lists.size(foods) > 0}" class="alert alert-info mb-3" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Hướng dẫn:</strong>
+                <ul class="mb-0 mt-2">
+                    <li><span class="text-danger fw-bold">Đỏ + ⚠️</span>: Số lượng ≤ 5 - Cần nhập thêm hàng ngay!</li>
+                    <li><span class="text-warning">Vàng + ⚠️</span>: Số lượng 6-10 - Cần theo dõi và nhập thêm sớm</li>
+                    <li><span class="text-success">Xanh</span>: Số lượng > 10 - Ổn định</li>
+                </ul>
+            </div>
+            
+            <!-- Hiển thị cảnh báo nếu có món ăn số lượng thấp -->
+            <div th:if="${#lists.size(foods.?[size <= 5]) > 0}" class="alert alert-danger mb-3" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Cảnh báo!</strong> Có 
+                <span th:text="${#lists.size(foods.?[size <= 5])}"></span> 
+                món ăn có số lượng thấp (≤5). Vui lòng kiểm tra và nhập thêm hàng!
+            </div>
+            
             <div class="table-responsive">
                 <table class="table food-table">
                     <thead>
@@ -433,7 +489,17 @@
                         <td th:text="${food.id}"></td>
                         <td th:text="${food.name}"></td>
                         <td th:text="${food.price}"></td>
-                        <td th:text="${food.size}"></td>
+                        <td>
+                            <span th:text="${food.size}" 
+                                  th:class="${food.size <= 5 ? 'text-danger fw-bold' : (food.size <= 10 ? 'text-warning' : 'text-success')}"
+                                  th:title="${food.size <= 5 ? '⚠️ Số lượng thấp! Cần nhập thêm hàng.' : (food.size <= 10 ? '⚠️ Số lượng đang thấp.' : '✅ Số lượng ổn định.')}">
+                            </span>
+                            <!-- Hiển thị icon cảnh báo khi số lượng thấp -->
+                            <i th:if="${food.size <= 5}" class="fas fa-exclamation-triangle text-danger ms-1" 
+                               title="Số lượng thấp! Cần nhập thêm hàng."></i>
+                            <i th:if="${food.size > 5 && food.size <= 10}" class="fas fa-exclamation-circle text-warning ms-1" 
+                               title="Số lượng đang thấp."></i>
+                        </td>
                         <td th:text="${food.description}"></td>
                         <td>
                             <img th:src="@{${food.image}}" alt="Food Image" class="food-poster"/>

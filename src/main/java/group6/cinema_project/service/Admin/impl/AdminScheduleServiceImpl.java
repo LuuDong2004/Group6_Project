@@ -57,6 +57,10 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         ScreeningSchedule screeningSchedule = convertToEntity(screeningScheduleDto);
         ScreeningSchedule savedSchedule = movieScheduleRepository.save(screeningSchedule);
+        
+        // Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
+        updateScreeningRoomStatus(savedSchedule.getScreeningRoom().getId());
+        
         return convertToDto(savedSchedule);
     }
 
@@ -755,6 +759,23 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         }
 
         return savedSchedules;
+    }
+    
+    /**
+     * Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
+     * @param roomId ID của phòng chiếu
+     */
+    private void updateScreeningRoomStatus(int roomId) {
+        try {
+            ScreeningRoom room = screeningRoomRepository.findById(roomId).orElse(null);
+            if (room != null && !"ACTIVE".equals(room.getStatus())) {
+                room.setStatus("ACTIVE");
+                screeningRoomRepository.save(room);
+                System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành ACTIVE");
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật trạng thái phòng chiếu: " + e.getMessage());
+        }
     }
 
     @Override

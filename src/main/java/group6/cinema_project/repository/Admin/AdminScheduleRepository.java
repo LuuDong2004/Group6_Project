@@ -1,15 +1,16 @@
 
 package group6.cinema_project.repository.Admin;
 
-import group6.cinema_project.entity.Movie;
-import group6.cinema_project.entity.ScreeningSchedule;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import group6.cinema_project.entity.Movie;
+import group6.cinema_project.entity.ScreeningSchedule;
 
 @Repository
 public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule, Integer> {

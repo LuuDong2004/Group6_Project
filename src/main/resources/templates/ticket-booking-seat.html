@@ -253,6 +253,24 @@
         .seat-vip2.available:hover { background-color: #7b1fa2; }
         .seat-couple { background-color: #e91e63; border-color: #ad1457; }
         .seat-couple.available:hover { background-color: #ad1457; }
+        
+        /* CSS cho ghế couple đặc biệt */
+        .seat-couple {
+            width: 64px !important;
+            height: 32px !important;
+            border-radius: 8px !important;
+            position: relative;
+        }
+        .seat-couple::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ad1457;
+            transform: translateX(-50%);
+        }
         .seat-sweetbox { background-color: #2196f3; border-color: #1565c0; }
         .seat-sweetbox.available:hover { background-color: #1565c0; }
 
@@ -834,7 +852,17 @@
                     let seatTypeClass = '';
                     if (seat.type === 'Vip2') seatTypeClass = 'seat-vip2';
                     else if (seat.type === 'Vip1') seatTypeClass = 'seat-vip1';
+                    else if (seat.type === 'Couple') seatTypeClass = 'seat-couple';
                     else seatTypeClass = 'seat-standard';
+                    
+                    // Xử lý đặc biệt cho ghế couple - làm cho nó rộng hơn
+                    if (seat.type === 'Couple') {
+                        seatDiv.style.width = '64px';
+                        seatDiv.style.height = '32px';
+                        seatDiv.style.borderRadius = '8px';
+                        seatDiv.style.position = 'relative';
+                    }
+                    
                     seatDiv.className = `seat ${seatTypeClass} ${seat.status === 'RESERVED' ? 'reserved' : seat.status === 'PENDING' ? 'pending' : 'available'}`;
                     seatDiv.textContent = seat.seatName;
                     seatDiv.dataset.seatId = seat.seatId;

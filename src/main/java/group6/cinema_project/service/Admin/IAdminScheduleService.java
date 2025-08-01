@@ -1,15 +1,14 @@
 package group6.cinema_project.service.Admin;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public interface IAdminScheduleService {
     Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id);

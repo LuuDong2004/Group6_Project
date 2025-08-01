@@ -16,6 +16,42 @@
         <div class="card-header">
             <h3>Chi tiết Phòng Chiếu</h3>
         </div>
+        <!-- Thông báo cảnh báo khi không thể chỉnh sửa -->
+        <div th:if="${cannotEdit}" class="alert alert-warning mt-3" role="alert">
+            <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Không thể chỉnh sửa phòng chiếu!</h5>
+            <p class="mb-0">Phòng chiếu này đang có suất chiếu đang hoạt động. Bạn chỉ có thể chỉnh sửa sau khi:</p>
+            <ul class="mb-0 mt-2">
+                <li>Hết thời gian chiếu của tất cả suất chiếu</li>
+                <li>Hoặc gỡ bỏ các suất chiếu đang hoạt động</li>
+            </ul>
+        </div>
+
+        <!-- Danh sách suất chiếu đang hoạt động -->
+        <div th:if="${activeSchedules != null and !activeSchedules.empty}" class="alert alert-info mt-3" role="alert">
+            <h6 class="alert-heading"><i class="fas fa-calendar-alt"></i> Danh sách suất chiếu đang hoạt động:</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-borderless mb-0">
+                    <thead>
+                    <tr>
+                        <th>Phim</th>
+                        <th>Ngày chiếu</th>
+                        <th>Giờ bắt đầu</th>
+                        <th>Giờ kết thúc</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="schedule : ${activeSchedules}">
+                        <td th:text="${schedule.movie != null ? schedule.movie.title : 'N/A'}"></td>
+                        <td th:text="${#dates.format(schedule.screeningDate, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${schedule.startTime}"></td>
+                        <td th:text="${schedule.endTime}"></td>
+                        <td><span class="badge bg-success">Đang hoạt động</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="card-body">
             <dl class="row">
                 <dt class="col-sm-3">ID</dt>
