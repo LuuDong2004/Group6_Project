@@ -36,7 +36,6 @@
         height: 100vh;
         display: flex;
         flex-direction: column;
-        transition: width 0.3s ease;
         z-index: 1000;
         overflow-y: auto;
       }
@@ -76,7 +75,6 @@
         padding: 0.75rem 1.5rem;
         color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
-        transition: background-color 0.2s ease, color 0.2s ease;
       }
 
       .menu-item:hover,
@@ -95,7 +93,6 @@
 
       .main-content-wrapper {
         margin-left: 320px;
-        transition: margin-left 0.3s ease;
         padding-top: 70px;
       }
 
@@ -112,7 +109,6 @@
         background-color: white;
         border-bottom: 1px solid #e5e7eb;
         z-index: 999;
-        transition: left 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -194,7 +190,6 @@
         border: 2px solid rgba(79, 70, 229, 0.2);
         border-radius: 15px;
         padding: 0.75rem 1.5rem;
-        transition: all 0.3s ease;
         font-weight: 600;
         cursor: pointer;
         display: flex;
@@ -206,15 +201,12 @@
 
       .filter-btn:hover {
         background: rgba(79, 70, 229, 0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
       }
 
       .filter-btn.active {
         background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
         border-color: #4f46e5;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
       }
 
       .filter-btn.upcoming {
@@ -265,12 +257,6 @@
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         overflow: hidden;
         border: 1px solid rgba(79, 70, 229, 0.1);
-        transition: all 0.3s ease;
-      }
-
-      .movie-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
       }
 
       .movie-header {
@@ -345,14 +331,11 @@
         border: 2px solid #e2e8f0;
         border-radius: 15px;
         padding: 1rem;
-        transition: all 0.3s ease;
         cursor: pointer;
       }
 
       .schedule-item:hover {
         border-color: #4f46e5;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
       }
 
       .schedule-time {
@@ -654,16 +637,7 @@
               </h1>
               <p class="date-subtitle">Lịch chiếu phim chi tiết trong ngày</p>
             </div>
-            <!-- Button thêm lịch chiếu luôn hiển thị -->
-            <div>
-              <a
-                th:href="@{/admin/schedules/add(date=${selectedDate})}"
-                class="btn btn-primary"
-                th:if="${selectedDate != null}"
-              >
-                <i class="fas fa-plus me-2"></i>Thêm lịch chiếu mới
-              </a>
-            </div>
+            <!-- Button thêm lịch chiếu chỉ hiển thị cho ngày hiện tại và tương lai -->
           </div>
         </div>
 
@@ -697,19 +671,16 @@
             class="text-center py-5"
           >
             <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">Không có lịch chiếu nào trong ngày này</h5>
-            <p class="text-muted">
+            <h5 class="text-muted">Chưa có suất chiếu nào</h5>
+            <p class="text-muted" th:if="${isPastDate}">
+              Không có lịch chiếu nào trong ngày này.
+            </p>
+            <p class="text-muted" th:if="${not isPastDate}">
               Vui lòng chọn ngày khác hoặc thêm lịch chiếu mới.
             </p>
-            <a
-              th:href="@{/admin/schedules/add(date=${selectedDate})}"
-              class="btn btn-primary"
-            >
-              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
-            </a>
           </div>
 
-          <!-- Thêm button thêm lịch chiếu ở cuối danh sách nếu có phim -->
+          <!-- Thêm button thêm lịch chiếu ở cuối danh sách nếu có phim và không phải ngày quá khứ -->
           <div
             th:if="${movies != null and not #lists.isEmpty(movies)}"
             class="text-center mt-4"
@@ -717,9 +688,9 @@
             <a
               th:href="@{/admin/schedules/add(date=${selectedDate})}"
               class="btn btn-outline-primary btn-lg"
-              th:if="${selectedDate != null}"
+              th:if="${selectedDate != null and not isPastDate}"
             >
-              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu cho ngày này
+              <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
             </a>
           </div>
 

@@ -161,17 +161,15 @@ public class AdminScheduleController {
             // Format ngày để hiển thị
             String formattedDate = formatDateForDisplay(selectedDate);
 
+            // Kiểm tra xem ngày có phải là quá khứ không
+            boolean isPastDate = selectedDate.isBefore(LocalDate.now());
+
             // Thêm dữ liệu vào model
             model.addAttribute("movies", moviesWithSchedules);
             model.addAttribute("selectedDate", selectedDate);
             model.addAttribute("selectedDateFormatted", formattedDate);
             model.addAttribute("selectedStatus", status);
-
-            // Thêm thông báo nếu không có lịch chiếu nào
-            if (moviesWithSchedules.isEmpty()) {
-                model.addAttribute("message", "Chưa có lịch chiếu nào cho ngày " + formattedDate
-                        + ". Bạn có thể tạo lịch chiếu mới bằng cách nhấn nút 'Thêm lịch chiếu' bên dưới.");
-            }
+            model.addAttribute("isPastDate", isPastDate);
 
             log.info("Successfully loaded {} movies with schedules for date: {}", moviesWithSchedules.size(),
                     selectedDate);
@@ -180,9 +178,10 @@ public class AdminScheduleController {
             log.error("Error loading schedules for date: " + selectedDate, e);
             model.addAttribute("error", "Lỗi khi tải lịch chiếu: " + e.getMessage());
             model.addAttribute("movies", Collections.emptyList());
-            model.addAttribute("selectedDate", selectedDate != null ? selectedDate : LocalDate.now());
-            model.addAttribute("selectedDateFormatted",
-                    formatDateForDisplay(selectedDate != null ? selectedDate : LocalDate.now()));
+            LocalDate finalSelectedDate = selectedDate != null ? selectedDate : LocalDate.now();
+            model.addAttribute("selectedDate", finalSelectedDate);
+            model.addAttribute("selectedDateFormatted", formatDateForDisplay(finalSelectedDate));
+            model.addAttribute("isPastDate", finalSelectedDate.isBefore(LocalDate.now()));
         }
 
         return "admin/admin_schedules_list";
@@ -192,6 +191,7 @@ public class AdminScheduleController {
      * Phương thức hỗ trợ để convert MovieDto thành MovieWithSchedulesDto với
      * schedules rỗng
      */
+
     private List<MovieWithSchedulesDto> convertMovieDtosToMoviesWithSchedules(List<MovieDto> movieDtos) {
         return movieDtos.stream().map(movieDto -> {
             MovieWithSchedulesDto movieWithSchedules = new MovieWithSchedulesDto();

@@ -693,8 +693,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="movie : ${movies}">
-                        <td th:text="${movie.id}">#001</td>
+                   <tr th:each="movie, iterStat : ${movies}">
+    <td th:text="${iterStat.count}">1</td>
                         <td>
                             <div class="movie-info">
                                 <img th:src="${movie.image}"
