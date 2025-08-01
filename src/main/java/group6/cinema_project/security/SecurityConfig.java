@@ -111,7 +111,7 @@ public class SecurityConfig {
                 .securityMatcher("/admin/secret-login", "/admin/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/css/**", "/js/**", "/images/**",  "/assets/**", "/static/**"
+                                "/css/**", "/js/**", "/images/**",  "/assets/**", "/static/**", "/uploads/**"
                         ).permitAll()
                         .requestMatchers("/admin/secret-login").permitAll()
                         .anyRequest().hasRole("ADMIN")
@@ -140,7 +140,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**", "/", "/login", "/register", "/sign_in",
+                                "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**", "/uploads/**", "/", "/login", "/register", "/sign_in",
                                 "/dashboard", "/movie/**", "/schedule/**", "/about", "/contact", "/ticket-booking",
                                 "/payment/sepay/webhook", "/ws/**",
                                 "/forgot-password", "/reset-password/confirm", "/api/forgot-password", "/api/reset-password/confirm",
