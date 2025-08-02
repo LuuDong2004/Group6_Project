@@ -94,6 +94,9 @@ public class AdminMovieController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
+
         return "admin/admin_movie_list";
     }
 

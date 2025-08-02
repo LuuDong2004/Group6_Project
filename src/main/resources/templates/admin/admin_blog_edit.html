@@ -132,45 +132,46 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar p-0">
-          <div class="p-4">
-            <h4 class="text-center mb-4">
-              <i class="fas fa-film me-2"></i>Cinema Admin
-            </h4>
-          </div>
-          <nav class="nav flex-column px-3">
-            <a th:href="@{/admin/dashboard}" class="nav-link">
-              <i class="fas fa-home me-2"></i>Bảng điều khiển
-            </a>
-            <a th:href="@{/admin/movies/list}" class="nav-link">
-              <i class="fas fa-film me-2"></i>Phim
-            </a>
-            <a th:href="@{/admin/directors/list}" class="nav-link">
-              <i class="fas fa-user-friends me-2"></i>Diễn viên & Đạo diễn
-            </a>
-            <a th:href="@{/admin/schedules/list}" class="nav-link">
-              <i class="fas fa-list me-2"></i>Danh sách lịch chiếu
-            </a>
-            <a th:href="@{/admin/schedules/calendar}" class="nav-link">
-              <i class="fas fa-calendar-alt me-2"></i>Lịch chiếu tháng
-            </a>
-            <a th:href="@{/admin/blogs/list}" class="nav-link active">
-              <i class="fas fa-blog me-2"></i>Quản lý Blog
-            </a>
-            <a href="#" class="nav-link">
-              <i class="fas fa-ticket-alt me-2"></i>Đặt vé
-            </a>
-            <a href="#" class="nav-link">
-              <i class="fas fa-users me-2"></i>Khách hàng
-            </a>
-          </nav>
-        </div>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-        <!-- Main Content -->
-        <div class="col-md-10 main-content p-4">
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Chỉnh sửa Blog</h4>
+        </div>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                  style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
+                   class="rounded-circle me-2">
+              <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
+              <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <div class="container-fluid p-4">
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -471,5 +472,6 @@
         counter.textContent = titleInput.value.length;
       });
     </script>
+    </div>
   </body>
 </html>

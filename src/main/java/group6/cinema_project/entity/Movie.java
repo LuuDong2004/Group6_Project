@@ -33,6 +33,7 @@ public class Movie {
     private String description;
 
     private String status;
+    
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore

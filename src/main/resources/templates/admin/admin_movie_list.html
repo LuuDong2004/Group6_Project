@@ -697,7 +697,7 @@
     <td th:text="${iterStat.count}">1</td>
                         <td>
                             <div class="movie-info">
-                                <img th:src="${movie.image}"
+                                <img th:src="${movie.image} + '?t=' + ${timestamp}"
                                      th:alt="${movie.name}"
                                      onerror="this.onerror=null;this.src='https://placehold.co/40x60/e2e8f0/94a3b8?text=Poster';"
                                      alt="Movie Poster" class="movie-poster"/>

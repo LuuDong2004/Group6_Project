@@ -38,6 +38,8 @@ public class MovieController {
         // Lấy recommendedMovies cho user hiện tại
         List<MovieDto> recommendedMovies = recommendMoviesInternal();
         model.addAttribute("recommendedMovies", recommendedMovies);
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
         return "movies";
     }
 

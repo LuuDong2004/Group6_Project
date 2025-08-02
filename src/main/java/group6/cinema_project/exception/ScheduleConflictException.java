@@ -29,12 +29,12 @@ public class ScheduleConflictException extends RuntimeException {
     }
 
     public ScheduleConflictException(String message,
-                                     Integer screeningRoomId,
-                                     String screeningRoomName,
-                                     LocalDate screeningDate,
-                                     LocalTime startTime,
-                                     LocalTime endTime,
-                                     List<ConflictingSchedule> conflictingSchedules) {
+            Integer screeningRoomId,
+            String screeningRoomName,
+            LocalDate screeningDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            List<ConflictingSchedule> conflictingSchedules) {
         super(message);
         this.screeningRoomId = screeningRoomId;
         this.screeningRoomName = screeningRoomName;
@@ -115,15 +115,18 @@ public class ScheduleConflictException extends RuntimeException {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Xung đột lịch chiếu trong phòng ").append(screeningRoomName != null ? screeningRoomName : screeningRoomId)
-                .append(" vào ngày ").append(screeningDate)
-                .append(" từ ").append(startTime).append(" đến ").append(endTime).append(".\n");
+        sb.append("Phát hiện xung đột với các lịch chiếu: ");
 
-        sb.append("Các lịch chiếu bị xung đột:\n");
-        for (ConflictingSchedule conflict : conflictingSchedules) {
-            sb.append("- ").append(conflict.toString()).append("\n");
+        for (int i = 0; i < conflictingSchedules.size(); i++) {
+            ConflictingSchedule conflict = conflictingSchedules.get(i);
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append("\"").append(conflict.getMovieName()).append("\"");
+            sb.append(" (").append(conflict.getStartTime()).append(" - ").append(conflict.getEndTime()).append(")");
         }
 
         return sb.toString();
     }
+
 }

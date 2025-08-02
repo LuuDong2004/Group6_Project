@@ -238,6 +238,84 @@
         display: none;
       }
 
+      .schedule-conflict-error {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border: 2px solid #fc8181;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(252, 129, 129, 0.15);
+      }
+
+      .schedule-conflict-error .conflict-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: #c53030;
+        font-size: 1.1em;
+      }
+
+      .schedule-conflict-error .conflict-header i {
+        font-size: 1.3em;
+        margin-right: 10px;
+        animation: pulse 2s infinite;
+      }
+
+      .schedule-conflict-error .conflict-details {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        border-left: 4px solid #fc8181;
+      }
+
+      .schedule-conflict-error .conflict-movie-list {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+
+      .schedule-conflict-error .conflict-movie-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(252, 129, 129, 0.2);
+      }
+
+      .schedule-conflict-error .conflict-movie-item:last-child {
+        border-bottom: none;
+      }
+
+      .schedule-conflict-error .movie-icon {
+        color: #e53e3e;
+        margin-right: 10px;
+        font-size: 1.1em;
+      }
+
+      .schedule-conflict-error .conflict-suggestion {
+        background: rgba(56, 178, 172, 0.1);
+        border: 1px solid #38b2ac;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 15px;
+        color: #2c7a7b;
+        font-weight: 500;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
       .is-invalid {
         border-color: #dc3545;
       }
@@ -301,7 +379,7 @@
   </head>
 
   <body>
-    <div th:replace="~{/fragments/sidebar :: sidebar}"></div>
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <div class="main-content-wrapper" id="mainContentWrapper">
       <header class="header-custom shadow-sm">
@@ -507,36 +585,6 @@
             </div>
 
             <div class="row">
-              <!-- Chọn phòng chiếu -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="screeningRoomId" class="form-label">
-                    <i class="fas fa-door-open me-2"></i>Phòng chiếu
-                  </label>
-                  <select
-                    class="form-control"
-                    id="screeningRoomId"
-                    th:field="*{screeningRoomId}"
-                    required
-                  >
-                    <option value="">-- Chọn phòng chiếu --</option>
-                    <option
-                      th:each="room : ${screeningRooms}"
-                      th:value="${room.id}"
-                      th:text="${room.name + ' (Sức chứa: ' + room.capacity + ')'}"
-                    >
-                      Phòng 1 (Sức chứa: 100)
-                    </option>
-                  </select>
-                  <div
-                    th:if="${#fields.hasErrors('screeningRoomId')}"
-                    class="invalid-feedback d-block"
-                  >
-                    <span th:errors="*{screeningRoomId}"></span>
-                  </div>
-                </div>
-              </div>
-
               <!-- Chọn chi nhánh -->
               <div class="col-md-6">
                 <div class="form-group">
@@ -548,14 +596,15 @@
                     id="branchId"
                     th:field="*{branchId}"
                     required
+                    onchange="loadRoomsByBranch()"
                   >
                     <option value="">-- Chọn chi nhánh --</option>
                     <option
                       th:each="branch : ${branches}"
                       th:value="${branch.id}"
-                      th:text="${branch.name}"
+                      th:text="${branch.name + ' - ' + branch.address}"
                     >
-                      Chi nhánh 1
+                      Chi nhánh 1 - Địa chỉ
                     </option>
                   </select>
                   <div
@@ -563,6 +612,30 @@
                     class="invalid-feedback d-block"
                   >
                     <span th:errors="*{branchId}"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chọn phòng chiếu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="screeningRoomId" class="form-label">
+                    <i class="fas fa-door-open me-2"></i>Phòng chiếu
+                  </label>
+                  <select
+                    class="form-control"
+                    id="screeningRoomId"
+                    th:field="*{screeningRoomId}"
+                    required
+                    disabled
+                  >
+                    <option value="">-- Chọn chi nhánh trước --</option>
+                  </select>
+                  <div
+                    th:if="${#fields.hasErrors('screeningRoomId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{screeningRoomId}"></span>
                   </div>
                 </div>
               </div>
@@ -586,7 +659,20 @@
                     th:if="${#fields.hasErrors('startTime')}"
                     class="invalid-feedback d-block"
                   >
-                    <span th:errors="*{startTime}"></span>
+                    <!-- Kiểm tra nếu lỗi là xung đột lịch chiếu -->
+                    <div
+                      th:if="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
+                      class="alert alert-warning"
+                      style="margin-top: 10px"
+                    >
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      <span th:text="${#fields.errors('startTime')[0]}"></span>
+                    </div>
+                    <!-- Hiển thị lỗi thường -->
+                    <span
+                      th:unless="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
+                      th:errors="*{startTime}"
+                    ></span>
                   </div>
                 </div>
               </div>
@@ -625,7 +711,7 @@
               <div class="col-12">
                 <div class="d-flex justify-content-end gap-3">
                   <a
-                    th:href="@{/admin/schedules/calendar}"
+                    th:href="@{/admin/schedules/list/date(date=${schedule.screeningDate})}"
                     class="btn btn-secondary"
                   >
                     <i class="fas fa-times me-2"></i>Hủy
@@ -647,7 +733,58 @@
         initializeFormValidation();
         setDefaultStatus();
         initializeDashboardBehavior();
+        initializeBranchRoomLogic();
       });
+
+      // Khởi tạo logic chi nhánh và phòng chiếu
+      function initializeBranchRoomLogic() {
+        const branchSelect = document.getElementById("branchId");
+        const roomSelect = document.getElementById("screeningRoomId");
+
+        // Nếu đã có chi nhánh được chọn, load phòng chiếu
+        if (branchSelect.value) {
+          loadRoomsByBranch();
+        }
+      }
+
+      // Load danh sách phòng chiếu theo chi nhánh
+      function loadRoomsByBranch() {
+        const branchSelect = document.getElementById("branchId");
+        const roomSelect = document.getElementById("screeningRoomId");
+        const selectedBranchId = branchSelect.value;
+
+        if (!selectedBranchId) {
+          // Nếu không chọn chi nhánh, disable phòng chiếu
+          roomSelect.disabled = true;
+          roomSelect.innerHTML =
+            '<option value="">-- Chọn chi nhánh trước --</option>';
+          return;
+        }
+
+        // Enable phòng chiếu và hiển thị loading
+        roomSelect.disabled = false;
+        roomSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+
+        // Gọi API để lấy danh sách phòng chiếu
+        fetch(`/admin/schedules/api/branches/${selectedBranchId}/rooms`)
+          .then((response) => response.json())
+          .then((rooms) => {
+            roomSelect.innerHTML =
+              '<option value="">-- Chọn phòng chiếu --</option>';
+
+            rooms.forEach((room) => {
+              const option = document.createElement("option");
+              option.value = room.id;
+              option.textContent = `${room.name} (Sức chứa: ${room.capacity})`;
+              roomSelect.appendChild(option);
+            });
+          })
+          .catch((error) => {
+            console.error("Lỗi khi tải danh sách phòng chiếu:", error);
+            roomSelect.innerHTML =
+              '<option value="">-- Lỗi khi tải phòng chiếu --</option>';
+          });
+      }
 
       // Chuyển đổi hiển thị chọn phim
       function toggleMovieSelection() {

@@ -1,368 +1,550 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <th:block th:if="${_csrf != null}">
-        <meta name="_csrf" th:content="${_csrf.token}"/>
-        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-        <meta name="user-provider" th:content="${user?.provider}"/>
-        <meta name="is-oauth2-user" th:content="${isOAuth2User}"/>
+      <meta name="_csrf" th:content="${_csrf.token}" />
+      <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+      <meta name="user-provider" th:content="${user?.provider}" />
+      <meta name="is-oauth2-user" th:content="${isOAuth2User}" />
     </th:block>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thông tin tài khoản - Cinemas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
-            min-height: 100vh;
-        }
-        .container {
-            margin-top: 40px;
-            background: white;
-            padding: 30px 30px 10px 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(60,72,88,0.12);
-        }
-        .nav-tabs .nav-link.active {
-            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
-            color: #fff !important;
-            border: none;
-        }
-        .nav-tabs .nav-link {
-            color: #6366f1;
-            font-weight: 500;
-            border: none;
-        }
-        .tab-content {
-            margin-top: 24px;
-        }
-        .form-label.required::after {
-            content: " *";
-            color: #ef4444;
-        }
-        .form-control:disabled {
-            background: #f3f4f6;
-        }
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(60,72,88,0.08);
-            border: none;
-        }
-        .table {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .table thead {
-            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
-            color: #fff;
-        }
-        .btn-primary, .btn-info {
-            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
-            border: none;
-        }
-        .btn-primary:hover, .btn-info:hover {
-            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
-        }
-        .pagination .page-link {
-            color: #6366f1;
-            border: none;
-        }
-        .pagination .active .page-link {
-            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
-            color: #fff;
-        }
-        .alert {
-            margin-top: 15px;
-        }
-        .d-flex.align-items-center.gap-2 img {
-            border: 2px solid #e0e7ff;
-        }
+      body {
+        background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+        min-height: 100vh;
+      }
+      .container {
+        margin-top: 40px;
+        background: white;
+        padding: 30px 30px 10px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(60, 72, 88, 0.12);
+      }
+      .nav-tabs .nav-link.active {
+        background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+        color: #fff !important;
+        border: none;
+      }
+      .nav-tabs .nav-link {
+        color: #6366f1;
+        font-weight: 500;
+        border: none;
+      }
+      .tab-content {
+        margin-top: 24px;
+      }
+      .form-label.required::after {
+        content: " *";
+        color: #ef4444;
+      }
+      .form-control:disabled {
+        background: #f3f4f6;
+      }
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(60, 72, 88, 0.08);
+        border: none;
+      }
+      .table {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .table thead {
+        background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+        color: #fff;
+      }
+      .btn-primary,
+      .btn-info {
+        background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+        border: none;
+      }
+      .btn-primary:hover,
+      .btn-info:hover {
+        background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+      }
+      .pagination .page-link {
+        color: #6366f1;
+        border: none;
+      }
+      .pagination .active .page-link {
+        background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+        color: #fff;
+      }
+      .alert {
+        margin-top: 15px;
+      }
+      .d-flex.align-items-center.gap-2 img {
+        border: 2px solid #e0e7ff;
+      }
     </style>
-</head>
-<body>
-<div th:replace="~{fragments/header :: header}"></div>
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+  </head>
+  <body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold">Thông Tin Tài Khoản</h3>
         <a href="/dashboard" class="btn btn-secondary">Quay lại trang chủ</a>
-    </div>
-    <ul class="nav nav-tabs" id="memberTabs" role="tablist">
+      </div>
+      <ul class="nav nav-tabs" id="memberTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Thông Tin Tài Khoản</button>
+          <button
+            class="nav-link active"
+            id="info-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#info"
+            type="button"
+            role="tab"
+          >
+            Thông Tin Tài Khoản
+          </button>
         </li>
-        <li class="nav-item" role="presentation" th:if="${user?.provider != 'GOOGLE'}">
-            <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">Đổi Mật Khẩu</button>
+        <li
+          class="nav-item"
+          role="presentation"
+          th:if="${user?.provider != 'GOOGLE'}"
+        >
+          <button
+            class="nav-link"
+            id="password-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#password"
+            type="button"
+            role="tab"
+          >
+            Đổi Mật Khẩu
+          </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">Lịch Sử Vé</button>
+          <button
+            class="nav-link"
+            id="history-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#history"
+            type="button"
+            role="tab"
+          >
+            Lịch Sử Vé
+          </button>
         </li>
-    </ul>
+      </ul>
 
-    <div class="tab-content">
+      <div class="tab-content">
         <!-- Tab Thông tin tài khoản -->
         <div class="tab-pane fade show active" id="info" role="tabpanel">
-            <div class="card p-4 mb-4">
-                <div id="accountAlert"></div>
-                <form id="accountForm">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label required" for="userName">Họ tên</label>
-                            <input type="text" class="form-control" id="userName" th:value="${user?.userName}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required" for="phone">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="phone" th:value="${user?.phone}" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label required" for="dateOfBirth">Ngày sinh</label>
-                            <input type="date" class="form-control" id="dateOfBirth" th:value="${user?.dateOfBirth}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required" for="email">Email</label>
-                            <input type="email" class="form-control" id="email" th:value="${user?.email}" disabled>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="address">Địa chỉ</label>
-                        <input type="text" class="form-control" id="address" th:value="${user?.address}" placeholder="Nhập địa chỉ">
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary px-4">Cập nhật</button>
-                    </div>
-                </form>
-            </div>
+          <div class="card p-4 mb-4">
+            <div id="accountAlert"></div>
+            <form id="accountForm">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label required" for="userName"
+                    >Họ tên</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="userName"
+                    th:value="${user?.userName}"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label required" for="phone"
+                    >Số điện thoại</label
+                  >
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="phone"
+                    th:value="${user?.phone}"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label required" for="dateOfBirth"
+                    >Ngày sinh</label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dateOfBirth"
+                    th:value="${user?.dateOfBirth}"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label required" for="email">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    th:value="${user?.email}"
+                    disabled
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="address">Địa chỉ</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="address"
+                  th:value="${user?.address}"
+                  placeholder="Nhập địa chỉ"
+                />
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary px-4">
+                  Cập nhật
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
         <!-- Tab Đổi mật khẩu -->
         <div class="tab-pane fade" id="password" role="tabpanel">
-            <div class="card p-4 mb-4">
-                <div id="passwordAlert"></div>
-                <div th:if="${user?.provider == 'GOOGLE'}" class="alert alert-info">
-                    <strong>Thông báo:</strong> Tài khoản Google không thể đổi mật khẩu tại đây. Vui lòng đổi mật khẩu trực tiếp trên Google.
-                </div>
-                <form id="changePasswordForm" th:if="${user?.provider != 'GOOGLE'}">
-                    <div class="mb-3">
-                        <label class="form-label required" for="oldPassword">Mật khẩu hiện tại</label>
-                        <input type="password" class="form-control" id="oldPassword" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label required" for="newPassword">Mật khẩu mới</label>
-                        <input type="password" class="form-control" id="newPassword" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label required" for="confirmPassword">Xác nhận mật khẩu</label>
-                        <input type="password" class="form-control" id="confirmPassword" required>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-success px-4">Đổi mật khẩu</button>
-                    </div>
-                </form>
+          <div class="card p-4 mb-4">
+            <div id="passwordAlert"></div>
+            <div th:if="${user?.provider == 'GOOGLE'}" class="alert alert-info">
+              <strong>Thông báo:</strong> Tài khoản Google không thể đổi mật
+              khẩu tại đây. Vui lòng đổi mật khẩu trực tiếp trên Google.
             </div>
+            <form id="changePasswordForm" th:if="${user?.provider != 'GOOGLE'}">
+              <div class="mb-3">
+                <label class="form-label required" for="oldPassword"
+                  >Mật khẩu hiện tại</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="oldPassword"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label required" for="newPassword"
+                  >Mật khẩu mới</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="newPassword"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label required" for="confirmPassword"
+                  >Xác nhận mật khẩu</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirmPassword"
+                  required
+                />
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-success px-4">
+                  Đổi mật khẩu
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
         <!-- Tab Lịch sử vé -->
         <div class="tab-pane fade" id="history" role="tabpanel">
-            <h5 class="mt-3 fw-bold">Lịch sử đặt vé</h5>
-            <div class="card p-3 mb-4">
-                <table class="table table-bordered table-striped mt-3 text-center align-middle">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>PHIM</th>
-                        <th>RẠP CHIẾU</th>
-                        <th>NGÀY ĐẶT</th>
-                        <th>GIÁ TIỀN</th>
-                        <th>TRẠNG THÁI</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="booking : ${bookings}">
-                        <td class="d-flex align-items-center gap-2">
-                            <img th:src="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.image : '/static/assets/images/no-image.png'}" alt="Ảnh phim" width="40" height="60" style="object-fit:cover;border-radius:4px;">
-                            <span th:text="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.name : ''}">Tên phim</span>
-                        </td>
-                        <td th:text="${booking.schedule != null && booking.schedule.branch != null ? booking.schedule.branch.name : ''}">Tên rạp</td>
-                        <td th:text="${#temporals.format(booking.date, 'dd/MM/yyyy')}">12/06/2025</td>
-                        <td th:text="${#numbers.formatDecimal(booking.amount, 0, 'COMMA', 2, 'POINT')} + ' ₫'">200,000 ₫</td>
-                        <td>
-                            <span th:if="${booking.schedule != null && booking.schedule.screeningDate != null}">
-                                <span th:with="expired=${T(java.time.LocalDate).parse(booking.schedule.screeningDate.toString()).isBefore(T(java.time.LocalDate).now())}">
-                                    <span th:text="${expired ? 'Hết hạn' : 'Còn hạn'}"></span>
-                                </span>
-                            </span>
-                            <span th:if="${booking.schedule == null || booking.schedule.screeningDate == null}">-</span>
-                        </td>
-                        <td>
-                            <span th:if="${booking.schedule != null && booking.schedule.screeningDate != null}">
-                                <span th:with="expired=${T(java.time.LocalDate).parse(booking.schedule.screeningDate.toString()).isBefore(T(java.time.LocalDate).now())}">
-                                    <a class="btn btn-sm btn-info" th:if="${!expired}" th:href="@{'/booking/detail/' + ${booking.id}}">Xem chi tiết</a>
-                                </span>
-                            </span>
-                            <span th:if="${booking.schedule == null || booking.schedule.screeningDate == null}">
-                                <a class="btn btn-sm btn-info disabled" tabindex="-1" aria-disabled="true">Xem chi tiết</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(bookings)}">
-                        <td colspan="6" class="text-center text-muted">Chưa có lịch sử đặt vé</td>
-                    </tr>
-                    </tbody>
-                </table>
-                <!-- PHÂN TRANG chỉ hiển thị ở tab lịch sử vé -->
-                <div class="d-flex justify-content-center mt-3">
-                    <nav th:if="${totalPages > 1}">
-                        <ul class="pagination">
-                            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                                <a class="page-link" th:href="@{'/profile'(page=${currentPage - 1})}">Trước</a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" th:href="@{'/profile'(page=${i})}" th:text="${i}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                                <a class="page-link" th:href="@{'/profile'(page=${currentPage + 1})}">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+          <h5 class="mt-3 fw-bold">Lịch sử đặt vé</h5>
+          <div class="card p-3 mb-4">
+            <table
+              class="table table-bordered table-striped mt-3 text-center align-middle"
+            >
+              <thead class="table-dark">
+                <tr>
+                  <th>PHIM</th>
+                  <th>RẠP CHIẾU</th>
+                  <th>NGÀY ĐẶT</th>
+                  <th>GIÁ TIỀN</th>
+                  <th>TRẠNG THÁI</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="booking : ${bookings}">
+                  <td class="d-flex align-items-center gap-2">
+                    <img
+                      th:src="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.image : '/static/assets/images/no-image.png'}"
+                      alt="Ảnh phim"
+                      width="40"
+                      height="60"
+                      style="object-fit: cover; border-radius: 4px"
+                    />
+                    <span
+                      th:text="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.name : ''}"
+                      >Tên phim</span
+                    >
+                  </td>
+                  <td
+                    th:text="${booking.schedule != null && booking.schedule.branch != null ? booking.schedule.branch.name : ''}"
+                  >
+                    Tên rạp
+                  </td>
+                  <td
+                    th:text="${#temporals.format(booking.date, 'dd/MM/yyyy')}"
+                  >
+                    12/06/2025
+                  </td>
+                  <td
+                    th:text="${#numbers.formatDecimal(booking.amount, 0, 'COMMA', 2, 'POINT')} + ' ₫'"
+                  >
+                    200,000 ₫
+                  </td>
+                  <td>
+                    <span
+                      th:if="${booking.schedule != null && booking.schedule.screeningDate != null}"
+                    >
+                      <span
+                        th:text="${expiredMap[booking.id] ? 'Hết hạn' : 'Còn hạn'}"
+                      ></span>
+                    </span>
+                    <span
+                      th:if="${booking.schedule == null || booking.schedule.screeningDate == null}"
+                      >-</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:if="${booking.schedule != null && booking.schedule.screeningDate != null}"
+                    >
+                      <a
+                        class="btn btn-sm btn-info"
+                        th:if="${!expiredMap[booking.id]}"
+                        th:href="@{'/booking/detail/' + ${booking.id}}"
+                        >Xem chi tiết</a
+                      >
+                    </span>
+                    <span
+                      th:if="${booking.schedule == null || booking.schedule.screeningDate == null}"
+                    >
+                      <a
+                        class="btn btn-sm btn-info disabled"
+                        tabindex="-1"
+                        aria-disabled="true"
+                        >Xem chi tiết</a
+                      >
+                    </span>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(bookings)}">
+                  <td colspan="6" class="text-center text-muted">
+                    Chưa có lịch sử đặt vé
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- PHÂN TRANG chỉ hiển thị ở tab lịch sử vé -->
+            <div class="d-flex justify-content-center mt-3">
+              <nav th:if="${totalPages > 1}">
+                <ul class="pagination">
+                  <li
+                    class="page-item"
+                    th:classappend="${currentPage == 1} ? 'disabled'"
+                  >
+                    <a
+                      class="page-link"
+                      th:href="@{'/profile'(page=${currentPage - 1})}"
+                      >Trước</a
+                    >
+                  </li>
+                  <li
+                    class="page-item"
+                    th:each="i : ${#numbers.sequence(1, totalPages)}"
+                    th:classappend="${i == currentPage} ? 'active'"
+                  >
+                    <a
+                      class="page-link"
+                      th:href="@{'/profile'(page=${i})}"
+                      th:text="${i}"
+                    ></a>
+                  </li>
+                  <li
+                    class="page-item"
+                    th:classappend="${currentPage == totalPages} ? 'disabled'"
+                  >
+                    <a
+                      class="page-link"
+                      th:href="@{'/profile'(page=${currentPage + 1})}"
+                      >Sau</a
+                    >
+                  </li>
+                </ul>
+              </nav>
             </div>
+          </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-4">
-            <div></div>
-            <div>
-                <a href="/logout" class="btn btn-danger">Đăng xuất</a>
-            </div>
+          <div></div>
+          <div>
+            <a href="/logout" class="btn btn-danger">Đăng xuất</a>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-<!--<div th:replace="~{fragments/footer :: footer}"></div>-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!--<div th:replace="~{fragments/footer :: footer}"></div>-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    // Lấy CSRF token
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+    <script>
+      // Lấy CSRF token
+      const csrfToken = document
+        .querySelector('meta[name="_csrf"]')
+        ?.getAttribute("content");
+      const csrfHeader = document
+        .querySelector('meta[name="_csrf_header"]')
+        ?.getAttribute("content");
 
-    // Hàm hiển thị alert
-    function showAlert(containerId, type, message) {
+      // Hàm hiển thị alert
+      function showAlert(containerId, type, message) {
         const container = document.getElementById(containerId);
         container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>`;
-    }
+      }
 
-    // Xử lý form cập nhật thông tin
-    document.getElementById("accountForm").addEventListener("submit", function(e) {
-        e.preventDefault();
+      // Xử lý form cập nhật thông tin
+      document
+        .getElementById("accountForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-        const formData = {
+          const formData = {
             userName: document.getElementById("userName").value,
             phone: document.getElementById("phone").value,
             dateOfBirth: document.getElementById("dateOfBirth").value,
-            address: document.getElementById("address").value
-        };
+            address: document.getElementById("address").value,
+          };
 
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+          const headers = {
+            "Content-Type": "application/json",
+          };
 
-        // Thêm CSRF token nếu có
-        if (csrfToken && csrfHeader) {
+          // Thêm CSRF token nếu có
+          if (csrfToken && csrfHeader) {
             headers[csrfHeader] = csrfToken;
-        }
+          }
 
-        fetch('/update-profile', {
-            method: 'POST',
+          fetch("/update-profile", {
+            method: "POST",
             headers: headers,
             body: JSON.stringify(formData),
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
+            credentials: "include",
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
             })
-            .then(data => {
-                if (data.success) {
-                    showAlert('accountAlert', 'success', data.message);
-                } else {
-                    showAlert('accountAlert', 'danger', data.message);
-                }
+            .then((data) => {
+              if (data.success) {
+                showAlert("accountAlert", "success", data.message);
+              } else {
+                showAlert("accountAlert", "danger", data.message);
+              }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('accountAlert', 'danger', 'Có lỗi xảy ra khi cập nhật thông tin!');
+            .catch((error) => {
+              console.error("Error:", error);
+              showAlert(
+                "accountAlert",
+                "danger",
+                "Có lỗi xảy ra khi cập nhật thông tin!"
+              );
             });
-    });
+        });
 
-    // Xử lý form đổi mật khẩu
-    document.getElementById("changePasswordForm").addEventListener("submit", function(e) {
-        e.preventDefault();
+      // Xử lý form đổi mật khẩu
+      document
+        .getElementById("changePasswordForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-        const newPass = document.getElementById("newPassword").value;
-        const confirmPass = document.getElementById("confirmPassword").value;
+          const newPass = document.getElementById("newPassword").value;
+          const confirmPass = document.getElementById("confirmPassword").value;
 
-        if (newPass !== confirmPass) {
-            showAlert('passwordAlert', 'danger', 'Mật khẩu xác nhận không khớp!');
+          if (newPass !== confirmPass) {
+            showAlert(
+              "passwordAlert",
+              "danger",
+              "Mật khẩu xác nhận không khớp!"
+            );
             return;
-        }
+          }
 
-        const formData = {
+          const formData = {
             oldPassword: document.getElementById("oldPassword").value,
             newPassword: newPass,
-            confirmPassword: confirmPass
-        };
+            confirmPassword: confirmPass,
+          };
 
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+          const headers = {
+            "Content-Type": "application/json",
+          };
 
-        // Thêm CSRF token nếu có
-        if (csrfToken && csrfHeader) {
+          // Thêm CSRF token nếu có
+          if (csrfToken && csrfHeader) {
             headers[csrfHeader] = csrfToken;
-        }
+          }
 
-        fetch('/change-password', {
-            method: 'POST',
+          fetch("/change-password", {
+            method: "POST",
             headers: headers,
             body: JSON.stringify(formData),
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
+            credentials: "include",
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
             })
-            .then(data => {
-                if (data.success) {
-                    showAlert('passwordAlert', 'success', data.message);
-                    document.getElementById("changePasswordForm").reset();
-                } else {
-                    showAlert('passwordAlert', 'danger', data.message);
-                }
+            .then((data) => {
+              if (data.success) {
+                showAlert("passwordAlert", "success", data.message);
+                document.getElementById("changePasswordForm").reset();
+              } else {
+                showAlert("passwordAlert", "danger", data.message);
+              }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('passwordAlert', 'danger', 'Có lỗi xảy ra khi đổi mật khẩu!');
+            .catch((error) => {
+              console.error("Error:", error);
+              showAlert(
+                "passwordAlert",
+                "danger",
+                "Có lỗi xảy ra khi đổi mật khẩu!"
+              );
             });
-    });
+        });
 
-    // Khi có ?page= param trên URL, tự động chuyển sang tab Lịch Sử Vé
-    document.addEventListener('DOMContentLoaded', function() {
+      // Khi có ?page= param trên URL, tự động chuyển sang tab Lịch Sử Vé
+      document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('page')) {
-            const historyTab = document.getElementById('history-tab');
-            if (historyTab) {
-                new bootstrap.Tab(historyTab).show();
-            }
+        if (urlParams.has("page")) {
+          const historyTab = document.getElementById("history-tab");
+          if (historyTab) {
+            new bootstrap.Tab(historyTab).show();
+          }
         }
-    });
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>

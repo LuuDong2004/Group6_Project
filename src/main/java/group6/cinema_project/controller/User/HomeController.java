@@ -20,6 +20,8 @@ public class HomeController {
         List<MovieDto> newReleases = homeService.getNewReleases();
         model.addAttribute("popularMovies", popularMovies);
         model.addAttribute("newReleases", newReleases);
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
         return "index";
     }
 }

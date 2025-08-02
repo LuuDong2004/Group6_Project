@@ -1,19 +1,14 @@
 
 package group6.cinema_project.controller.Admin;
 
-import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.MovieWithSchedulesDto;
-import group6.cinema_project.dto.ScheduleGroupedByDateDto;
-import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
-import group6.cinema_project.dto.ScheduleTimeSlotDto;
-import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.dto.*;
+import group6.cinema_project.entity.*;
 import group6.cinema_project.exception.ScheduleConflictException;
+import group6.cinema_project.service.Admin.*;
 
-import group6.cinema_project.service.Admin.IAdminBranchService;
-import group6.cinema_project.service.Admin.IAdminMovieService;
-import group6.cinema_project.service.Admin.IAdminRoomService;
-import group6.cinema_project.service.Admin.IAdminScheduleService;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,26 +18,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.ScreeningRoom;
-import group6.cinema_project.entity.Branch;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.web.bind.annotation.PostMapping;
-
-/**
- * Controller for handling admin schedule management operations.
- * Handles the display of movie schedules in the admin interface.
- */
 @Controller
 @RequestMapping("/admin/schedules")
 @RequiredArgsConstructor
@@ -54,10 +34,6 @@ public class AdminScheduleController {
     private final IAdminRoomService screeningRoomService;
     private final IAdminBranchService branchService;
 
-    /**
-     * Display the schedule list page with optional filtering
-     */
-
     @GetMapping("/list")
     public String listSchedules(Model model,
             @RequestParam(value = "movieId", required = false) Integer movieId,
@@ -68,11 +44,8 @@ public class AdminScheduleController {
                 movieId, screeningDate, screeningRoomId);
 
         try {
-            // Load schedule data
             List<ScreeningScheduleDto> schedules;
 
-            // If any filter parameters are provided, use filtered search; otherwise get all
-            // schedules
             if (movieId != null || screeningDate != null || screeningRoomId != null) {
                 log.info("Using filtered search for schedules");
                 schedules = movieScheduleService.getFilteredScreeningSchedulesForDisplay(
@@ -84,10 +57,8 @@ public class AdminScheduleController {
 
             log.info("Successfully loaded {} schedules", schedules.size());
 
-            // Add schedules to model
             model.addAttribute("schedules", schedules);
 
-            // Pre-calculate editability info for each schedule to avoid AJAX calls
             Map<Integer, Map<String, Object>> editabilityMap = new HashMap<>();
             for (ScreeningScheduleDto schedule : schedules) {
                 try {
@@ -143,6 +114,9 @@ public class AdminScheduleController {
         model.addAttribute("selectedMovieId", movieId);
         model.addAttribute("selectedScreeningDate", screeningDate);
         model.addAttribute("selectedScreeningRoomId", screeningRoomId);
+
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
 
         return "admin/admin_schedules_list";
     }
@@ -219,6 +193,9 @@ public class AdminScheduleController {
             model.addAttribute("selectedDateFormatted", formatDateForDisplay(finalSelectedDate));
             model.addAttribute("isPastDate", finalSelectedDate.isBefore(LocalDate.now()));
         }
+
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
 
         return "admin/admin_schedules_list";
     }
@@ -458,7 +435,7 @@ public class AdminScheduleController {
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
             }
-            return "admin/admin_schedule_add";
+            return "admin/admin_schedules_add";
 
         } catch (Exception e) {
             log.error("Error adding schedule", e);
@@ -890,7 +867,6 @@ public class AdminScheduleController {
             model.addAttribute("comingSoonCount", comingSoonCount);
             model.addAttribute("stoppedCount", stoppedCount);
 
-           
             String[] monthNames = {
                     "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
                     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
@@ -1201,6 +1177,34 @@ public class AdminScheduleController {
                 return "stopped";
             default:
                 return "unknown";
+        }
+    }
+
+    /**
+     * API endpoint để lấy danh sách phòng chiếu theo chi nhánh
+     */
+    @GetMapping("/api/branches/{branchId}/rooms")
+    @ResponseBody
+    public List<Map<String, Object>> getRoomsByBranch(@PathVariable("branchId") Integer branchId) {
+        log.info("API request for rooms by branch ID: {}", branchId);
+
+        try {
+            List<ScreeningRoomDto> rooms = screeningRoomService.getScreeningRoomsByBranch(branchId);
+
+            return rooms.stream()
+                    .map(room -> {
+                        Map<String, Object> roomData = new HashMap<>();
+                        roomData.put("id", room.getId());
+                        roomData.put("name", room.getName());
+                        roomData.put("capacity", room.getCapacity());
+                        roomData.put("type", room.getType());
+                        return roomData;
+                    })
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error getting rooms by branch", e);
+            return List.of();
         }
     }
 
