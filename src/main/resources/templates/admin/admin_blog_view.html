@@ -15,27 +15,87 @@
       rel="stylesheet"
     />
     <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
       .sidebar {
-        min-height: 100vh;
+        width: 260px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
       }
-      .sidebar .nav-link {
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
         color: rgba(255, 255, 255, 0.8);
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin: 4px 0;
-        transition: all 0.3s ease;
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
-      .sidebar .nav-link:hover,
-      .sidebar .nav-link.active {
-        background: rgba(255, 255, 255, 0.2);
+
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
         color: white;
-        transform: translateX(5px);
       }
-      .main-content {
-        background-color: #f8f9fa;
+
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-right: 3px solid white;
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
         min-height: 100vh;
+        background-color: #f8fafc;
+        transition: margin-left 0.3s ease;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .text-gray-700 {
+        color: #374151 !important;
       }
       .card {
         border: none;
@@ -165,7 +225,7 @@
             <div class="col-md-8">
               <!-- Blog Header -->
               <div class="blog-header">
-                <h1 class="mb-3" th:text="${blogPost.title}"></h1>
+                <h1 class="mb-3" th:utext="${blogPost.title}"></h1>
                 <div class="blog-meta">
                   <div class="row">
                     <div class="col-md-6">
@@ -229,13 +289,12 @@
                       >
                         <i class="fas fa-edit me-2"></i>Chỉnh sửa
                       </a>
-                      <button
-                        type="button"
+                      <a
+                        th:href="@{/admin/blogs/delete/{id}(id=${blogPost.id})}"
                         class="btn btn-outline-danger"
-                        onclick="confirmDelete([[${blogPost.id}]], '[[${blogPost.title}]]')"
                       >
                         <i class="fas fa-trash me-2"></i>Xóa bài viết
-                      </button>
+                      </a>
                       <a
                         th:href="@{/blogs/{id}(id=${blogPost.id})}"
                         class="btn btn-outline-info"
@@ -281,7 +340,7 @@
                       <label class="form-label fw-bold">Tóm tắt:</label>
                       <p
                         class="mb-0 text-muted small"
-                        th:text="${blogPost.summary}"
+                        th:utext="${blogPost.summary}"
                       ></p>
                     </div>
                     <div th:if="${blogPost.coverImageUrl}">
@@ -307,58 +366,8 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-exclamation-triangle text-warning me-2"></i>Xác
-              nhận xóa
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <p>
-              Bạn có chắc chắn muốn xóa blog post "<span id="blogTitle"></span
-              >"?
-            </p>
-            <p class="text-danger small">
-              <i class="fas fa-warning me-1"></i>Hành động này không thể hoàn
-              tác!
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Hủy
-            </button>
-            <form id="deleteForm" method="post" style="display: inline">
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash me-2"></i>Xóa
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      function confirmDelete(blogId, blogTitle) {
-        document.getElementById("blogTitle").textContent = blogTitle;
-        document.getElementById("deleteForm").action =
-          "/admin/blogs/delete/" + blogId;
-        new bootstrap.Modal(document.getElementById("deleteModal")).show();
-      }
-    </script>
-    </div>
   </body>
 </html>

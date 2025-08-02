@@ -1067,6 +1067,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
 
     <!-- Pass existing directors and actors data to JavaScript -->
     <script th:inline="javascript">
@@ -1126,8 +1127,14 @@
           // headerTitle.textContent = 'Chỉnh Sửa Phim';
         }
 
-        initializeDashboardBehavior();
-        initializeFileUpload();
+        initializeSidebarToggle();
+        initializeFileUploadPreview(
+          "uploadArea",
+          "image",
+          "imagePreview",
+          "previewImg",
+          "removeImageBtn"
+        );
         initializeSelectableTagsVisuals();
 
         // Initialize autocomplete multi-select for directors and actors
@@ -1136,22 +1143,9 @@
         const movieForm = document.getElementById("movieForm");
         if (movieForm) {
           movieForm.addEventListener("submit", function (event) {
-            let isValid = true;
-
-            // Validate genres first
+            // Chỉ validate genres vì HTML5 sẽ handle required fields
             if (!validateGenres()) {
-              isValid = false;
-            }
-
-            // Validate all other required fields (excluding file input if it's not required for edit)
-            if (!validateAllRequiredFields()) {
-              isValid = false;
-            }
-
-            if (!isValid) {
-              event.preventDefault(); // Prevent form submission
-              // Optionally, show a general error message
-              console.warn("Form validation failed. Please check the fields.");
+              event.preventDefault();
               return false;
             }
             // Add a loading state to the submit button
@@ -1167,158 +1161,9 @@
         initializeRequiredFieldValidation();
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      // Moved to admin-common.js
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-          console.error(
-            "Sidebar toggle, sidebar, or main content wrapper not found."
-          );
-          return;
-        }
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-          // Store preference (optional)
-          // localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        }
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          // Collapse sidebar by default on smaller screens if not already explicitly expanded by user
-          if (window.innerWidth <= 992) {
-            // Consistent with CSS media query
-            if (!sidebar.classList.contains("collapsed")) {
-              // sidebar.classList.add('collapsed'); // Auto-collapse
-              // mainContentWrapper.classList.add('expanded');
-            }
-          } else {
-            // On larger screens, restore based on preference or default to expanded
-            // if (localStorage.getItem('sidebarCollapsed') === 'false' && sidebar.classList.contains('collapsed')) {
-            //    toggleSidebar();
-            // }
-          }
-        }
-        checkViewport(); // Initial check
-        window.addEventListener("resize", checkViewport); // Check on resize
-      }
-
-      function initializeFileUpload() {
-        const uploadArea = document.getElementById("uploadArea");
-        const fileInput = document.getElementById("image"); // Name is 'image' in HTML
-        const imagePreviewDiv = document.getElementById("imagePreview");
-        const previewImg = document.getElementById("previewImg");
-        const removeImageBtn = document.getElementById("removeImageBtn");
-
-        if (
-          !uploadArea ||
-          !fileInput ||
-          !imagePreviewDiv ||
-          !previewImg ||
-          !removeImageBtn
-        ) {
-          console.error(
-            "One or more file upload elements are missing for file upload."
-          );
-          return;
-        }
-
-        // Initial state check for existing image (set by Thymeleaf)
-        if (
-          previewImg.src &&
-          previewImg.src !== window.location.href &&
-          !previewImg.src.includes("placehold.co")
-        ) {
-          // Check if a real image is loaded
-          imagePreviewDiv.classList.remove("d-none");
-          removeImageBtn.classList.remove("d-none");
-          // Fade in effect for initially loaded image
-          imagePreviewDiv.style.opacity = "0";
-          setTimeout(() => {
-            imagePreviewDiv.style.transition = "opacity 0.3s ease";
-            imagePreviewDiv.style.opacity = "1";
-          }, 50);
-        } else {
-          // Ensure placeholder or no image state is clean
-          if (
-            previewImg.src.includes("placehold.co") ||
-            !previewImg.src ||
-            previewImg.src === window.location.href
-          ) {
-            // Keep imagePreviewDiv visible if placeholder is used, hide remove button
-            if (previewImg.src.includes("placehold.co")) {
-              imagePreviewDiv.classList.remove("d-none");
-            } else {
-              imagePreviewDiv.classList.add("d-none");
-            }
-            removeImageBtn.classList.add("d-none");
-          }
-        }
-
-        uploadArea.addEventListener("click", () => fileInput.click());
-        uploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadArea.classList.add("dragover");
-        });
-        uploadArea.addEventListener("dragleave", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-        });
-        uploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-          const files = e.dataTransfer.files;
-          if (files.length > 0) handleFileSelect(files[0]);
-        });
-        fileInput.addEventListener("change", (e) => {
-          if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
-        });
-
-        function handleFileSelect(file) {
-          if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              previewImg.src = e.target.result;
-              imagePreviewDiv.classList.remove("d-none");
-              removeImageBtn.classList.remove("d-none");
-              // Fade-in effect for new preview
-              imagePreviewDiv.style.opacity = "0";
-              setTimeout(() => {
-                imagePreviewDiv.style.transition = "opacity 0.3s ease";
-                imagePreviewDiv.style.opacity = "1";
-              }, 50);
-              // If image field had validation error, clear it
-              const imageLabel = document.querySelector('label[for="image"]');
-              if (imageLabel) imageLabel.classList.remove("required-error");
-            };
-            reader.readAsDataURL(file);
-          } else {
-            console.warn(
-              "Invalid file type or no file selected. Please select a PNG or JPG image."
-            );
-            // Reset to placeholder or hide if no valid file
-            previewImg.src =
-              "https://placehold.co/300x450/E2E8F0/475569?text=Poster";
-            // imagePreviewDiv.classList.add('d-none'); // Or keep placeholder visible
-            removeImageBtn.classList.add("d-none");
-            fileInput.value = ""; // Clear the file input
-          }
-        }
-
-        removeImageBtn.addEventListener("click", function () {
-          previewImg.src =
-            "https://placehold.co/300x450/E2E8F0/475569?text=Poster"; // Reset to placeholder
-          // imagePreviewDiv.classList.add('d-none'); // Or keep placeholder visible
-          this.classList.add("d-none"); // Hide remove button
-          fileInput.value = ""; // Clear the actual file input
-          // Note: Backend will need logic to handle image removal if 'image' is empty on submit.
-          // If image was 'required', this would trigger validation error unless 'required' is removed for edit.
-        });
-      }
+      // Moved to admin-common.js
 
       function initializeSelectableTagsVisuals() {
         document.querySelectorAll(".selectable-tag-form").forEach((label) => {
@@ -1418,70 +1263,7 @@
         });
       }
 
-      function validateRequiredField(field, label) {
-        if (!label) return;
-
-        let isEmpty = false;
-        if (field.type === "file") {
-          // File input is not required for edit, so this specific check might be less relevant here
-          isEmpty = !field.files || field.files.length === 0;
-        } else if (field.tagName === "SELECT") {
-          isEmpty = !field.value || field.value === ""; // Changed '0' to empty string for default "Chọn rating" option
-        } else {
-          isEmpty = !field.value.trim();
-        }
-
-        if (isEmpty && field.hasAttribute("required")) {
-          // Only apply error if field is actually required
-          label.classList.add("required-error");
-        } else {
-          label.classList.remove("required-error");
-        }
-      }
-
-      function validateAllRequiredFields() {
-        const requiredFields = document.querySelectorAll(
-          "input[required], textarea[required], select[required]"
-        );
-        let allValid = true;
-        let firstInvalidField = null;
-
-        requiredFields.forEach((field) => {
-          const label = document.querySelector(`label[for="${field.id}"]`);
-          let isEmpty = false;
-
-          // Skip file input validation if it's not strictly required for edit
-          // The 'image' input does not have 'required' anymore in this edit form.
-          // So it won't be picked by querySelectorAll('input[required], ...') if 'required' is removed.
-          // If it were to be included and optional:
-          // if (field.id === 'image' && !field.hasAttribute('required')) { return; /* skip */ }
-
-          if (field.tagName === "SELECT") {
-            isEmpty = !field.value || field.value === ""; // Default option has value ""
-          } else {
-            isEmpty = !field.value.trim();
-          }
-
-          if (isEmpty) {
-            if (label) label.classList.add("required-error");
-            allValid = false;
-            if (!firstInvalidField) {
-              firstInvalidField = field;
-            }
-          } else {
-            if (label) label.classList.remove("required-error");
-          }
-        });
-
-        if (firstInvalidField) {
-          firstInvalidField.focus();
-          firstInvalidField.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-        return allValid;
-      }
+      // Removed complex validation functions - using HTML5 validation instead
 
       // Autocomplete Multi-Select Functionality
       function initializeAutocomplete() {

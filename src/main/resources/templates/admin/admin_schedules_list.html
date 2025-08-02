@@ -197,6 +197,8 @@
         gap: 0.5rem;
         min-width: 150px;
         justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
       }
 
       .filter-btn:hover {
@@ -632,25 +634,43 @@
           </div>
         </div>
 
-        <!-- Filter Buttons -->
+        <!-- Filter Buttons - Using server-side filtering -->
         <div class="filter-container">
           <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">
+            <a
+              th:href="@{/admin/schedules/list/date(date=${selectedDate})}"
+              class="filter-btn"
+              th:classappend="${status == null or status == 'all' ? 'active' : ''}"
+            >
               <i class="fas fa-th"></i>
               <span>Tất cả</span>
-            </button>
-            <button class="filter-btn upcoming" data-filter="upcoming">
+            </a>
+            <a
+              th:if="${not isPastDate}"
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='upcoming')}"
+              class="filter-btn upcoming"
+              th:classappend="${status == 'upcoming' ? 'active' : ''}"
+            >
               <i class="fas fa-clock"></i>
               <span>Sắp chiếu</span>
-            </button>
-            <button class="filter-btn playing" data-filter="active">
+            </a>
+            <a
+              th:if="${not isPastDate}"
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='active')}"
+              class="filter-btn playing"
+              th:classappend="${status == 'active' ? 'active' : ''}"
+            >
               <i class="fas fa-play-circle"></i>
               <span>Đang chiếu</span>
-            </button>
-            <button class="filter-btn ended" data-filter="ended">
+            </a>
+            <a
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='ended')}"
+              class="filter-btn ended"
+              th:classappend="${status == 'ended' ? 'active' : ''}"
+            >
               <i class="fas fa-stop-circle"></i>
               <span>Đã chiếu</span>
-            </button>
+            </a>
           </div>
         </div>
 
@@ -835,6 +855,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
       // Lấy ngày được chọn từ server
       const selectedDate = new Date(
@@ -847,113 +868,14 @@
       const isPastDate = selectedDate < today;
 
       document.addEventListener("DOMContentLoaded", function () {
-        initializeDashboardBehavior();
-        initializeFilters();
-        handlePastDateFilters();
+        initializeSidebarToggle();
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      // Moved to admin-common.js
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+      // Removed handlePastDateFilters - using Thymeleaf conditional rendering instead
 
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-        }
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              toggleSidebar();
-            }
-          }
-        }
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
-      function handlePastDateFilters() {
-        if (isPastDate) {
-          // Ẩn button "Sắp chiếu" và "Đang chiếu" cho ngày quá khứ
-          const upcomingBtn = document.querySelector(
-            '.filter-btn[data-filter="upcoming"]'
-          );
-          const activeBtn = document.querySelector(
-            '.filter-btn[data-filter="active"]'
-          );
-
-          if (upcomingBtn) {
-            upcomingBtn.style.display = "none";
-          }
-          if (activeBtn) {
-            activeBtn.style.display = "none";
-          }
-
-          // Nếu button hiện tại đang active là upcoming hoặc active, chuyển về "all"
-          const currentActive = document.querySelector(".filter-btn.active");
-          if (
-            currentActive &&
-            (currentActive.dataset.filter === "upcoming" ||
-              currentActive.dataset.filter === "active")
-          ) {
-            currentActive.classList.remove("active");
-            document
-              .querySelector('.filter-btn[data-filter="all"]')
-              .classList.add("active");
-          }
-        }
-      }
-
-      function initializeFilters() {
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        const movieCards = document.querySelectorAll(".movie-card");
-
-        filterButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            // Xóa active class từ tất cả buttons
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            // Thêm active class cho button được click
-            button.classList.add("active");
-
-            const filter = button.dataset.filter;
-            filterMovies(filter);
-          });
-        });
-      }
-
-      function filterMovies(filter) {
-        const movieCards = document.querySelectorAll(".movie-card");
-
-        movieCards.forEach((card) => {
-          if (filter === "all") {
-            card.style.display = "block";
-          } else {
-            // Kiểm tra xem movie có schedule với status tương ứng không
-            const scheduleItems = card.querySelectorAll(".schedule-item");
-            let hasMatchingSchedule = false;
-
-            scheduleItems.forEach((item) => {
-              const status = item.dataset.status;
-              if (
-                (filter === "upcoming" && status === "UPCOMING") ||
-                (filter === "active" && status === "ACTIVE") ||
-                (filter === "ended" &&
-                  (status === "ENDED" || status === "CANCELLED"))
-              ) {
-                hasMatchingSchedule = true;
-              }
-            });
-
-            card.style.display = hasMatchingSchedule ? "block" : "none";
-          }
-        });
-      }
+      // Removed client-side filtering - using server-side filtering instead
 
       function showScheduleDetails(scheduleId) {
         // Hiển thị chi tiết lịch chiếu

@@ -15,27 +15,87 @@
     <!-- TinyMCE -->
     <script th:src="${tinyMCEUrl}" referrerpolicy="origin"></script>
     <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
       .sidebar {
-        min-height: 100vh;
+        width: 260px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
       }
-      .sidebar .nav-link {
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
         color: rgba(255, 255, 255, 0.8);
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin: 4px 0;
-        transition: all 0.3s ease;
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
-      .sidebar .nav-link:hover,
-      .sidebar .nav-link.active {
-        background: rgba(255, 255, 255, 0.2);
+
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
         color: white;
-        transform: translateX(5px);
       }
-      .main-content {
-        background-color: #f8f9fa;
+
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-right: 3px solid white;
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
         min-height: 100vh;
+        background-color: #f8fafc;
+        transition: margin-left 0.3s ease;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .text-gray-700 {
+        color: #374151 !important;
       }
       .card {
         border: none;
@@ -250,9 +310,7 @@
                           <i class="fas fa-exclamation-circle me-1"></i>
                           <span th:errors="*{title}"></span>
                         </div>
-                        <div class="char-counter mt-1">
-                          <span id="titleCounter">0</span>/255 ký tự
-                        </div>
+
                       </div>
                     </div>
 
@@ -335,7 +393,6 @@
                         id="coverImageFile"
                         name="coverImageFile"
                         accept="image/*"
-                        onchange="previewImage(this)"
                       />
                       <div class="text-center">
                         <i
@@ -348,16 +405,7 @@
                       </div>
                     </div>
 
-                    <div id="imagePreview" class="image-preview">
-                      <img id="previewImg" src="" alt="Preview" />
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger mt-2 w-100"
-                        onclick="removeImage()"
-                      >
-                        <i class="fas fa-trash me-1"></i>Xóa ảnh mới
-                      </button>
-                    </div>
+
 
                     <div
                       th:if="${#fields.hasErrors('coverImageUrl')}"
@@ -411,67 +459,19 @@
         language: "vi",
       });
 
-      // Character counter for title
-      document.getElementById("title").addEventListener("input", function () {
-        const counter = document.getElementById("titleCounter");
-        counter.textContent = this.value.length;
-
-        if (this.value.length > 255) {
-          counter.parentElement.classList.add("text-danger");
-        } else {
-          counter.parentElement.classList.remove("text-danger");
-        }
-      });
-
-      // Image preview
-      function previewImage(input) {
-        if (input.files && input.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            document.getElementById("previewImg").src = e.target.result;
-            document.getElementById("imagePreview").style.display = "block";
-          };
-          reader.readAsDataURL(input.files[0]);
-        }
-      }
-
-      // Remove image
-      function removeImage() {
-        document.getElementById("coverImageFile").value = "";
-        document.getElementById("imagePreview").style.display = "none";
-        document.getElementById("previewImg").src = "";
-      }
-
-      // Form validation
+      // Form submission handler để save TinyMCE content
       document
         .getElementById("blogForm")
         .addEventListener("submit", function (e) {
-          // Get content from TinyMCE
+          // Lưu nội dung từ TinyMCE vào textarea trước khi submit
           tinymce.triggerSave();
-
-          const title = document.getElementById("title").value.trim();
-          const content = tinymce.get("content").getContent();
-
-          if (!title) {
-            e.preventDefault();
-            alert("Vui lòng nhập tiêu đề bài viết");
-            return;
-          }
-
-          if (!content || content.length < 10) {
-            e.preventDefault();
-            alert("Vui lòng nhập nội dung bài viết (ít nhất 10 ký tự)");
-            return;
-          }
         });
-
-      // Initialize character counter
-      document.addEventListener("DOMContentLoaded", function () {
-        const titleInput = document.getElementById("title");
-        const counter = document.getElementById("titleCounter");
-        counter.textContent = titleInput.value.length;
+          mainContent.style.marginLeft = '260px';
+        } else {
+          sidebar.style.width = '60px';
+          mainContent.style.marginLeft = '60px';
+        }
       });
     </script>
-    </div>
   </body>
 </html>

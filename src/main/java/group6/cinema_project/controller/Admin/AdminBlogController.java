@@ -45,9 +45,9 @@ public class AdminBlogController {
      */
     @GetMapping("/list")
     public String listBlogPosts(Model model,
-                                @RequestParam(value = "searchTerm", required = false) String searchTerm,
-                                @RequestParam(value = "page", defaultValue = "0") int page,
-                                @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         log.info("Admin: Hiển thị danh sách blog posts - page: {}, size: {}, searchTerm: {}", page, size, searchTerm);
 
         try {
@@ -104,10 +104,10 @@ public class AdminBlogController {
      */
     @PostMapping("/add")
     public String addBlogPost(@Valid @ModelAttribute("blogPost") BlogPostDto blogPostDto,
-                              @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
-                              BindingResult bindingResult,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Admin: Xử lý thêm blog post với tiêu đề: {}", blogPostDto.getTitle());
 
         try {
@@ -115,8 +115,8 @@ public class AdminBlogController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameOrEmail = authentication.getName();
             User currentUser = userRepository.findByUserName(usernameOrEmail)
-                .or(() -> userRepository.findByEmail(usernameOrEmail))
-                .orElse(null);
+                    .or(() -> userRepository.findByEmail(usernameOrEmail))
+                    .orElse(null);
             if (currentUser == null) {
                 log.error("Không tìm thấy user đang đăng nhập!");
                 bindingResult.rejectValue("title", "error.blogPost",
@@ -204,11 +204,11 @@ public class AdminBlogController {
      */
     @PostMapping("/edit/{id}")
     public String updateBlogPost(@PathVariable("id") Long id,
-                                 @Valid @ModelAttribute("blogPost") BlogPostDto blogPostDto,
-                                 @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
-                                 BindingResult bindingResult,
-                                 Model model,
-                                 RedirectAttributes redirectAttributes) {
+            @Valid @ModelAttribute("blogPost") BlogPostDto blogPostDto,
+            @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         log.info("Admin: Xử lý cập nhật blog post ID: {} với tiêu đề: {}", id, blogPostDto.getTitle());
 
         if (bindingResult.hasErrors()) {
@@ -260,6 +260,31 @@ public class AdminBlogController {
                 log.error("Lỗi khi reload users", ex);
             }
             return "admin/admin_blog_edit";
+        }
+    }
+
+    /**
+     * Hiển thị trang xác nhận xóa blog post.
+     */
+    @GetMapping("/delete/{id}")
+    public String showDeleteConfirmation(@PathVariable("id") Long id, Model model) {
+        log.info("Admin: Hiển thị trang xác nhận xóa blog post ID: {}", id);
+
+        try {
+            Optional<BlogPostDto> blogPost = adminBlogService.getBlogPostByIdForAdmin(id);
+            if (blogPost.isEmpty()) {
+                log.warn("Không tìm thấy blog post với ID: {}", id);
+                model.addAttribute("error", "Không tìm thấy blog post");
+                return "redirect:/admin/blogs/list";
+            }
+
+            model.addAttribute("blogPost", blogPost.get());
+            return "admin/admin_blog_delete_confirm";
+
+        } catch (Exception e) {
+            log.error("Lỗi khi hiển thị trang xác nhận xóa blog post ID: {}", id, e);
+            model.addAttribute("error", "Có lỗi xảy ra khi tải trang xác nhận: " + e.getMessage());
+            return "redirect:/admin/blogs/list";
         }
     }
 

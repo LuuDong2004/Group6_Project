@@ -107,6 +107,9 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         color: #6c757d;
+        line-height: 1.4;
+        font-size: 0.875rem;
+        padding: 2px 0;
       }
       .cover-image {
         width: 60px;
@@ -298,14 +301,14 @@
                   <td>
                     <div
                       class="blog-title fw-semibold"
-                      th:text="${blog.title}"
+                      th:utext="${blog.title}"
                       th:title="${blog.title}"
                     ></div>
                   </td>
                   <td>
                     <div
                       class="blog-summary small"
-                      th:text="${blog.summary}"
+                      th:utext="${blog.summary}"
                       th:title="${blog.summary}"
                     ></div>
                   </td>
@@ -337,15 +340,13 @@
                       >
                         <i class="fas fa-edit"></i>
                       </a>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary delete-blog-btn"
+                      <a
+                        th:href="@{/admin/blogs/delete/{id}(id=${blog.id})}"
+                        class="btn btn-sm btn-outline-secondary"
                         title="Xóa"
-                        th:data-blog-id="${blog.id}"
-                        th:data-blog-title="${blog.title}"
                       >
                         <i class="fas fa-trash"></i>
-                      </button>
+                      </a>
                     </div>
                   </td>
                 </tr>
@@ -399,78 +400,6 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-exclamation-triangle text-warning me-2"></i>Xác
-              nhận xóa
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <p>
-              Bạn có chắc chắn muốn xóa blog post "<span id="blogTitle"></span
-              >"?
-            </p>
-            <p class="text-danger small">
-              <i class="fas fa-warning me-1"></i>Hành động này không thể hoàn
-              tác!
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Hủy
-            </button>
-            <form id="deleteForm" method="post" style="display: inline">
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash me-2"></i>Xóa
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // Xử lý sự kiện click cho nút xóa blog
-      document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll(".delete-blog-btn");
-        deleteButtons.forEach(function (button) {
-          button.addEventListener("click", function () {
-            const blogId = this.getAttribute("data-blog-id");
-            const blogTitle = this.getAttribute("data-blog-title");
-            confirmDelete(blogId, blogTitle);
-          });
-        });
-      });
-
-      function confirmDelete(blogId, blogTitle) {
-        document.getElementById("blogTitle").textContent = blogTitle;
-        document.getElementById("deleteForm").action =
-          "/admin/blogs/delete/" + blogId;
-        new bootstrap.Modal(document.getElementById("deleteModal")).show();
-      }
-
-      // Tự động ẩn thông báo sau 5 giây
-      setTimeout(function () {
-        const alerts = document.querySelectorAll(".alert");
-        alerts.forEach(function (alert) {
-          const bsAlert = new bootstrap.Alert(alert);
-          bsAlert.close();
-        });
-      }, 5000);
-    </script>
   </body>
 </html>
