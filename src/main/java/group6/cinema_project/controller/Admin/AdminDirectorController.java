@@ -1,7 +1,10 @@
 package group6.cinema_project.controller.Admin;
 
+
+
 import group6.cinema_project.entity.Director;
 
+import group6.cinema_project.service.Admin.IAdminActorService;
 import group6.cinema_project.service.Admin.IAdminDirectorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +48,7 @@ public class AdminDirectorController {
 
     @GetMapping("/list")
     public String listDirectors(Model model,
-            @RequestParam(value = "searchTerm", required = false) String searchTerm) {
+                                @RequestParam(value = "searchTerm", required = false) String searchTerm) {
         log.info("Displaying director list page with search term: {}", searchTerm);
 
         try {
@@ -83,9 +86,9 @@ public class AdminDirectorController {
 
     @PostMapping("/add")
     public String addDirector(@Valid @ModelAttribute("director") Director director,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
+                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                              BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes) {
         log.info("Processing add director request for: {}", director.getName());
 
         if (bindingResult.hasErrors()) {
@@ -159,10 +162,10 @@ public class AdminDirectorController {
 
     @PostMapping("/edit/{id}")
     public String updateDirector(@PathVariable Integer id,
-            @Valid @ModelAttribute("director") Director director,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
+                                 @Valid @ModelAttribute("director") Director director,
+                                 @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) {
         log.info("Processing update director request for ID: {}", id);
 
         if (bindingResult.hasErrors()) {

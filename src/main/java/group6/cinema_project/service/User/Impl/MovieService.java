@@ -1,8 +1,12 @@
 package group6.cinema_project.service.User.Impl;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
+import group6.cinema_project.dto.ReviewDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Genre;
+import group6.cinema_project.entity.Qa.Review;
+import group6.cinema_project.repository.User.ReviewRepository;
 
 import group6.cinema_project.service.User.IMovieService;
 import org.modelmapper.ModelMapper;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 public class MovieService implements IMovieService {
     @Autowired
     private MovieRepository movieReponsitory;
+    @Autowired
+    private ReviewRepository reviewRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -50,6 +56,7 @@ public class MovieService implements IMovieService {
     // .map(movie -> modelMapper.map(movie, MovieDto.class))
     // .collect(Collectors.toList());
     // }
+
     // @Override
     // public List<MovieDto> getMoviesByTop3Rating(){
     // Pageable top3 = PageRequest.of(0, 3);
@@ -58,6 +65,7 @@ public class MovieService implements IMovieService {
     // .map(movie -> modelMapper.map(movie, MovieDto.class))
     // .collect(Collectors.toList());
     // }
+
     @Override
     public List<MovieDto> getMoviesWithPagination(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -151,6 +159,58 @@ public class MovieService implements IMovieService {
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer());
         dto.setStatus(movie.getStatus());
+
+        return dto;
+    }
+
+    @Override
+    public MovieDto getMovieById(Integer movieId) {
+        List<Movie> movies = movieReponsitory.findMovieById(movieId);
+        if (movies != null && !movies.isEmpty()) {
+            return convertToBasicDto(movies.get(0));
+        }
+        return null;
+    }
+
+    // Method mới để lấy chi tiết phim với actors, directors và reviews
+    public MovieDto getMovieDetail(Integer movieId) {
+        Movie movie = movieReponsitory.findById(movieId).orElse(null);
+        if (movie == null) {
+            return null;
+        }
+
+        MovieDto dto = convertToBasicDto(movie);
+
+        // Map actors với thông tin chi tiết
+        if (movie.getActors() != null) {
+            dto.setActorsDetail(movie.getActors().stream()
+                    .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
+                    .collect(Collectors.toList()));
+        }
+
+        // Map directors với thông tin chi tiết
+        if (movie.getDirectors() != null) {
+            dto.setDirectorsDetail(movie.getDirectors().stream()
+                    .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
+                    .collect(Collectors.toList()));
+        }
+
+        // Map reviews
+        if (reviewRepository != null) {
+            List<Review> reviews = reviewRepository.findByMovie_Id(movieId.longValue());
+            if (reviews != null) {
+                dto.setReviews(reviews.stream()
+                        .map(review -> {
+                            ReviewDto rd = new ReviewDto();
+                            rd.setId(review.getId());
+                            rd.setUser("User " + review.getUserId()); // hoặc lấy tên user nếu có
+                            rd.setComment(review.getComment());
+                            rd.setRating(review.getRating());
+                            rd.setDate(review.getDate());
+                            return rd;
+                        }).collect(Collectors.toList()));
+            }
+        }
 
         return dto;
     }

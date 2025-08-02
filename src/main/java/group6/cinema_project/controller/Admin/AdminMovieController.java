@@ -18,6 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -31,10 +32,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 
 import jakarta.annotation.PostConstruct;
+<<<<<<< HEAD
+=======
+import lombok.RequiredArgsConstructor;
+>>>>>>> 223fbd2 (1)
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -66,10 +72,15 @@ public class AdminMovieController {
 
     @GetMapping("/list")
     public String listMovies(Model model,
+<<<<<<< HEAD
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
             @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+=======
+                             @RequestParam(value = "searchTerm", required = false) String searchTerm,
+                             @RequestParam(value = "filterBy", required = false, defaultValue = "name") String filterBy) {
+>>>>>>> 223fbd2 (1)
         List<MovieDto> movies;
 
         // Tạo Pageable object với page và size
@@ -126,6 +137,7 @@ public class AdminMovieController {
 
     @PostMapping("/add")
     public String adminMovieAddPost(Model model,
+<<<<<<< HEAD
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("duration") int duration,
@@ -137,6 +149,18 @@ public class AdminMovieController {
             @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
             @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
             RedirectAttributes redirectAttributes) {
+=======
+                                    @RequestParam("name") String name,
+                                    @RequestParam("description") String description,
+                                    @RequestParam("duration") int duration,
+                                    @RequestParam("rating") String rating,
+                                    @RequestParam("releaseDate") String releaseDate,
+                                    @RequestParam(value = "genres", required = false) List<String> genres,
+                                    @RequestParam("image") MultipartFile image,
+                                    @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
+                                    @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
+                                    @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds) {
+>>>>>>> 223fbd2 (1)
 
         try {
             MovieDto movie = new MovieDto();
@@ -174,22 +198,22 @@ public class AdminMovieController {
             }
             // Handle selected directors
             if (selectedDirectorIds != null && !selectedDirectorIds.isEmpty()) {
-                Set<String> directorNames = selectedDirectorIds.stream()
+                List<PersonSimpleDto> directors = selectedDirectorIds.stream()
                         .map(id -> directorService.getDirectorById(id))
                         .filter(director -> director != null)
-                        .map(Director::getName)
-                        .collect(Collectors.toSet());
-                movie.setDirectors(directorNames);
+                        .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
+                        .collect(Collectors.toList());
+                movie.setDirectors(directors);
             }
 
             // Handle selected actors
             if (selectedActorIds != null && !selectedActorIds.isEmpty()) {
-                Set<String> actorNames = selectedActorIds.stream()
+                List<PersonSimpleDto> actors = selectedActorIds.stream()
                         .map(id -> actorService.getActorById(id))
                         .filter(actor -> actor != null)
-                        .map(Actor::getName)
-                        .collect(Collectors.toSet());
-                movie.setActors(actorNames);
+                        .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
+                        .collect(Collectors.toList());
+                movie.setActors(actors);
             }
 
             movieService.saveOrUpdate(movie);
@@ -247,6 +271,7 @@ public class AdminMovieController {
 
     @PostMapping("/edit/{id}")
     public String updateMovie(@PathVariable Integer id, Model model,
+<<<<<<< HEAD
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("duration") int duration,
@@ -258,6 +283,19 @@ public class AdminMovieController {
             @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
             @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
             RedirectAttributes redirectAttributes) {
+=======
+                              @RequestParam("name") String name,
+                              @RequestParam("description") String description,
+                              @RequestParam("duration") int duration,
+                              @RequestParam("rating") String rating,
+                              @RequestParam("releaseDate") String releaseDate,
+                              @RequestParam(value = "genres", required = false) List<String> genres,
+                              @RequestParam(value = "image", required = false) MultipartFile image,
+                              @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
+                              @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
+                              @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
+                              RedirectAttributes redirectAttributes) {
+>>>>>>> 223fbd2 (1)
 
         try {
             // Get existing movie
@@ -300,26 +338,26 @@ public class AdminMovieController {
 
             // Handle directors
             if (selectedDirectorIds != null && !selectedDirectorIds.isEmpty()) {
-                Set<String> directorNames = selectedDirectorIds.stream()
+                List<PersonSimpleDto> directors = selectedDirectorIds.stream()
                         .map(directorService::getDirectorById)
                         .filter(director -> director != null)
-                        .map(Director::getName)
-                        .collect(Collectors.toSet());
-                movie.setDirectors(directorNames);
+                        .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
+                        .collect(Collectors.toList());
+                movie.setDirectors(directors);
             } else {
-                movie.setDirectors(new HashSet<>());
+                movie.setDirectors(new ArrayList<>());
             }
 
             // Handle actors
             if (selectedActorIds != null && !selectedActorIds.isEmpty()) {
-                Set<String> actorNames = selectedActorIds.stream()
+                List<PersonSimpleDto> actors = selectedActorIds.stream()
                         .map(actorService::getActorById)
                         .filter(actor -> actor != null)
-                        .map(Actor::getName)
-                        .collect(Collectors.toSet());
-                movie.setActors(actorNames);
+                        .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
+                        .collect(Collectors.toList());
+                movie.setActors(actors);
             } else {
-                movie.setActors(new HashSet<>());
+                movie.setActors(new ArrayList<>());
             }
 
             movieService.saveOrUpdate(movie);

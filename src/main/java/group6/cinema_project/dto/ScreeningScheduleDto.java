@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
@@ -54,3 +55,4 @@ public class ScreeningScheduleDto {
     private String endTimeStr;
     private String screeningDateStr;
 }
+

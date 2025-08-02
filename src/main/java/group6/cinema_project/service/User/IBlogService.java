@@ -1,4 +1,4 @@
-package group6.cinema_project.service.User;
+package group6.cinema_project.service;
 
 import group6.cinema_project.dto.BlogPostDto;
 import org.springframework.data.domain.Page;

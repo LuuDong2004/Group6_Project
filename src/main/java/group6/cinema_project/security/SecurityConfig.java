@@ -1,7 +1,7 @@
 
 package group6.cinema_project.security;
 
-import group6.cinema_project.service.User.Impl.CustomUserDetailsServiceImpl;
+import group6.cinema_project.service.CustomUserDetailsServiceImpl;
 import group6.cinema_project.service.User.Impl.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+
 import java.io.IOException;
+
 
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,20 +27,24 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
+
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    // http
-    // .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-    // .csrf(csrf -> csrf.disable());
-    // return http.build();
-    // }
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+//                .csrf(csrf -> csrf.disable());
+//        return http.build();
+//    }
+
 
     @Autowired
     private CustomUserDetailsServiceImpl userDetailsService;
@@ -52,7 +58,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return new AuthenticationSuccessHandler() {
@@ -60,10 +65,10 @@ public class SecurityConfig {
 
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request,
-                    HttpServletResponse response,
-                    org.springframework.security.core.Authentication authentication)
+                                                HttpServletResponse response,
+                                                org.springframework.security.core.Authentication authentication)
                     throws IOException, ServletException {
-                // kiểm tra tiếp tục url trong session truoc
+                //kiểm tra tiếp tục url trong session truoc
                 String continueUrl = (String) request.getSession().getAttribute("continueAfterLogin");
                 if (continueUrl != null) {
                     request.getSession().removeAttribute("continueAfterLogin");
@@ -106,6 +111,7 @@ public class SecurityConfig {
         };
     }
 
+
     @Bean
     @Order(1)
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -113,10 +119,16 @@ public class SecurityConfig {
                 .securityMatcher("/admin/secret-login", "/admin/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+<<<<<<< HEAD
                                 "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**", "/uploads/**")
                         .permitAll()
+=======
+                                "/css/**", "/js/**", "/images/**",  "/assets/**", "/static/**"
+                        ).permitAll()
+>>>>>>> 223fbd2 (1)
                         .requestMatchers("/admin/secret-login").permitAll()
-                        .anyRequest().hasRole("ADMIN"))
+                        .anyRequest().hasRole("ADMIN")
+                )
                 .formLogin(form -> form
                         .loginPage("/admin/secret-login")
                         .loginProcessingUrl("/admin/secret-login")
@@ -124,11 +136,13 @@ public class SecurityConfig {
                         .failureUrl("/admin/secret-login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .permitAll())
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/secret-login?logout=true")
-                        .permitAll())
+                        .permitAll()
+                )
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
@@ -139,17 +153,21 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+<<<<<<< HEAD
                                 "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**", "/uploads/**",
                                 "/", "/login", "/register", "/sign_in",
+=======
+                                "/css/**", "/js/**", "/images/**", "/assets/**", "/static/**", "/", "/login", "/register", "/sign_in",
+>>>>>>> 223fbd2 (1)
                                 "/dashboard", "/movie/**", "/schedule/**", "/about", "/contact", "/ticket-booking",
                                 "/payment/sepay/webhook", "/ws/**",
-                                "/forgot-password", "/reset-password/confirm", "/api/forgot-password",
-                                "/api/reset-password/confirm",
+                                "/forgot-password", "/reset-password/confirm", "/api/forgot-password", "/api/reset-password/confirm",
                                 "/blog", "/blog/**",
-                                "/blogs", "/blogs/**")
-                        .permitAll()
+                                "/blogs", "/blogs/**"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -157,20 +175,25 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .permitAll())
+                        .permitAll()
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .successHandler(customAuthenticationSuccessHandler())
                         .failureUrl("/login?error=true")
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService())))
+                                .userService(customOAuth2UserService())
+                        )
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
-                        .permitAll())
+                        .permitAll()
+                )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/payment/sepay/webhook") // Tắt CSRF cho webhook
-                        .disable());
+                    .ignoringRequestMatchers("/payment/sepay/webhook") // Tắt CSRF cho webhook
+                    .disable()
+                );
         return http.build();
     }
 
@@ -179,3 +202,8 @@ public class SecurityConfig {
         return new CustomOAuth2UserService();
     }
 }
+
+
+
+
+

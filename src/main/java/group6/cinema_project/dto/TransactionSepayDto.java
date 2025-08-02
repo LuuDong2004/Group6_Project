@@ -1,5 +1,6 @@
 package group6.cinema_project.dto;
 
+import group6.cinema_project.entity.Booking;
 import lombok.Data;
 import java.time.LocalDateTime;
 

@@ -11,7 +11,7 @@ import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.exception.ScheduleConflictException;
 
 import java.time.LocalDate;
-
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

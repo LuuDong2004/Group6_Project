@@ -1,6 +1,7 @@
 package group6.cinema_project.service.User.Impl;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Genre;
 import group6.cinema_project.repository.User.MovieRepository;
@@ -8,7 +9,9 @@ import group6.cinema_project.service.User.IHomeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -22,14 +25,21 @@ public class HomeServiceImpl implements IHomeService {
     private ModelMapper modelMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<MovieDto> getPopularMovies() {
         List<Movie> movies = movieRepository.findTop8ByOrderByRatingDesc(PageRequest.of(0, 8));
+        System.out.println("Found " + movies.size() + " movies for popular");
         return movies.stream().map(this::convertToBasicDto).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MovieDto> getNewReleases() {
         List<Movie> movies = movieRepository.findTop8ByOrderByReleaseDateDesc();
+        if (movies.size() > 8) {
+            movies = movies.subList(0, 8);
+        }
+        System.out.println("Found " + movies.size() + " movies for new releases");
         return movies.stream().map(this::convertToBasicDto).collect(Collectors.toList());
     }
 
