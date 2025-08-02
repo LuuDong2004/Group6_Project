@@ -220,36 +220,12 @@
         border-color: #6366f1;
       }
 
-      .autocomplete-container {
-        position: relative;
-      }
-
-      .autocomplete-suggestions {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        border: 1px solid #ddd;
+      .movie-info-display {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
         border-radius: 8px;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 1000;
-        display: none;
-      }
-
-      .autocomplete-suggestion {
-        padding: 0.75rem 1rem;
-        cursor: pointer;
-        border-bottom: 1px solid #f8f9fa;
-      }
-
-      .autocomplete-suggestion:hover {
-        background-color: #f8f9fa;
-      }
-
-      .autocomplete-suggestion:last-child {
-        border-bottom: none;
+        padding: 15px;
+        margin-bottom: 15px;
       }
 
       .conflict-warning {
@@ -458,40 +434,68 @@
             </div>
 
             <div class="row">
-              <!-- Chọn phim với autocomplete -->
+              <!-- Chọn phim với dropdown -->
               <div class="col-md-12">
                 <div class="form-group">
-                  <label for="movieSearch" class="form-label">
+                  <label for="movieId" class="form-label">
                     <i class="fas fa-film me-2"></i>Chọn phim
                   </label>
-                  <div class="autocomplete-container">
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="movieSearch"
-                      placeholder="Nhập tên phim để tìm kiếm..."
-                      autocomplete="off"
-                    />
-                    <div
-                      class="autocomplete-suggestions"
-                      id="movieSuggestions"
-                    ></div>
-                  </div>
-                  <input
-                    type="hidden"
-                    th:field="*{movieId}"
-                    id="selectedMovieId"
-                  />
+
+                  <!-- Hiển thị phim được chọn -->
                   <div
-                    class="mt-2"
                     id="selectedMovieDisplay"
                     style="display: none"
+                    class="mb-3"
                   >
-                    <div class="alert alert-info">
-                      <i class="fas fa-film me-2"></i>
-                      <span id="selectedMovieName"></span>
+                    <div
+                      class="alert alert-info d-flex justify-content-between align-items-start"
+                    >
+                      <div>
+                        <i class="fas fa-film me-2"></i>
+                        <strong id="selectedMovieName">Tên phim</strong>
+                        <small class="d-block text-muted mt-1">
+                          <span id="selectedMovieInfo">Thông tin phim</span>
+                        </small>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="toggleMovieSelection()"
+                        title="Thay đổi phim"
+                      >
+                        <i class="fas fa-edit"></i> Thay đổi
+                      </button>
                     </div>
                   </div>
+
+                  <!-- Dropdown chọn phim -->
+                  <div id="movieSelectionDiv">
+                    <select
+                      class="form-control"
+                      id="movieId"
+                      th:field="*{movieId}"
+                      required
+                      onchange="updateMovieInfo()"
+                    >
+                      <option value="">-- Chọn phim --</option>
+                      <option
+                        th:each="movie : ${movies}"
+                        th:value="${movie.id}"
+                        th:text="${movie.name + ' (' + movie.duration + ' phút - ' + movie.genre + ')'}"
+                        th:data-duration="${movie.duration}"
+                        th:data-genre="${movie.genre}"
+                        th:data-rating="${movie.rating}"
+                        th:data-name="${movie.name}"
+                      >
+                        Tên phim (thời lượng - thể loại)
+                      </option>
+                    </select>
+                    <small class="form-text text-muted">
+                      Chọn phim từ danh sách có sẵn. Thời gian kết thúc sẽ được
+                      tự động tính toán.
+                    </small>
+                  </div>
+
                   <div
                     th:if="${#fields.hasErrors('movieId')}"
                     class="invalid-feedback d-block"
@@ -640,100 +644,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        initializeAutocomplete();
-        initializeConflictCheck();
         initializeFormValidation();
         setDefaultStatus();
         initializeDashboardBehavior();
       });
 
-      // Khởi tạo autocomplete cho phim
-      function initializeAutocomplete() {
-        const movieSearch = document.getElementById("movieSearch");
-        const movieSuggestions = document.getElementById("movieSuggestions");
-        const selectedMovieId = document.getElementById("selectedMovieId");
+      // Chuyển đổi hiển thị chọn phim
+      function toggleMovieSelection() {
+        const movieSelectionDiv = document.getElementById("movieSelectionDiv");
         const selectedMovieDisplay = document.getElementById(
           "selectedMovieDisplay"
         );
-        const selectedMovieName = document.getElementById("selectedMovieName");
 
-        let debounceTimer;
-
-        movieSearch.addEventListener("input", function () {
-          const query = this.value.trim();
-
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            if (query.length >= 2) {
-              searchMovies(query);
-            } else {
-              movieSuggestions.style.display = "none";
-            }
-          }, 300);
-        });
-
-        function searchMovies(query) {
-          fetch(
-            `/admin/schedules/api/movies/search?q=${encodeURIComponent(query)}`
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              displaySuggestions(data);
-            })
-            .catch((error) => {
-              console.error("Lỗi khi tìm kiếm phim:", error);
-            });
-        }
-
-        function displaySuggestions(movies) {
-          movieSuggestions.innerHTML = "";
-
-          if (movies.length === 0) {
-            movieSuggestions.innerHTML =
-              '<div class="autocomplete-suggestion">Không tìm thấy phim nào</div>';
-          } else {
-            movies.forEach((movie) => {
-              const suggestion = document.createElement("div");
-              suggestion.className = "autocomplete-suggestion";
-              suggestion.innerHTML = `
-                <div>
-                  <strong>${movie.name}</strong>
-                  <br>
-                  <small class="text-muted">Thời lượng: ${movie.duration} phút | Thể loại: ${movie.genre}</small>
-                </div>
-              `;
-
-              suggestion.addEventListener("click", function () {
-                selectMovie(movie);
-              });
-
-              movieSuggestions.appendChild(suggestion);
-            });
-          }
-
-          movieSuggestions.style.display = "block";
-        }
-
-        function selectMovie(movie) {
-          movieSearch.value = movie.name;
-          selectedMovieId.value = movie.id;
-          selectedMovieName.textContent = movie.name;
+        if (movieSelectionDiv.style.display === "none") {
+          movieSelectionDiv.style.display = "block";
+          selectedMovieDisplay.style.display = "none";
+        } else {
+          movieSelectionDiv.style.display = "none";
           selectedMovieDisplay.style.display = "block";
-          movieSuggestions.style.display = "none";
-
-          // Tự động tính thời gian kết thúc dựa trên thời lượng phim
-          calculateEndTime(movie.duration);
         }
+      }
 
-        // Ẩn suggestions khi click bên ngoài
-        document.addEventListener("click", function (e) {
-          if (
-            !movieSearch.contains(e.target) &&
-            !movieSuggestions.contains(e.target)
-          ) {
-            movieSuggestions.style.display = "none";
+      // Cập nhật thông tin phim và tính thời gian kết thúc
+      function updateMovieInfo() {
+        const movieSelect = document.getElementById("movieId");
+        const selectedOption = movieSelect.options[movieSelect.selectedIndex];
+
+        if (selectedOption.value) {
+          // Hiển thị thông tin phim được chọn
+          const movieName = selectedOption.getAttribute("data-name");
+          const duration = selectedOption.getAttribute("data-duration");
+          const genre = selectedOption.getAttribute("data-genre");
+          const rating = selectedOption.getAttribute("data-rating");
+
+          document.getElementById("selectedMovieName").textContent = movieName;
+          document.getElementById(
+            "selectedMovieInfo"
+          ).textContent = `${duration} phút • ${genre} • Rating: ${rating}`;
+
+          // Ẩn dropdown và hiển thị thông tin phim
+          document.getElementById("movieSelectionDiv").style.display = "none";
+          document.getElementById("selectedMovieDisplay").style.display =
+            "block";
+
+          // Tính thời gian kết thúc
+          if (duration) {
+            calculateEndTime(parseInt(duration));
           }
-        });
+          console.log("Selected movie:", selectedOption.text);
+        }
       }
 
       // Tự động tính thời gian kết thúc
@@ -750,112 +709,72 @@
 
           endTimeInput.value = `${hours}:${minutes}`;
 
-          // Kiểm tra xung đột sau khi tính thời gian
-          checkConflict();
+          // Kiểm tra thời gian hợp lệ
+          validateTimeInputs();
         }
       }
 
-      // Kiểm tra xung đột lịch chiếu
-      function initializeConflictCheck() {
-        const screeningDate = document.getElementById("screeningDate");
-        const startTime = document.getElementById("startTime");
-        const endTime = document.getElementById("endTime");
-        const screeningRoomId = document.getElementById("screeningRoomId");
+      // Đơn giản hóa: Chỉ kiểm tra thời gian cơ bản
+      function validateTimeInputs() {
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+        const conflictWarning = document.getElementById("conflictWarning");
+        const conflictMessage = document.getElementById("conflictMessage");
 
-        [screeningDate, startTime, endTime, screeningRoomId].forEach(
-          (element) => {
-            element.addEventListener("change", checkConflict);
+        if (startTime && endTime) {
+          if (startTime >= endTime) {
+            conflictMessage.textContent =
+              "Thời gian kết thúc phải sau thời gian bắt đầu";
+            conflictWarning.style.display = "block";
+            return false;
+          } else {
+            conflictWarning.style.display = "none";
+            return true;
           }
-        );
+        }
+        return true;
+      }
 
-        // Cũng kiểm tra khi thay đổi thời gian bắt đầu để tự động tính thời gian kết thúc
-        startTime.addEventListener("change", function () {
-          const selectedMovieId =
-            document.getElementById("selectedMovieId").value;
-          if (selectedMovieId) {
-            // Lấy thông tin phim để tính thời gian kết thúc
-            fetch(`/admin/schedules/api/movies/${selectedMovieId}`)
-              .then((response) => response.json())
-              .then((movie) => {
-                calculateEndTime(movie.duration);
-              })
-              .catch((error) => {
-                console.error("Lỗi khi lấy thông tin phim:", error);
-              });
+      // Thêm event listener cho tính toán thời gian kết thúc
+      function initializeTimeCalculation() {
+        const startTimeInput = document.getElementById("startTime");
+        const movieSelect = document.getElementById("movieId");
+
+        startTimeInput.addEventListener("change", function () {
+          const selectedOption = movieSelect.options[movieSelect.selectedIndex];
+          if (selectedOption.value) {
+            const duration = selectedOption.getAttribute("data-duration");
+            if (duration) {
+              calculateEndTime(parseInt(duration));
+            }
           }
         });
       }
 
-      function checkConflict() {
-        const screeningDate = document.getElementById("screeningDate").value;
-        const startTime = document.getElementById("startTime").value;
-        const endTime = document.getElementById("endTime").value;
-        const screeningRoomId =
-          document.getElementById("screeningRoomId").value;
-        const conflictWarning = document.getElementById("conflictWarning");
-        const conflictMessage = document.getElementById("conflictMessage");
-        const submitBtn = document.getElementById("submitBtn");
-
-        if (screeningDate && startTime && endTime && screeningRoomId) {
-          const selectedMovieId =
-            document.getElementById("selectedMovieId").value;
-
-          if (!selectedMovieId) {
-            // Không có movieId thì không thể check conflict
-            conflictWarning.style.display = "none";
-            submitBtn.disabled = false;
-            submitBtn.innerHTML =
-              '<i class="fas fa-save me-2"></i>Lưu lịch chiếu';
-            return;
-          }
-
-          const conflictData = {
-            screeningDate: screeningDate,
-            startTime: startTime,
-            endTime: endTime,
-            screeningRoomId: screeningRoomId,
-            movieId: selectedMovieId,
-          };
-
-          fetch("/admin/schedules/api/check-conflict", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(conflictData),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.hasConflict) {
-                conflictMessage.textContent = data.message;
-                conflictWarning.style.display = "block";
-                submitBtn.disabled = true;
-                submitBtn.innerHTML =
-                  '<i class="fas fa-exclamation-triangle me-2"></i>Có xung đột lịch chiếu';
-              } else {
-                conflictWarning.style.display = "none";
-                submitBtn.disabled = false;
-                submitBtn.innerHTML =
-                  '<i class="fas fa-save me-2"></i>Lưu lịch chiếu';
-              }
-            })
-            .catch((error) => {
-              console.error("Lỗi khi kiểm tra xung đột:", error);
-            });
-        }
-      }
-
-      // Khởi tạo validation form
+      // Khởi tạo validation form đơn giản
       function initializeFormValidation() {
         const form = document.getElementById("scheduleForm");
+        const startTimeInput = document.getElementById("startTime");
+        const endTimeInput = document.getElementById("endTime");
+
+        // Thêm event listener cho validation thời gian
+        startTimeInput.addEventListener("change", validateTimeInputs);
+        endTimeInput.addEventListener("change", validateTimeInputs);
+
+        // Khởi tạo tính toán thời gian
+        initializeTimeCalculation();
 
         form.addEventListener("submit", function (e) {
-          const selectedMovieId =
-            document.getElementById("selectedMovieId").value;
+          const movieId = document.getElementById("movieId").value;
 
-          if (!selectedMovieId) {
+          if (!movieId) {
             e.preventDefault();
-            alert("Vui lòng chọn phim từ danh sách gợi ý");
+            alert("Vui lòng chọn phim");
+            return false;
+          }
+
+          if (!validateTimeInputs()) {
+            e.preventDefault();
             return false;
           }
         });

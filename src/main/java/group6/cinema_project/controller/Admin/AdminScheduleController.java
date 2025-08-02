@@ -87,6 +87,25 @@ public class AdminScheduleController {
             // Add schedules to model
             model.addAttribute("schedules", schedules);
 
+            // Pre-calculate editability info for each schedule to avoid AJAX calls
+            Map<Integer, Map<String, Object>> editabilityMap = new HashMap<>();
+            for (ScreeningScheduleDto schedule : schedules) {
+                try {
+                    Map<String, Object> editabilityInfo = movieScheduleService
+                            .getScheduleEditabilityInfo(schedule.getId());
+                    editabilityMap.put(schedule.getId(), editabilityInfo);
+                } catch (Exception e) {
+                    log.warn("Error getting editability info for schedule {}: {}", schedule.getId(), e.getMessage());
+                    // Provide default values if error occurs
+                    Map<String, Object> defaultInfo = new HashMap<>();
+                    defaultInfo.put("canEdit", false);
+                    defaultInfo.put("canDelete", false);
+                    defaultInfo.put("reason", "Lỗi hệ thống");
+                    editabilityMap.put(schedule.getId(), defaultInfo);
+                }
+            }
+            model.addAttribute("editabilityMap", editabilityMap);
+
             // Add success message if filtering was applied
             if (movieId != null || screeningDate != null || screeningRoomId != null) {
                 model.addAttribute("message", "Tìm thấy " + schedules.size() + " lịch chiếu phù hợp");
@@ -159,8 +178,30 @@ public class AdminScheduleController {
             // Kiểm tra xem ngày có phải là quá khứ không
             boolean isPastDate = selectedDate.isBefore(LocalDate.now());
 
+            // Pre-calculate editability info for all schedules to avoid AJAX calls
+            Map<Integer, Map<String, Object>> editabilityMap = new HashMap<>();
+            for (MovieWithSchedulesDto movie : moviesWithSchedules) {
+                for (ScreeningSchedule schedule : movie.getSchedules()) {
+                    try {
+                        Map<String, Object> editabilityInfo = movieScheduleService
+                                .getScheduleEditabilityInfo(schedule.getId());
+                        editabilityMap.put(schedule.getId(), editabilityInfo);
+                    } catch (Exception e) {
+                        log.warn("Error getting editability info for schedule {}: {}", schedule.getId(),
+                                e.getMessage());
+                        // Provide default values if error occurs
+                        Map<String, Object> defaultInfo = new HashMap<>();
+                        defaultInfo.put("canEdit", false);
+                        defaultInfo.put("canDelete", false);
+                        defaultInfo.put("reason", "Lỗi hệ thống");
+                        editabilityMap.put(schedule.getId(), defaultInfo);
+                    }
+                }
+            }
+
             // Thêm dữ liệu vào model
             model.addAttribute("movies", moviesWithSchedules);
+            model.addAttribute("editabilityMap", editabilityMap);
             model.addAttribute("selectedDate", selectedDate);
             model.addAttribute("selectedDateFormatted", formattedDate);
             model.addAttribute("selectedStatus", status);
@@ -459,7 +500,18 @@ public class AdminScheduleController {
                     schedule.getEndTime(), schedule.getMovieId(), schedule.getScreeningRoomId(),
                     schedule.getBranchId(), schedule.getStatus());
 
+            // Lấy thông tin phim hiện tại để hiển thị
+            MovieDto selectedMovie = null;
+            if (schedule.getMovieId() != null) {
+                Optional<MovieDto> movieOpt = movieService.getMovieById(schedule.getMovieId());
+                if (movieOpt.isPresent()) {
+                    selectedMovie = movieOpt.get();
+                    log.info("Loaded selected movie: {} (ID: {})", selectedMovie.getName(), selectedMovie.getId());
+                }
+            }
+
             model.addAttribute("schedule", schedule);
+            model.addAttribute("selectedMovie", selectedMovie);
             model.addAttribute("movies", movieService.getAllMovie());
             model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
@@ -838,7 +890,7 @@ public class AdminScheduleController {
             model.addAttribute("comingSoonCount", comingSoonCount);
             model.addAttribute("stoppedCount", stoppedCount);
 
-            // Thêm tên tháng tiếng Việt
+           
             String[] monthNames = {
                     "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
                     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"

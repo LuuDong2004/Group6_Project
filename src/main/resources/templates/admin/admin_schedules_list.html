@@ -878,17 +878,20 @@
                     class="schedule-actions"
                     th:if="${schedule.status == 'UPCOMING'}"
                   >
+                    <!-- Sử dụng dữ liệu editability từ server thay vì AJAX -->
                     <button
                       class="action-btn edit-btn"
-                      th:onclick="'editSchedule(' + ${schedule.id} + ', event)'"
-                      title="Chỉnh sửa lịch chiếu"
+                      th:onclick="'editScheduleDirectly(' + ${schedule.id} + ', event)'"
+                      th:disabled="${editabilityMap[schedule.id] != null ? !editabilityMap[schedule.id]['canEdit'] : true}"
+                      th:title="${editabilityMap[schedule.id] != null ? (editabilityMap[schedule.id]['canEdit'] ? 'Chỉnh sửa lịch chiếu' : 'Không thể chỉnh sửa: ' + editabilityMap[schedule.id]['reason']) : 'Không thể chỉnh sửa'}"
                     >
                       <i class="fas fa-edit"></i>
                     </button>
                     <button
                       class="action-btn delete-btn"
-                      th:onclick="'deleteSchedule(' + ${schedule.id} + ', event)'"
-                      title="Xóa lịch chiếu"
+                      th:onclick="'deleteScheduleDirectly(' + ${schedule.id} + ', event)'"
+                      th:disabled="${editabilityMap[schedule.id] != null ? !editabilityMap[schedule.id]['canDelete'] : true}"
+                      th:title="${editabilityMap[schedule.id] != null ? (editabilityMap[schedule.id]['canDelete'] ? 'Xóa lịch chiếu' : 'Không thể xóa: ' + editabilityMap[schedule.id]['reason']) : 'Không thể xóa'}"
                     >
                       <i class="fas fa-trash"></i>
                     </button>
@@ -1028,99 +1031,40 @@
         // Có thể mở modal hoặc chuyển đến trang chi tiết
       }
 
-      // Hàm chỉnh sửa lịch chiếu
-      function editSchedule(scheduleId, event) {
+      // Hàm chỉnh sửa lịch chiếu đơn giản (không cần AJAX check)
+      function editScheduleDirectly(scheduleId, event) {
+        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
+        // Chuyển đến trang chỉnh sửa trực tiếp vì đã check ở server
+        window.location.href = `/admin/schedules/edit/${scheduleId}`;
+      }
+
+      // Hàm xóa lịch chiếu đơn giản (không cần AJAX check)
+      function deleteScheduleDirectly(scheduleId, event) {
         event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
 
-        // Kiểm tra khả năng chỉnh sửa trước
-        checkScheduleEditability(scheduleId, function (canEdit, reason) {
-          if (canEdit) {
-            // Chuyển đến trang chỉnh sửa
-            window.location.href = `/admin/schedules/edit/${scheduleId}`;
-          } else {
-            alert(`Không thể chỉnh sửa lịch chiếu: ${reason}`);
+        if (confirm("Bạn có chắc chắn muốn xóa lịch chiếu này không?")) {
+          // Tạo form để submit POST request
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = `/admin/schedules/delete/${scheduleId}`;
+
+          // Thêm CSRF token nếu cần
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const csrfInput = document.createElement("input");
+            csrfInput.type = "hidden";
+            csrfInput.name = "_csrf";
+            csrfInput.value = csrfToken.getAttribute("content");
+            form.appendChild(csrfInput);
           }
-        });
+
+          document.body.appendChild(form);
+          form.submit();
+        }
       }
 
-      // Hàm xóa lịch chiếu
-      function deleteSchedule(scheduleId, event) {
-        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
-
-        // Kiểm tra khả năng xóa trước
-        checkScheduleEditability(scheduleId, function (canDelete, reason) {
-          if (canDelete) {
-            if (confirm("Bạn có chắc chắn muốn xóa lịch chiếu này không?")) {
-              // Tạo form để submit POST request
-              const form = document.createElement("form");
-              form.method = "POST";
-              form.action = `/admin/schedules/delete/${scheduleId}`;
-
-              // Thêm CSRF token nếu cần
-              const csrfToken = document.querySelector('meta[name="_csrf"]');
-              if (csrfToken) {
-                const csrfInput = document.createElement("input");
-                csrfInput.type = "hidden";
-                csrfInput.name = "_csrf";
-                csrfInput.value = csrfToken.getAttribute("content");
-                form.appendChild(csrfInput);
-              }
-
-              document.body.appendChild(form);
-              form.submit();
-            }
-          } else {
-            alert(`Không thể xóa lịch chiếu: ${reason}`);
-          }
-        });
-      }
-
-      // Hàm kiểm tra khả năng chỉnh sửa/xóa lịch chiếu
-      function checkScheduleEditability(scheduleId, callback) {
-        fetch(`/admin/schedules/api/check-editability/${scheduleId}`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              callback(data.canEdit || data.canDelete, data.reason);
-            } else {
-              callback(false, data.reason || "Lỗi hệ thống");
-            }
-          })
-          .catch((error) => {
-            console.error("Error checking editability:", error);
-            callback(false, "Lỗi kết nối");
-          });
-      }
-
-      // Cập nhật trạng thái action buttons khi trang load
-      document.addEventListener("DOMContentLoaded", function () {
-        const scheduleItems = document.querySelectorAll(
-          '.schedule-item[data-status="UPCOMING"]'
-        );
-
-        scheduleItems.forEach((item) => {
-          const scheduleId = item.getAttribute("data-schedule-id");
-          const editBtn = item.querySelector(".edit-btn");
-          const deleteBtn = item.querySelector(".delete-btn");
-
-          if (scheduleId && (editBtn || deleteBtn)) {
-            checkScheduleEditability(scheduleId, function (canEdit, reason) {
-              if (editBtn) {
-                editBtn.disabled = !canEdit;
-                if (!canEdit) {
-                  editBtn.title = `Không thể chỉnh sửa: ${reason}`;
-                }
-              }
-              if (deleteBtn) {
-                deleteBtn.disabled = !canEdit; // Sử dụng cùng logic với edit
-                if (!canEdit) {
-                  deleteBtn.title = `Không thể xóa: ${reason}`;
-                }
-              }
-            });
-          }
-        });
-      });
+      // Không cần function checkScheduleEditability nữa vì đã có dữ liệu từ server
+      // Không cần cập nhật button state vì đã được xử lý bằng Thymeleaf
     </script>
   </body>
 </html>
