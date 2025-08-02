@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+    <title>CinemaAdmin - Statistic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" >
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+
+        body { font-family: "Inter", sans-serif; background-color: #f8fafc; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%); color: white; position: fixed; top: 0; left: 0; height: 100vh; display: flex; flex-direction: column; transition: width 0.3s ease, transform 0.3s ease; z-index: 1000; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-header h5, .sidebar.collapsed .sidebar-header small, .sidebar.collapsed .sidebar-menu span, .sidebar.collapsed .mt-auto .text-white, .sidebar.collapsed .mt-auto small { display: none; }
+        .sidebar.collapsed .sidebar-header .d-flex { justify-content: center; }
+        .sidebar.collapsed .sidebar-header .bg-white { margin-right: 0 !important; }
+        .sidebar.collapsed .menu-item { justify-content: center; }
+        .sidebar.collapsed .menu-item i { margin-right: 0; }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+        .sidebar-header .fa-film { color: #6366f1; }
+        .sidebar-menu { flex-grow: 1; padding-top: 1rem; }
+        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: background-color 0.2s ease, color 0.2s ease; white-space: nowrap; }
+        .menu-item:hover, .menu-item.active { background-color: rgba(255, 255, 255, 0.1); color: white; border-left: 3px solid white; padding-left: calc(1.5rem - 3px); }
+        .sidebar.collapsed .menu-item:hover, .sidebar.collapsed .menu-item.active { border-left: none; padding-left: 1.5rem; }
+        .sidebar.collapsed .menu-item.active { background-color: #4f46e5; }
+        .menu-item i { width: 20px; margin-right: 0.75rem; text-align: center; }
+        .sidebar.collapsed .menu-item i { margin-right: 0; font-size: 1.25rem; }
+        .main-content-wrapper { margin-left: 260px; transition: margin-left 0.3s ease; }
+        .main-content-wrapper.expanded { margin-left: 80px; }
+        .header-custom { position: sticky; top: 0; background-color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem; height: 70px; border-bottom: 1px solid #e2e8f0; z-index: 999; }
+        .add-new-btn, .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .add-new-btn:hover, .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); color: white; }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-100%); } .sidebar:not(.collapsed) { transform: translateX(0); } .main-content-wrapper, .main-content-wrapper.expanded { margin-left: 0; } }
+    </style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+            <div class="bg-white rounded-circle p-2 me-3">
+                <i class="fas fa-film"></i>
+            </div>
+            <div>
+                <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
+                <small class="text-white-50">Quản lý Phim</small>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <a th:href="@{/admin/dashboard}" class="menu-item"><i class="fas fa-home"></i><span>Bảng điều khiển</span></a>
+        <a th:href="@{/admin/movies/list}" class="menu-item"><i class="fas fa-film"></i><span>Phim</span></a>
+        <a th:href="@{/admin/directors/list}" class="menu-item"><i class="fas fa-user-friends"></i><span>Diễn viên & Đạo diễn</span></a>
+        <a th:href="@{/admin/schedules/list}" class="menu-item"><i class="fas fa-calendar-alt"></i><span>Lịch chiếu</span></a>
+        <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i><span>Đặt vé</span></a>
+        <a href="#" class="menu-item"><i class="fas fa-users"></i><span>Người dùng</span></a>
+        <a href="#" class="menu-item"><i class="fas fa-chart-pie"></i><span>Phân tích</span></a>
+        <a href="#" class="menu-item"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
+        <a th:href="@{/admin/vouchers}" class="menu-item "><i class="fas fa-gift"></i><span>Voucher</span></a>
+        <a th:href="@{/admin/statistic}" class="menu-item active"><i class="fas fa-chart-bar"></i><span>Thống kê</span></a>
+    </nav>
+    <div class="mt-auto p-4 border-top border-white-50" style="border-color: rgba(255, 255, 255, 0.1) !important">
+        <div class="d-flex align-items-center">
+            <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=A" alt="User Avatar" width="40" height="40" class="rounded-circle me-3" onerror="this.onerror=null;this.src='https://placehold.co/40x40?text=A';" />
+            <div>
+                <div class="text-white fw-semibold">Admin User</div>
+                <small class="text-white-50">admin@cinema.com</small>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-content-wrapper" id="mainContentWrapper">
+    <header class="header-custom">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-2" id="sidebarToggle"><i class="fas fa-bars fs-5"></i></button>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-1 position-relative"><i class="fas fa-bell fs-5"></i><span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"><span class="visually-hidden">Thông báo mới</span></span></button>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><img src="https://placehold.co/32x32/E2E8F0/4A5568?text=A" alt="User Avatar" width="32" height="32" class="rounded-circle me-2" onerror="this.onerror=null;this.src='https://placehold.co/32x32?text=A';" /><span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span></a>
+                <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div class="main-content">
+        <h1>Thống kê</h1>
+        <style>
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                background-color: #f4f7fa;
+                height: 100vh;
+                box-sizing: border-box;
+            }
+
+            .main-content h1 {
+                color: #333;
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+                background-color: #fff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            th, td {
+                border: 1px solid #ddd;
+                padding: 12px;
+                text-align: left;
+                font-size: 14px;
+            }
+
+            th {
+                background-color: #6b2ab5;
+                color: white;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+
+            td {
+                color: #555;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+
+            tr:hover {
+                background-color: #f1f1f1;
+                transition: background-color 0.3s;
+            }
+
+            .chart-container {
+                width: 100%;
+                height: 400px;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto !important;
+            }
+        </style>
+        <table>
+            <tr>
+                <th>Tên khách hàng</th>
+                <th>Tên phim</th>
+                <th>Số lượng vé</th>
+                <th>Giá tiền</th>
+            </tr>
+            <tr th:each="stat : ${statistics}">
+                <td th:text="${stat.userName}"></td>
+                <td th:text="${stat.movieName}"></td>
+                <td th:text="${stat.totalTickets}"></td>
+                <td th:text="${stat.totalAmount} + ' VND'"></td>
+            </tr>
+        </table>
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: /*[[${movieLabels}]]*/,
+                datasets: [{
+                    label: 'Doanh thu (VND)',
+                    data: /*[[${movieData}]]*/,
+                    backgroundColor: 'rgba(107, 42, 181, 0.6)',
+                    borderColor: 'rgba(107, 42, 181, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Doanh thu (VND)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tên phim'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

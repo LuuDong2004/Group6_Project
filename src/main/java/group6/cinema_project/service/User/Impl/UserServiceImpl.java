@@ -1,11 +1,11 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.Login.AdminPasswordResetDto;
+import group6.cinema_project.dto.AdminPasswordResetDto;
 import group6.cinema_project.dto.Login.ChangePasswordDto;
 import group6.cinema_project.dto.Login.PasswordResetRequestDto;
 import group6.cinema_project.dto.Login.UserLoginDto;
 import group6.cinema_project.dto.Login.UserRegistrationDto;
-import group6.cinema_project.dto.Login.PasswordResetConfirmDto;
+import group6.cinema_project.dto.PasswordResetConfirmDto;
 import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.entity.Enum.AuthProvider;
 import group6.cinema_project.entity.Enum.Role;
@@ -55,9 +55,9 @@ public class UserServiceImpl implements IUserService {
         }
 
         // Check if userName already exists
-        // if (isUsernameExists(registrationDto.getUserName())) {
-        // throw new IllegalArgumentException("Username already exists");
-        // }
+//        if (isUsernameExists(registrationDto.getUserName())) {
+//            throw new IllegalArgumentException("Username already exists");
+//        }
 
         // Check if email already exists
         if (isEmailExists(registrationDto.getEmail())) {
@@ -99,6 +99,7 @@ public class UserServiceImpl implements IUserService {
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Invalid email or password");
         }
+
 
         return convertToDto(user);
     }
@@ -178,6 +179,7 @@ public class UserServiceImpl implements IUserService {
 
     }
 
+
     @Override
     public UserDto getUserById(int id) {
         Optional<User> userOpt = userRepository.findById(id);
@@ -251,6 +253,7 @@ public class UserServiceImpl implements IUserService {
             existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
+
         User updatedUser = userRepository.save(existingUser);
         return convertToDto(updatedUser);
     }
@@ -271,8 +274,7 @@ public class UserServiceImpl implements IUserService {
 
         // ✅ THÊM LOG ĐỂ DEBUG
         System.out.println("Found user: " + user.getEmail());
-        System.out.println(
-                "Password starts with: " + user.getPassword().substring(0, Math.min(10, user.getPassword().length())));
+        System.out.println("Password starts with: " + user.getPassword().substring(0, Math.min(10, user.getPassword().length())));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
@@ -283,6 +285,7 @@ public class UserServiceImpl implements IUserService {
                 .authorities(authorities)
                 .build();
     }
+
 
     @Override
     public boolean isUsernameExists(String userName) {
@@ -379,8 +382,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public String resetPassword(int userId) {
         var userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty())
-            throw new RuntimeException("Không tìm thấy người dùng!");
+        if (userOpt.isEmpty()) throw new RuntimeException("Không tìm thấy người dùng!");
         var user = userOpt.get();
         // Sinh mật khẩu mới
         String newPassword = generateRandomPassword(8);
@@ -402,8 +404,7 @@ public class UserServiceImpl implements IUserService {
     public boolean adminResetPassword(AdminPasswordResetDto adminPasswordResetDto) {
         Optional<User> userOpt = userRepository.findById(adminPasswordResetDto.getUserId());
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Không tìm thấy người dùng với ID: " + adminPasswordResetDto.getUserId());
+            throw new IllegalArgumentException("Không tìm thấy người dùng với ID: " + adminPasswordResetDto.getUserId());
         }
 
         User user = userOpt.get();

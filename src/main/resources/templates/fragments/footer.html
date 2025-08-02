@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Home</title>
     <link rel="stylesheet" th:href="@{/assets/css/style-starter.css}">
-
-    <link rel="stylesheet" href="assets/css/style-starter.css">
     <!--	<link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"-->
     <!--		rel="stylesheet">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,19 +21,19 @@
                     <div class="right-side">
                         <div class="row footer-about">
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner1.jpg"
+                                <a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner1.jpg}"
                                                            alt=""></a>
                             </div>
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner2.jpg"
+                                <a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner2.jpg}"
                                                            alt=""></a>
                             </div>
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner3.jpg"
+                                <a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner3.jpg}"
                                                            alt=""></a>
                             </div>
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner4.jpg"
+                                <a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner4.jpg}"
                                                            alt=""></a>
                             </div>
                         </div>
@@ -45,34 +43,34 @@
                             <div class="col-md-3 col-sm-6 sub-two-right mt-5">
                                 <h6>Phim</h6>
                                 <ul>
-                                    <li><a href="#">Phim</a></li>
+                                    <li><a th:href="@{/movie/view}">Phim</a></li>
                                     <li><a href="#">Video</a></li>
                                     <li><a href="#">Phim Tiếng Anh</a></li>
                                     <li><a href="#">Tùy chỉnh</a></li>
                                     <li><a href="#">Phim sắp chiếu</a></li>
-                                    <li><a href="Contact_Us.html">Liên hệ</a></li>
+                                    <li><a th:href="@{/contact}">Liên hệ</a></li>
                                 </ul>
                             </div>
                             <div class="col-md-3 col-sm-6 sub-two-right mt-5">
                                 <h6>Thông tin</h6>
                                 <ul>
-                                    <li><a href="index.html">Trang chủ</a> </li>
-                                    <li><a href="about.html">Giới thiệu</a> </li>
-                                    <li><a href="#">Bộ phim</a> </li>
-                                    <li><a href="#">Bài viết</a> </li>
-                                    <li><a href="sign_in.html">Đăng nhập</a></li>
-                                    <li><a href="Contact_Us.html">Liên hệ</a></li>
+                                    <li><a th:href="@{/}">Trang chủ</a> </li>
+                                    <li><a th:href="@{/about}">Giới thiệu</a> </li>
+                                    <li><a th:href="@{/movie/view}">Bộ phim</a> </li>
+                                    <li><a th:href="@{/blogs}">Bài viết</a> </li>
+                                    <li><a th:href="@{/signin}">Đăng nhập</a></li>
+                                    <li><a th:href="@{/contact}">Liên hệ</a></li>
                                 </ul>
                             </div>
                             <div class="col-md-3 col-sm-6 sub-two-right mt-5">
                                 <h6>Khu vực</h6>
                                 <ul>
-                                    <li><a href="movies.html">Châu Á</a></li>
-                                    <li><a href="movies.html">Pháp</a></li>
-                                    <li><a href="movies.html">Đài Loan</a></li>
-                                    <li><a href="movies.html">Hoa Kỳ</a></li>
-                                    <li><a href="movies.html">Hàn Quốc</a></li>
-                                    <li><a href="movies.html">Vương quốc Anh</a></li>
+                                    <li><a th:href="@{/movie/view}">Châu Á</a></li>
+                                    <li><a th:href="@{/movie/view}">Pháp</a></li>
+                                    <li><a th:href="@{/movie/view}">Đài Loan</a></li>
+                                    <li><a th:href="@{/movie/view}">Hoa Kỳ</a></li>
+                                    <li><a th:href="@{/movie/view}">Hàn Quốc</a></li>
+                                    <li><a th:href="@{/movie/view}">Vương quốc Anh</a></li>
                                 </ul>
                             </div>
                             <div class="col-md-3 col-sm-6 sub-two-right mt-5">

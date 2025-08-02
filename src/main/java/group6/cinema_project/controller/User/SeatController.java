@@ -4,7 +4,7 @@ import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.dto.SeatReservationDto;
 import group6.cinema_project.dto.FoodDto;
-
+import group6.cinema_project.repository.User.FoodRepository;
 import group6.cinema_project.service.User.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Collections;
-
+import java.util.stream.Collectors;
 import group6.cinema_project.service.User.IBookingService;
 
 @Controller
@@ -24,13 +24,13 @@ import group6.cinema_project.service.User.IBookingService;
 public class SeatController {
     @Autowired
     private ISeatService seatService;
-
+    
     @Autowired
     private ISeatReservationService seatReservationService;
-
+    
     @Autowired
     private IMovieService movieService;
-
+    
     @Autowired
     private IScheduleService scheduleService;
 
@@ -44,10 +44,10 @@ public class SeatController {
 
     @GetMapping("/{movieId}/{scheduleId}/{roomId}")
     public String getSeatsByMovieId(@PathVariable(name = "movieId") Integer movieId,
-            @PathVariable(name = "scheduleId") Integer scheduleId,
-            @PathVariable(name = "roomId") Integer roomId,
-            @RequestParam(value = "bookingId", required = false) Integer bookingId,
-            Model model) {
+                                    @PathVariable(name = "scheduleId") Integer scheduleId,
+                                    @PathVariable(name = "roomId") Integer roomId,
+                                    @RequestParam(value = "bookingId", required = false) Integer bookingId,
+                                    Model model) {
         try {
             // Nếu có bookingId truyền lên, hủy booking PENDING cũ
             if (bookingId != null) {
@@ -73,7 +73,7 @@ public class SeatController {
             model.addAttribute("movieId", movieId);
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
-
+            
             // Thêm danh sách phòng (chỉ có 1 phòng cho lịch chiếu này)
             if (selectedSchedule != null && selectedSchedule.getScreeningRoom() != null) {
                 model.addAttribute("rooms", Collections.singletonList(selectedSchedule.getScreeningRoom()));
@@ -90,8 +90,8 @@ public class SeatController {
 
     @PostMapping("/reserve")
     public ResponseEntity<String> reserveSeat(@RequestParam Integer seatId,
-            @RequestParam Integer scheduleId,
-            @RequestParam Integer userId) {
+                                            @RequestParam Integer scheduleId,
+                                            @RequestParam Integer userId) {
         try {
             boolean success = seatReservationService.reserveSeat(seatId, scheduleId, userId, null);
             if (success) {
@@ -107,8 +107,8 @@ public class SeatController {
 
     @PostMapping("/cancel")
     public ResponseEntity<String> cancelReservation(@RequestParam Integer seatId,
-            @RequestParam Integer scheduleId,
-            @RequestParam Integer userId) {
+                                                   @RequestParam Integer scheduleId,
+                                                   @RequestParam Integer userId) {
         try {
             boolean success = seatReservationService.cancelPendingReservation(seatId, scheduleId, userId);
             if (success) {
@@ -133,10 +133,10 @@ public class SeatController {
             return ResponseEntity.ok(seats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+                .body(null);
         }
     }
-
+    
     @GetMapping("/status")
     @ResponseBody
     public ResponseEntity<List<SeatReservationDto>> getSeatStatus(@RequestParam Integer scheduleId) {
@@ -145,7 +145,7 @@ public class SeatController {
             return ResponseEntity.ok(seats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+                .body(null);
         }
     }
 }

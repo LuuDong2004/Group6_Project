@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import group6.cinema_project.dto.Login.AdminPasswordResetDto;
+import group6.cinema_project.dto.AdminPasswordResetDto;
 import group6.cinema_project.dto.UserDto;
 
 import jakarta.validation.Valid;
@@ -47,8 +47,8 @@ public class AdminUserController {
     // Xử lý thêm user
     @PostMapping("/add")
     public String addUser(@Valid @ModelAttribute("user") UserRegistrationDto userDto,
-            BindingResult result,
-            RedirectAttributes redirectAttributes) {
+                          BindingResult result,
+                          RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "admin2/user_add";
         }
@@ -107,7 +107,7 @@ public class AdminUserController {
     @PostMapping("/reset-password/{id}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> resetPasswordWithOptions(@PathVariable int id,
-            @RequestBody AdminPasswordResetDto adminPasswordResetDto) {
+                                                                        @RequestBody AdminPasswordResetDto adminPasswordResetDto) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -122,9 +122,8 @@ public class AdminUserController {
 
                 // Trả về mật khẩu mới nếu không gửi email
                 if (!adminPasswordResetDto.isSendEmail()) {
-                    response.put("newPassword",
-                            adminPasswordResetDto.hasCustomPassword() ? adminPasswordResetDto.getCustomPassword()
-                                    : "Mật khẩu ngẫu nhiên đã được tạo");
+                    response.put("newPassword", adminPasswordResetDto.hasCustomPassword() ?
+                            adminPasswordResetDto.getCustomPassword() : "Mật khẩu ngẫu nhiên đã được tạo");
                 }
             } else {
                 response.put("success", false);
@@ -143,8 +142,7 @@ public class AdminUserController {
     // API endpoint để reset password
     @PostMapping("/api/reset-password")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> apiResetPassword(
-            @RequestBody AdminPasswordResetDto adminPasswordResetDto) {
+    public ResponseEntity<Map<String, Object>> apiResetPassword(@RequestBody AdminPasswordResetDto adminPasswordResetDto) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -158,9 +156,8 @@ public class AdminUserController {
 
                 // Trả về mật khẩu mới nếu không gửi email
                 if (!adminPasswordResetDto.isSendEmail()) {
-                    response.put("newPassword",
-                            adminPasswordResetDto.hasCustomPassword() ? adminPasswordResetDto.getCustomPassword()
-                                    : "Mật khẩu ngẫu nhiên đã được tạo");
+                    response.put("newPassword", adminPasswordResetDto.hasCustomPassword() ?
+                            adminPasswordResetDto.getCustomPassword() : "Mật khẩu ngẫu nhiên đã được tạo");
                 }
             } else {
                 response.put("success", false);

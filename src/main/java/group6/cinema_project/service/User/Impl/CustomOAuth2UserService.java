@@ -4,7 +4,7 @@ package group6.cinema_project.service.User.Impl;
 import java.util.Optional;
 
 import group6.cinema_project.entity.Enum.AuthProvider;
-
+import group6.cinema_project.entity.Enum.Role;
 import group6.cinema_project.entity.User;
 import group6.cinema_project.repository.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
 
 import group6.cinema_project.security.oauth2.CustomOAuth2User;
 
@@ -42,8 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             if (user.getUserName() == null || user.getUserName().isEmpty()) {
                 user.setUserName(name != null ? name : email);
             }
-            // Nếu user đã tồn tại và provider là LOCAL, có thể cập nhật provider thành
-            // GOOGLE hoặc báo lỗi (ở đây cập nhật)
+            // Nếu user đã tồn tại và provider là LOCAL, có thể cập nhật provider thành GOOGLE hoặc báo lỗi (ở đây cập nhật)
             if (user.getProvider() == null || user.getProvider() == AuthProvider.LOCAL) {
                 user.setProvider(AuthProvider.GOOGLE);
             }

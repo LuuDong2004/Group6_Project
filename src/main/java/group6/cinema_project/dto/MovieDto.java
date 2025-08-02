@@ -13,7 +13,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -32,9 +32,6 @@ public class MovieDto {
     @Min(value = 1, message = "Thời lượng phim phải lớn hơn 0.")
     private Integer duration;
 
-
-
-
     @NotNull(message = "Ngày phát hành không được để trống.")
     @PastOrPresent(message = "Ngày phát hành không được là một ngày trong tương lai.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -49,9 +46,13 @@ public class MovieDto {
 
     private String language;
     private String trailer;
-    // Danh sách tên các đạo diễn, không phải đối tượng Director
-    private Set<String> directors;
+    
+    // Danh sách đạo diễn với thông tin chi tiết
+    private List<PersonSimpleDto> directors;
 
-    // Danh sách tên các diễn viên, không phải đối tượng Actor
-    private Set<String> actors;
+    // Danh sách diễn viên với thông tin chi tiết
+    private List<PersonSimpleDto> actors;
+    
+    // Danh sách review
+    private List<ReviewDto> reviews;
 }

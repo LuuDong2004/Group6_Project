@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,9 +56,9 @@ public class AdminScheduleController {
 
     @GetMapping("/list")
     public String listSchedules(Model model,
-            @RequestParam(value = "movieId", required = false) Integer movieId,
-            @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
-            @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
+                                @RequestParam(value = "movieId", required = false) Integer movieId,
+                                @RequestParam(value = "screeningDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate screeningDate,
+                                @RequestParam(value = "screeningRoomId", required = false) Integer screeningRoomId) {
 
         log.info("Loading schedule list with filters - movieId: {}, screeningDate: {}, screeningRoomId: {}",
                 movieId, screeningDate, screeningRoomId);
@@ -236,9 +238,9 @@ public class AdminScheduleController {
 
     @PostMapping("/add")
     public String addSchedule(@Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes) {
+                              BindingResult bindingResult,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
         log.info("Processing add schedule request for movie ID: {}", scheduleDto.getMovieId());
 
         if (bindingResult.hasErrors()) {
@@ -329,10 +331,10 @@ public class AdminScheduleController {
      */
     @PostMapping("/edit/{id}")
     public String editSchedule(@PathVariable("id") Integer id,
-            @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes) {
+                               @Valid @ModelAttribute("schedule") ScreeningScheduleDto scheduleDto,
+                               BindingResult bindingResult,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
         log.info("Processing edit schedule request for ID: {}", id);
 
         // Set the ID to ensure we're updating the correct record
@@ -500,9 +502,9 @@ public class AdminScheduleController {
      */
     @GetMapping("/detail/{movieId}")
     public String showMovieScheduleDetail(@PathVariable("movieId") Integer movieId,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "backUrl", required = false) String backUrl,
-            Model model) {
+                                          @RequestParam(value = "status", required = false) String status,
+                                          @RequestParam(value = "backUrl", required = false) String backUrl,
+                                          Model model) {
 
         log.info("Đang tải chi tiết lịch chiếu cho phim ID: {} với bộ lọc trạng thái: {}", movieId, status);
 
@@ -704,8 +706,8 @@ public class AdminScheduleController {
      */
     @GetMapping("/calendar")
     public String showCalendarView(Model model,
-            @RequestParam(value = "year", required = false) Integer year,
-            @RequestParam(value = "month", required = false) Integer month) {
+                                   @RequestParam(value = "year", required = false) Integer year,
+                                   @RequestParam(value = "month", required = false) Integer month) {
         log.info("Loading calendar view - year: {}, month: {}", year, month);
 
         try {

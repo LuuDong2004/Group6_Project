@@ -1,7 +1,11 @@
 package group6.cinema_project.service.User.Impl;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
+import group6.cinema_project.dto.ReviewDto;
 import group6.cinema_project.entity.Movie;
+import group6.cinema_project.entity.Qa.Review;
+import group6.cinema_project.repository.User.ReviewRepository;
 
 import group6.cinema_project.service.User.IMovieService;
 import org.modelmapper.ModelMapper;
@@ -25,6 +29,8 @@ public class MovieService implements IMovieService {
     @Autowired
     private MovieRepository movieReponsitory;
     @Autowired
+    private ReviewRepository reviewRepository;
+    @Autowired
     private ModelMapper modelMapper;
 
 //    public MovieService() {
@@ -43,7 +49,7 @@ public class MovieService implements IMovieService {
                 .map(movie -> modelMapper.map(movie , MovieDto.class))
                 .collect(Collectors.toList());
     }
-//    @Override
+    //    @Override
 //    public List<MovieDto> getMoviesByGenre(String gener){
 //        List<Movie> movies = movieReponsitory.getMoviesByGenre(gener);
 //
@@ -79,16 +85,16 @@ public class MovieService implements IMovieService {
         int topN = 3;
         List<Movie> movies = movieReponsitory.findTopMovies7Days(topN);
         return movies.stream()
-            .map(movie -> modelMapper.map(movie, MovieDto.class))
-            .collect(Collectors.toList());
+                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
     }
 
     public List<MovieDto> getTopMovies7Days() {
         int topN = 3;
         List<Movie> movies = movieReponsitory.findTopMovies7Days(topN);
         return movies.stream()
-            .map(movie -> modelMapper.map(movie, MovieDto.class))
-            .collect(Collectors.toList());
+                .map(movie -> modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -114,5 +120,70 @@ public class MovieService implements IMovieService {
     @Override
     public List<String> getAllGenres() {
         return movieReponsitory.findAllGenres();
+    }
+
+    @Override
+    public MovieDto getMovieById(Integer movieId) {
+        List<Movie> movies = movieReponsitory.findMovieById(movieId);
+        if (movies != null && !movies.isEmpty()) {
+            return modelMapper.map(movies.get(0), MovieDto.class);
+        }
+        return null;
+    }
+    
+    // Method mới để lấy chi tiết phim với actors, directors và reviews
+    public MovieDto getMovieDetail(Integer movieId) {
+        Movie movie = movieReponsitory.findById(movieId).orElse(null);
+        if (movie == null) {
+            return null;
+        }
+        
+        MovieDto dto = new MovieDto();
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        // Sửa đường dẫn hình ảnh nếu cần
+        String imagePath = movie.getImage();
+        if (imagePath != null && !imagePath.startsWith("/assets/")) {
+            imagePath = "/assets/images/" + imagePath;
+        }
+        dto.setImage(imagePath);
+        dto.setDuration(movie.getDuration());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setRating(movie.getRating());
+        dto.setGenre(movie.getGenre());
+        dto.setLanguage(movie.getLanguage());
+        dto.setTrailer(movie.getTrailer());
+        dto.setDescription(movie.getDescription());
+
+        // Map actors
+        if (movie.getActors() != null) {
+            dto.setActors(movie.getActors().stream()
+                .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
+                .collect(Collectors.toList()));
+        }
+
+        // Map directors
+        if (movie.getDirectors() != null) {
+            dto.setDirectors(movie.getDirectors().stream()
+                .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
+                .collect(Collectors.toList()));
+        }
+
+        // Map reviews
+        List<Review> reviews = reviewRepository.findByMovie_Id(movieId.longValue());
+        if (reviews != null) {
+            dto.setReviews(reviews.stream()
+                .map(review -> {
+                    ReviewDto rd = new ReviewDto();
+                    rd.setId(review.getId());
+                    rd.setUser("User " + review.getUserId()); // hoặc lấy tên user nếu có
+                    rd.setComment(review.getComment());
+                    rd.setRating(review.getRating());
+                    rd.setDate(review.getDate());
+                    return rd;
+                }).collect(Collectors.toList()));
+        }
+
+        return dto;
     }
 }

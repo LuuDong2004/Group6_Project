@@ -4,8 +4,8 @@ package group6.cinema_project.service.User.Impl;
 import group6.cinema_project.dto.BlogPostDto;
 import group6.cinema_project.entity.BlogPost;
 
-import group6.cinema_project.repository.User.BlogRepository;
-import group6.cinema_project.service.User.IBlogService;
+import group6.cinema_project.repository.BlogRepository;
+import group6.cinema_project.service.IBlogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

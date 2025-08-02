@@ -233,4 +233,14 @@ public class MovieController {
             return ResponseEntity.ok(topMovies);
         }
     }
+
+    @GetMapping("/view/{id}")
+    public String getMovieDetail(@PathVariable Integer id, Model model) {
+        MovieDto movie = movieService.getMovieDetail(id);
+        if (movie == null) {
+            return "redirect:/movie/view";
+        }
+        model.addAttribute("movie", movie);
+        return "movie_detail";
+    }
 }

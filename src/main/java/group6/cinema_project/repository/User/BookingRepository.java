@@ -1,6 +1,7 @@
 package group6.cinema_project.repository.User;
 
 import group6.cinema_project.entity.Booking;
+import group6.cinema_project.entity.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
