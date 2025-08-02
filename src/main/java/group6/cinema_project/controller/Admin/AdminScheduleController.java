@@ -450,7 +450,16 @@ public class AdminScheduleController {
                 return "redirect:/admin/schedules/list";
             }
 
-            model.addAttribute("schedule", scheduleOpt.get());
+            ScreeningScheduleDto schedule = scheduleOpt.get();
+
+            // Debug log để kiểm tra dữ liệu
+            log.info(
+                    "Schedule data for edit - ID: {}, Date: {}, StartTime: {}, EndTime: {}, MovieId: {}, RoomId: {}, BranchId: {}, Status: {}",
+                    schedule.getId(), schedule.getScreeningDate(), schedule.getStartTime(),
+                    schedule.getEndTime(), schedule.getMovieId(), schedule.getScreeningRoomId(),
+                    schedule.getBranchId(), schedule.getStatus());
+
+            model.addAttribute("schedule", schedule);
             model.addAttribute("movies", movieService.getAllMovie());
             model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
@@ -476,23 +485,32 @@ public class AdminScheduleController {
             RedirectAttributes redirectAttributes) {
         log.info("Processing edit schedule request for ID: {}", id);
 
-        // Set the ID to ensure we're updating the correct record
-        scheduleDto.setId(id);
-
-        if (bindingResult.hasErrors()) {
-            log.warn("Validation errors in edit schedule form for ID: {}", id);
-            // Reload dropdown data for form
-            try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
-                model.addAttribute("branches", branchService.getAllBranches());
-            } catch (Exception e) {
-                log.error("Error reloading dropdown data", e);
-            }
-            return "admin/admin_schedule_edit";
-        }
-
         try {
+            // Kiểm tra khả năng chỉnh sửa trước khi xử lý
+            if (!movieScheduleService.canEditSchedule(id)) {
+                Map<String, Object> editabilityInfo = movieScheduleService.getScheduleEditabilityInfo(id);
+                String reason = (String) editabilityInfo.get("reason");
+                redirectAttributes.addFlashAttribute("error", "Không thể chỉnh sửa lịch chiếu: " + reason);
+                return "redirect:/admin/schedules/list";
+            }
+
+            // Set the ID to ensure we're updating the correct record
+            scheduleDto.setId(id);
+
+            if (bindingResult.hasErrors()) {
+                log.warn("Validation errors in edit schedule form for ID: {}", id);
+                model.addAttribute("error", "Vui lòng kiểm tra lại thông tin đã nhập");
+                // Reload dropdown data for form
+                try {
+                    model.addAttribute("movies", movieService.getAllMovie());
+                    model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                    model.addAttribute("branches", branchService.getAllBranches());
+                } catch (Exception e) {
+                    log.error("Error reloading dropdown data", e);
+                }
+                return "admin/admin_schedule_edit";
+            }
+
             ScreeningScheduleDto updatedSchedule = movieScheduleService
                     .saveOrUpdateScreeningScheduleWithValidation(scheduleDto);
             log.info("Successfully updated schedule with ID: {}", updatedSchedule.getId());
@@ -548,6 +566,14 @@ public class AdminScheduleController {
         log.info("Processing delete schedule request for ID: {}", id);
 
         try {
+            // Kiểm tra khả năng xóa trước khi xử lý
+            if (!movieScheduleService.canDeleteSchedule(id)) {
+                Map<String, Object> editabilityInfo = movieScheduleService.getScheduleEditabilityInfo(id);
+                String reason = (String) editabilityInfo.get("reason");
+                redirectAttributes.addFlashAttribute("error", "Không thể xóa lịch chiếu: " + reason);
+                return "redirect:/admin/schedules/list";
+            }
+
             // Lấy thông tin lịch chiếu trước khi xóa để biết ngày
             Optional<ScreeningScheduleDto> scheduleOpt = movieScheduleService.getScreeningScheduleById(id);
             String redirectUrl = "redirect:/admin/schedules/list"; // default fallback
@@ -1123,6 +1149,29 @@ public class AdminScheduleController {
                 return "stopped";
             default:
                 return "unknown";
+        }
+    }
+
+    /**
+     * API endpoint để kiểm tra khả năng chỉnh sửa/xóa lịch chiếu
+     */
+    @GetMapping("/api/check-editability/{id}")
+    @ResponseBody
+    public Map<String, Object> checkScheduleEditability(@PathVariable("id") Integer scheduleId) {
+        log.info("Checking editability for schedule ID: {}", scheduleId);
+
+        try {
+            Map<String, Object> result = movieScheduleService.getScheduleEditabilityInfo(scheduleId);
+            result.put("success", true);
+            return result;
+        } catch (Exception e) {
+            log.error("Error checking schedule editability for ID: {}", scheduleId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("canEdit", false);
+            errorResponse.put("canDelete", false);
+            errorResponse.put("reason", "Lỗi hệ thống: " + e.getMessage());
+            return errorResponse;
         }
     }
 

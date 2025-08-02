@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     private final AdminMovieRepository movieRepository;
     private final AdminScreeningRoomRepository screeningRoomRepository;
     private final AdminBranchRepository branchRepository;
+    private final group6.cinema_project.repository.User.BookingRepository bookingRepository;
     // Removed unused field that might cause UnsupportedOperationException
     // List<ScheduleGroupedByDateDto> groupedSchedules;
 
@@ -45,7 +47,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Transactional(readOnly = true)
     public Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id) {
         return movieScheduleRepository.findById(id)
-                .map(this::convertToDto);
+                .map(this::convertToDtoWithRelatedData);
     }
 
     @Override
@@ -57,10 +59,10 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         ScreeningSchedule screeningSchedule = convertToEntity(screeningScheduleDto);
         ScreeningSchedule savedSchedule = movieScheduleRepository.save(screeningSchedule);
-        
+
         // Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
         updateScreeningRoomStatus(savedSchedule.getScreeningRoom().getId());
-        
+
         return convertToDto(savedSchedule);
     }
 
@@ -760,9 +762,10 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         return savedSchedules;
     }
-    
+
     /**
      * Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
+     * 
      * @param roomId ID của phòng chiếu
      */
     private void updateScreeningRoomStatus(int roomId) {
@@ -810,6 +813,124 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Kiểm tra xem lịch chiếu có thể chỉnh sửa hay không
+     * Điều kiện: Status phải là UPCOMING và không có booking nào
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return true nếu có thể chỉnh sửa, false nếu không thể
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canEditSchedule(Integer scheduleId) {
+        try {
+            // Kiểm tra lịch chiếu có tồn tại không
+            Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(scheduleId);
+            if (scheduleOpt.isEmpty()) {
+                return false;
+            }
+
+            ScreeningSchedule schedule = scheduleOpt.get();
+
+            // Chỉ cho phép chỉnh sửa lịch chiếu có status UPCOMING
+            if (!"UPCOMING".equalsIgnoreCase(schedule.getStatus())) {
+                return false;
+            }
+
+            // Kiểm tra xem lịch chiếu có booking nào không
+            boolean hasBookings = bookingRepository.existsByScheduleId(scheduleId);
+            if (hasBookings) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi kiểm tra khả năng chỉnh sửa lịch chiếu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem lịch chiếu có thể xóa hay không
+     * Điều kiện: Status phải là UPCOMING và không có booking nào
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return true nếu có thể xóa, false nếu không thể
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canDeleteSchedule(Integer scheduleId) {
+        // Logic giống với canEditSchedule
+        return canEditSchedule(scheduleId);
+    }
+
+    /**
+     * Lấy thông tin chi tiết về khả năng chỉnh sửa/xóa lịch chiếu
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return Map chứa thông tin chi tiết
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getScheduleEditabilityInfo(Integer scheduleId) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // Kiểm tra lịch chiếu có tồn tại không
+            Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(scheduleId);
+            if (scheduleOpt.isEmpty()) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                result.put("reason", "Lịch chiếu không tồn tại");
+                return result;
+            }
+
+            ScreeningSchedule schedule = scheduleOpt.get();
+            String status = schedule.getStatus();
+
+            // Kiểm tra status
+            boolean isUpcoming = "UPCOMING".equalsIgnoreCase(status);
+            if (!isUpcoming) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                if ("ACTIVE".equalsIgnoreCase(status)) {
+                    result.put("reason", "Không thể sửa/xóa lịch chiếu đang chiếu");
+                } else if ("ENDED".equalsIgnoreCase(status)) {
+                    result.put("reason", "Không thể sửa/xóa lịch chiếu đã kết thúc");
+                } else {
+                    result.put("reason", "Trạng thái lịch chiếu không cho phép chỉnh sửa");
+                }
+                return result;
+            }
+
+            // Kiểm tra booking
+            boolean hasBookings = bookingRepository.existsByScheduleId(scheduleId);
+            long bookingCount = bookingRepository.countByScheduleId(scheduleId);
+
+            if (hasBookings) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                result.put("reason", "Lịch chiếu đã có " + bookingCount + " booking, không thể chỉnh sửa");
+                result.put("bookingCount", bookingCount);
+            } else {
+                result.put("canEdit", true);
+                result.put("canDelete", true);
+                result.put("reason", "Có thể chỉnh sửa/xóa");
+                result.put("bookingCount", 0);
+            }
+
+            result.put("status", status);
+
+        } catch (Exception e) {
+            result.put("canEdit", false);
+            result.put("canDelete", false);
+            result.put("reason", "Lỗi hệ thống: " + e.getMessage());
+            System.err.println("Lỗi khi lấy thông tin khả năng chỉnh sửa lịch chiếu: " + e.getMessage());
+        }
+
+        return result;
     }
 
 }

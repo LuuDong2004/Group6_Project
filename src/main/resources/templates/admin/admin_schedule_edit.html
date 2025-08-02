@@ -305,6 +305,21 @@
           <span th:text="${error}"></span>
         </div>
 
+        <!-- Debug info - chỉ hiển thị trong development -->
+        <div class="alert alert-info" style="display: none" id="debugInfo">
+          <h6>Debug Info:</h6>
+          <p>Schedule ID: <span th:text="${schedule?.id}"></span></p>
+          <p>
+            Screening Date: <span th:text="${schedule?.screeningDate}"></span>
+          </p>
+          <p>Start Time: <span th:text="${schedule?.startTime}"></span></p>
+          <p>End Time: <span th:text="${schedule?.endTime}"></span></p>
+          <p>Movie ID: <span th:text="${schedule?.movieId}"></span></p>
+          <p>Room ID: <span th:text="${schedule?.screeningRoomId}"></span></p>
+          <p>Branch ID: <span th:text="${schedule?.branchId}"></span></p>
+          <p>Status: <span th:text="${schedule?.status}"></span></p>
+        </div>
+
         <form
           th:action="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
           th:object="${schedule}"
@@ -392,9 +407,24 @@
                   id="selectedMovieDisplay"
                   style="display: none"
                 >
-                  <div class="alert alert-info">
-                    <i class="fas fa-film me-2"></i>
-                    <span id="selectedMovieName"></span>
+                  <div
+                    class="alert alert-info d-flex justify-content-between align-items-start"
+                  >
+                    <div>
+                      <i class="fas fa-film me-2"></i>
+                      <span id="selectedMovieName"></span>
+                      <small class="d-block text-muted mt-1">
+                        <span id="selectedMovieDetails"></span>
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      onclick="changeMovie()"
+                      title="Thay đổi phim"
+                    >
+                      <i class="fas fa-edit"></i> Thay đổi
+                    </button>
                   </div>
                 </div>
                 <div
@@ -541,6 +571,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Debug: Log form data khi load
+        console.log("Form loaded with data:");
+        console.log("- Date:", document.getElementById("screeningDate").value);
+        console.log(
+          "- Start Time:",
+          document.getElementById("startTime").value
+        );
+        console.log("- End Time:", document.getElementById("endTime").value);
+        console.log(
+          "- Movie ID:",
+          document.getElementById("selectedMovieId").value
+        );
+        console.log(
+          "- Room ID:",
+          document.getElementById("screeningRoomId").value
+        );
+        console.log("- Branch ID:", document.getElementById("branchId").value);
+        console.log("- Status:", document.getElementById("status").value);
+
+        // Hiển thị debug info để kiểm tra
+        const debugInfo = document.getElementById("debugInfo");
+        if (debugInfo) {
+          debugInfo.style.display = "block";
+        }
+
         initializeAutocomplete();
         initializeConflictCheck();
         initializeFormValidation();
@@ -555,12 +610,28 @@
           // Lấy thông tin phim để hiển thị
           fetch(`/admin/schedules/api/movies/${selectedMovieId}`)
             .then((response) => response.json())
-            .then((movie) => {
-              document.getElementById("movieSearch").value = movie.title;
-              document.getElementById("selectedMovieName").textContent =
-                movie.title;
-              document.getElementById("selectedMovieDisplay").style.display =
-                "block";
+            .then((data) => {
+              if (data.error) {
+                console.error("Error loading movie data:", data.error);
+              } else {
+                const movie = data;
+                document.getElementById("movieSearch").value = movie.name;
+                document.getElementById("selectedMovieName").textContent =
+                  movie.name;
+
+                // Hiển thị thông tin chi tiết phim
+                const detailsText = `${movie.duration} phút • ${movie.genre} • Rating: ${movie.rating}`;
+                document.getElementById("selectedMovieDetails").textContent =
+                  detailsText;
+
+                document.getElementById("selectedMovieDisplay").style.display =
+                  "block";
+
+                // Ẩn input search và hiển thị thông tin đã chọn
+                document.getElementById("movieSearch").style.display = "none";
+
+                console.log("Loaded existing movie data:", movie);
+              }
             })
             .catch((error) => {
               console.error("Lỗi khi tải thông tin phim:", error);
@@ -723,6 +794,22 @@
             return false;
           }
         });
+      }
+
+      // Function để thay đổi phim
+      function changeMovie() {
+        // Hiển thị lại input search
+        document.getElementById("movieSearch").style.display = "block";
+        document.getElementById("movieSearch").value = "";
+
+        // Ẩn thông tin phim đã chọn
+        document.getElementById("selectedMovieDisplay").style.display = "none";
+
+        // Clear selected movie ID
+        document.getElementById("selectedMovieId").value = "";
+
+        // Focus vào input search
+        document.getElementById("movieSearch").focus();
       }
     </script>
   </body>

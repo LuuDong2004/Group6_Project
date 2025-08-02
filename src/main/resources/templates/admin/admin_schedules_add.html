@@ -22,71 +22,144 @@
     <style>
       body {
         font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #f8fafc;
         min-height: 100vh;
       }
 
       .sidebar {
-        width: 280px;
-        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-        min-height: 100vh;
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
         position: fixed;
-        left: 0;
         top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
         z-index: 1000;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
       }
-
+      .sidebar.collapsed {
+        width: 80px;
+      }
+      .sidebar.collapsed .sidebar-header h5,
+      .sidebar.collapsed .sidebar-header small,
+      .sidebar.collapsed .sidebar-menu span,
+      .sidebar.collapsed .mt-auto .text-white,
+      .sidebar.collapsed .mt-auto small {
+        display: none;
+      }
+      .sidebar.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
       .sidebar-header {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
-
-      .sidebar-menu {
-        padding: 1rem 0;
+      .sidebar-header .fa-film {
+        color: #6366f1;
       }
-
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
       .menu-item {
         display: flex;
         align-items: center;
-        padding: 1rem 1.5rem;
+        padding: 0.75rem 1.5rem;
         color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
-        transition: all 0.3s ease;
-        border-left: 3px solid transparent;
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
-
       .menu-item:hover,
       .menu-item.active {
-        background: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.1);
         color: white;
-        border-left-color: #3498db;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
       }
-
+      .sidebar.collapsed .menu-item:hover,
+      .sidebar.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem;
+      }
+      .sidebar.collapsed .menu-item.active {
+        background-color: #4f46e5;
+      }
       .menu-item i {
         width: 20px;
-        margin-right: 1rem;
+        margin-right: 0.75rem;
         text-align: center;
       }
+      .sidebar.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
 
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
       .main-content {
-        margin-left: 280px;
-        padding: 2rem;
+        padding: 2.5rem 3rem;
       }
 
       .content-header {
-        background: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
-      .form-container {
-        background: white;
-        border-radius: 15px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      .content-header h1 {
+        color: white;
+        margin-bottom: 0;
+      }
+
+      .content-header p {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0;
+      }
+
+      .content-header .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .form-section {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+      }
+      .form-section .card-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          #6366f1 0%,
+          #8b5cf6 100%
+        ) !important;
+        color: white;
       }
 
       .form-group {
@@ -95,44 +168,56 @@
 
       .form-label {
         font-weight: 600;
-        color: #2c3e50;
+        color: #334155;
         margin-bottom: 0.5rem;
         display: block;
       }
 
-      .form-control {
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
+      .form-control,
+      .form-select {
+        border-radius: 0.375rem;
+        border-color: #cbd5e1;
         padding: 0.75rem 1rem;
         transition: all 0.3s ease;
       }
 
-      .form-control:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
       }
 
       .btn-primary {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        border: none;
-        border-radius: 10px;
+        background-color: #6366f1;
+        border-color: #6366f1;
+        border-radius: 0.375rem;
         padding: 0.75rem 2rem;
-        font-weight: 600;
+        font-weight: 500;
         transition: all 0.3s ease;
       }
 
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        background-color: #4f46e5;
+        border-color: #4f46e5;
       }
 
       .btn-secondary {
         background: #6c757d;
         border: none;
-        border-radius: 10px;
+        border-radius: 0.375rem;
         padding: 0.75rem 2rem;
-        font-weight: 600;
+        font-weight: 500;
         transition: all 0.3s ease;
+      }
+
+      .btn-outline-primary {
+        color: #6366f1;
+        border-color: #6366f1;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: #6366f1;
+        border-color: #6366f1;
       }
 
       .autocomplete-container {
@@ -192,361 +277,363 @@
         opacity: 1;
         cursor: not-allowed;
       }
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 80px;
+        }
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .sidebar-menu span,
+        .sidebar .mt-auto .text-white,
+        .sidebar .mt-auto small {
+          display: none;
+        }
+        .sidebar .sidebar-menu .menu-item {
+          justify-content: center;
+        }
+        .sidebar .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
+        }
+        .main-content-wrapper {
+          margin-left: 80px;
+        }
+        .header-custom {
+          left: 80px;
+          padding: 0 1rem;
+        }
+      }
     </style>
   </head>
 
   <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
+    <div th:replace="~{/fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-calendar-plus text-primary"></i>
-          </div>
-          <div>
-            <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Thêm Lịch Chiếu</small>
-          </div>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4
+            class="mb-0 fw-semibold"
+            id="main-header-title"
+            style="
+              background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            "
+          >
+            Thêm Lịch Chiếu Mới
+          </h4>
         </div>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item active">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a th:href="@{/admin/blogs/list}" class="menu-item">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-users"></i>
-          <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i>
-          <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
-        </a>
-      </nav>
-
-      <div
-        class="mt-auto p-4 border-top border-white-50"
-        style="border-color: rgba(255, 255, 255, 0.1) !important"
-      >
         <div class="d-flex align-items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="User Avatar"
-            width="40"
-            height="40"
-            class="rounded-circle me-3"
-          />
-          <div>
-            <div class="text-white fw-semibold">Admin User</div>
-            <small class="text-white-50">admin@cinema.com</small>
-          </div>
+          <a th:href="@{/admin/schedules/list}" class="btn btn-secondary me-2">
+            <i class="fas fa-list me-2"></i>Danh sách
+          </a>
+          <a
+            th:href="@{/admin/schedules/calendar}"
+            class="btn btn-outline-primary"
+          >
+            <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
+          </a>
         </div>
-      </div>
-    </div>
+      </header>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Header -->
+      <!-- Content Header -->
       <div class="content-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h1 class="h3 mb-0 text-gray-800 fw-bold">
-              <i class="fas fa-calendar-plus me-2 text-primary"></i>
-              Thêm Lịch Chiếu Mới
-            </h1>
-            <p class="text-muted mb-0">Tạo lịch chiếu cho phim</p>
-          </div>
-          <div>
-            <a
-              th:href="@{/admin/schedules/list}"
-              class="btn btn-secondary me-2"
-            >
-              <i class="fas fa-list me-2"></i>Danh sách
-            </a>
-            <a
-              th:href="@{/admin/schedules/calendar}"
-              class="btn btn-outline-primary"
-            >
-              <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
-            </a>
-          </div>
+        <div class="header-info">
+          <h1 class="h3 fw-bold">
+            <i class="fas fa-calendar-plus me-2"></i>
+            Thêm Lịch Chiếu Mới
+          </h1>
+          <p>Tạo lịch chiếu cho phim</p>
+        </div>
+        <div class="header-actions">
+          <a th:href="@{/admin/schedules/list}" class="btn btn-light me-2">
+            <i class="fas fa-list me-2"></i>Danh sách
+          </a>
+          <a
+            th:href="@{/admin/schedules/calendar}"
+            class="btn btn-outline-light"
+          >
+            <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
+          </a>
         </div>
       </div>
 
       <!-- Form Container -->
-      <div class="form-container">
-        <!-- Hiển thị thông báo lỗi nếu có -->
-        <div th:if="${error}" class="alert alert-danger" role="alert">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          <span th:text="${error}"></span>
+      <div class="form-section">
+        <div class="card-header p-3">
+          <h5 class="mb-0 fw-semibold">
+            <i class="fas fa-calendar-plus me-2"></i>
+            Thông tin Lịch Chiếu
+          </h5>
         </div>
-
-        <!-- Hiển thị thông báo thành công nếu có -->
-        <div th:if="${success}" class="alert alert-success" role="alert">
-          <i class="fas fa-check-circle me-2"></i>
-          <span th:text="${success}"></span>
-        </div>
-
-        <form
-          th:action="@{/admin/schedules/add}"
-          th:object="${schedule}"
-          method="post"
-          id="scheduleForm"
-        >
-          <div class="row">
-            <!-- Ngày chiếu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="screeningDate" class="form-label">
-                  <i class="fas fa-calendar me-2"></i>Ngày chiếu
-                </label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="screeningDate"
-                  th:field="*{screeningDate}"
-                  readonly
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('screeningDate')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{screeningDate}"></span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Trạng thái -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="status" class="form-label">
-                  <i class="fas fa-info-circle me-2"></i>Trạng thái
-                </label>
-                <select class="form-control" id="status" required readonly>
-                  <option value="UPCOMING" selected>Sắp chiếu</option>
-                </select>
-                <!-- Hidden input để đảm bảo giá trị được submit -->
-                <input type="hidden" th:field="*{status}" value="UPCOMING" />
-                <small class="text-muted">
-                  <i class="fas fa-info-circle me-1"></i>
-                  Lịch chiếu mới luôn có trạng thái "Sắp chiếu"
-                </small>
-                <div
-                  th:if="${#fields.hasErrors('status')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{status}"></span>
-                </div>
-              </div>
-            </div>
+        <div class="card-body p-4 p-md-5">
+          <!-- Hiển thị thông báo lỗi nếu có -->
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
           </div>
 
-          <div class="row">
-            <!-- Chọn phim với autocomplete -->
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="movieSearch" class="form-label">
-                  <i class="fas fa-film me-2"></i>Chọn phim
-                </label>
-                <div class="autocomplete-container">
+          <!-- Hiển thị thông báo thành công nếu có -->
+          <div th:if="${success}" class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+          </div>
+
+          <form
+            th:action="@{/admin/schedules/add}"
+            th:object="${schedule}"
+            method="post"
+            id="scheduleForm"
+          >
+            <div class="row">
+              <!-- Ngày chiếu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="screeningDate" class="form-label">
+                    <i class="fas fa-calendar me-2"></i>Ngày chiếu
+                  </label>
                   <input
-                    type="text"
+                    type="date"
                     class="form-control"
-                    id="movieSearch"
-                    placeholder="Nhập tên phim để tìm kiếm..."
-                    autocomplete="off"
+                    id="screeningDate"
+                    th:field="*{screeningDate}"
+                    readonly
+                    required
                   />
                   <div
-                    class="autocomplete-suggestions"
-                    id="movieSuggestions"
-                  ></div>
-                </div>
-                <input
-                  type="hidden"
-                  th:field="*{movieId}"
-                  id="selectedMovieId"
-                />
-                <div
-                  class="mt-2"
-                  id="selectedMovieDisplay"
-                  style="display: none"
-                >
-                  <div class="alert alert-info">
-                    <i class="fas fa-film me-2"></i>
-                    <span id="selectedMovieName"></span>
+                    th:if="${#fields.hasErrors('screeningDate')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{screeningDate}"></span>
                   </div>
                 </div>
-                <div
-                  th:if="${#fields.hasErrors('movieId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{movieId}"></span>
-                </div>
               </div>
-            </div>
-          </div>
 
-          <div class="row">
-            <!-- Chọn phòng chiếu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="screeningRoomId" class="form-label">
-                  <i class="fas fa-door-open me-2"></i>Phòng chiếu
-                </label>
-                <select
-                  class="form-control"
-                  id="screeningRoomId"
-                  th:field="*{screeningRoomId}"
-                  required
-                >
-                  <option value="">-- Chọn phòng chiếu --</option>
-                  <option
-                    th:each="room : ${screeningRooms}"
-                    th:value="${room.id}"
-                    th:text="${room.name + ' (Sức chứa: ' + room.capacity + ')'}"
+              <!-- Trạng thái -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="status" class="form-label">
+                    <i class="fas fa-info-circle me-2"></i>Trạng thái
+                  </label>
+                  <select class="form-control" id="status" required readonly>
+                    <option value="UPCOMING" selected>Sắp chiếu</option>
+                  </select>
+                  <!-- Hidden input để đảm bảo giá trị được submit -->
+                  <input type="hidden" th:field="*{status}" value="UPCOMING" />
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Lịch chiếu mới luôn có trạng thái "Sắp chiếu"
+                  </small>
+                  <div
+                    th:if="${#fields.hasErrors('status')}"
+                    class="invalid-feedback d-block"
                   >
-                    Phòng 1 (Sức chứa: 100)
-                  </option>
-                </select>
-                <div
-                  th:if="${#fields.hasErrors('screeningRoomId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{screeningRoomId}"></span>
+                    <span th:errors="*{status}"></span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Chọn chi nhánh -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="branchId" class="form-label">
-                  <i class="fas fa-building me-2"></i>Chi nhánh
-                </label>
-                <select
-                  class="form-control"
-                  id="branchId"
-                  th:field="*{branchId}"
-                  required
-                >
-                  <option value="">-- Chọn chi nhánh --</option>
-                  <option
-                    th:each="branch : ${branches}"
-                    th:value="${branch.id}"
-                    th:text="${branch.name}"
+            <div class="row">
+              <!-- Chọn phim với autocomplete -->
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="movieSearch" class="form-label">
+                    <i class="fas fa-film me-2"></i>Chọn phim
+                  </label>
+                  <div class="autocomplete-container">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="movieSearch"
+                      placeholder="Nhập tên phim để tìm kiếm..."
+                      autocomplete="off"
+                    />
+                    <div
+                      class="autocomplete-suggestions"
+                      id="movieSuggestions"
+                    ></div>
+                  </div>
+                  <input
+                    type="hidden"
+                    th:field="*{movieId}"
+                    id="selectedMovieId"
+                  />
+                  <div
+                    class="mt-2"
+                    id="selectedMovieDisplay"
+                    style="display: none"
                   >
-                    Chi nhánh 1
-                  </option>
-                </select>
-                <div
-                  th:if="${#fields.hasErrors('branchId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{branchId}"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <!-- Thời gian bắt đầu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="startTime" class="form-label">
-                  <i class="fas fa-clock me-2"></i>Thời gian bắt đầu
-                </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="startTime"
-                  th:field="*{startTime}"
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('startTime')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{startTime}"></span>
+                    <div class="alert alert-info">
+                      <i class="fas fa-film me-2"></i>
+                      <span id="selectedMovieName"></span>
+                    </div>
+                  </div>
+                  <div
+                    th:if="${#fields.hasErrors('movieId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{movieId}"></span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Thời gian kết thúc -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="endTime" class="form-label">
-                  <i class="fas fa-clock me-2"></i>Thời gian kết thúc
-                </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="endTime"
-                  th:field="*{endTime}"
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('endTime')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{endTime}"></span>
+            <div class="row">
+              <!-- Chọn phòng chiếu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="screeningRoomId" class="form-label">
+                    <i class="fas fa-door-open me-2"></i>Phòng chiếu
+                  </label>
+                  <select
+                    class="form-control"
+                    id="screeningRoomId"
+                    th:field="*{screeningRoomId}"
+                    required
+                  >
+                    <option value="">-- Chọn phòng chiếu --</option>
+                    <option
+                      th:each="room : ${screeningRooms}"
+                      th:value="${room.id}"
+                      th:text="${room.name + ' (Sức chứa: ' + room.capacity + ')'}"
+                    >
+                      Phòng 1 (Sức chứa: 100)
+                    </option>
+                  </select>
+                  <div
+                    th:if="${#fields.hasErrors('screeningRoomId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{screeningRoomId}"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chọn chi nhánh -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="branchId" class="form-label">
+                    <i class="fas fa-building me-2"></i>Chi nhánh
+                  </label>
+                  <select
+                    class="form-control"
+                    id="branchId"
+                    th:field="*{branchId}"
+                    required
+                  >
+                    <option value="">-- Chọn chi nhánh --</option>
+                    <option
+                      th:each="branch : ${branches}"
+                      th:value="${branch.id}"
+                      th:text="${branch.name}"
+                    >
+                      Chi nhánh 1
+                    </option>
+                  </select>
+                  <div
+                    th:if="${#fields.hasErrors('branchId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{branchId}"></span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Cảnh báo xung đột lịch chiếu -->
-          <div class="conflict-warning" id="conflictWarning">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <span id="conflictMessage"></span>
-          </div>
+            <div class="row">
+              <!-- Thời gian bắt đầu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="startTime" class="form-label">
+                    <i class="fas fa-clock me-2"></i>Thời gian bắt đầu
+                  </label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="startTime"
+                    th:field="*{startTime}"
+                    required
+                  />
+                  <div
+                    th:if="${#fields.hasErrors('startTime')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{startTime}"></span>
+                  </div>
+                </div>
+              </div>
 
-          <!-- Nút submit -->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="d-flex justify-content-end gap-3">
-                <a
-                  th:href="@{/admin/schedules/calendar}"
-                  class="btn btn-secondary"
-                >
-                  <i class="fas fa-times me-2"></i>Hủy
-                </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                  <i class="fas fa-save me-2"></i>Lưu lịch chiếu
-                </button>
+              <!-- Thời gian kết thúc -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="endTime" class="form-label">
+                    <i class="fas fa-clock me-2"></i>Thời gian kết thúc
+                  </label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="endTime"
+                    th:field="*{endTime}"
+                    required
+                  />
+                  <div
+                    th:if="${#fields.hasErrors('endTime')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{endTime}"></span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+
+            <!-- Cảnh báo xung đột lịch chiếu -->
+            <div class="conflict-warning" id="conflictWarning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <span id="conflictMessage"></span>
+            </div>
+
+            <!-- Nút submit -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="d-flex justify-content-end gap-3">
+                  <a
+                    th:href="@{/admin/schedules/calendar}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-times me-2"></i>Hủy
+                  </a>
+                  <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save me-2"></i>Lưu lịch chiếu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -557,6 +644,7 @@
         initializeConflictCheck();
         initializeFormValidation();
         setDefaultStatus();
+        initializeDashboardBehavior();
       });
 
       // Khởi tạo autocomplete cho phim
@@ -793,6 +881,34 @@
           screeningDateInput.value = dateParam;
           console.log("Set date from URL parameter:", dateParam);
         }
+      }
+
+      // Khởi tạo hành vi dashboard (sidebar toggle)
+      function initializeDashboardBehavior() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const mainContentWrapper =
+          document.getElementById("mainContentWrapper");
+
+        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        function checkViewport() {
+          if (window.innerWidth <= 992) {
+            if (!sidebar.classList.contains("collapsed")) {
+              toggleSidebar();
+            }
+          }
+        }
+
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
       }
     </script>
   </body>

@@ -332,10 +332,72 @@
         border-radius: 15px;
         padding: 1rem;
         cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
       }
 
       .schedule-item:hover {
         border-color: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
+      }
+
+      .schedule-item:hover .schedule-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .schedule-actions {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        display: flex;
+        gap: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .action-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .edit-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .edit-btn:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+      }
+
+      .delete-btn {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .delete-btn:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+
+      .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
       }
 
       .schedule-time {
@@ -637,7 +699,6 @@
               </h1>
               <p class="date-subtitle">Lịch chiếu phim chi tiết trong ngày</p>
             </div>
-            <!-- Button thêm lịch chiếu chỉ hiển thị cho ngày hiện tại và tương lai -->
           </div>
         </div>
 
@@ -678,17 +739,31 @@
             <p class="text-muted" th:if="${not isPastDate}">
               Vui lòng chọn ngày khác hoặc thêm lịch chiếu mới.
             </p>
+            <!-- Button thêm lịch chiếu - hiển thị cho ngày hiện tại và tương lai, ẩn cho ngày quá khứ -->
+            <div
+              th:if="${selectedDate != null and not isPastDate}"
+              class="mt-4"
+            >
+              <a
+                th:href="@{/admin/schedules/add(date=${selectedDate})}"
+                class="btn btn-primary btn-lg"
+                style="border-radius: 15px; font-weight: 600"
+              >
+                <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
+              </a>
+            </div>
           </div>
 
-          <!-- Thêm button thêm lịch chiếu ở cuối danh sách nếu có phim và không phải ngày quá khứ -->
+          <!-- Button thêm lịch chiếu ở cuối danh sách - hiển thị cho ngày hiện tại và tương lai, ẩn cho ngày quá khứ -->
           <div
             th:if="${movies != null and not #lists.isEmpty(movies)}"
             class="text-center mt-4"
           >
             <a
               th:href="@{/admin/schedules/add(date=${selectedDate})}"
-              class="btn btn-outline-primary btn-lg"
+              class="btn btn-primary btn-lg"
               th:if="${selectedDate != null and not isPastDate}"
+              style="border-radius: 15px; font-weight: 600"
             >
               <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
             </a>
@@ -755,6 +830,7 @@
                   th:each="schedule : ${movie.schedules}"
                   class="schedule-item"
                   th:data-status="${schedule.status}"
+                  th:data-schedule-id="${schedule.id}"
                   th:onclick="'showScheduleDetails(' + ${schedule.id} + ')'"
                 >
                   <div
@@ -795,6 +871,27 @@
                         </span>
                       </span>
                     </div>
+                  </div>
+
+                  <!-- Action buttons - chỉ hiển thị cho status UPCOMING -->
+                  <div
+                    class="schedule-actions"
+                    th:if="${schedule.status == 'UPCOMING'}"
+                  >
+                    <button
+                      class="action-btn edit-btn"
+                      th:onclick="'editSchedule(' + ${schedule.id} + ', event)'"
+                      title="Chỉnh sửa lịch chiếu"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="action-btn delete-btn"
+                      th:onclick="'deleteSchedule(' + ${schedule.id} + ', event)'"
+                      title="Xóa lịch chiếu"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -930,6 +1027,100 @@
         alert("Xem chi tiết lịch chiếu ID: " + scheduleId);
         // Có thể mở modal hoặc chuyển đến trang chi tiết
       }
+
+      // Hàm chỉnh sửa lịch chiếu
+      function editSchedule(scheduleId, event) {
+        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
+
+        // Kiểm tra khả năng chỉnh sửa trước
+        checkScheduleEditability(scheduleId, function (canEdit, reason) {
+          if (canEdit) {
+            // Chuyển đến trang chỉnh sửa
+            window.location.href = `/admin/schedules/edit/${scheduleId}`;
+          } else {
+            alert(`Không thể chỉnh sửa lịch chiếu: ${reason}`);
+          }
+        });
+      }
+
+      // Hàm xóa lịch chiếu
+      function deleteSchedule(scheduleId, event) {
+        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
+
+        // Kiểm tra khả năng xóa trước
+        checkScheduleEditability(scheduleId, function (canDelete, reason) {
+          if (canDelete) {
+            if (confirm("Bạn có chắc chắn muốn xóa lịch chiếu này không?")) {
+              // Tạo form để submit POST request
+              const form = document.createElement("form");
+              form.method = "POST";
+              form.action = `/admin/schedules/delete/${scheduleId}`;
+
+              // Thêm CSRF token nếu cần
+              const csrfToken = document.querySelector('meta[name="_csrf"]');
+              if (csrfToken) {
+                const csrfInput = document.createElement("input");
+                csrfInput.type = "hidden";
+                csrfInput.name = "_csrf";
+                csrfInput.value = csrfToken.getAttribute("content");
+                form.appendChild(csrfInput);
+              }
+
+              document.body.appendChild(form);
+              form.submit();
+            }
+          } else {
+            alert(`Không thể xóa lịch chiếu: ${reason}`);
+          }
+        });
+      }
+
+      // Hàm kiểm tra khả năng chỉnh sửa/xóa lịch chiếu
+      function checkScheduleEditability(scheduleId, callback) {
+        fetch(`/admin/schedules/api/check-editability/${scheduleId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              callback(data.canEdit || data.canDelete, data.reason);
+            } else {
+              callback(false, data.reason || "Lỗi hệ thống");
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking editability:", error);
+            callback(false, "Lỗi kết nối");
+          });
+      }
+
+      // Cập nhật trạng thái action buttons khi trang load
+      document.addEventListener("DOMContentLoaded", function () {
+        const scheduleItems = document.querySelectorAll(
+          '.schedule-item[data-status="UPCOMING"]'
+        );
+
+        scheduleItems.forEach((item) => {
+          const scheduleId = item.getAttribute("data-schedule-id");
+          const editBtn = item.querySelector(".edit-btn");
+          const deleteBtn = item.querySelector(".delete-btn");
+
+          if (scheduleId && (editBtn || deleteBtn)) {
+            checkScheduleEditability(scheduleId, function (canEdit, reason) {
+              if (editBtn) {
+                editBtn.disabled = !canEdit;
+                if (!canEdit) {
+                  editBtn.title = `Không thể chỉnh sửa: ${reason}`;
+                }
+              }
+              if (deleteBtn) {
+                deleteBtn.disabled = !canEdit; // Sử dụng cùng logic với edit
+                if (!canEdit) {
+                  deleteBtn.title = `Không thể xóa: ${reason}`;
+                }
+              }
+            });
+          }
+        });
+      });
     </script>
   </body>
 </html>
