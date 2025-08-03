@@ -80,19 +80,19 @@ public class AdminScreeningRoomServiceImpl implements IAdminScreeningRoomService
         // Tạo ghế mới
         int rows = roomDto.getRows();
         int seatsPerRow = roomDto.getSeatsPerRow();
-        int standardRows = rows / 4; // 25% hàng ghế thường
-        int vipRows = rows / 2;      // 50% hàng ghế VIP
-        int coupleRows = rows - standardRows - vipRows; // còn lại là hàng ghế đôi
+        int popularRows = rows / 4; // 25% hàng ghế Popular (trước đây là Standard)
+        int standardRows = rows / 2; // 50% hàng ghế Standard (trước đây là VIP)
+        int vipRows = rows - popularRows - standardRows; // còn lại là hàng ghế VIP (trước đây là Couple)
         List<Seat> seats = new java.util.ArrayList<>();
         for (int i = 0; i < rows; i++) {
             char rowChar = (char) ('A' + i);
             String seatType;
-            if (i < standardRows) {
-                seatType = "Standard"; // Ghế thường
-            } else if (i < standardRows + vipRows) {
-                seatType = "VIP"; // Ghế VIP
+            if (i < popularRows) {
+                seatType = "Popular"; // Ghế Popular
+            } else if (i < popularRows + standardRows) {
+                seatType = "Standard"; // Ghế Standard
             } else {
-                seatType = "Couple"; // Ghế đôi
+                seatType = "VIP"; // Ghế VIP
             }
             for (int j = 1; j <= seatsPerRow; j++) {
                 Seat seat = new Seat();

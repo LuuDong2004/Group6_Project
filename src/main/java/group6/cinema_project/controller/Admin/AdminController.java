@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

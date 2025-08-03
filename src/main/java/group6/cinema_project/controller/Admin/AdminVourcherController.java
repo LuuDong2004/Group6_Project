@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 
 import group6.cinema_project.entity.Qa.Voucher;
 import group6.cinema_project.repository.User.VoucherRepository;

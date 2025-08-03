@@ -1,9 +1,9 @@
 package group6.cinema_project.service.User;
 
+import java.util.List;
+
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
-
-import java.util.List;
 
 public interface IBookingService {
     List<BookingDto> createBooking(BookingRequest request);
@@ -16,4 +16,8 @@ public interface IBookingService {
     void cancelPendingBooking(Integer bookingId);
     List<BookingDto> getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(Integer userId, java.time.LocalDate fromDate);
     void updateBookingAmount(Integer bookingId, double newAmount);
+    
+    // Admin methods
+    List<BookingDto> getAllBookings();
+    List<BookingDto> getBookingsByScheduleId(Integer scheduleId);
 }

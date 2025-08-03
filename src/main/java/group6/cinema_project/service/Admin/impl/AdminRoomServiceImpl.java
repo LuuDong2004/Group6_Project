@@ -76,6 +76,15 @@ public class AdminRoomServiceImpl implements IAdminRoomService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScreeningRoomDto> getActiveScreeningRooms() {
+        return screeningRoomRepository.findAll().stream()
+                .filter(room -> "ACTIVE".equals(room.getStatus()) || "INACTIVE".equals(room.getStatus()))
+                .map(this::convertToBasicDto)
+                .collect(Collectors.toList());
+    }
+
     /**
      * Convert ScreeningRoom entity to DTO without triggering relationship loading
      * This method manually maps only the basic fields to avoid ModelMapper cascade

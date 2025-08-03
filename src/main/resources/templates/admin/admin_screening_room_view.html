@@ -1,78 +1,225 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết Phòng Chiếu</title>
+    <title>Chỉnh sửa Phòng Chiếu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .edit-room-container { display: flex; gap: 32px; margin-top: 40px; }
+        .seat-map-panel { flex: 1.5; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 32px; display: flex; flex-direction: column; align-items: center; }
+        .seat-map-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+        .seat-map { display: grid; gap: 8px; margin-bottom: 16px; }
+        .seat { width: 32px; height: 32px; border-radius: 6px; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: border 0.2s, background 0.2s; }
+        .seat-popular { border-color: #22c55e; background: #f0fdf4; }
+        .seat-standard { border-color: #ef4444; background: #fef2f2; }
+        .seat-vip { border-color: #8b5cf6; background: #faf5ff; }
+        .seat-label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+        .edit-form-panel { flex: 1; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 32px; }
+        .form-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+        .form-group { margin-bottom: 18px; }
+        .form-label { font-weight: 500; margin-bottom: 6px; display: block; }
+        .form-control, .form-select { border-radius: 6px; }
+        .error-message { color: #ef4444; font-size: 14px; margin-bottom: 8px; }
+        .seat-legend { display: flex; gap: 16px; margin-bottom: 16px; }
+        .seat-legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .seat-legend .seat { width: 20px; height: 20px; }
+        .seat-legend .seat { width: 20px; height: 20px; }
+        @media (max-width: 900px) {
+            .edit-room-container { flex-direction: column; }
+            .seat-map-panel, .edit-form-panel { width: 100%; }
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-    <a th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${screeningRoom.branch.id})}" class="btn btn-secondary mb-3">
-        <i class="fas fa-arrow-left"></i> Quay lại danh sách
-    </a>
-    <div class="card">
-        <div class="card-header">
-            <h3>Chi tiết Phòng Chiếu</h3>
-        </div>
-        <!-- Thông báo cảnh báo khi không thể chỉnh sửa -->
-        <div th:if="${cannotEdit}" class="alert alert-warning mt-3" role="alert">
-            <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Không thể chỉnh sửa phòng chiếu!</h5>
-            <p class="mb-0">Phòng chiếu này đang có suất chiếu đang hoạt động. Bạn chỉ có thể chỉnh sửa sau khi:</p>
-            <ul class="mb-0 mt-2">
-                <li>Hết thời gian chiếu của tất cả suất chiếu</li>
-                <li>Hoặc gỡ bỏ các suất chiếu đang hoạt động</li>
-            </ul>
-        </div>
+<div class="container">
 
-        <!-- Danh sách suất chiếu đang hoạt động -->
-        <div th:if="${activeSchedules != null and !activeSchedules.empty}" class="alert alert-info mt-3" role="alert">
-            <h6 class="alert-heading"><i class="fas fa-calendar-alt"></i> Danh sách suất chiếu đang hoạt động:</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-borderless mb-0">
-                    <thead>
-                    <tr>
-                        <th>Phim</th>
-                        <th>Ngày chiếu</th>
-                        <th>Giờ bắt đầu</th>
-                        <th>Giờ kết thúc</th>
-                        <th>Trạng thái</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="schedule : ${activeSchedules}">
-                        <td th:text="${schedule.movie != null ? schedule.movie.title : 'N/A'}"></td>
-                        <td th:text="${#dates.format(schedule.screeningDate, 'dd/MM/yyyy')}"></td>
-                        <td th:text="${schedule.startTime}"></td>
-                        <td th:text="${schedule.endTime}"></td>
-                        <td><span class="badge bg-success">Đang hoạt động</span></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+    <a th:href="@{/admin/screening-rooms/branch/{id}(id=${screeningRoom.branch.id})}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+    <h2 class="mt-3 mb-2">Quản lý phòng Chiếu</h2>
+
+    <!-- Thông báo cảnh báo khi không thể chỉnh sửa -->
+    <div th:if="${cannotEdit}" class="alert alert-warning mt-3" role="alert">
+        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Không thể chỉnh sửa phòng chiếu!</h5>
+        <p class="mb-0">Phòng chiếu này đang có suất chiếu đang hoạt động. Bạn chỉ có thể chỉnh sửa sau khi:</p>
+        <ul class="mb-0 mt-2">
+            <li>Hết thời gian chiếu của tất cả suất chiếu</li>
+            <li>Hoặc gỡ bỏ các suất chiếu đang hoạt động</li>
+        </ul>
+    </div>
+
+    <!-- Danh sách suất chiếu đang hoạt động -->
+    <div th:if="${activeSchedules != null and !activeSchedules.empty}" class="alert alert-info mt-3" role="alert">
+        <h6 class="alert-heading"><i class="fas fa-calendar-alt"></i> Danh sách suất chiếu đang hoạt động:</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-borderless mb-0">
+                <thead>
+                <tr>
+                    <th>Phim</th>
+                    <th>Ngày chiếu</th>
+                    <th>Giờ bắt đầu</th>
+                    <th>Giờ kết thúc</th>
+                    <th>Trạng thái</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="schedule : ${activeSchedules}">
+                    <td th:text="${schedule.movie != null ? schedule.movie.name : 'N/A'}"></td>
+                    <td th:text="${#dates.format(schedule.screeningDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${schedule.startTime}"></td>
+                    <td th:text="${schedule.endTime}"></td>
+                    <td th:text="${schedule.status == 'ACTIVE' ? 'Đang chiếu' : schedule.status == 'UPCOMING' ? 'Sắp chiếu' :schedule.status == 'ENDED' ? 'Đã kết thúc' : ''}"></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">ID</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.id}"></dd>
-                <dt class="col-sm-3">Tên phòng</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.name}"></dd>
-                <dt class="col-sm-3">Sức chứa</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.capacity}"></dd>
-                <dt class="col-sm-3">Loại phòng</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.type}"></dd>
-                <dt class="col-sm-3">Trạng thái</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.status}"></dd>
-                <dt class="col-sm-3">Số hàng</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.rows}"></dd>
-                <dt class="col-sm-3">Ghế/hàng</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.seatsPerRow}"></dd>
-                <dt class="col-sm-3">Mô tả</dt>
-                <dd class="col-sm-9" th:text="${screeningRoom.description}"></dd>
-            </dl>
+    </div>
+
+    <div class="edit-room-container">
+        <!-- Sơ đồ ghế động -->
+        <div class="seat-map-panel">
+            <div class="seat-map-title">Sơ đồ ghế</div>
+            <div class="seat-label">
+                <span id="seatMapInfo"></span>
+            </div>
+            <div class="seat-legend">
+                <div class="seat-legend-item"><div class="seat seat-popular"></div> Popular</div>
+                <div class="seat-legend-item"><div class="seat seat-standard"></div> Standard</div>
+                <div class="seat-legend-item"><div class="seat seat-vip"></div> VIP</div>
+            </div>
+            <div id="seatMap" class="seat-map"></div>
+        </div>
+        <!-- Form chỉnh sửa -->
+        <div class="edit-form-panel">
+            <div class="form-title">Chỉnh sửa thông tin phòng chiếu</div>
+            <form th:action="@{/admin/screening-rooms/edit/{id}(id=${screeningRoom.id})}" method="post" th:object="${screeningRoom}" onsubmit="return validateRowsAndSeats();">
+                <input type="hidden" th:field="*{branch.id}" />
+                <div class="form-group">
+                    <label class="form-label">Tên phòng chiếu</label>
+                    <input type="text" class="form-control" th:field="*{name}" required th:readonly="${readonly}" th:disabled="${readonly}" >
+                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Chọn hàng ghế:</label>
+                    <input type="number" class="form-control" id="rows" th:field="*{rows}" min="2" required th:readonly="${readonly}" th:disabled="${readonly}" >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Số ghế mỗi hàng:</label>
+                    <input type="number" class="form-control" id="seatsPerRow" th:field="*{seatsPerRow}" min="2" required th:readonly="${readonly}" th:disabled="${readonly}" >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Số lượng ghế</label>
+                    <input type="number" class="form-control" id="capacity" th:field="*{capacity}" readonly th:readonly="${readonly}" th:disabled="${readonly}" >
+                </div>
+                <div id="rowsSeatsError" class="error-message"></div>
+                <div class="form-group">
+                    <div class="form-label">*Mặc định kiểu: 25% ghế đầu là Popular, 50% ghế giữa là Standard, 25% ghế cuối là VIP</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Type:</label>
+                    <div>
+                        <label><input type="radio" th:field="*{type}" value="2D" required th:disabled="${readonly}"> 2D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="3D" th:disabled="${readonly}"> 3D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="4D" th:disabled="${readonly}"> 4D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="5D" th:disabled="${readonly}"> 5D</label>
+                        <label class="ms-3"><input type="radio" th:field="*{type}" value="IMAX" th:disabled="${readonly}"> IMAX</label>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Trạng thái:</label>
+                    <select class="form-select" th:field="*{status}" required th:disabled="${readonly}" >
+                        <option value="ACTIVE">Hoạt động</option>
+                        <option value="INACTIVE">Không hoạt động</option>
+                        <option value="MAINTENANCE">Bảo trì</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-control" th:field="*{description}" rows="3" th:readonly="${readonly}" th:disabled="${readonly}" ></textarea>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a th:href="@{/admin/screening-rooms/branch/{id}(id=${screeningRoom.branch.id})}" class="btn btn-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary" th:if="${readonly == null or !readonly}">Lưu</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+<script src="https://kit.fontawesome.com/4e7f7e6e8b.js" crossorigin="anonymous"></script>
+<script>
+    // Validate số hàng ghế và số ghế mỗi hàng
+    function validateRowsAndSeats() {
+        const rows = parseInt(document.getElementById('rows').value);
+        const seats = parseInt(document.getElementById('seatsPerRow').value);
+        let error = '';
+        if (rows !== seats) {
+            error = 'Số hàng phải bằng số cột (hàng bằng cột)';
+        }
+        document.getElementById('rowsSeatsError').innerText = error;
+        renderSeatMap();
+        return error === '';
+    }
+    document.getElementById('rows').addEventListener('input', validateRowsAndSeats);
+    document.getElementById('seatsPerRow').addEventListener('input', validateRowsAndSeats);
+
+    // Render sơ đồ ghế động
+    function renderSeatMap() {
+        const rows = parseInt(document.getElementById('rows').value);
+        const seats = parseInt(document.getElementById('seatsPerRow').value);
+        const seatMap = document.getElementById('seatMap');
+        seatMap.innerHTML = '';
+        if (isNaN(rows) || isNaN(seats) || rows < 2 || seats < 2) return;
+        seatMap.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        seatMap.style.gridTemplateColumns = `repeat(${seats}, 1fr)`;
+
+        // Quy tắc: popular ở đầu, standard ở giữa, vip ở cuối
+        const popularRows = Math.floor(rows * 0.25);
+        const vipRows = Math.floor(rows * 0.25);
+        const standardStart = popularRows;
+        const standardEnd = rows - vipRows;
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < seats; c++) {
+                let seatType = '';
+
+                if (r < popularRows) {
+                    seatType = 'seat-popular'; // Popular
+                } else if (r >= standardStart && r < standardEnd) {
+                    seatType = 'seat-standard'; // Standard
+                } else {
+                    seatType = 'seat-vip'; // VIP
+                }
+
+                const seatDiv = document.createElement('div');
+                seatDiv.className = 'seat ' + seatType;
+
+                seatMap.appendChild(seatDiv);
+            }
+        }
+        document.getElementById('seatMapInfo').innerText = `Chọn hàng ghế: ${rows}, Số ghế mỗi hàng: ${seats}`;
+    }
+
+    function updateCapacity() {
+        const rows = parseInt(document.getElementById('rows').value);
+        const seats = parseInt(document.getElementById('seatsPerRow').value);
+        const capacityInput = document.getElementById('capacity');
+        if (!isNaN(rows) && !isNaN(seats) && rows > 0 && seats > 0) {
+            capacityInput.value = rows * seats;
+        } else {
+            capacityInput.value = '';
+        }
+    }
+    document.getElementById('rows').addEventListener('input', updateCapacity);
+    document.getElementById('seatsPerRow').addEventListener('input', updateCapacity);
+    window.onload = function() {
+        validateRowsAndSeats();
+        updateCapacity();
+    };
+</script>
 </body>
 </html> 

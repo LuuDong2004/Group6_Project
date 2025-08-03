@@ -57,10 +57,10 @@ public interface AdminScreeningRoomRepository extends JpaRepository<ScreeningRoo
      */
     List<ScreeningRoom> findByNameContainingIgnoreCase(String name);
 
-    // Kiểm tra xem phòng chiếu có suất chiếu đang hoạt động không
+    // Kiểm tra xem phòng chiếu có suất chiếu đang hoạt động hoặc sắp chiếu không
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END FROM ScreeningSchedule ss " +
            "WHERE ss.screening_room_id = :roomId " +
-           "AND ss.status = 'ACTIVE' " +
+           "AND (ss.status = 'ACTIVE' OR ss.status = 'UPCOMING') " +
            "AND (ss.screening_date > :currentDate " +
            "OR (ss.screening_date = :currentDate AND CAST(ss.end_time AS TIME) > CAST(:currentTime AS TIME)))", 
            nativeQuery = true)
@@ -68,10 +68,10 @@ public interface AdminScreeningRoomRepository extends JpaRepository<ScreeningRoo
                               @Param("currentDate") Date currentDate, 
                               @Param("currentTime") java.sql.Time currentTime);
     
-    // Lấy danh sách suất chiếu đang hoạt động của phòng
+    // Lấy danh sách suất chiếu đang hoạt động hoặc sắp chiếu của phòng
     @Query(value = "SELECT * FROM ScreeningSchedule ss " +
            "WHERE ss.screening_room_id = :roomId " +
-           "AND ss.status = 'ACTIVE' " +
+           "AND (ss.status = 'ACTIVE' OR ss.status = 'UPCOMING') " +
            "AND (ss.screening_date > :currentDate " +
            "OR (ss.screening_date = :currentDate AND CAST(ss.end_time AS TIME) > CAST(:currentTime AS TIME))) " +
            "ORDER BY ss.screening_date ASC, ss.start_time ASC", 

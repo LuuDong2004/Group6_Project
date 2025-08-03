@@ -927,8 +927,15 @@
 
       function showScheduleDetails(scheduleId) {
         // Hiển thị chi tiết lịch chiếu
-        alert("Xem chi tiết lịch chiếu ID: " + scheduleId);
-        // Có thể mở modal hoặc chuyển đến trang chi tiết
+        const action = confirm("Chọn hành động:\nOK - Xem chi tiết lịch chiếu\nCancel - Xem danh sách đặt vé cho suất chiếu này");
+        if (action) {
+          // Xem chi tiết lịch chiếu
+          alert("Xem chi tiết lịch chiếu ID: " + scheduleId);
+          // Có thể mở modal hoặc chuyển đến trang chi tiết
+        } else {
+          // Xem danh sách đặt vé cho suất chiếu này
+          window.location.href = `/admin/bookings/schedule/${scheduleId}`;
+        }
       }
     </script>
   </body>

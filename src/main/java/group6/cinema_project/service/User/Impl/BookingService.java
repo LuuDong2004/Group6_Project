@@ -1,31 +1,36 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.BookingDto;
-import group6.cinema_project.dto.BookingRequest;
-import group6.cinema_project.entity.Booking;
-import group6.cinema_project.entity.SeatReservation;
-import group6.cinema_project.entity.User;
-import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.BookingFood;
-import group6.cinema_project.entity.Food;
-import group6.cinema_project.repository.User.*;
-
-import group6.cinema_project.service.User.IBookingService;
-import group6.cinema_project.service.User.MailService;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Map;
-import group6.cinema_project.dto.BookedFoodDto;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import group6.cinema_project.dto.BookedFoodDto;
+import group6.cinema_project.dto.BookingDto;
+import group6.cinema_project.dto.BookingRequest;
+import group6.cinema_project.entity.Booking;
+import group6.cinema_project.entity.BookingFood;
+import group6.cinema_project.entity.Food;
+import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.SeatReservation;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.User.BookingFoodRepository;
+import group6.cinema_project.repository.User.BookingRepository;
+import group6.cinema_project.repository.User.FoodRepository;
+import group6.cinema_project.repository.User.ScheduleRepository;
+import group6.cinema_project.repository.User.SeatReservationRepository;
+import group6.cinema_project.repository.User.UserRepository;
+import group6.cinema_project.service.User.IBookingService;
+import group6.cinema_project.service.User.MailService;
 
 
 
@@ -359,5 +364,57 @@ public class BookingService implements IBookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow();
         booking.setAmount(newAmount);
         bookingRepository.save(booking);
+    }
+
+    // Admin methods
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDto> getAllBookings() {
+        return bookingRepository.findAllOrderByDateDesc().stream()
+                .map(this::convertToBookingDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDto> getBookingsByScheduleId(Integer scheduleId) {
+        return bookingRepository.findByScheduleIdOrderByDateDesc(scheduleId).stream()
+                .map(this::convertToBookingDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert Booking entity to BookingDto with all related information
+     */
+    private BookingDto convertToBookingDto(Booking booking) {
+        BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+        
+        // Map schedule với mapToDto để set các trường chuỗi thời gian
+        if (booking.getSchedule() != null) {
+            bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
+        }
+        
+        // Map danh sách ghế
+        List<SeatReservation> reservations = seatReservationRepository.findByBookingId(booking.getId());
+        List<String> seatNames = reservations.stream()
+            .map(r -> r.getSeat().getName())
+            .collect(Collectors.toList());
+        bookingDto.setSeatNames(seatNames);
+        
+        // Map danh sách food đã đặt
+        List<BookedFoodDto> foodList = bookingFoodRepository.findByBookingId(booking.getId())
+            .stream()
+            .map(bf -> {
+                BookedFoodDto dto = new BookedFoodDto();
+                dto.setName(bf.getFood().getName());
+                dto.setImage(bf.getFood().getImage());
+                dto.setQuantity(bf.getQuantity());
+                dto.setPrice(bf.getPrice());
+                return dto;
+            })
+            .collect(Collectors.toList());
+        bookingDto.setFoodList(foodList);
+        
+        return bookingDto;
     }
 }

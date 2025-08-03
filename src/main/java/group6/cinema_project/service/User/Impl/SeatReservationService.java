@@ -1,28 +1,29 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.SeatReservationDto;
-import group6.cinema_project.entity.Seat;
-import group6.cinema_project.entity.SeatReservation;
-import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.Ticket;
-import group6.cinema_project.entity.Booking;
-import group6.cinema_project.entity.BookingFood;
-import group6.cinema_project.repository.User.ScheduleRepository;
-import group6.cinema_project.repository.User.SeatRepository;
-import group6.cinema_project.repository.User.SeatReservationRepository;
-import group6.cinema_project.repository.User.TicketRepository;
-import group6.cinema_project.repository.User.BookingRepository;
-import group6.cinema_project.repository.User.BookingFoodRepository;
-import group6.cinema_project.service.User.ISeatReservationService;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.List;
+import group6.cinema_project.dto.SeatReservationDto;
+import group6.cinema_project.entity.Booking;
+import group6.cinema_project.entity.BookingFood;
+import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.Seat;
+import group6.cinema_project.entity.SeatReservation;
+import group6.cinema_project.entity.Ticket;
+import group6.cinema_project.repository.User.BookingFoodRepository;
+import group6.cinema_project.repository.User.BookingRepository;
+import group6.cinema_project.repository.User.ScheduleRepository;
+import group6.cinema_project.repository.User.SeatRepository;
+import group6.cinema_project.repository.User.SeatReservationRepository;
+import group6.cinema_project.repository.User.TicketRepository;
+import group6.cinema_project.service.User.ISeatReservationService;
 
 @Service
 @Transactional
@@ -119,18 +120,18 @@ public class SeatReservationService implements ISeatReservationService {
                     dto.setSeatId(seat.getId());
                     dto.setSeatName(seat.getName());
                     dto.setRow(seat.getRow());
-                    // Set giá động đúng 3 loại
+                    // Set giá động đúng 3 loại mới: Popular, Standard, VIP
                     double price = 0;
                     String type = seat.getType() != null ? seat.getType().trim().toUpperCase() : "";
                     if (dayOfWeek >= 2 && dayOfWeek <= 6) { // T2-T6
-                        if (type.equals("STANDARD")) price = 50_000;
-                        else if (type.equals("VIP")) price = 70_000;
-                        else if (type.equals("VIP2")) price = 80_000;
+                        if (type.equals("POPULAR")) price = 50_000; // Popular (trước đây là Standard)
+                        else if (type.equals("STANDARD")) price = 70_000; // Standard (trước đây là VIP)
+                        else if (type.equals("VIP")) price = 80_000; // VIP (trước đây là Couple)
                         else price = 50_000; // fallback
                     } else { // T7, CN
-                        if (type.equals("STANDARD")) price = 80_000;
-                        else if (type.equals("VIP")) price = 100_000;
-                        else if (type.equals("VIP2")) price = 120_000;
+                        if (type.equals("POPULAR")) price = 80_000; // Popular (trước đây là Standard)
+                        else if (type.equals("STANDARD")) price = 100_000; // Standard (trước đây là VIP)
+                        else if (type.equals("VIP")) price = 120_000; // VIP (trước đây là Couple)
                         else price = 80_000; // fallback
                     }
                     dto.setPrice(price);

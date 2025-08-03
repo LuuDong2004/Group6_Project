@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 
 import group6.cinema_project.dto.CinemaChainDto;
 import group6.cinema_project.service.Admin.IAdminCinemaChainService;

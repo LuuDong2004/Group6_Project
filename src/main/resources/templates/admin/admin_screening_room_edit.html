@@ -12,9 +12,9 @@
         .seat-map-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
         .seat-map { display: grid; gap: 8px; margin-bottom: 16px; }
         .seat { width: 32px; height: 32px; border-radius: 6px; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: border 0.2s, background 0.2s; }
-        .seat-standard { border-color: #22c55e; background: #f0fdf4; }
-        .seat-vip { border-color: #ef4444; background: #fef2f2; }
-        .seat-couple { border-color: #a21caf; background: #f3e8ff; }
+        .seat-popular { border-color: #22c55e; background: #f0fdf4; }
+        .seat-standard { border-color: #ef4444; background: #fef2f2; }
+        .seat-vip { border-color: #8b5cf6; background: #faf5ff; }
         .seat-label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
         .edit-form-panel { flex: 1; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 32px; }
         .form-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
@@ -24,6 +24,7 @@
         .error-message { color: #ef4444; font-size: 14px; margin-bottom: 8px; }
         .seat-legend { display: flex; gap: 16px; margin-bottom: 16px; }
         .seat-legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .seat-legend .seat { width: 20px; height: 20px; }
         .seat-legend .seat { width: 20px; height: 20px; }
         @media (max-width: 900px) {
             .edit-room-container { flex-direction: column; }
@@ -65,11 +66,11 @@
                 </thead>
                 <tbody>
                     <tr th:each="schedule : ${activeSchedules}">
-                        <td th:text="${schedule.movie != null ? schedule.movie.title : 'N/A'}"></td>
+                        <td th:text="${schedule.movie != null ? schedule.movie.name : 'N/A'}"></td>
                         <td th:text="${#dates.format(schedule.screeningDate, 'dd/MM/yyyy')}"></td>
                         <td th:text="${schedule.startTime}"></td>
                         <td th:text="${schedule.endTime}"></td>
-                        <td><span class="badge bg-success"></span>${schedule.status}</td>
+                        <td th:text="${schedule.status == 'ACTIVE' ? 'Hoạt động' : schedule.status == 'ENDED' ? 'Không hoạt động' :schedule.status == 'MAINTENANCE' ? 'Bảo trì' : ''}"></td>
                     </tr>
                 </tbody>
             </table>
@@ -84,9 +85,9 @@
                 <span id="seatMapInfo"></span>
             </div>
             <div class="seat-legend">
+                <div class="seat-legend-item"><div class="seat seat-popular"></div> Popular</div>
                 <div class="seat-legend-item"><div class="seat seat-standard"></div> Standard</div>
                 <div class="seat-legend-item"><div class="seat seat-vip"></div> VIP</div>
-                <div class="seat-legend-item"><div class="seat seat-couple"></div> Couple</div>
             </div>
             <div id="seatMap" class="seat-map"></div>
         </div>
@@ -114,7 +115,7 @@
                 </div>
                 <div id="rowsSeatsError" class="error-message"></div>
                 <div class="form-group">
-                    <div class="form-label">*Mặc định kiểu: 25% ghế đầu là standard, 50% ghế sau là ghế vip, còn lại là couple</div>
+                    <div class="form-label">*Mặc định kiểu: 25% ghế đầu là Popular, 50% ghế giữa là Standard, 25% ghế cuối là VIP</div>
                 </div>
 
                 <div class="form-group">
@@ -153,15 +154,11 @@
 <script>
 // Validate số hàng ghế và số ghế mỗi hàng
 function validateRowsAndSeats() {
-    const rows = parseInt(document.getElementById('rows').value, 10);
-    const seats = parseInt(document.getElementById('seatsPerRow').value, 10);
+    const rows = parseInt(document.getElementById('rows').value);
+    const seats = parseInt(document.getElementById('seatsPerRow').value);
     let error = '';
     if (rows !== seats) {
-        error = 'Chỉ cho phép phòng vuông (AxA)';
-    } else if (rows % 2 !== 0) {
-        error = 'Số hàng và số ghế mỗi hàng phải là số chẵn';
-    } else if ((rows / 2) % 2 !== 0) {
-        error = 'Số hàng (và số ghế mỗi hàng) chia 2 phải là số chẵn (để chia ghế couple)';
+        error = 'Số hàng phải bằng số cột (hàng bằng cột)';
     }
     document.getElementById('rowsSeatsError').innerText = error;
     renderSeatMap();
@@ -172,28 +169,35 @@ document.getElementById('seatsPerRow').addEventListener('input', validateRowsAnd
 
 // Render sơ đồ ghế động
 function renderSeatMap() {
-    const rows = parseInt(document.getElementById('rows').value, 10);
-    const seats = parseInt(document.getElementById('seatsPerRow').value, 10);
+    const rows = parseInt(document.getElementById('rows').value);
+    const seats = parseInt(document.getElementById('seatsPerRow').value);
     const seatMap = document.getElementById('seatMap');
     seatMap.innerHTML = '';
     if (isNaN(rows) || isNaN(seats) || rows < 2 || seats < 2) return;
     seatMap.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     seatMap.style.gridTemplateColumns = `repeat(${seats}, 1fr)`;
 
-    // Quy tắc mới: standard ở đầu, vip ở giữa, couple ở cuối
-    const standardRows = Math.floor(rows * 0.25);
-    const coupleRows = Math.floor(rows * 0.25);
-    const vipStart = standardRows;
-    const vipEnd = rows - coupleRows;
+    // Quy tắc: popular ở đầu, standard ở giữa, vip ở cuối
+    const popularRows = Math.floor(rows * 0.25);
+    const vipRows = Math.floor(rows * 0.25);
+    const standardStart = popularRows;
+    const standardEnd = rows - vipRows;
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < seats; c++) {
             let seatType = '';
-            if (r < standardRows) seatType = 'seat-standard';
-            else if (r >= vipStart && r < vipEnd) seatType = 'seat-vip';
-            else seatType = 'seat-couple';
+            
+            if (r < popularRows) {
+                seatType = 'seat-popular'; // Popular
+            } else if (r >= standardStart && r < standardEnd) {
+                seatType = 'seat-standard'; // Standard
+            } else {
+                seatType = 'seat-vip'; // VIP
+            }
+            
             const seatDiv = document.createElement('div');
             seatDiv.className = 'seat ' + seatType;
+            
             seatMap.appendChild(seatDiv);
         }
     }
@@ -201,8 +205,8 @@ function renderSeatMap() {
 }
 
 function updateCapacity() {
-    const rows = parseInt(document.getElementById('rows').value, 10);
-    const seats = parseInt(document.getElementById('seatsPerRow').value, 10);
+    const rows = parseInt(document.getElementById('rows').value);
+    const seats = parseInt(document.getElementById('seatsPerRow').value);
     const capacityInput = document.getElementById('capacity');
     if (!isNaN(rows) && !isNaN(seats) && rows > 0 && seats > 0) {
         capacityInput.value = rows * seats;

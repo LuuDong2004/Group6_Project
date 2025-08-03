@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 
 import java.io.IOException;
 import static java.math.BigDecimal.ZERO;

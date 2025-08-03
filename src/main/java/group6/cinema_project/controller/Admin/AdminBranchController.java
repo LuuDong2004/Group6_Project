@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;

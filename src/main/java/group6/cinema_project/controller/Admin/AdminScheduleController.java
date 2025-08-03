@@ -112,7 +112,7 @@ public class AdminScheduleController {
         }
 
         try {
-            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+            model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
         } catch (Exception e) {
             model.addAttribute("screeningRooms", java.util.Collections.emptyList());
             if (!model.containsAttribute("error")) {
@@ -358,7 +358,7 @@ public class AdminScheduleController {
 
             // Load dropdown data
             model.addAttribute("movies", movieService.getAllMovie());
-            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+            model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
             log.info("Successfully loaded add schedule form");
@@ -383,7 +383,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception e) {
                 log.error("Error reloading dropdown data", e);
@@ -412,7 +412,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -426,7 +426,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -452,7 +452,7 @@ public class AdminScheduleController {
 
             model.addAttribute("schedule", scheduleOpt.get());
             model.addAttribute("movies", movieService.getAllMovie());
-            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+            model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
             log.info("Successfully loaded edit schedule form for ID: {}", id);
@@ -484,7 +484,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception e) {
                 log.error("Error reloading dropdown data", e);
@@ -517,7 +517,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -531,7 +531,7 @@ public class AdminScheduleController {
             // Reload dropdown data for form
             try {
                 model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);

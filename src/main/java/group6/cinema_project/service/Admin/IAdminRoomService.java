@@ -1,10 +1,10 @@
 package group6.cinema_project.service.Admin;
 
-import group6.cinema_project.dto.ScreeningRoomDto;
-import group6.cinema_project.entity.ScreeningRoom;
-
 import java.util.List;
 import java.util.Optional;
+
+import group6.cinema_project.dto.ScreeningRoomDto;
+import group6.cinema_project.entity.ScreeningRoom;
 
 public interface IAdminRoomService {
     Optional<ScreeningRoomDto> getScreeningRoomById(Integer id);
@@ -20,4 +20,6 @@ public interface IAdminRoomService {
     List<ScreeningRoomDto> getScreeningRoomsByBranch(Integer branchId);
 
     List<ScreeningRoomDto> getFilteredScreeningRooms(String searchTerm);
+    
+    List<ScreeningRoomDto> getActiveScreeningRooms();
 }

@@ -1,4 +1,4 @@
-package group6.cinema_project.controller.Admin2;
+package group6.cinema_project.controller.Admin;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,13 +110,7 @@ public class AdminScreeningRoomController {
         int rows = screeningRoomDto.getRows();
         int seats = screeningRoomDto.getSeatsPerRow();
         if (rows != seats) {
-            redirectAttributes.addFlashAttribute("error", "Chỉ cho phép phòng vuông (AxA)");
-            return "redirect:/admin/screening-rooms/branch/" + screeningRoomDto.getBranch().getId();
-        } else if (rows % 2 != 0) {
-            redirectAttributes.addFlashAttribute("error", "Số hàng và số ghế mỗi hàng phải là số chẵn");
-            return "redirect:/admin/screening-rooms/branch/" + screeningRoomDto.getBranch().getId();
-        } else if ((rows / 2) % 2 != 0) {
-            redirectAttributes.addFlashAttribute("error", "Số hàng (và số ghế mỗi hàng) chia 2 phải là số chẵn (để chia ghế couple)");
+            redirectAttributes.addFlashAttribute("error", "Số hàng phải bằng số cột (hàng bằng cột)");
             return "redirect:/admin/screening-rooms/branch/" + screeningRoomDto.getBranch().getId();
         }
         try {
@@ -147,6 +141,7 @@ public class AdminScreeningRoomController {
         }
 
         model.addAttribute("screeningRoom", screeningRoom);
+        model.addAttribute("cannotEdit", false);
         model.addAttribute("canEdit", true);
         return "admin/admin_screening_room_edit";
     }
@@ -166,13 +161,7 @@ public class AdminScreeningRoomController {
         int rows = screeningRoomDto.getRows();
         int seats = screeningRoomDto.getSeatsPerRow();
         if (rows != seats) {
-            redirectAttributes.addFlashAttribute("error", "Chỉ cho phép phòng vuông (AxA)");
-            return "redirect:/admin/screening-rooms/edit/" + id;
-        } else if (rows % 2 != 0) {
-            redirectAttributes.addFlashAttribute("error", "Số hàng và số ghế mỗi hàng phải là số chẵn");
-            return "redirect:/admin/screening-rooms/edit/" + id;
-        } else if ((rows / 2) % 2 != 0) {
-            redirectAttributes.addFlashAttribute("error", "Số hàng (và số ghế mỗi hàng) chia 2 phải là số chẵn (để chia ghế couple)");
+            redirectAttributes.addFlashAttribute("error", "Số hàng phải bằng số cột (hàng bằng cột)");
             return "redirect:/admin/screening-rooms/edit/" + id;
         }
         try {
@@ -214,8 +203,19 @@ public class AdminScreeningRoomController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy phòng chiếu!");
             return "redirect:/admin/branches";
         }
+        
+        // Kiểm tra xem phòng có thể chỉnh sửa được không
+        boolean canEdit = adminScreeningRoomService.canEditRoom(id);
+        if (!canEdit) {
+            List<ScreeningSchedule> activeSchedules = adminScreeningRoomService.getActiveSchedules(id);
+            model.addAttribute("activeSchedules", activeSchedules);
+            model.addAttribute("readonly", true);
+        } else {
+            model.addAttribute("readonly", false);
+        }
+        
         model.addAttribute("screeningRoom", screeningRoom);
-        model.addAttribute("readonly", true);
-        return "admin/admin_screening_room_edit";
+        // Luôn trả về template view, không phải edit
+        return "admin/admin_screening_room_view";
     }
     }

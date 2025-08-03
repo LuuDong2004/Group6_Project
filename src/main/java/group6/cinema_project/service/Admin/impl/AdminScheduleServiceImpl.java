@@ -1,34 +1,35 @@
 package group6.cinema_project.service.Admin.impl;
 
-import group6.cinema_project.repository.Admin.AdminMovieRepository;
-import group6.cinema_project.repository.Admin.AdminScheduleRepository;
-import group6.cinema_project.repository.Admin.AdminBranchRepository;
-import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
-import group6.cinema_project.service.Admin.IAdminScheduleService;
-import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.ScheduleGroupedByDateDto;
-import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
-import group6.cinema_project.dto.ScheduleTimeSlotDto;
-import group6.cinema_project.dto.ScreeningScheduleDto;
-import group6.cinema_project.entity.Movie;
-import group6.cinema_project.entity.ScreeningRoom;
-import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.Branch;
-import group6.cinema_project.exception.ScheduleConflictException;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.ScheduleGroupedByDateDto;
+import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
+import group6.cinema_project.dto.ScheduleTimeSlotDto;
+import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.entity.Branch;
+import group6.cinema_project.entity.Movie;
+import group6.cinema_project.entity.ScreeningRoom;
+import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.exception.ScheduleConflictException;
+import group6.cinema_project.repository.Admin.AdminBranchRepository;
+import group6.cinema_project.repository.Admin.AdminMovieRepository;
+import group6.cinema_project.repository.Admin.AdminScheduleRepository;
+import group6.cinema_project.repository.Admin.AdminScreeningRoomRepository;
+import group6.cinema_project.service.Admin.IAdminScheduleService;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -70,11 +71,23 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
         }
-        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho
-        // xóa
+        
+        // Lấy thông tin phòng trước khi xóa
+        ScreeningSchedule schedule = movieScheduleRepository.findById(id).orElse(null);
+        Integer roomId = null;
+        if (schedule != null) {
+            roomId = schedule.getScreeningRoom().getId();
+        }
+        
+        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho xóa
         validateScheduleIsNotCurrentlyShowing(id);
 
         movieScheduleRepository.deleteById(id);
+        
+        // Cập nhật trạng thái phòng sau khi xóa lịch chiếu
+        if (roomId != null) {
+            updateScreeningRoomStatus(roomId);
+        }
     }
 
     @Override
@@ -762,16 +775,34 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     }
     
     /**
-     * Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
+     * Tự động cập nhật trạng thái phòng chiếu dựa trên lịch chiếu
      * @param roomId ID của phòng chiếu
      */
     private void updateScreeningRoomStatus(int roomId) {
         try {
             ScreeningRoom room = screeningRoomRepository.findById(roomId).orElse(null);
-            if (room != null && !"ACTIVE".equals(room.getStatus())) {
-                room.setStatus("ACTIVE");
-                screeningRoomRepository.save(room);
-                System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành ACTIVE");
+            if (room == null) return;
+            
+            // Kiểm tra xem phòng có lịch chiếu ACTIVE hoặc UPCOMING không
+            Date currentDate = new Date();
+            java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
+            
+            Integer hasActiveSchedules = screeningRoomRepository.hasActiveSchedules(roomId, currentDate, currentTime);
+            
+            if (hasActiveSchedules != null && hasActiveSchedules == 1) {
+                // Có lịch chiếu → Chuyển thành ACTIVE
+                if (!"ACTIVE".equals(room.getStatus())) {
+                    room.setStatus("ACTIVE");
+                    screeningRoomRepository.save(room);
+                    System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành ACTIVE");
+                }
+            } else {
+                // Không có lịch chiếu → Chuyển thành INACTIVE
+                if (!"INACTIVE".equals(room.getStatus())) {
+                    room.setStatus("INACTIVE");
+                    screeningRoomRepository.save(room);
+                    System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành INACTIVE");
+                }
             }
         } catch (Exception e) {
             System.err.println("Lỗi khi cập nhật trạng thái phòng chiếu: " + e.getMessage());
