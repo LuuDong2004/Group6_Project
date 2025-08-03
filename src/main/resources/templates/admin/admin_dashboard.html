@@ -193,6 +193,11 @@
       color: white;
     }
 
+    .stats-card-info {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+    }
+
     .dashboard-action-btn {
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
@@ -362,7 +367,7 @@
             <div class="stats-card stats-card-primary">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h3 class="mb-1">25</h3>
+                  <h3 class="mb-1" th:text="${totalMovies}">25</h3>
                   <p class="mb-0 opacity-75">Phim đang chiếu</p>
                 </div>
                 <i class="fas fa-film fa-2x opacity-75"></i>
@@ -373,8 +378,8 @@
             <div class="stats-card stats-card-success">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h3 class="mb-1">156</h3>
-                  <p class="mb-0 opacity-75">Suất chiếu hôm nay</p>
+                  <h3 class="mb-1" th:text="${todaySchedules}">156</h3>
+                  <p class="mb-0 opacity-75">Tổng suất chiếu</p>
                 </div>
                 <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
               </div>
@@ -384,7 +389,7 @@
             <div class="stats-card stats-card-warning">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h3 class="mb-1">1,234</h3>
+                  <h3 class="mb-1" th:text="${totalBookings}">1,234</h3>
                   <p class="mb-0 opacity-75">Vé đã bán</p>
                 </div>
                 <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
@@ -395,10 +400,36 @@
             <div class="stats-card stats-card-danger">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h3 class="mb-1">$45,678</h3>
+                  <h3 class="mb-1" th:text="${todayRevenue} + ' VND'">$45,678</h3>
                   <p class="mb-0 opacity-75">Doanh thu hôm nay</p>
                 </div>
                 <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voucher Statistics -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="stats-card stats-card-info">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="mb-1" th:text="${totalVouchers}">0</h3>
+                  <p class="mb-0 opacity-75">Tổng số Voucher</p>
+                </div>
+                <i class="fas fa-tags fa-2x opacity-75"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="stats-card stats-card-success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="mb-1" th:text="${activeVouchers}">0</h3>
+                  <p class="mb-0 opacity-75">Voucher đang hoạt động</p>
+                </div>
+                <i class="fas fa-check-circle fa-2x opacity-75"></i>
               </div>
             </div>
           </div>
@@ -416,6 +447,14 @@
           <a href="/admin/foods/list" class="dashboard-action-btn">
             <i class="fas fa-hamburger"></i>
             <span>Quản lý Combo Food</span>
+          </a>
+          <a href="/admin/vouchers" class="dashboard-action-btn">
+            <i class="fas fa-tags"></i>
+            <span>Quản lý Voucher</span>
+          </a>
+          <a href="/admin/vouchers/add" class="dashboard-action-btn">
+            <i class="fas fa-plus-circle"></i>
+            <span>Thêm Voucher</span>
           </a>
           <a href="/admin/schedules/list" class="dashboard-action-btn">
             <i class="fas fa-calendar-alt"></i>
