@@ -1,0 +1,414 @@
+/* movie_detail.css */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--theme-bg) !important;
+    overflow-y: auto;
+}
+.modal-content {
+    background-color: var(--theme-bg) !important;
+    color: #fff !important;
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 50% !important;
+    max-width: 700px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.close {
+    position: absolute;
+    top: 18px;
+    right: 28px;
+    color: #fff;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+.close:hover {
+    color: #e74c3c;
+}
+.movie-details {
+    display: flex;
+    gap: 20px;
+}
+.movie-poster {
+    flex: 0 0 300px;
+}
+.movie-poster img {
+    width: 100%;
+    border-radius: 8px;
+}
+.movie-info {
+    flex: 1;
+}
+.movie-info h2 {
+    margin-top: 0;
+    color: #333;
+}
+.movie-meta {
+    margin: 20px 0;
+}
+.movie-meta p {
+    margin: 8px 0;
+    color: #555;
+    font-size: 15px;
+}
+.movie-meta strong {
+    color: #333;
+    font-weight: 600;
+}
+.movie-description {
+    margin: 15px 0;
+    line-height: 1.6;
+}
+.cast-crew {
+    margin-top: 20px;
+}
+.cast-crew h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+.cast-list, .crew-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.cast-item, .crew-item {
+    background: #f5f5f5;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+.movie-modal-content {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+.movie-modal-poster {
+    flex: 0 0 300px;
+}
+.movie-modal-poster img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: var(--theme-bg) !important;
+}
+.movie-modal-info {
+    flex: 1;
+}
+.movie-title {
+    margin: 0 0 20px 0;
+    color: var(--theme-bg) !important;
+    font-size: 28px;
+    font-weight: 600;
+}
+#bookTicketBtn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+#bookTicketBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.trailer-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+.trailer-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+.screenshots-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+.screenshot-item {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+.screenshot-item:hover {
+    transform: scale(1.05);
+}
+.screenshot-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.summary-text {
+    line-height: 1.6;
+    color: #444;
+    font-size: 15px;
+    margin-top: 10px;
+}
+.comments-container {
+    margin-top: 15px;
+}
+.comment-item {
+    background: #222;
+    color: #eee;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.comment-item .rating {
+    color: #b2ffb2;
+    font-size: 0.98em;
+}
+.no-comments {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+/* Responsive styles */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+    .movie-modal-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .movie-modal-poster {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    .movie-title {
+        font-size: 24px;
+        text-align: center;
+    }
+    .movie-meta {
+        text-align: center;
+    }
+    #bookTicketBtn {
+        width: 100%;
+    }
+    .screenshots-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+/* ==== Movie Detail Modal Dark Theme ==== */
+.movie-detail-dark {
+  background: #181a17;
+  color: #eee;
+  border-radius: 10px;
+  padding: 32px 32px 24px 32px;
+  max-width: 900px;
+}
+.movie-detail-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 18px;
+  color: var(--theme-title) !important;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+}
+.movie-detail-main {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.movie-detail-poster {
+  flex: 0 0 240px;
+  max-width: 240px;
+}
+.movie-detail-poster img {
+  width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  display: block;
+}
+.movie-detail-info {
+  flex: 1;
+  min-width: 220px;
+}
+.movie-detail-info h1 {
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.movie-detail-info p {
+  margin: 8px 0;
+  font-size: 1.08rem;
+}
+.movie-detail-info b {
+  color: #fff;
+  font-weight: 600;
+}
+#bookTicketBtn {
+  display: block;
+  margin: 24px 0 0 0;
+}
+#bookTicketBtn:hover {
+  background: #2e8b36;
+}
+.movie-trailer-section {
+  margin-bottom: 32px;
+}
+.movie-trailer-section h4 {
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #222;
+}
+.trailer-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+}
+.movie-summary, .movie-comments {
+  margin-top: 24px;
+}
+#movieComments {
+  color: #eee;
+}
+@media (max-width: 700px) {
+  .movie-detail-main {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .movie-detail-poster {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  .movie-detail-info {
+    min-width: 0;
+  }
+}
+/* ==== End Movie Detail Modal Dark Theme ==== */
+
+.movie-modal-info, .movie-summary, .movie-comments, .movie-summary-section, .movie-comments-section {
+    color: #fff !important;
+}
+
+body {
+    background: var(--theme-bg) !important;
+}
+
+.movie-detail-container {
+    position: relative;
+    max-width: 80%;
+    width: 90%;
+    margin: 40px auto;
+    background: var(--theme-bg) !important;
+    color: #eee;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    padding: 32px 50px 24px 50px;
+}
+.movie-detail-title {
+    color: #fff;
+    background: none;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 18px;
+    opacity: 1;
+    letter-spacing: 0;
+}
+.movie-detail-info b,
+.movie-detail-info span,
+.movie-detail-info p {
+    background: none !important;
+    color: #eee !important;
+    font-weight: 400;
+    font-size: 1rem;
+    opacity: 1;
+}
+.movie-detail-info h1, .movie-detail-info h2, .movie-detail-info h3 {
+    color: #fff;
+}
+#bookTicketBtn {
+    background: #43b05c;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    margin-top: 24px;
+    transition: background 0.2s;
+    display: block;
+}
+#bookTicketBtn:hover {
+    background: #388e3c;
+}
+.movie-trailer-section h4 {
+    color: #fff;
+}
+
+.actor-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.actor-chip {
+    background: #232323;
+    color: #b2ffb2;
+    border-radius: 16px;
+    padding: 5px 14px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 2px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border: 1px solid #333;
+    transition: background 0.2s;
+}
+.actor-chip:hover {
+    background: #2e8b36;
+    color: #fff;
+}
+
+@media (max-width: 700px) {
+  .movie-detail-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+} 

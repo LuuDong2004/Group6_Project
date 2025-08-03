@@ -5,7 +5,6 @@ import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Genre;
 
 import group6.cinema_project.service.User.IMovieService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.PageRequest;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 public class MovieService implements IMovieService {
     @Autowired
     private MovieRepository movieReponsitory;
-    @Autowired
-    private ModelMapper modelMapper;
 
     // public MovieService() {
     // }
@@ -67,11 +64,26 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
-    public List<MovieDto> findMovieById(Integer moiveId) {
-        List<Movie> movies = movieReponsitory.findMovieById(moiveId);
+    @Override
+    public List<MovieDto> findMovieById(Integer movieId) {
+        List<Movie> movies = movieReponsitory.findMovieById(movieId);
         return movies.stream()
                 .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public MovieDto getMovieById(Integer movieId) {
+        return movieReponsitory.findById(movieId)
+                .map(this::convertToBasicDto)
+                .orElse(null);
+    }
+
+    @Override
+    public MovieDto getMovieDetail(Integer movieId) {
+        return movieReponsitory.findById(movieId)
+                .map(this::convertToBasicDto)
+                .orElse(null);
     }
 
     public List<MovieDto> getTopMoviesToday() {
@@ -133,30 +145,23 @@ public class MovieService implements IMovieService {
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
 
-        // Xử lý Rating - lấy ID và set display text
+        // Xử lý Rating - chỉ lấy ID
         if (movie.getRating() != null) {
             dto.setRatingId(movie.getRating().getId());
-            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
         }
 
-        // Xử lý Genres - lấy ID và set display text
+        // Xử lý Genres - chỉ lấy ID
         if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
             Set<Integer> genreIds = movie.getGenres().stream()
                     .map(Genre::getId)
                     .collect(Collectors.toSet());
             dto.setGenreIds(genreIds);
-
-            String genreNames = movie.getGenres().stream()
-                    .map(Genre::getName)
-                    .collect(Collectors.joining(", "));
-            dto.setGenreDisplay(genreNames);
         }
 
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer());
-        dto.setStatus(movie.getStatus());
 
         return dto;
     }

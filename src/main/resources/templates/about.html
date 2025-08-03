@@ -21,11 +21,11 @@
 		<!--/nav-->
 		<nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
 			<div class="container">
-				<h1><a class="navbar-brand" href="index.html"><span class="fa fa-play icon-log"
+				<h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log"
 							aria-hidden="true"></span>
 						MyShowz </a></h1>
 				<!-- if logo is image enable this   
-							<a class="navbar-brand" href="#index.html">
+							<a class="navbar-brand" th:href="@{/}">
 								<img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
 							</a> -->
 				<button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
@@ -39,18 +39,18 @@
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto">
 						<li class="nav-item">
-							<a class="nav-link" href="index.html">Home</a>
+							<a class="nav-link" th:href="@{/}">Home</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="movies.html">movies</a>
+							<a class="nav-link" th:href="@{/movie/view}">movies</a>
 						</li>
 
 						<li class="nav-item active">
-							<a class="nav-link" href="about.html">About</a>
+							<a class="nav-link" th:href="@{/about}">About</a>
 						</li>
 
 						<li class="nav-item">
-							<a class="nav-link" href="Contact_Us.html">Contact</a>
+							<a class="nav-link" th:href="@{/contact}">Contact</a>
 						</li>
 					</ul>
 
@@ -60,7 +60,7 @@
 					<div class="Login_SignUp" id="login"
 						style="font-size: 2rem ; display: inline-block; position: relative;">
 						<!-- <li class="nav-item"> -->
-						<a class="nav-link" href="sign_in.html"><i class="fa fa-user-circle-o"></i></a>
+						<a class="nav-link" th:href="@{/signin}"><i class="fa fa-user-circle-o"></i></a>
 						<!-- </li> -->
 					</div>
 				</div>
@@ -86,7 +86,7 @@
 	<div class="w3l-breadcrumbs">
 		<nav id="breadcrumbs" class="breadcrumbs">
 			<div class="container page-wrapper">
-				<a href="index.html">Home</a> » <span class="breadcrumb_last" aria-current="page">About</span>
+				<a th:href="@{/}">Home</a> » <span class="breadcrumb_last" aria-current="page">About</span>
 			</div>
 		</nav>
 	</div>
@@ -96,7 +96,7 @@
 		<div class="container py-lg-4">
 			<div class="row ab-grids-sec align-items-center">
 				<div class="col-lg-6 ab-right">
-					<img class="img-fluid" src="assets/images/banner1.jpg">
+					<img class="img-fluid" th:src="@{/assets/images/banner1.jpg}">
 				</div>
 				<div class="col-lg-6 ab-left pl-lg-4 mt-lg-0 mt-5">
 					<h3 class="hny-title">My Showz Entertainment</h3>
@@ -159,7 +159,7 @@
 	<div class="swiper-wrapper">
 		<div class="swiper-slide">
 			<div class="imgBx">
-				<img src="assets/images/kishan.PNG" style="width :100%; height: 100%">
+				<img th:src="@{/assets/images/kishan.PNG}" style="width :100%; height: 100%">
 			</div>
 			<div class="details">
 				<h3 id="details-h3-1">Kishan Patel<br></h3>
@@ -172,7 +172,7 @@
 		</div>
 		<div class="swiper-slide">
 			<div class="imgBx">
-				<img src="assets/images/sharvil.jpg" style="width :100%; height: 100%">
+				<img th:src="@{/assets/images/sharvil.jpg}" style="width :100%; height: 100%">
 			</div>
 			<div class="details">
 				<h3 id="details-h3-2">Sharvil Patel<br></h3>
@@ -185,7 +185,7 @@
 		</div>
 		<div class="swiper-slide">
 			<div class="imgBx">
-				<img src="assets/images/Harsh (2).jpg" style="width :100%; height: 100%">
+				<img th:src="@{/assets/images/Harsh (2).jpg}" style="width :100%; height: 100%">
 			</div>
 			<div class="details">
 				<h3 id="details-h3-3">Harsh Mange<br></h3>
@@ -198,7 +198,7 @@
 		</div>
 		<div class="swiper-slide">
 			<div class="imgBx">
-				<img src="assets/images/chavda.PNG" style="width :100%; height: 100%">
+				<img th:src="@{/assets/images/chavda.PNG}" style="width :100%; height: 100%">
 			</div>
 			<div class="details">
 				<h3 id="details-h3-4">Yugam Chavda<br></h3>
@@ -232,7 +232,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team1.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team1.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Johnson smith</h3>
@@ -250,7 +250,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team2.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team2.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Alexander leo</h3>
@@ -268,7 +268,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team3.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team3.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Roy Linderson</h3>
@@ -286,7 +286,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team4.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team4.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Mike Thyson</h3>
@@ -304,7 +304,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team2.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team2.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Laura gill</h3>
@@ -322,7 +322,7 @@
 										voluptate rem ullam dolore!.</q>
 								</blockquote>
 								<div class="testi-des">
-									<div class="test-img"><img src="assets/images/team3.jpg" class="img-fluid" alt="/">
+									<div class="test-img"><img th:src="@{/assets/images/team3.jpg}" class="img-fluid" alt="/">
 									</div>
 									<div class="peopl align-self">
 										<h3>Smith Johnson</h3>
@@ -344,22 +344,22 @@
 				<div class="container py-lg-4">
 					<div class="text-txt">
 						<div class="right-side">
-							<div class="row footer-about">
+														<div class="row footer-about">
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-									<a href="movies.html"><img class="img-fluid" src="assets/images/banner1.jpg"
-											alt=""></a>
+									<a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner1.jpg}"
+										alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-									<a href="movies.html"><img class="img-fluid" src="assets/images/banner2.jpg"
-											alt=""></a>
+									<a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner2.jpg}"
+										alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-									<a href="movies.html"><img class="img-fluid" src="assets/images/banner3.jpg"
-											alt=""></a>
+									<a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner3.jpg}"
+										alt=""></a>
 								</div>
 								<div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-									<a href="movies.html"><img class="img-fluid" src="assets/images/banner4.jpg"
-											alt=""></a>
+									<a th:href="@{/movie/view}"><img class="img-fluid" th:src="@{/assets/images/banner4.jpg}"
+										alt=""></a>
 								</div>
 							</div>
 							<div class="row footer-links">
@@ -373,29 +373,29 @@
 										<li><a href="#">English Movies</a></li>
 										<li><a href="#">Tailor</a></li>
 										<li><a href="#">Upcoming Movies</a></li>
-										<li><a href="Contact_Us.html">Contact Us</a></li>
+										<li><a th:href="@{/contact}">Contact Us</a></li>
 									</ul>
 								</div>
 								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
 									<h6>Information</h6>
 									<ul>
-										<li><a href="index.html">Home</a> </li>
-										<li><a href="about.html">About</a> </li>
+										<li><a th:href="@{/}">Home</a> </li>
+										<li><a th:href="@{/about}">About</a> </li>
 										<li><a href="#">Tv Series</a> </li>
-										<li><a href="#">Blogs</a> </li>
-										<li><a href="sign_in.html">Login</a></li>
-										<li><a href="Contact_Us.html">Contact</a></li>
+										<li><a th:href="@{/blogs}">Blogs</a> </li>
+										<li><a th:href="@{/signin}">Login</a></li>
+										<li><a th:href="@{/contact}">Contact</a></li>
 									</ul>
 								</div>
 								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
 									<h6>Locations</h6>
 									<ul>
-										<li><a href="movies.html">Asia</a></li>
-										<li><a href="movies.html">France</a></li>
-										<li><a href="movies.html">Taiwan</a></li>
-										<li><a href="movies.html">United States</a></li>
-										<li><a href="movies.html">Korea</a></li>
-										<li><a href="movies.html">United Kingdom</a></li>
+										<li><a th:href="@{/movie/view}">Asia</a></li>
+										<li><a th:href="@{/movie/view}">France</a></li>
+										<li><a th:href="@{/movie/view}">Taiwan</a></li>
+										<li><a th:href="@{/movie/view}">United States</a></li>
+										<li><a th:href="@{/movie/view}">Korea</a></li>
+										<li><a th:href="@{/movie/view}">United Kingdom</a></li>
 									</ul>
 								</div>
 								<div class="col-md-3 col-sm-6 sub-two-right mt-5">
@@ -466,16 +466,16 @@
 </body>
 
 </html>
-<script src="assets/js/jquery-3.3.1.min.js"></script>
+<script th:src="@{/assets/js/jquery-3.3.1.min.js}"></script>
 <!-- stats -->
-<script src="assets/js/jquery.waypoints.min.js"></script>
-<script src="assets/js/jquery.countup.js"></script>
-<script type="text/javascript" src='assets/js/swiper.min.js'></script>
+<script th:src="@{/assets/js/jquery.waypoints.min.js}"></script>
+<script th:src="@{/assets/js/jquery.countup.js}"></script>
+<script type="text/javascript" th:src='@{/assets/js/swiper.min.js}'></script>
 <script>
 	$('.counter').countUp();
 </script>
 <!--/theme-change-->
-<script src="assets/js/theme-change.js"></script>
+<script th:src="@{/assets/js/theme-change.js}"></script>
 <script>
 	const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
 	const currentTheme = localStorage.getItem('theme');
@@ -512,7 +512,7 @@
 	}
 	toggleSwitch.addEventListener('change', switchTheme, false);
 </script>
-<script src="assets/js/owl.carousel.js"></script>
+<script th:src="@{/assets/js/owl.carousel.js}"></script>
 <!-- script for banner slider-->
 <script>
 	$(document).ready(function () {
@@ -661,4 +661,4 @@
 		});
 	});
 </script>
-<script src="assets/js/bootstrap.min.js"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>

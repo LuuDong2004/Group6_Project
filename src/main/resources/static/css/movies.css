@@ -1,0 +1,253 @@
+/* movies.css */
+body {
+    background: var(--theme-bg) !important;
+}
+
+.w3l-grids, .movie-list-grid, .movie-grid {
+    background: var(--theme-bg) !important;
+}
+
+.w3l-grids {
+    background: var(--theme-bg) !important;
+    padding-bottom: 40px;
+}
+.box16 {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+}
+.box16:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.box16 figure {
+    margin: 0;
+    overflow: hidden;
+}
+.box16 img {
+    width: 100%;
+    display: block;
+    transition: transform 0.3s;
+}
+.box16:hover img {
+    transform: scale(1.05);
+}
+.box-content {
+    padding: 15px 20px 10px 20px;
+}
+.box-content h3.title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.box-content h4 {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 0;
+}
+.video-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #e50914;
+    font-size: 1.5rem;
+}
+.movie-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+}
+.movie-card {
+    width: 100%;
+    max-width: 260px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    overflow: hidden;
+    text-align: left;
+    transition: box-shadow 0.3s, transform 0.2s;
+    cursor: pointer;
+    margin: 0 auto;
+}
+.movie-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    transform: translateY(-6px) scale(1.03);
+}
+.movie-poster-img {
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    display: block;
+    border-bottom: 1px solid #eee;
+}
+.movie-info {
+    padding: 16px 14px 14px 14px;
+}
+.movie-title {
+    font-weight: bold;
+    margin: 10px 0 6px 0;
+    font-size: 1.15em;
+    color: #222;
+}
+.movie-meta {
+    color: #888;
+    font-size: 0.97rem;
+    margin-bottom: 10px;
+}
+.btn.btn-detail {
+    background: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-size: 1em;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn.btn-detail:hover {
+    background: #b0060f;
+}
+
+/* Thêm CSS cho movie grid dạng lưới poster lớn */
+.movie-list-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.movie-card {
+    width: 180px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.movie-card:hover {
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.movie-poster-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.movie-title {
+    font-weight: bold;
+    margin: 10px 0 6px 0;
+    font-size: 1.1em;
+    color: #222;
+}
+
+.w3l-albums, .albums-content, .resp-tabs-list, .resp-tabs-container, .row, .col-lg-4, .slider-info, .img-circle, .message {
+    background: var(--theme-bg) !important;
+}
+
+section.w3l-grids, .grids-main {
+    background: var(--theme-bg) !important;
+}
+
+#movie-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px 24px;
+  justify-items: center;
+  justify-content: center;
+}
+
+.movie-card {
+  width: 100%;
+  max-width: 260px;
+} 
+
+.movie-info p {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+/* Filter bar styles */
+.filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.btn-filter {
+    background-color: transparent;
+    border: 1px solid var(--theme-border-color-light);
+    color: var(--theme-title);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.btn-filter.dropdown-toggle::after {
+    margin-left: .5em;
+}
+
+.filters-bar .dropdown-menu {
+    background-color: var(--theme-bg);
+    border: 1px solid var(--theme-border-color-light);
+    border-radius: 8px;
+}
+
+.filters-bar .dropdown-item {
+    color: var(--theme-title);
+    padding: 8px 16px;
+}
+
+.filters-bar .dropdown-item:hover {
+    background-color: var(--theme-bg-light);
+}
+
+.filters-bar .genre-dropdown .btn {
+    background-color: transparent;
+    border: 1px solid var(--theme-border-color-light);
+    color: var(--theme-title);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.filters-bar .genre-dropdown .dropdown-menu {
+    background-color: var(--theme-bg);
+    border: 1px solid var(--theme-border-color-light);
+    border-radius: 8px;
+    padding: 4px 0;
+}
+
+.filters-bar .genre-dropdown .dropdown-item {
+    color: var(--theme-para);
+    padding: 8px 20px;
+    font-weight: 500;
+}
+
+.filters-bar .genre-dropdown .dropdown-item:hover,
+.filters-bar .genre-dropdown .dropdown-item.active {
+    background-color: var(--theme-bg-light);
+    color: var(--theme-title);
+}
+
+/* Modal styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+} 

@@ -18,6 +18,10 @@ public class HomeController {
     public String home(Model model) {
         List<MovieDto> popularMovies = homeService.getPopularMovies();
         List<MovieDto> newReleases = homeService.getNewReleases();
+        
+        System.out.println("Popular Movies: " + (popularMovies != null ? popularMovies.size() : "null"));
+        System.out.println("New Releases: " + (newReleases != null ? newReleases.size() : "null"));
+        
         model.addAttribute("popularMovies", popularMovies);
         model.addAttribute("newReleases", newReleases);
         // Thêm timestamp để tránh cache hình ảnh
