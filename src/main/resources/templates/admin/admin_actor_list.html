@@ -263,23 +263,11 @@
             </span>
           </button>
           <div class="dropdown">
-            <a
-              href="#"
-              class="d-flex align-items-center text-decoration-none dropdown-toggle"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <img
-                src="https://placehold.co/32x32/E2E8F0/4A5568?text=A"
-                alt="User Avatar"
-                width="32"
-                height="32"
-                class="rounded-circle me-2"
-                onerror="this.onerror=null;this.src='https://placehold.co/32x32?text=A';"
-              />
-              <span class="d-none d-sm-inline text-gray-700 fw-medium"
-                >Admin User</span
-              >
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-link text-secondary me-2">
+                <i class="fas fa-cog fs-5"></i>
+              </button>
             </a>
             <ul
               class="dropdown-menu dropdown-menu-end text-small shadow border-0"
@@ -296,7 +284,7 @@
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item text-danger" href="#"
+                <a class="dropdown-item text-danger" href="/admin/logout"
                   ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
                 >
               </li>
