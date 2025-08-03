@@ -2,6 +2,7 @@ package group6.cinema_project.controller.Admin;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,49 +26,39 @@ public class AdminBookingController {
     private final IBookingService bookingService;
 
     /**
-     * Hiển thị danh sách tất cả booking
+     * Hiển thị danh sách tất cả booking với phân trang
      */
     @GetMapping
     public String listAllBookings(Model model,
+                                 @RequestParam(value = "page", defaultValue = "0") int page,
+                                 @RequestParam(value = "size", defaultValue = "5") int size,
                                  @RequestParam(value = "searchTerm", required = false) String searchTerm,
                                  @RequestParam(value = "status", required = false) String status,
                                  @RequestParam(value = "scheduleId", required = false) Integer scheduleId) {
         try {
-            List<BookingDto> bookings;
+            // Clean up search term
+            searchTerm = (searchTerm != null && !searchTerm.trim().isEmpty()) ? searchTerm.trim() : null;
             
-            if (scheduleId != null) {
-                // Lấy booking theo suất chiếu cụ thể
-                bookings = bookingService.getBookingsByScheduleId(scheduleId);
-                model.addAttribute("scheduleId", scheduleId);
-            } else {
-                // Lấy tất cả booking
-                bookings = bookingService.getAllBookings();
-            }
+            // Lấy bookings với phân trang
+            Page<BookingDto> bookingPage = bookingService.getBookingsPage(page, size, searchTerm, status, scheduleId);
             
-            // Filter theo search term nếu có
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                bookings = bookings.stream()
-                    .filter(booking -> 
-                        booking.getUser().getEmail().toLowerCase().contains(searchTerm.toLowerCase()) ||
-                        booking.getCode().toLowerCase().contains(searchTerm.toLowerCase()) ||
-                        (booking.getSchedule() != null && booking.getSchedule().getMovie() != null && 
-                         booking.getSchedule().getMovie().getName().toLowerCase().contains(searchTerm.toLowerCase()))
-                    )
-                    .toList();
-            }
-            
-            // Filter theo status nếu có
-            if (status != null && !status.trim().isEmpty() && !"all".equals(status)) {
-                bookings = bookings.stream()
-                    .filter(booking -> status.equals(booking.getStatus()))
-                    .toList();
-            }
-            
-            model.addAttribute("bookings", bookings);
+            // Add attributes to model
+            model.addAttribute("bookingPage", bookingPage);
+            model.addAttribute("bookings", bookingPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", bookingPage.getTotalPages());
+            model.addAttribute("pageSize", size);
             model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
             model.addAttribute("status", status != null ? status : "");
+            model.addAttribute("scheduleId", scheduleId);
             
-            log.info("Successfully loaded {} bookings for admin", bookings.size());
+            // If viewing by schedule, add schedule info
+            if (scheduleId != null && !bookingPage.getContent().isEmpty()) {
+                model.addAttribute("schedule", bookingPage.getContent().get(0).getSchedule());
+            }
+            
+            log.info("Successfully loaded {} bookings for admin (page {}/{})", 
+                    bookingPage.getContent().size(), page + 1, bookingPage.getTotalPages());
             return "admin/admin_bookings_list";
             
         } catch (Exception e) {

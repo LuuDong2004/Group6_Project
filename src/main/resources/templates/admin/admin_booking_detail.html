@@ -148,7 +148,7 @@
                             <div class="col-md-8">
                                 <h5 th:if="${booking.schedule.movie != null}" th:text="${booking.schedule.movie.name}"></h5>
                                 <p th:if="${booking.schedule.movie != null}">
-                                    <strong>Thể loại:</strong> <span th:text="${booking.schedule.movie.genre}"></span> | 
+                                    <strong>Thể loại:</strong> <span th:text="${booking.schedule.movie.genreDisplay}"></span> | 
                                     <strong>Thời lượng:</strong> <span th:text="${booking.schedule.movie.duration + ' phút'}"></span>
                                 </p>
                                 <hr>

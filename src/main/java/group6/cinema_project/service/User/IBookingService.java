@@ -2,6 +2,8 @@ package group6.cinema_project.service.User;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
 
@@ -20,4 +22,7 @@ public interface IBookingService {
     // Admin methods
     List<BookingDto> getAllBookings();
     List<BookingDto> getBookingsByScheduleId(Integer scheduleId);
+    
+    // Pagination methods
+    Page<BookingDto> getBookingsPage(int page, int size, String searchTerm, String status, Integer scheduleId);
 }

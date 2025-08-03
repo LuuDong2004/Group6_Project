@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -416,5 +420,52 @@ public class BookingService implements IBookingService {
         bookingDto.setFoodList(foodList);
         
         return bookingDto;
+    }
+
+    // Pagination method for admin
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingDto> getBookingsPage(int page, int size, String searchTerm, String status, Integer scheduleId) {
+        // Tạo pageable object
+        Pageable pageable = PageRequest.of(page, size);
+        
+        // Lấy tất cả bookings theo điều kiện
+        List<BookingDto> allBookings;
+        
+        if (scheduleId != null) {
+            // Lấy booking theo suất chiếu cụ thể
+            allBookings = getBookingsByScheduleId(scheduleId);
+        } else {
+            // Lấy tất cả booking
+            allBookings = getAllBookings();
+        }
+        
+        // Filter theo search term nếu có
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            allBookings = allBookings.stream()
+                .filter(booking -> 
+                    booking.getUser().getEmail().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                    booking.getCode().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                    (booking.getSchedule() != null && booking.getSchedule().getMovie() != null && 
+                     booking.getSchedule().getMovie().getName().toLowerCase().contains(searchTerm.toLowerCase()))
+                )
+                .collect(Collectors.toList());
+        }
+        
+        // Filter theo status nếu có
+        if (status != null && !status.trim().isEmpty() && !"all".equals(status)) {
+            allBookings = allBookings.stream()
+                .filter(booking -> status.equals(booking.getStatus()))
+                .collect(Collectors.toList());
+        }
+        
+        // Thực hiện phân trang thủ công
+        int totalElements = allBookings.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), totalElements);
+        
+        List<BookingDto> pageContent = allBookings.subList(start, end);
+        
+        return new PageImpl<>(pageContent, pageable, totalElements);
     }
 }

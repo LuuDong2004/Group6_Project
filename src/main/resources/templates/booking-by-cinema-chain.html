@@ -135,7 +135,7 @@
                         <div class="col-md-10">
                             <div class="card-body">
                                 <h5 class="card-title" th:text="${movie.name}"></h5>
-                                <div class="movie-details" th:text="${movie.genre} + ' • ' + ${movie.duration} + ' phút'"></div>
+                                <div class="movie-details" th:text="${movie.genreDisplay} + ' • ' + ${movie.duration} + ' phút'"></div>
                                 <span class="movie-rating" th:text="${movie.rating}"></span>
                                 <div class="showtimes mt-3">
                                     <a th:each="sch : ${movieSchedules[movie.id]}" th:href="@{'/seat/' + ${movie.id} + '/' + ${sch.id} + '/' + ${sch.screeningRoom.id}}" class="showtime-slot">

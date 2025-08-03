@@ -115,10 +115,10 @@ public class UserServiceImpl implements IUserService {
         User existingUser = userOpt.get();
 
         // Check if new username/phone already exists (excluding current user)
-        if (!existingUser.getUserName().equals(userDto.getUserName()) &&
-                isUsernameExists(userDto.getUserName())) {
-            throw new IllegalArgumentException("Username already exists");
-        }
+//        if (!existingUser.getUserName().equals(userDto.getUserName()) &&
+//                isUsernameExists(userDto.getUserName())) {
+//            throw new IllegalArgumentException("Username already exists");
+//        }
 
         if (!existingUser.getPhone().equals(userDto.getPhone()) &&
                 isPhoneExists(userDto.getPhone())) {

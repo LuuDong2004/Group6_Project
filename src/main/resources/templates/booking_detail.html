@@ -18,7 +18,7 @@
             <img th:src="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.image : '/static/assets/images/no-image.png'}" class="movie-img mb-2" alt="Ảnh phim">
             <h5 th:text="${booking.schedule != null && booking.schedule.movie != null ? booking.schedule.movie.name : ''}">Tên phim</h5>
             <div th:if="${booking.schedule != null && booking.schedule.movie != null}">
-                <span th:text="${booking.schedule.movie.genre}"></span> | <span th:text="${booking.schedule.movie.duration + ' phút'}"></span>
+                <span th:text="${booking.schedule.movie.genreDisplay}"></span> | <span th:text="${booking.schedule.movie.duration + ' phút'}"></span>
             </div>
         </div>
         <div class="col-md-8">
