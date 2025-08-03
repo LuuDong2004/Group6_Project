@@ -1,57 +1,268 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sửa Chuỗi rạp - Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/admin2-common.css}" />
     <style>
-        :root { --primary-color: #3b82f6; --secondary-color: #64748b; --success-color: #10b981; --danger-color: #ef4444; --warning-color: #f59e0b; --info-color: #06b6d4; --light-color: #f8fafc; --dark-color: #1e293b; --border-color: #e2e8f0; --shadow-color: rgba(0, 0, 0, 0.1); }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f1f5f9; margin: 0; padding: 0; }
-        .sidebar-custom { position: fixed; left: 0; top: 0; height: 100vh; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; z-index: 1000; transition: all 0.3s ease; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); overflow-y: auto; }
-        .sidebar-custom.collapsed { width: 80px; }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .sidebar-header h5 { margin: 0; font-weight: 600; font-size: 1.1rem; }
-        .sidebar-header small { opacity: 0.8; font-size: 0.85rem; }
-        .sidebar-menu { padding: 1rem 0; }
-        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: rgba(255, 255, 255, 0.9); text-decoration: none; transition: all 0.2s; border-left: 3px solid transparent; }
-        .menu-item:hover { background: rgba(255, 255, 255, 0.1); color: white; border-left-color: white; text-decoration: none; }
-        .menu-item.active { background: rgba(255, 255, 255, 0.15); color: white; border-left-color: white; }
-        .menu-item i { margin-right: 0.75rem; width: 20px; text-align: center; }
-        .main-content-wrapper { margin-left: 250px; transition: all 0.3s ease; }
-        .main-content-wrapper.expanded { margin-left: 80px; }
-        .header-custom { position: fixed; top: 0; right: 0; left: 250px; background: white; padding: 1rem 2rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 999; transition: all 0.3s ease; }
-        .header-custom.expanded { left: 80px; }
-        .page-content { margin-top: 80px; padding: 2rem; }
-        .edit-chain-section { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 2rem; }
-        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
-        .page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0; }
-        .back-btn { background: #f1f5f9; color: #64748b; border: none; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
-        .back-btn:hover { background: #e2e8f0; color: #475569; text-decoration: none; }
-        .form-container { max-width: 600px; }
-        .form-label { font-weight: 600; color: #374151; margin-bottom: 0.5rem; }
-        .form-control, .form-select { border: 1px solid #d1d5db; border-radius: 8px; padding: 0.75rem; transition: all 0.2s; }
-        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .btn-primary { background: #3b82f6; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); }
-        .btn-secondary { background: #6b7280; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-        .btn-secondary:hover { background: #4b5563; }
-        .alert { border-radius: 8px; border: none; }
-        .alert-success { background: #d1fae5; color: #065f46; }
-        .alert-danger { background: #fee2e2; color: #991b1b; }
-        @media (max-width: 768px) { .sidebar-custom { width: 80px; } .sidebar-custom .sidebar-header h5, .sidebar-custom .sidebar-header small, .sidebar-custom .sidebar-menu span, .sidebar-custom .mt-auto .text-white, .sidebar-custom .mt-auto small { display: none; } .sidebar-custom .sidebar-menu .menu-item { justify-content: center; } .sidebar-custom .sidebar-menu .menu-item i { margin-right: 0; font-size: 1.25rem; } .main-content-wrapper { margin-left: 80px; } .header-custom { left: 80px; padding: 0 1rem; } .header-custom .flex-grow-1 { display: none; } .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
+      * {
+        font-family: "Inter", sans-serif;
+      }
+      .sidebar-custom {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+      .sidebar.collapsed {
+        width: 80px;
+      }
+      .sidebar.collapsed .sidebar-header h5,
+      .sidebar.collapsed .sidebar-header small,
+      .sidebar.collapsed .sidebar-menu span,
+      .sidebar.collapsed .mt-auto .text-white,
+      .sidebar.collapsed .mt-auto small {
+        display: none;
+      }
+      .sidebar.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+      .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+      .sidebar.collapsed .menu-item:hover,
+      .sidebar.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem;
+      }
+      .sidebar.collapsed .menu-item.active {
+        background-color: #4f46e5;
+      }
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+      .sidebar.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+
+      .edit-chain-section { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 2rem; }
+      .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+      .page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0; }
+      .back-btn { background: #f1f5f9; color: #64748b; border: none; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+      .back-btn:hover { background: #e2e8f0; color: #475569; text-decoration: none; }
+      .form-container { max-width: 600px; }
+      .form-label { font-weight: 600; color: #374151; margin-bottom: 0.5rem; }
+      .form-control, .form-select { border: 1px solid #d1d5db; border-radius: 8px; padding: 0.75rem; transition: all 0.2s; }
+      .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+      .btn-primary { background: #3b82f6; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+      .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); }
+      .btn-secondary { background: #6b7280; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+      .btn-secondary:hover { background: #4b5563; }
+      .alert { border-radius: 8px; border: none; }
+      .alert-success { background: #d1fae5; color: #065f46; }
+      .alert-danger { background: #fee2e2; color: #991b1b; }
+
+      @media (max-width: 768px) {
+        .sidebar-custom {
+          width: 80px;
+        }
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
+          display: none;
+        }
+        .sidebar-custom .sidebar-menu .menu-item {
+          justify-content: center;
+        }
+        .sidebar-custom .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
+        }
+        .main-content-wrapper {
+          margin-left: 80px;
+        }
+        .header-custom {
+          left: 80px;
+          padding: 0 1rem;
+        }
+        .header-custom .flex-grow-1 {
+          display: none;
+        }
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+      }
     </style>
 </head>
 <body>
 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 <div class="main-content-wrapper" id="mainContentWrapper">
-    <header class="header-custom shadow-sm">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-            <a href="/admin/cinema-chains" class="btn btn-link text-secondary me-2"><i class="fas fa-arrow-left"></i></a>
-            <h4 class="mb-0 fw-semibold text-gray-700">Sửa Chuỗi rạp</h4>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+            Quản lý Chuỗi rạp
+          </h4>
         </div>
-    </header>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="/profile"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="redirect:/admin/login"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
     <div class="page-content">
         <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>
@@ -99,29 +310,34 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Sidebar toggle functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.querySelector('.sidebar-custom');
-        const mainContent = document.querySelector('.main-content-wrapper');
-        const header = document.querySelector('.header-custom');
-
-        // Check if sidebar should be collapsed
-        if (window.innerWidth <= 768) {
-            if (sidebar) sidebar.classList.add('collapsed');
-            if (mainContent) mainContent.classList.add('expanded');
-            if (header) header.classList.add('expanded');
+  document.addEventListener("DOMContentLoaded", function () {
+    initializeDashboardBehavior();
+  });
+  function initializeDashboardBehavior() {
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebar = document.getElementById("sidebar");
+    const mainContentWrapper =
+      document.getElementById("mainContentWrapper");
+    const header = document.querySelector(".header-custom");
+    if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+    function toggleSidebar() {
+      sidebar.classList.toggle("collapsed");
+      mainContentWrapper.classList.toggle("expanded");
+      if (header) {
+        header.classList.toggle("expanded");
+      }
+    }
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    function checkViewport() {
+      if (window.innerWidth <= 992) {
+        if (!sidebar.classList.contains("collapsed")) {
+          toggleSidebar();
         }
-
-        // Toggle sidebar
-        const toggleBtn = document.querySelector('.sidebar-toggle');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                if (sidebar) sidebar.classList.toggle('collapsed');
-                if (mainContent) mainContent.classList.toggle('expanded');
-                if (header) header.classList.toggle('expanded');
-            });
-        }
-    });
+      }
+    }
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+  }
 </script>
 </body>
 </html> 
