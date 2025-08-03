@@ -1,31 +1,32 @@
 package group6.cinema_project.service.Admin;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.AdminMovieDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
 public interface IAdminMovieService {
-    Optional<MovieDto> getMovieById(Integer id);
+    Optional<AdminMovieDto> getMovieById(Integer id);
 
     // Phương thức lấy thông tin phim để hiển thị (có ratingDisplay và genreDisplay)
-    Optional<MovieDto> getMovieByIdForDisplay(Integer id);
+    Optional<AdminMovieDto> getMovieByIdForDisplay(Integer id);
 
-    MovieDto saveOrUpdate(MovieDto movieDto);
+    AdminMovieDto saveOrUpdate(AdminMovieDto movieDto);
 
     void deleteMovie(Integer id);
 
-    List<MovieDto> getAllMovie();
+    List<AdminMovieDto> getAllMovie();
 
     // New methods for display with directors and actors
-    List<MovieDto> getAllMoviesForDisplay();
+    List<AdminMovieDto> getAllMoviesForDisplay();
 
-    List<MovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy);
+    List<AdminMovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy);
 
     // Phương thức phân trang cho hiển thị danh sách phim
-    Page<MovieDto> getAllMoviesForDisplayWithPagination(Pageable pageable);
+    Page<AdminMovieDto> getAllMoviesForDisplayWithPagination(Pageable pageable);
 
     // Phương thức phân trang cho tìm kiếm và lọc phim
-    Page<MovieDto> getFilteredMoviesForDisplayWithPagination(String searchTerm, String filterBy, Pageable pageable);
+    Page<AdminMovieDto> getFilteredMoviesForDisplayWithPagination(String searchTerm, String filterBy,
+            Pageable pageable);
 }

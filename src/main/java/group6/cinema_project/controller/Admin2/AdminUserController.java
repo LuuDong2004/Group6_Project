@@ -3,6 +3,7 @@ package group6.cinema_project.controller.Admin2;
 import java.util.HashMap;
 import java.util.Map;
 
+import group6.cinema_project.dto.Login.AdminPasswordResetDto;
 import group6.cinema_project.dto.Login.UserRegistrationDto;
 import group6.cinema_project.service.User.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import group6.cinema_project.dto.AdminPasswordResetDto;
+
 import group6.cinema_project.dto.UserDto;
 
 import jakarta.validation.Valid;

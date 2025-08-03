@@ -1,6 +1,6 @@
 package group6.cinema_project.controller.User;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.CustomerMovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.dto.SeatReservationDto;
 import group6.cinema_project.dto.FoodDto;
@@ -24,13 +24,13 @@ import group6.cinema_project.service.User.IBookingService;
 public class SeatController {
     @Autowired
     private ISeatService seatService;
-    
+
     @Autowired
     private ISeatReservationService seatReservationService;
-    
+
     @Autowired
     private IMovieService movieService;
-    
+
     @Autowired
     private IScheduleService scheduleService;
 
@@ -44,17 +44,17 @@ public class SeatController {
 
     @GetMapping("/{movieId}/{scheduleId}/{roomId}")
     public String getSeatsByMovieId(@PathVariable(name = "movieId") Integer movieId,
-                                    @PathVariable(name = "scheduleId") Integer scheduleId,
-                                    @PathVariable(name = "roomId") Integer roomId,
-                                    @RequestParam(value = "bookingId", required = false) Integer bookingId,
-                                    Model model) {
+            @PathVariable(name = "scheduleId") Integer scheduleId,
+            @PathVariable(name = "roomId") Integer roomId,
+            @RequestParam(value = "bookingId", required = false) Integer bookingId,
+            Model model) {
         try {
             // Nếu có bookingId truyền lên, hủy booking PENDING cũ
             if (bookingId != null) {
                 bookingService.cancelPendingBooking(bookingId);
             }
             // Lấy thông tin phim
-            List<MovieDto> movies = movieService.findMovieById(movieId);
+            List<CustomerMovieDto> movies = movieService.findMovieById(movieId);
 
             // Lấy thông tin lịch chiếu
             ScreeningScheduleDto selectedSchedule = scheduleService.getScheduleById(scheduleId);
@@ -73,7 +73,7 @@ public class SeatController {
             model.addAttribute("movieId", movieId);
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
-            
+
             // Thêm danh sách phòng (chỉ có 1 phòng cho lịch chiếu này)
             if (selectedSchedule != null && selectedSchedule.getScreeningRoom() != null) {
                 model.addAttribute("rooms", Collections.singletonList(selectedSchedule.getScreeningRoom()));
@@ -90,8 +90,8 @@ public class SeatController {
 
     @PostMapping("/reserve")
     public ResponseEntity<String> reserveSeat(@RequestParam Integer seatId,
-                                            @RequestParam Integer scheduleId,
-                                            @RequestParam Integer userId) {
+            @RequestParam Integer scheduleId,
+            @RequestParam Integer userId) {
         try {
             boolean success = seatReservationService.reserveSeat(seatId, scheduleId, userId, null);
             if (success) {
@@ -107,8 +107,8 @@ public class SeatController {
 
     @PostMapping("/cancel")
     public ResponseEntity<String> cancelReservation(@RequestParam Integer seatId,
-                                                   @RequestParam Integer scheduleId,
-                                                   @RequestParam Integer userId) {
+            @RequestParam Integer scheduleId,
+            @RequestParam Integer userId) {
         try {
             boolean success = seatReservationService.cancelPendingReservation(seatId, scheduleId, userId);
             if (success) {
@@ -133,10 +133,10 @@ public class SeatController {
             return ResponseEntity.ok(seats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null);
+                    .body(null);
         }
     }
-    
+
     @GetMapping("/status")
     @ResponseBody
     public ResponseEntity<List<SeatReservationDto>> getSeatStatus(@RequestParam Integer scheduleId) {
@@ -145,7 +145,7 @@ public class SeatController {
             return ResponseEntity.ok(seats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null);
+                    .body(null);
         }
     }
 }

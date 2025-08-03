@@ -1,6 +1,6 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.CustomerMovieDto;
 import group6.cinema_project.dto.PersonSimpleDto;
 import group6.cinema_project.dto.ReviewDto;
 import group6.cinema_project.entity.Movie;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import group6.cinema_project.repository.User.MovieRepository;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +40,7 @@ public class MovieService implements IMovieService {
     // }
 
     @Override
-    public List<MovieDto> getAllMovie() {
+    public List<CustomerMovieDto> getAllMovie() {
         List<Movie> movies = movieReponsitory.findAll();
         return movies.stream()
                 .map(this::convertToBasicDto)
@@ -67,7 +66,7 @@ public class MovieService implements IMovieService {
     // }
 
     @Override
-    public List<MovieDto> getMoviesWithPagination(int page, int size) {
+    public List<CustomerMovieDto> getMoviesWithPagination(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<Movie> movies = movieReponsitory.findAll(pageable).getContent();
         return movies.stream()
@@ -75,14 +74,14 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
-    public List<MovieDto> findMovieById(Integer moiveId) {
+    public List<CustomerMovieDto> findMovieById(Integer moiveId) {
         List<Movie> movies = movieReponsitory.findMovieById(moiveId);
         return movies.stream()
                 .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
     }
 
-    public List<MovieDto> getTopMoviesToday() {
+    public List<CustomerMovieDto> getTopMoviesToday() {
         int topN = 3;
         List<Movie> movies = movieReponsitory.findTopMovies7Days(topN);
         return movies.stream()
@@ -90,7 +89,7 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
-    public List<MovieDto> getTopMovies7Days() {
+    public List<CustomerMovieDto> getTopMovies7Days() {
         int topN = 3;
         List<Movie> movies = movieReponsitory.findTopMovies7Days(topN);
         return movies.stream()
@@ -99,7 +98,7 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public List<MovieDto> filterMovies(String genre, Integer year, String sort, String search) {
+    public List<CustomerMovieDto> filterMovies(String genre, Integer year, String sort, String search) {
         List<Movie> movies = movieReponsitory.findAll();
         return movies.stream()
                 .filter(m -> genre == null || genre.isEmpty() || (m.getGenres() != null &&
@@ -128,43 +127,41 @@ public class MovieService implements IMovieService {
     }
 
     /**
-     * Chuyển đổi Movie entity sang DTO mà không gây ra vấn đề lazy loading
-     * Phương thức này chỉ map các field cơ bản để tránh các vấn đề cascade của
-     * ModelMapper
+     * Chuyển đổi Movie entity sang CustomerMovieDto cho customer viewing
+     * Bao gồm ratingDisplay và genreDisplay đã được format
      */
-    private MovieDto convertToBasicDto(Movie movie) {
-        MovieDto dto = new MovieDto();
+    private CustomerMovieDto convertToBasicDto(Movie movie) {
+        CustomerMovieDto dto = new CustomerMovieDto();
 
         // Map các field cơ bản
         dto.setId(movie.getId());
         dto.setName(movie.getName());
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
-
-        // Xử lý Rating - chỉ lấy ID để tránh lazy loading
-        if (movie.getRating() != null) {
-            dto.setRatingId(movie.getRating().getId());
-        }
-
-        // Xử lý Genres - chỉ lấy ID để tránh lazy loading
-        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
-            Set<Integer> genreIds = movie.getGenres().stream()
-                    .map(Genre::getId)
-                    .collect(Collectors.toSet());
-            dto.setGenreIds(genreIds);
-        }
-
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer());
         dto.setStatus(movie.getStatus());
 
+        // Set thông tin hiển thị cho Rating
+        if (movie.getRating() != null) {
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        // Set thông tin hiển thị cho Genre
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            String genreNames = movie.getGenres().stream()
+                    .map(Genre::getName)
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
+        }
+
         return dto;
     }
 
     @Override
-    public MovieDto getMovieById(Integer movieId) {
+    public CustomerMovieDto getMovieById(Integer movieId) {
         List<Movie> movies = movieReponsitory.findMovieById(movieId);
         if (movies != null && !movies.isEmpty()) {
             return convertToBasicDto(movies.get(0));
@@ -173,13 +170,13 @@ public class MovieService implements IMovieService {
     }
 
     // Method mới để lấy chi tiết phim với actors, directors và reviews
-    public MovieDto getMovieDetail(Integer movieId) {
+    public CustomerMovieDto getMovieDetail(Integer movieId) {
         Movie movie = movieReponsitory.findById(movieId).orElse(null);
         if (movie == null) {
             return null;
         }
 
-        MovieDto dto = convertToBasicDto(movie);
+        CustomerMovieDto dto = convertToBasicDto(movie);
 
         // Map actors với thông tin chi tiết
         if (movie.getActors() != null) {

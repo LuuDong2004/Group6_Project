@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.service.IBlogService;
+import group6.cinema_project.service.User.IBlogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,15 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.service.User.IBlogService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Controller cho user xem blog posts.
  * Xử lý các chức năng hiển thị blog cho người dùng cuối.
  */
+
 @Controller
 @RequestMapping("/blogs")
 @RequiredArgsConstructor
@@ -41,9 +37,9 @@ public class BlogController {
      */
     @GetMapping
     public String listBlogPosts(Model model,
-                                @RequestParam(value = "search", required = false) String search,
-                                @RequestParam(value = "page", defaultValue = "0") int page,
-                                @RequestParam(value = "size", defaultValue = "6") int size) {
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "6") int size) {
         log.info("Hiển thị danh sách blog posts - page: {}, size: {}, search: {}", page, size, search);
 
         try {
@@ -124,8 +120,8 @@ public class BlogController {
     @GetMapping("/search")
     @ResponseBody
     public Page<BlogPostDto> searchBlogPosts(@RequestParam("q") String query,
-                                             @RequestParam(value = "page", defaultValue = "0") int page,
-                                             @RequestParam(value = "size", defaultValue = "6") int size) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "6") int size) {
         log.info("API tìm kiếm blog posts với từ khóa: {}", query);
 
         try {
@@ -142,9 +138,9 @@ public class BlogController {
      */
     @GetMapping("/author/{authorId}")
     public String getBlogPostsByAuthor(@PathVariable("authorId") int authorId,
-                                       Model model,
-                                       @RequestParam(value = "page", defaultValue = "0") int page,
-                                       @RequestParam(value = "size", defaultValue = "6") int size) {
+            Model model,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "6") int size) {
         log.info("Lấy blog posts theo tác giả ID: {}", authorId);
 
         try {
@@ -206,8 +202,8 @@ public class BlogController {
     @GetMapping("/load-more")
     @ResponseBody
     public Page<BlogPostDto> loadMoreBlogPosts(@RequestParam(value = "page", defaultValue = "1") int page,
-                                               @RequestParam(value = "size", defaultValue = "6") int size,
-                                               @RequestParam(value = "search", required = false) String search) {
+            @RequestParam(value = "size", defaultValue = "6") int size,
+            @RequestParam(value = "search", required = false) String search) {
         log.info("API load more blog posts - page: {}, size: {}, search: {}", page, size, search);
 
         try {

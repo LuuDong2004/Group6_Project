@@ -92,8 +92,9 @@ public class AdminScheduleController {
         }
 
         try {
-            // Load dropdown data for filters - convert MovieDto to MovieWithSchedulesDto
-            List<MovieDto> movieDtos = movieService.getAllMoviesForDisplay();
+            // Load dropdown data for filters - convert AdminMovieDto to
+            // MovieWithSchedulesDto
+            List<AdminMovieDto> movieDtos = movieService.getAllMoviesForDisplay();
             List<MovieWithSchedulesDto> moviesWithSchedules = convertMovieDtosToMoviesWithSchedules(movieDtos);
             model.addAttribute("movies", moviesWithSchedules);
         } catch (Exception e) {
@@ -203,11 +204,11 @@ public class AdminScheduleController {
     }
 
     /**
-     * Phương thức hỗ trợ để convert MovieDto thành MovieWithSchedulesDto với
+     * Phương thức hỗ trợ để convert AdminMovieDto thành MovieWithSchedulesDto với
      * schedules rỗng
      */
 
-    private List<MovieWithSchedulesDto> convertMovieDtosToMoviesWithSchedules(List<MovieDto> movieDtos) {
+    private List<MovieWithSchedulesDto> convertMovieDtosToMoviesWithSchedules(List<AdminMovieDto> movieDtos) {
         return movieDtos.stream().map(movieDto -> {
             MovieWithSchedulesDto movieWithSchedules = new MovieWithSchedulesDto();
             movieWithSchedules.setId(movieDto.getId());
@@ -234,9 +235,9 @@ public class AdminScheduleController {
 
         try {
             // Lấy tất cả phim
-            List<MovieDto> allMovies = movieService.getAllMoviesForDisplay();
+            List<AdminMovieDto> allMovies = movieService.getAllMoviesForDisplay();
 
-            for (MovieDto movieDto : allMovies) {
+            for (AdminMovieDto movieDto : allMovies) {
                 // Lấy lịch chiếu của phim theo ID
                 List<ScreeningScheduleDto> schedulesDtos = movieScheduleService.getSchedulesByMovieId(movieDto.getId());
 
@@ -482,9 +483,9 @@ public class AdminScheduleController {
                     schedule.getBranchId(), schedule.getStatus());
 
             // Lấy thông tin phim hiện tại để hiển thị
-            MovieDto selectedMovie = null;
+            AdminMovieDto selectedMovie = null;
             if (schedule.getMovieId() != null) {
-                Optional<MovieDto> movieOpt = movieService.getMovieByIdForDisplay(schedule.getMovieId());
+                Optional<AdminMovieDto> movieOpt = movieService.getMovieByIdForDisplay(schedule.getMovieId());
                 if (movieOpt.isPresent()) {
                     selectedMovie = movieOpt.get();
                     log.info("Loaded selected movie: {} (ID: {})", selectedMovie.getName(), selectedMovie.getId());
@@ -977,7 +978,7 @@ public class AdminScheduleController {
         log.info("API request for movie search with query: {}", query);
 
         try {
-            List<MovieDto> movies = movieService.getFilteredMoviesForDisplay(query, "name");
+            List<AdminMovieDto> movies = movieService.getFilteredMoviesForDisplay(query, "name");
 
             return movies.stream()
                     .limit(10) // Giới hạn 10 kết quả
@@ -1007,10 +1008,10 @@ public class AdminScheduleController {
         log.info("API request for movie details with ID: {}", id);
 
         try {
-            Optional<MovieDto> movieOpt = movieService.getMovieById(id);
+            Optional<AdminMovieDto> movieOpt = movieService.getMovieById(id);
 
             if (movieOpt.isPresent()) {
-                MovieDto movie = movieOpt.get();
+                AdminMovieDto movie = movieOpt.get();
                 Map<String, Object> movieData = new HashMap<>();
                 movieData.put("id", movie.getId());
                 movieData.put("name", movie.getName());

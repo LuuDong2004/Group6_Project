@@ -5,7 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.AdminMovieDto;
 import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningRoom;
@@ -24,17 +24,17 @@ public class AppConfig {
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
 
-        // Configure custom mapping rules when mapping from Movie to MovieDto
-        modelMapper.typeMap(Movie.class, MovieDto.class).addMappings(mapper -> {
+        // Configure custom mapping rules when mapping from Movie to AdminMovieDto
+        modelMapper.typeMap(Movie.class, AdminMovieDto.class).addMappings(mapper -> {
             // Skip collection fields to avoid cascade loading issues in most cases
-            mapper.skip(MovieDto::setDirectors);
-            mapper.skip(MovieDto::setActors);
+            mapper.skip(AdminMovieDto::setDirectors);
+            mapper.skip(AdminMovieDto::setActors);
             // Map rating ID properly
-            mapper.map(src -> src.getRating() != null ? src.getRating().getId() : null, MovieDto::setRatingId);
+            mapper.map(src -> src.getRating() != null ? src.getRating().getId() : null, AdminMovieDto::setRatingId);
         });
 
-        // Configure mapping rules when mapping from MovieDto to Movie
-        modelMapper.typeMap(MovieDto.class, Movie.class).addMappings(mapper -> {
+        // Configure mapping rules when mapping from AdminMovieDto to Movie
+        modelMapper.typeMap(AdminMovieDto.class, Movie.class).addMappings(mapper -> {
             // Skip mapping directors and actors as they will be handled separately in
             // service layer
             mapper.skip(Movie::setDirectors);

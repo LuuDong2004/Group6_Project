@@ -1,7 +1,7 @@
 
 package group6.cinema_project.controller.User;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.CustomerMovieDto;
 import group6.cinema_project.service.User.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +31,12 @@ public class MovieController {
 
     @GetMapping("view")
     public String getAllMoviesAndByGenre(@RequestParam(value = "genre", required = false) String genre, Model model) {
-        List<MovieDto> allMovies = movieService.getAllMovie();
-        List<MovieDto> topMovies = movieService.getTopMovies7Days();
+        List<CustomerMovieDto> allMovies = movieService.getAllMovie();
+        List<CustomerMovieDto> topMovies = movieService.getTopMovies7Days();
         model.addAttribute("Movies", allMovies);
         model.addAttribute("topMovies", topMovies);
         // Lấy recommendedMovies cho user hiện tại
-        List<MovieDto> recommendedMovies = recommendMoviesInternal();
+        List<CustomerMovieDto> recommendedMovies = recommendMoviesInternal();
         model.addAttribute("recommendedMovies", recommendedMovies);
         // Thêm timestamp để tránh cache hình ảnh
         model.addAttribute("timestamp", System.currentTimeMillis());
@@ -44,7 +44,7 @@ public class MovieController {
     }
 
     // Hàm dùng để lấy recommendedMovies cho user hiện tại
-    private List<MovieDto> recommendMoviesInternal() {
+    private List<CustomerMovieDto> recommendMoviesInternal() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()
@@ -89,9 +89,9 @@ public class MovieController {
                     }
                 }
             }
-            List<MovieDto> allMovies = movieService.getAllMovie();
-            List<MovieDto> recommend = new ArrayList<>();
-            for (MovieDto movie : allMovies) {
+            List<CustomerMovieDto> allMovies = movieService.getAllMovie();
+            List<CustomerMovieDto> recommend = new ArrayList<>();
+            for (CustomerMovieDto movie : allMovies) {
                 if (movie.getGenreDisplay() != null && !watchedMovieIds.contains(movie.getId())) {
                     for (String g : genres) {
                         if (movie.getGenreDisplay().toLowerCase().contains(g.toLowerCase())) {
@@ -119,17 +119,17 @@ public class MovieController {
 
     @GetMapping("/loadMore")
     @ResponseBody
-    public ResponseEntity<List<MovieDto>> loadMoreMovies(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<List<CustomerMovieDto>> loadMoreMovies(@RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "8") int size) {
-        List<MovieDto> movies = movieService.getMoviesWithPagination(page, size);
+        List<CustomerMovieDto> movies = movieService.getMoviesWithPagination(page, size);
         return ResponseEntity.ok(movies);
     }
 
     // API endpoint để load tất cả phim
     @GetMapping("/loadAll")
     @ResponseBody
-    public ResponseEntity<List<MovieDto>> loadAllMovies() {
-        List<MovieDto> allMovies = movieService.getAllMovie();
+    public ResponseEntity<List<CustomerMovieDto>> loadAllMovies() {
+        List<CustomerMovieDto> allMovies = movieService.getAllMovie();
         return ResponseEntity.ok(allMovies);
     }
 
@@ -140,13 +140,13 @@ public class MovieController {
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "page", defaultValue = "0") int page) {
-        List<MovieDto> movies = movieService.filterMovies(genre, null, sort, search);
+        List<CustomerMovieDto> movies = movieService.filterMovies(genre, null, sort, search);
         int pageSize = 8;
         int total = movies.size();
         int totalPages = (int) Math.ceil((double) total / pageSize);
         int fromIndex = page * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, total);
-        List<MovieDto> pageMovies = (fromIndex < total) ? movies.subList(fromIndex, toIndex) : List.of();
+        List<CustomerMovieDto> pageMovies = (fromIndex < total) ? movies.subList(fromIndex, toIndex) : List.of();
         Map<String, Object> result = new HashMap<>();
         result.put("movies", pageMovies);
         result.put("totalPages", totalPages);
@@ -163,25 +163,25 @@ public class MovieController {
 
     @GetMapping("/recommend")
     @ResponseBody
-    public ResponseEntity<List<MovieDto>> recommendMovies() {
+    public ResponseEntity<List<CustomerMovieDto>> recommendMovies() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()
                     || authentication.getName().equals("anonymousUser")) {
                 // Nếu chưa đăng nhập, trả về top phim rating cao nhất gần đây
-                List<MovieDto> topMovies = movieService.getTopMovies7Days();
+                List<CustomerMovieDto> topMovies = movieService.getTopMovies7Days();
                 return ResponseEntity.ok(topMovies);
             }
             String email = authentication.getName();
             User user = userRepository.findByEmail(email).orElse(null);
             if (user == null) {
-                List<MovieDto> topMovies = movieService.getTopMovies7Days();
+                List<CustomerMovieDto> topMovies = movieService.getTopMovies7Days();
                 return ResponseEntity.ok(topMovies);
             }
             // Lấy các booking gần nhất
             List<BookingDto> bookings = bookingService.getBookingsByUserId(user.getId());
             if (bookings == null || bookings.isEmpty()) {
-                List<MovieDto> topMovies = movieService.getTopMovies7Days();
+                List<CustomerMovieDto> topMovies = movieService.getTopMovies7Days();
                 return ResponseEntity.ok(topMovies);
             }
             // Lấy các thể loại từ các booking gần nhất
@@ -218,9 +218,9 @@ public class MovieController {
                 }
             }
             // Gợi ý phim cùng thể loại, loại trừ phim đã xem
-            List<MovieDto> allMovies = movieService.getAllMovie();
-            List<MovieDto> recommend = new ArrayList<>();
-            for (MovieDto movie : allMovies) {
+            List<CustomerMovieDto> allMovies = movieService.getAllMovie();
+            List<CustomerMovieDto> recommend = new ArrayList<>();
+            for (CustomerMovieDto movie : allMovies) {
                 if (movie.getGenreDisplay() != null && !watchedMovieIds.contains(movie.getId())) {
                     for (String g : genres) {
                         if (movie.getGenreDisplay().toLowerCase().contains(g.toLowerCase())) {
@@ -246,14 +246,14 @@ public class MovieController {
             return ResponseEntity.ok(recommend);
         } catch (Exception e) {
             // Nếu lỗi, fallback top rating
-            List<MovieDto> topMovies = movieService.getTopMovies7Days();
+            List<CustomerMovieDto> topMovies = movieService.getTopMovies7Days();
             return ResponseEntity.ok(topMovies);
         }
     }
 
     @GetMapping("/view/{id}")
     public String getMovieDetail(@PathVariable Integer id, Model model) {
-        MovieDto movie = movieService.getMovieDetail(id);
+        CustomerMovieDto movie = movieService.getMovieDetail(id);
         if (movie == null) {
             return "redirect:/movie/view";
         }

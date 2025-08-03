@@ -7,8 +7,7 @@ import group6.cinema_project.repository.Admin.AdminRatingRepository;
 import group6.cinema_project.repository.Admin.AdminGenreRepository;
 import group6.cinema_project.service.Admin.IAdminMovieService;
 import org.springframework.stereotype.Service;
-import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.PersonSimpleDto;
+import group6.cinema_project.dto.AdminMovieDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.entity.Movie;
@@ -23,7 +22,6 @@ import org.modelmapper.ModelMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminMovieServiceImpl implements IAdminMovieService {
     private final AdminMovieRepository adminMovieRepository;
-    private final AdminActorRepository actorRepository; 
+    private final AdminActorRepository actorRepository;
     private final AdminDirectorRepository directorRepository;
     private final AdminRatingRepository ratingRepository;
     private final AdminGenreRepository genreRepository;
@@ -43,21 +41,21 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<MovieDto> getMovieById(Integer id) {
+    public Optional<AdminMovieDto> getMovieById(Integer id) {
         return adminMovieRepository.findById(id)
                 .map(this::convertToBasicDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<MovieDto> getMovieByIdForDisplay(Integer id) {
+    public Optional<AdminMovieDto> getMovieByIdForDisplay(Integer id) {
         return adminMovieRepository.findByIdWithDirectorsAndActors(id)
                 .map(this::convertToDisplayDto);
     }
 
     @Override
     @Transactional
-    public MovieDto saveOrUpdate(MovieDto movieDto) {
+    public AdminMovieDto saveOrUpdate(AdminMovieDto movieDto) {
         Movie movie = modelMapper.map(movieDto, Movie.class);
 
         // Xử lý Rating
@@ -78,26 +76,21 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
             movie.setGenres(genres);
         }
 
-        // Xử lý directors
+        // Xử lý directors (AdminMovieDto sử dụng Set<String>)
         if (movieDto.getDirectors() != null && !movieDto.getDirectors().isEmpty()) {
             Set<Director> directors = new HashSet<>();
-            for (PersonSimpleDto directorDto : movieDto.getDirectors()) {
-                Director director = directorRepository.findById(directorDto.getId()).orElse(null);
+            for (String directorName : movieDto.getDirectors()) {
+                Director director = directorRepository.findFirstByName(directorName).orElse(null);
                 if (director == null) {
-                    // Nếu không tìm thấy theo ID, thử tìm theo tên
-                    director = directorRepository.findFirstByName(directorDto.getName()).orElse(null);
-                    if (director == null) {
-                        try {
-                            director = new Director();
-                            director.setName(directorDto.getName());
-                            director.setImageUrl(directorDto.getImageUrl());
-                            director = directorRepository.save(director);
-                        } catch (Exception e) {
-                            // If save fails due to duplicate, try to find again
-                            director = directorRepository.findFirstByName(directorDto.getName()).orElse(null);
-                            if (director == null) {
-                                throw new RuntimeException("Failed to create or find director: " + directorDto.getName(), e);
-                            }
+                    try {
+                        director = new Director();
+                        director.setName(directorName);
+                        director = directorRepository.save(director);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        director = directorRepository.findFirstByName(directorName).orElse(null);
+                        if (director == null) {
+                            throw new RuntimeException("Failed to create or find director: " + directorName, e);
                         }
                     }
                 }
@@ -106,26 +99,21 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
             movie.setDirectors(directors);
         }
 
-        // Xử lý actors
+        // Xử lý actors (AdminMovieDto sử dụng Set<String>)
         if (movieDto.getActors() != null && !movieDto.getActors().isEmpty()) {
             Set<Actor> actors = new HashSet<>();
-            for (PersonSimpleDto actorDto : movieDto.getActors()) {
-                Actor actor = actorRepository.findById(actorDto.getId()).orElse(null);
+            for (String actorName : movieDto.getActors()) {
+                Actor actor = actorRepository.findFirstByName(actorName).orElse(null);
                 if (actor == null) {
-                    // Nếu không tìm thấy theo ID, thử tìm theo tên
-                    actor = actorRepository.findFirstByName(actorDto.getName()).orElse(null);
-                    if (actor == null) {
-                        try {
-                            actor = new Actor();
-                            actor.setName(actorDto.getName());
-                            actor.setImageUrl(actorDto.getImageUrl());
-                            actor = actorRepository.save(actor);
-                        } catch (Exception e) {
-                            // If save fails due to duplicate, try to find again
-                            actor = actorRepository.findFirstByName(actorDto.getName()).orElse(null);
-                            if (actor == null) {
-                                throw new RuntimeException("Failed to create or find actor: " + actorDto.getName(), e);
-                            }
+                    try {
+                        actor = new Actor();
+                        actor.setName(actorName);
+                        actor = actorRepository.save(actor);
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to find again
+                        actor = actorRepository.findFirstByName(actorName).orElse(null);
+                        if (actor == null) {
+                            throw new RuntimeException("Failed to create or find actor: " + actorName, e);
                         }
                     }
                 }
@@ -149,7 +137,7 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> getAllMovie() {
+    public List<AdminMovieDto> getAllMovie() {
         return adminMovieRepository.findAll().stream()
                 .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
@@ -157,7 +145,7 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> getAllMoviesForDisplay() {
+    public List<AdminMovieDto> getAllMoviesForDisplay() {
         return adminMovieRepository.findAllWithDirectorsAndActors().stream()
                 .map(this::convertToDisplayDto)
                 .collect(Collectors.toList());
@@ -165,7 +153,7 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy) {
+    public List<AdminMovieDto> getFilteredMoviesForDisplay(String searchTerm, String filterBy) {
         List<Movie> movies;
 
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
@@ -225,9 +213,8 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
                 .collect(Collectors.toList());
     }
 
-
-    private MovieDto convertToBasicDto(Movie movie) {
-        MovieDto dto = new MovieDto();
+    private AdminMovieDto convertToBasicDto(Movie movie) {
+        AdminMovieDto dto = new AdminMovieDto();
 
         dto.setId(movie.getId());
         dto.setName(movie.getName());
@@ -253,8 +240,8 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
         return dto;
     }
 
-    private MovieDto convertToDisplayDto(Movie movie) {
-        MovieDto dto = new MovieDto();
+    private AdminMovieDto convertToDisplayDto(Movie movie) {
+        AdminMovieDto dto = new AdminMovieDto();
 
         // Map basic fields
         dto.setId(movie.getId());
@@ -280,19 +267,19 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer());
 
-        // Map directors and actors (these should be loaded via JOIN FETCH)
+        // Map directors and actors as String names for AdminMovieDto
         if (movie.getDirectors() != null) {
-            List<PersonSimpleDto> directors = movie.getDirectors().stream()
-                    .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
-                    .collect(Collectors.toList());
-            dto.setDirectors(directors);
+            Set<String> directorNames = movie.getDirectors().stream()
+                    .map(Director::getName)
+                    .collect(Collectors.toSet());
+            dto.setDirectors(directorNames);
         }
 
         if (movie.getActors() != null) {
-            List<PersonSimpleDto> actors = movie.getActors().stream()
-                    .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
-                    .collect(Collectors.toList());
-            dto.setActors(actors);
+            Set<String> actorNames = movie.getActors().stream()
+                    .map(Actor::getName)
+                    .collect(Collectors.toSet());
+            dto.setActors(actorNames);
         }
 
         // Set thông tin hiển thị cho Rating và Genre
@@ -312,14 +299,14 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MovieDto> getAllMoviesForDisplayWithPagination(Pageable pageable) {
+    public Page<AdminMovieDto> getAllMoviesForDisplayWithPagination(Pageable pageable) {
         Page<Movie> moviePage = adminMovieRepository.findAllWithDirectorsAndActorsPageable(pageable);
         return moviePage.map(this::convertToDisplayDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MovieDto> getFilteredMoviesForDisplayWithPagination(String searchTerm, String filterBy,
+    public Page<AdminMovieDto> getFilteredMoviesForDisplayWithPagination(String searchTerm, String filterBy,
             Pageable pageable) {
         Page<Movie> moviePage;
 

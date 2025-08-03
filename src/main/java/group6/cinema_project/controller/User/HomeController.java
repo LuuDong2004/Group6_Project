@@ -1,6 +1,6 @@
 package group6.cinema_project.controller.User;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.CustomerMovieDto;
 import group6.cinema_project.service.User.IHomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,12 +16,12 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        List<MovieDto> popularMovies = homeService.getPopularMovies();
-        List<MovieDto> newReleases = homeService.getNewReleases();
-        
+        List<CustomerMovieDto> popularMovies = homeService.getPopularMovies();
+        List<CustomerMovieDto> newReleases = homeService.getNewReleases();
+
         System.out.println("Popular Movies: " + (popularMovies != null ? popularMovies.size() : "null"));
         System.out.println("New Releases: " + (newReleases != null ? newReleases.size() : "null"));
-        
+
         model.addAttribute("popularMovies", popularMovies);
         model.addAttribute("newReleases", newReleases);
         // Thêm timestamp để tránh cache hình ảnh

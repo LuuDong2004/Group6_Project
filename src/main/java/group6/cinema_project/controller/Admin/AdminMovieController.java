@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.AdminMovieDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 
@@ -73,7 +73,7 @@ public class AdminMovieController {
 
         // Tạo Pageable object với page và size
         Pageable pageable = PageRequest.of(page, size);
-        Page<MovieDto> moviePage;
+        Page<AdminMovieDto> moviePage;
 
         // Sử dụng các phương thức pagination mới
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
@@ -138,7 +138,7 @@ public class AdminMovieController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            MovieDto movie = new MovieDto();
+            AdminMovieDto movie = new AdminMovieDto();
             movie.setName(name);
             movie.setDescription(description);
             movie.setDuration(duration);
@@ -219,13 +219,13 @@ public class AdminMovieController {
     @GetMapping("/edit/{id}")
     public String editMovie(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
-            Optional<MovieDto> movieOpt = movieService.getMovieById(id);
+            Optional<AdminMovieDto> movieOpt = movieService.getMovieById(id);
             if (movieOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim với ID: " + id);
                 return "redirect:/admin/movies/list";
             }
 
-            MovieDto movie = movieOpt.get();
+            AdminMovieDto movie = movieOpt.get();
             model.addAttribute("movie", movie);
 
             // Add all directors and actors for autocomplete functionality
@@ -260,13 +260,13 @@ public class AdminMovieController {
 
         try {
             // Get existing movie
-            Optional<MovieDto> existingMovieOpt = movieService.getMovieById(id);
+            Optional<AdminMovieDto> existingMovieOpt = movieService.getMovieById(id);
             if (existingMovieOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim với ID: " + id);
                 return "redirect:/admin/movies/list";
             }
 
-            MovieDto movie = existingMovieOpt.get();
+            AdminMovieDto movie = existingMovieOpt.get();
 
             // Update basic information
             movie.setName(name);
@@ -346,7 +346,7 @@ public class AdminMovieController {
     @GetMapping("/delete/{id}")
     public String deleteMovie(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            Optional<MovieDto> movieOpt = movieService.getMovieById(id);
+            Optional<AdminMovieDto> movieOpt = movieService.getMovieById(id);
             if (movieOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim với ID: " + id);
                 return "redirect:/admin/movies/list";

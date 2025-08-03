@@ -1,7 +1,7 @@
 package group6.cinema_project.controller.User;
 
 import group6.cinema_project.dto.BranchDto;
-import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.CustomerMovieDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.service.User.IMovieService;
 import group6.cinema_project.service.User.IScheduleService;
@@ -48,15 +48,16 @@ public class ScheduleController {
             // Chuẩn hóa ngày (chỉ lấy phần ngày, bỏ giờ phút giây)
             Date normalizedDate = normalizeDateToMidnight(date);
 
-             //Kiểm tra nếu ngày được chọn là ngày quá khứ
+            // Kiểm tra nếu ngày được chọn là ngày quá khứ
             if (normalizedDate.before(currentDate)) {
-                model.addAttribute("error", "Không thể xem lịch chiếu của ngày đã qua. Vui lòng chọn ngày hôm nay hoặc các ngày tiếp theo.");
+                model.addAttribute("error",
+                        "Không thể xem lịch chiếu của ngày đã qua. Vui lòng chọn ngày hôm nay hoặc các ngày tiếp theo.");
                 model.addAttribute("movieId", movieId);
                 return "error";
             }
 
             // Lấy thông tin phim
-            List<MovieDto> movies = movieService.findMovieById(movieId);
+            List<CustomerMovieDto> movies = movieService.findMovieById(movieId);
             if (movies.isEmpty()) {
                 model.addAttribute("error", "Movie not found");
                 return "error";
@@ -72,8 +73,8 @@ public class ScheduleController {
             // Thêm danh sách ngày dạng string yyyy-MM-dd cho JS
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             List<String> availableScreeningDateStrs = availableScreeningDates.stream()
-                .map(sdf::format)
-                .collect(Collectors.toList());
+                    .map(sdf::format)
+                    .collect(Collectors.toList());
             model.addAttribute("availableScreeningDateStrs", availableScreeningDateStrs);
 
             // Lấy danh sách rạp có lịch chiếu cho phim vào ngày đã chọn
@@ -99,11 +100,12 @@ public class ScheduleController {
             Map<Integer, Map<String, List<ScreeningScheduleDto>>> schedulesByBranchAndRoom = new HashMap<>();
 
             for (ScreeningScheduleDto schedule : schedules) {
-                if (schedule.getBranch() == null) continue;
+                if (schedule.getBranch() == null)
+                    continue;
 
                 int currBranchId = schedule.getBranch().getId();
-                String roomName = schedule.getScreeningRoom() != null ?
-                        schedule.getScreeningRoom().getName() : "Unknown Room";
+                String roomName = schedule.getScreeningRoom() != null ? schedule.getScreeningRoom().getName()
+                        : "Unknown Room";
 
                 if (!schedulesByBranchAndRoom.containsKey(currBranchId)) {
                     schedulesByBranchAndRoom.put(currBranchId, new HashMap<>());
@@ -139,7 +141,6 @@ public class ScheduleController {
                 }
             }
 
-
             model.addAttribute("movie", movies);
             model.addAttribute("dateList", dateList);
             model.addAttribute("branches", branches);
@@ -162,13 +163,11 @@ public class ScheduleController {
         }
     }
 
-
     private List<ScreeningScheduleDto> filterPastSchedules(List<ScreeningScheduleDto> schedules, Date currentDateTime) {
         return schedules.stream()
                 .filter(schedule -> !isScheduleInPast(schedule, currentDateTime))
                 .collect(Collectors.toList());
     }
-
 
     private boolean isScheduleInPast(ScreeningScheduleDto schedule, Date currentDateTime) {
         if (schedule.getScreeningDate() == null || schedule.getStartTime() == null) {
@@ -176,11 +175,10 @@ public class ScheduleController {
         }
         // Combine LocalDate and LocalTime to LocalDateTime
         java.time.LocalDateTime scheduleDateTime = java.time.LocalDateTime.of(
-            schedule.getScreeningDate(), schedule.getStartTime()
-        );
+                schedule.getScreeningDate(), schedule.getStartTime());
         java.time.LocalDateTime now = currentDateTime.toInstant()
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDateTime();
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDateTime();
         return scheduleDateTime.isBefore(now);
     }
 
@@ -212,7 +210,8 @@ public class ScheduleController {
     }
 
     /**
-     * FIXED: Tạo danh sách các ngày từ ngày hiện tại với selectedDate để xác định ngày được chọn
+     * FIXED: Tạo danh sách các ngày từ ngày hiện tại với selectedDate để xác định
+     * ngày được chọn
      */
     private List<Map<String, Object>> generateDateList(int numDays, Date selectedDate) {
         List<Map<String, Object>> dateList = new ArrayList<>();
@@ -224,7 +223,7 @@ public class ScheduleController {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        String[] dayNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+        String[] dayNames = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
         for (int i = 0; i < numDays; i++) {
             Map<String, Object> dateInfo = new HashMap<>();
@@ -262,7 +261,8 @@ public class ScheduleController {
      * FIXED: Cải thiện hàm kiểm tra hai ngày có cùng một ngày không
      */
     private boolean isSameDay(Date date1, Date date2) {
-        if (date1 == null || date2 == null) return false;
+        if (date1 == null || date2 == null)
+            return false;
 
         Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);

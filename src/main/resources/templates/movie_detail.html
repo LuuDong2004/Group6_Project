@@ -1,182 +1,315 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title th:text="${movie != null ? movie.name : 'Chi tiết phim'}">Chi tiết phim</title>
-    <link rel="stylesheet" th:href="@{/assets/css/style-starter.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/movie_detail.css}">
-    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title th:text="${movie != null ? movie.name : 'Chi tiết phim'}">
+      Chi tiết phim
+    </title>
+    <link rel="stylesheet" th:href="@{/assets/css/style-starter.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/movie_detail.css}" />
+    <link
+      href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        .movie-review {
-            background: #181818;
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 18px;
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .movie-review .review-user {
-            font-size: 1rem;
-            color: #e67e22;
-            margin-bottom: 4px;
-        }
-        .movie-review .review-rating {
-            color: #f1c40f;
-            margin-bottom: 4px;
-        }
-        .movie-review .review-comment {
-            margin-bottom: 4px;
-            font-size: 1.05rem;
-        }
-        .movie-review .review-date {
-            font-size: 0.95rem;
-            color: #aaa;
-        }
+      .movie-review {
+        background: #181818;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 18px;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .movie-review .review-user {
+        font-size: 1rem;
+        color: #e67e22;
+        margin-bottom: 4px;
+      }
+      .movie-review .review-rating {
+        color: #f1c40f;
+        margin-bottom: 4px;
+      }
+      .movie-review .review-comment {
+        margin-bottom: 4px;
+        font-size: 1.05rem;
+      }
+      .movie-review .review-date {
+        font-size: 0.95rem;
+        color: #aaa;
+      }
     </style>
-</head>
-<body>
-<!-- header -->
-<header id="site-header" class="w3l-header fixed-top">
-    <!--/nav-->
-    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+  </head>
+  <body>
+    <!-- header -->
+    <header id="site-header" class="w3l-header fixed-top">
+      <!--/nav-->
+      <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
         <div class="container">
-            <h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log" aria-hidden="true"></span> MyShowz </a></h1>
-            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="fa icon-expand fa-bars"></span>
-                <span class="fa icon-close fa-times"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">Home</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" th:href="@{/movies}">Movies</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/movie_theater}">Movie Theater</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/contact}">Contact</a>
-                    </li>
-                </ul>
-                <div class="Login_SignUp" id="login" style="font-size: 2rem ; display: inline-block; position: relative;">
-                    <a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
-                </div>
-                <!-- toggle switch for light and dark theme -->
-                <div class="mobile-position">
-                    <nav class="navigation">
-                        <div class="theme-switch-wrapper">
-                            <label class="theme-switch" for="checkbox">
-                                <input type="checkbox" id="checkbox">
-                                <div class="mode-container">
-                                    <i class="gg-sun"></i>
-                                    <i class="gg-moon"></i>
-                                </div>
-                            </label>
-                        </div>
-                    </nav>
-                </div>
+          <h1>
+            <a class="navbar-brand" th:href="@{/}"
+              ><span class="fa fa-play icon-log" aria-hidden="true"></span>
+              MyShowz
+            </a>
+          </h1>
+          <button
+            class="navbar-toggler collapsed"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="fa icon-expand fa-bars"></span>
+            <span class="fa icon-close fa-times"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" th:href="@{/}">Home</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" th:href="@{/movies}">Movies</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" th:href="@{/movie_theater}"
+                  >Movie Theater</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" th:href="@{/contact}">Contact</a>
+              </li>
+            </ul>
+            <div
+              class="Login_SignUp"
+              id="login"
+              style="font-size: 2rem; display: inline-block; position: relative"
+            >
+              <a class="nav-link" th:href="@{/login}"
+                ><i class="fa fa-user-circle-o"></i
+              ></a>
             </div>
+            <!-- toggle switch for light and dark theme -->
+            <div class="mobile-position">
+              <nav class="navigation">
+                <div class="theme-switch-wrapper">
+                  <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="mode-container">
+                      <i class="gg-sun"></i>
+                      <i class="gg-moon"></i>
+                    </div>
+                  </label>
+                </div>
+              </nav>
+            </div>
+          </div>
         </div>
-    </nav>
-</header>
-<!--/breadcrumbs -->
-<div class="w3l-breadcrumbs">
-    <nav id="breadcrumbs" class="breadcrumbs">
+      </nav>
+    </header>
+    <!--/breadcrumbs -->
+    <div class="w3l-breadcrumbs">
+      <nav id="breadcrumbs" class="breadcrumbs">
         <div class="container page-wrapper">
-            <a th:href="@{/}" >Home</a> » <a th:href="@{/movie/view}">movies</a> » <span class="breadcrumb_last" id="breadcrumbMovieName" aria-current="page" th:text="${movie != null ? movie.name : 'Chi tiết phim'}">Chi tiết phim</span>
+          <a th:href="@{/}">Home</a> » <a th:href="@{/movie/view}">movies</a> »
+          <span
+            class="breadcrumb_last"
+            id="breadcrumbMovieName"
+            aria-current="page"
+            th:text="${movie != null ? movie.name : 'Chi tiết phim'}"
+            >Chi tiết phim</span
+          >
         </div>
-    </nav>
-</div>
-<!--/breadcrumbs end-->
-<div class="movie-detail-container">
-    <h2 class="movie-detail-title">CHI TIẾT PHIM</h2>
-    <div class="movie-detail-main" th:if="${movie != null}">
+      </nav>
+    </div>
+    <!--/breadcrumbs end-->
+    <div class="movie-detail-container">
+      <h2 class="movie-detail-title">CHI TIẾT PHIM</h2>
+      <div class="movie-detail-main" th:if="${movie != null}">
         <div class="movie-detail-poster">
-            <img id="moviePoster" th:src="${movie.image}" th:alt="${movie.name}" alt="Movie Poster">
+          <img
+            id="moviePoster"
+            th:src="${movie.image}"
+            th:alt="${movie.name}"
+            alt="Movie Poster"
+          />
         </div>
         <div class="movie-detail-info">
-            <h1 id="movieTitle" th:text="${movie.name}">Movie Name</h1>
-            <p><b>Thể loại:</b> <span id="movieGenre" th:text="${movie.genre}">Genre</span></p>
-            <p><b>Đạo diễn:</b>
-                <span id="movieDirector">
-                        <span th:if="${movie.directors != null and !movie.directors.isEmpty()}" th:each="director,iter : ${movie.directors}">
-                            <a th:href="@{'/person_detail?type=director&id=' + ${director.id}}" th:text="${director.name}"></a><span th:if="${!iter.last}">, </span>
-                        </span>
-                        <span th:if="${movie.directors == null or movie.directors.isEmpty()}">N/A</span>
-                    </span>
-            </p>
-            <p><b>Diễn viên:</b>
-                <span id="movieActors">
-                        <span th:if="${movie.actors != null and !movie.actors.isEmpty()}" th:each="actor,iter : ${movie.actors}">
-                            <a th:href="@{'/person_detail?type=actor&id=' + ${actor.id}}" th:text="${actor.name}"></a><span th:if="${!iter.last}">, </span>
-                        </span>
-                        <span th:if="${movie.actors == null or movie.actors.isEmpty()}">N/A</span>
-                    </span>
-            </p>
-            <p><b>Thời lượng:</b> <span id="movieDuration" th:text="${movie.duration != null ? movie.duration : 'N/A'}">Duration</span> phút</p>
-            <p><b>Ngôn ngữ:</b> <span id="movieLanguage" th:text="${movie.language != null ? movie.language : 'N/A'}">Language</span></p>
-            <p><b>Khởi chiếu:</b> <span id="movieReleaseDate" th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'N/A'}">Release Date</span></p>
-            <p><b>Đánh giá:</b> <span id="movieRating" th:text="${movie.rating != null ? movie.rating : 'N/A'}">Rating</span></p>
-            <a th:href="@{/schedule/movie/{movieId}/date(movieId=${movie.id})}" class="btn btn-success" id="bookTicketBtn">Đặt vé</a>
+          <h1 id="movieTitle" th:text="${movie.name}">Movie Name</h1>
+          <p>
+            <b>Thể loại:</b>
+            <span id="movieGenre" th:text="${movie.genreDisplay}">Genre</span>
+          </p>
+          <p>
+            <b>Đạo diễn:</b>
+            <span id="movieDirector">
+              <span
+                th:if="${movie.directorsDetail != null and !movie.directorsDetail.isEmpty()}"
+                th:each="director,iter : ${movie.directorsDetail}"
+              >
+                <a
+                  th:href="@{'/person_detail?type=director&id=' + ${director.id}}"
+                  th:text="${director.name}"
+                ></a
+                ><span th:if="${!iter.last}">, </span>
+              </span>
+              <span
+                th:if="${movie.directorsDetail == null or movie.directorsDetail.isEmpty()}"
+                >N/A</span
+              >
+            </span>
+          </p>
+          <p>
+            <b>Diễn viên:</b>
+            <span id="movieActors">
+              <span
+                th:if="${movie.actorsDetail != null and !movie.actorsDetail.isEmpty()}"
+                th:each="actor,iter : ${movie.actorsDetail}"
+              >
+                <a
+                  th:href="@{'/person_detail?type=actor&id=' + ${actor.id}}"
+                  th:text="${actor.name}"
+                ></a
+                ><span th:if="${!iter.last}">, </span>
+              </span>
+              <span
+                th:if="${movie.actorsDetail == null or movie.actorsDetail.isEmpty()}"
+                >N/A</span
+              >
+            </span>
+          </p>
+          <p>
+            <b>Thời lượng:</b>
+            <span
+              id="movieDuration"
+              th:text="${movie.duration != null ? movie.duration : 'N/A'}"
+              >Duration</span
+            >
+            phút
+          </p>
+          <p>
+            <b>Ngôn ngữ:</b>
+            <span
+              id="movieLanguage"
+              th:text="${movie.language != null ? movie.language : 'N/A'}"
+              >Language</span
+            >
+          </p>
+          <p>
+            <b>Khởi chiếu:</b>
+            <span
+              id="movieReleaseDate"
+              th:text="${movie.releaseDate != null ? #dates.format(movie.releaseDate, 'dd/MM/yyyy') : 'N/A'}"
+              >Release Date</span
+            >
+          </p>
+          <p>
+            <b>Đánh giá:</b>
+            <span
+              id="movieRating"
+              th:text="${movie.rating != null ? movie.rating : 'N/A'}"
+              >Rating</span
+            >
+          </p>
+          <a
+            th:href="@{/schedule/movie/{movieId}/date(movieId=${movie.id})}"
+            class="btn btn-success"
+            id="bookTicketBtn"
+            >Đặt vé</a
+          >
         </div>
-    </div>
-    <div th:if="${movie == null}" class="text-center">
+      </div>
+      <div th:if="${movie == null}" class="text-center">
         <p>Không tìm thấy thông tin phim</p>
-        <a th:href="@{/movies}" class="btn btn-primary">Quay lại danh sách phim</a>
-    </div>
-    <h4>Trailer</h4>
-    <div class="trailer-container">
+        <a th:href="@{/movies}" class="btn btn-primary"
+          >Quay lại danh sách phim</a
+        >
+      </div>
+      <h4>Trailer</h4>
+      <div class="trailer-container">
         <div th:if="${movie.trailer != null and !movie.trailer.isEmpty()}">
-            <iframe id="movieTrailer" width="100%" height="400"
-                    th:src="${#strings.replace(movie.trailer, 'watch?v=', 'embed/')}"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
+          <iframe
+            id="movieTrailer"
+            width="100%"
+            height="400"
+            th:src="${#strings.replace(movie.trailer, 'watch?v=', 'embed/')}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
         </div>
-        <div th:if="${movie.trailer == null or movie.trailer.isEmpty()}" style="text-align: center; padding: 40px; color: #ccc;">
-            <p>Trailer không khả dụng</p>
+        <div
+          th:if="${movie.trailer == null or movie.trailer.isEmpty()}"
+          style="text-align: center; padding: 40px; color: #ccc"
+        >
+          <p>Trailer không khả dụng</p>
         </div>
-    </div>
-    <!-- HIỂN THỊ COMMENT -->
-    <div class="movie-comments-section">
+      </div>
+      <!-- HIỂN THỊ COMMENT -->
+      <div class="movie-comments-section">
         <h4>Đánh giá người xem</h4>
         <div th:if="${movie.reviews != null and !movie.reviews.isEmpty()}">
-            <div th:each="review : ${movie.reviews}" class="movie-review">
-                <div class="review-user">Người dùng: <span th:text="${review.user}"></span></div>
-                <div class="review-rating">Đánh giá: <span th:text="${review.rating}"></span>/5</div>
-                <div class="review-comment" th:text="${review.comment}"></div>
-                <div class="review-date" th:text="${#temporals.format(review.date, 'dd/MM/yyyy HH:mm')}"></div>
+          <div th:each="review : ${movie.reviews}" class="movie-review">
+            <div class="review-user">
+              Người dùng: <span th:text="${review.user}"></span>
             </div>
+            <div class="review-rating">
+              Đánh giá: <span th:text="${review.rating}"></span>/5
+            </div>
+            <div class="review-comment" th:text="${review.comment}"></div>
+            <div
+              class="review-date"
+              th:text="${#temporals.format(review.date, 'dd/MM/yyyy HH:mm')}"
+            ></div>
+          </div>
         </div>
-        <div th:if="${movie.reviews == null or movie.reviews.isEmpty()}" style="color:#ccc;">Chưa có đánh giá nào.</div>
-    </div>
-    <div th:if="${#authentication.principal != 'anonymousUser'}">
-        <button id="showCommentFormBtn" style="margin-top:24px;">Viết đánh giá</button>
-        <div class="movie-add-comment" id="addCommentSection" style="display:none;">
-            <h4>Viết đánh giá của bạn</h4>
-            <textarea id="userComment" placeholder="Nội dung đánh giá"></textarea>
-            <select id="userRating">
-                <option value="5">5/5</option>
-                <option value="4">4/5</option>
-                <option value="3">3/5</option>
-                <option value="2">2/5</option>
-                <option value="1">1/5</option>
-            </select>
-            <button id="submitComment">Gửi đánh giá</button>
-            <div id="commentMsg" style="color:#b2ffb2;margin-top:8px;"></div>
+        <div
+          th:if="${movie.reviews == null or movie.reviews.isEmpty()}"
+          style="color: #ccc"
+        >
+          Chưa có đánh giá nào.
         </div>
-        <div id="commentWarnMsg" style="color:#ffb2b2;margin-top:8px;"></div>
+      </div>
+      <div th:if="${#authentication.principal != 'anonymousUser'}">
+        <button id="showCommentFormBtn" style="margin-top: 24px">
+          Viết đánh giá
+        </button>
+        <div
+          class="movie-add-comment"
+          id="addCommentSection"
+          style="display: none"
+        >
+          <h4>Viết đánh giá của bạn</h4>
+          <textarea id="userComment" placeholder="Nội dung đánh giá"></textarea>
+          <select id="userRating">
+            <option value="5">5/5</option>
+            <option value="4">4/5</option>
+            <option value="3">3/5</option>
+            <option value="2">2/5</option>
+            <option value="1">1/5</option>
+          </select>
+          <button id="submitComment">Gửi đánh giá</button>
+          <div id="commentMsg" style="color: #b2ffb2; margin-top: 8px"></div>
+        </div>
+        <div id="commentWarnMsg" style="color: #ffb2b2; margin-top: 8px"></div>
+      </div>
+      <div
+        th:if="${#authentication.principal == 'anonymousUser'}"
+        style="margin-top: 24px"
+      >
+        <p style="color: #ccc">
+          Bạn cần
+          <a th:href="@{/signin}" style="color: #3498db">đăng nhập</a> để viết
+          đánh giá.
+        </p>
+      </div>
     </div>
-    <div th:if="${#authentication.principal == 'anonymousUser'}" style="margin-top:24px;">
-        <p style="color:#ccc;">Bạn cần <a th:href="@{/signin}" style="color:#3498db;">đăng nhập</a> để viết đánh giá.</p>
-    </div>
-</div>
-<script th:src="@{/assets/js/movie_detail.js}"></script>
-<script th:src="@{/assets/js/theme-change.js}"></script>
-</body>
+    <script th:src="@{/assets/js/movie_detail.js}"></script>
+    <script th:src="@{/assets/js/theme-change.js}"></script>
+  </body>
 </html>
-  

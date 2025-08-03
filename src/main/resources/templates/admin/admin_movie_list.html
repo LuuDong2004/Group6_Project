@@ -219,13 +219,13 @@
     <div th:if="${not #lists.isEmpty(movie.directors)}">
         <strong>Đạo diễn:</strong>
         <span th:each="director, iterStat : ${movie.directors}"
-              th:text="${director.name} + (${iterStat.last} ? '' : ', ')">Anthony Russo</span>
+              th:text="${director} + (${iterStat.last} ? '' : ', ')">Anthony Russo</span>
     </div>
 
     <div class="cast-info" th:if="${not #lists.isEmpty(movie.actors)}">
         <strong>Diễn viên:</strong>
-        <span th:title="${#strings.listJoin(movie.actors.![name], ', ')}"
-              th:text="${#strings.abbreviate(#strings.listJoin(movie.actors.![name], ', '), 30)}">
+        <span th:title="${#strings.listJoin(movie.actors, ', ')}"
+              th:text="${#strings.abbreviate(#strings.listJoin(movie.actors, ', '), 30)}">
             Robert Downey Jr., Chris Evans...
         </span>
     </div>
