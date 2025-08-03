@@ -496,13 +496,26 @@
                     <i class="fas fa-info-circle me-2"></i>Trạng thái
                   </label>
                   <select class="form-control" id="status" required readonly>
-                    <option value="UPCOMING" selected>Sắp chiếu</option>
+                    <option
+                      th:value="${schedule.status}"
+                      th:text="${schedule.status.displayName}"
+                      selected
+                    >
+                      Sắp chiếu
+                    </option>
                   </select>
                   <!-- Hidden input để đảm bảo giá trị được submit -->
-                  <input type="hidden" th:field="*{status}" value="UPCOMING" />
+                  <input
+                    type="hidden"
+                    th:field="*{status}"
+                    th:value="${schedule.status}"
+                  />
                   <small class="text-muted">
                     <i class="fas fa-info-circle me-1"></i>
-                    Lịch chiếu mới luôn có trạng thái "Sắp chiếu"
+                    Lịch chiếu mới luôn có trạng thái "<span
+                      th:text="${schedule.status.displayName}"
+                      >Sắp chiếu</span
+                    >"
                   </small>
                   <div
                     th:if="${#fields.hasErrors('status')}"
@@ -944,8 +957,9 @@
       // Set trạng thái mặc định - luôn là "Sắp chiếu"
       function setDefaultStatus() {
         const statusSelect = document.getElementById("status");
-        // Luôn set trạng thái là "Sắp chiếu"
-        statusSelect.value = "UPCOMING";
+        // Trạng thái đã được set từ server-side (ENUM value)
+        // Không cần hardcode "UPCOMING" nữa
+        console.log("Status đã được set từ server:", statusSelect.value);
 
         // Đảm bảo ngày được hiển thị đúng nếu có từ URL parameter
         setDateFromUrlParameter();

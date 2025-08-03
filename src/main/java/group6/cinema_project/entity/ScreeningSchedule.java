@@ -10,6 +10,8 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import group6.cinema_project.entity.Enum.ScheduleStatus;
+
 import java.sql.Time;
 
 import java.util.Date;
@@ -51,7 +53,8 @@ public class ScreeningSchedule {
     @Column(name = "end_time")
     private Time endTime;
 
-    @Column(name = "status", nullable = false, length = 255)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ScheduleStatus status;
 
 }

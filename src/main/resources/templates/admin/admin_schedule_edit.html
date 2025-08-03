@@ -424,18 +424,19 @@
                   <label for="status" class="form-label">
                     <i class="fas fa-info-circle me-2"></i>Trạng thái
                   </label>
-                  <select
+                  <input
+                    type="text"
                     class="form-control"
-                    id="status"
-                    th:field="*{status}"
-                    required
-                  >
-                    <option value="">-- Chọn trạng thái --</option>
-                    <option value="UPCOMING">Sắp chiếu</option>
-                    <option value="ACTIVE">Đang chiếu</option>
-                    <option value="COMPLETED">Đã hoàn thành</option>
-                    <option value="CANCELLED">Đã hủy</option>
-                  </select>
+                    id="statusDisplay"
+                    th:value="${schedule.status != null ? schedule.status.displayName : 'Không xác định'}"
+                    readonly
+                  />
+                  <!-- Hidden input để giữ nguyên giá trị trạng thái -->
+                  <input type="hidden" th:field="*{status}" />
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Không thể thay đổi trạng thái khi sửa lịch chiếu
+                  </small>
                   <div
                     th:if="${#fields.hasErrors('status')}"
                     class="invalid-feedback d-block"

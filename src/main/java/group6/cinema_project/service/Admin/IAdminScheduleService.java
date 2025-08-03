@@ -8,6 +8,7 @@ import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 import group6.cinema_project.exception.ScheduleConflictException;
 
 public interface IAdminScheduleService {
@@ -182,6 +183,14 @@ public interface IAdminScheduleService {
          * @return true nếu có thể chỉnh sửa, false nếu không thể
          */
         boolean canEditSchedule(Integer scheduleId);
+
+        /**
+         * Cập nhật trạng thái của lịch chiếu
+         *
+         * @param scheduleId ID của lịch chiếu
+         * @param newStatus  Trạng thái mới
+         */
+        void updateScheduleStatus(Integer scheduleId, ScheduleStatus newStatus);
 
         /**
          * Kiểm tra xem lịch chiếu có thể xóa hay không

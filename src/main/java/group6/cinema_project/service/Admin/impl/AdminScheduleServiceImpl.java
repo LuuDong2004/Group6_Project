@@ -24,6 +24,7 @@ import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 import group6.cinema_project.exception.ScheduleConflictException;
 import group6.cinema_project.repository.Admin.AdminBranchRepository;
 import group6.cinema_project.repository.Admin.AdminMovieRepository;
@@ -53,6 +54,26 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     @Transactional
     public ScreeningScheduleDto saveOrUpdateScreeningSchedule(ScreeningScheduleDto screeningScheduleDto) {
         validateScheduleIsNotCurrentlyShowing(screeningScheduleDto.getId());
+
+        // Nếu là tạo mới (id = null), luôn set trạng thái là UPCOMING
+        if (screeningScheduleDto.getId() == null) {
+            screeningScheduleDto.setStatus(ScheduleStatus.UPCOMING);
+        } else {
+            // Nếu là cập nhật, giữ nguyên trạng thái hiện tại và chỉ cho phép sửa nếu là
+            // UPCOMING
+            Optional<ScreeningSchedule> existingScheduleOpt = movieScheduleRepository
+                    .findById(screeningScheduleDto.getId());
+            if (existingScheduleOpt.isPresent()) {
+                ScreeningSchedule existingSchedule = existingScheduleOpt.get();
+                // Giữ nguyên trạng thái hiện tại, không cho phép thay đổi
+                screeningScheduleDto.setStatus(existingSchedule.getStatus());
+
+                // Kiểm tra chỉ cho phép sửa lịch chiếu UPCOMING
+                if (existingSchedule.getStatus() != ScheduleStatus.UPCOMING) {
+                    throw new IllegalStateException("Chỉ có thể sửa lịch chiếu có trạng thái 'Sắp chiếu'");
+                }
+            }
+        }
 
         calculateAndSetEndTime(screeningScheduleDto);
 
@@ -624,7 +645,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             List<ScreeningSchedule> allSchedules = movieScheduleRepository.findAllWithRelatedEntities();
             java.util.Map<String, Long> statusDistribution = allSchedules.stream()
                     .collect(Collectors.groupingBy(
-                            schedule -> schedule.getStatus() != null ? schedule.getStatus() : "NULL",
+                            schedule -> schedule.getStatus() != null ? schedule.getStatus().getValue() : "NULL",
                             Collectors.counting()));
             debugInfo.put("scheduleStatusDistribution", statusDistribution);
 
@@ -648,8 +669,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             int updatedCount = 0;
 
             for (ScreeningSchedule schedule : allSchedules) {
-                if (schedule.getStatus() == null || schedule.getStatus().trim().isEmpty()) {
-                    schedule.setStatus("AUTO");
+                if (schedule.getStatus() == null) {
+                    schedule.setStatus(ScheduleStatus.UPCOMING);
                     movieScheduleRepository.save(schedule);
                     updatedCount++;
                 }
@@ -677,8 +698,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         if (scheduleOpt.isPresent()) {
             ScreeningSchedule schedule = scheduleOpt.get();
 
-            // Also check English status variants
-            if ("ACTIVE".equalsIgnoreCase(schedule.getStatus())) {
+            // Kiểm tra trạng thái ACTIVE
+            if (schedule.getStatus() == ScheduleStatus.ACTIVE) {
                 throw new IllegalStateException("Cannot modify or delete a schedule that is currently showing");
             }
         }
@@ -700,7 +721,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             int updatedCount = 0;
 
             for (ScreeningSchedule schedule : expiredSchedules) {
-                schedule.setStatus("ENDED");
+                schedule.setStatus(ScheduleStatus.ENDED);
                 movieScheduleRepository.save(schedule);
                 updatedCount++;
             }
@@ -733,7 +754,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             int updatedCount = 0;
 
             for (ScreeningSchedule schedule : schedulesShouldBeActive) {
-                schedule.setStatus("ACTIVE");
+                schedule.setStatus(ScheduleStatus.ACTIVE);
                 movieScheduleRepository.save(schedule);
                 updatedCount++;
             }
@@ -774,7 +795,8 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             // Sao chép thông tin cơ bản từ baseSchedule
             scheduleDto.setMovieId(baseSchedule.getMovieId());
             scheduleDto.setScreeningDate(baseSchedule.getScreeningDate());
-            scheduleDto.setStatus(baseSchedule.getStatus());
+            // Luôn set trạng thái là UPCOMING cho lịch chiếu mới
+            scheduleDto.setStatus(ScheduleStatus.UPCOMING);
 
             // Lấy thông tin từ slot
             scheduleDto.setStartTime(LocalTime.parse((String) slot.get("startTime")));
@@ -834,6 +856,27 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     }
 
     @Override
+    @Transactional
+    public void updateScheduleStatus(Integer scheduleId, ScheduleStatus newStatus) {
+        try {
+            Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(scheduleId);
+            if (scheduleOpt.isPresent()) {
+                ScreeningSchedule schedule = scheduleOpt.get();
+                ScheduleStatus oldStatus = schedule.getStatus();
+                schedule.setStatus(newStatus);
+                movieScheduleRepository.save(schedule);
+                System.out.println("Đã cập nhật trạng thái lịch chiếu ID " + scheduleId +
+                        " từ " + oldStatus + " thành " + newStatus);
+            } else {
+                System.err.println("Không tìm thấy lịch chiếu với ID: " + scheduleId);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật trạng thái lịch chiếu ID " + scheduleId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<ScreeningScheduleDto> getSchedulesByMovieIdAndStatus(Integer movieId, String status) {
         try {
@@ -887,7 +930,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             ScreeningSchedule schedule = scheduleOpt.get();
 
             // Chỉ cho phép chỉnh sửa lịch chiếu có status UPCOMING
-            if (!"UPCOMING".equalsIgnoreCase(schedule.getStatus())) {
+            if (schedule.getStatus() != ScheduleStatus.UPCOMING) {
                 return false;
             }
 
@@ -940,16 +983,16 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             }
 
             ScreeningSchedule schedule = scheduleOpt.get();
-            String status = schedule.getStatus();
+            ScheduleStatus status = schedule.getStatus();
 
             // Kiểm tra status
-            boolean isUpcoming = "UPCOMING".equalsIgnoreCase(status);
+            boolean isUpcoming = (status == ScheduleStatus.UPCOMING);
             if (!isUpcoming) {
                 result.put("canEdit", false);
                 result.put("canDelete", false);
-                if ("ACTIVE".equalsIgnoreCase(status)) {
+                if (status == ScheduleStatus.ACTIVE) {
                     result.put("reason", "Không thể sửa/xóa lịch chiếu đang chiếu");
-                } else if ("ENDED".equalsIgnoreCase(status)) {
+                } else if (status == ScheduleStatus.ENDED) {
                     result.put("reason", "Không thể sửa/xóa lịch chiếu đã kết thúc");
                 } else {
                     result.put("reason", "Trạng thái lịch chiếu không cho phép chỉnh sửa");
@@ -973,7 +1016,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                 result.put("bookingCount", 0);
             }
 
-            result.put("status", status);
+            result.put("status", status != null ? status.getValue() : null);
 
         } catch (Exception e) {
             result.put("canEdit", false);
