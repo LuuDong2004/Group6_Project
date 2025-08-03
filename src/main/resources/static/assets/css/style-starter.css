@@ -19689,17 +19689,85 @@ button.closebtn {
 
 /* Loading ends */
 /*thêm mới bởi đông*/
-/* Thẻ cha .box16 */
-.box16 {
+/* CSS cải thiện cho homepage */
+
+/* Cải thiện layout cho phim nổi bật */
+.w3l-grids .w3l-populohny-grids {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-gap: 30px;
+  align-items: stretch; /* Đảm bảo tất cả items có chiều cao bằng nhau */
+}
+
+/* Cải thiện box16 cho phim nổi bật */
+.w3l-grids .box16 {
   position: relative;
   text-align: center;
   overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  background: var(--theme-bg-dark);
+  height: 100%; /* Đảm bảo chiều cao đồng đều */
+  display: flex;
+  flex-direction: column;
 }
 
-.box16 img {
+.w3l-grids .box16:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.w3l-grids .box16 figure {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  height: 350px; /* Chiều cao cố định cho ảnh */
+}
+
+.w3l-grids .box16 img {
   width: 100%;
+  height: 100%;
+  object-fit: cover; /* Đảm bảo ảnh không bị méo */
+  object-position: center;
   display: block;
-  border-radius: 5px; /* Tùy chọn nếu cần góc bo tròn cho ảnh */
+  border-radius: 12px 12px 0 0;
+  transition: transform 0.3s ease;
+}
+
+.w3l-grids .box16:hover img {
+  transform: scale(1.05);
+}
+
+/* Cải thiện content box */
+.w3l-grids .box16 .box-content {
+  padding: 20px 15px;
+  bottom: 0;
+  position: relative;
+  background: var(--theme-bg-dark);
+  border-radius: 0 0 12px 12px;
+  flex-grow: 1; /* Cho phép content mở rộng để fill không gian */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.w3l-grids .box16 .title {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--theme-title);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.w3l-grids .box16 .movie-info {
+  margin-top: auto; /* Đẩy thông tin xuống dưới */
+  font-size: 13px;
+  line-height: 18px;
 }
 
 /* Tên phim và thời gian luôn hiển thị */
@@ -19769,4 +19837,161 @@ button.closebtn {
 .action-buttons .btn-danger:hover {
   background-color: #c82333; /* Đỏ đậm hơn khi hover */
   transform: scale(1.1); /* Phóng to nhẹ khi hover */
+}
+
+/* CSS cho phim mới ra mắt - Owl Carousel */
+.owl-three .vhny-grid {
+  margin-bottom: 0;
+  height: 100%; /* Đảm bảo chiều cao đồng đều */
+}
+
+.owl-three .box16 {
+  height: 350px; /* Chiều cao cố định cho box phim */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  background: var(--theme-bg-dark);
+  position: relative;
+}
+
+.owl-three .box16:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.owl-three .box16 figure {
+  height: 100%;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.owl-three .box16 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.owl-three .box16:hover img {
+  transform: scale(1.03);
+}
+
+/* Styling cho tiêu đề phim mới ra mắt */
+.movie-title-section {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.movie-title-section .title-gd {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-title);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 12px;
+  line-height: 24px;
+  transition: color 0.3s ease;
+}
+
+.movie-title-section .title-gd:hover {
+  color: var(--theme-rose);
+}
+
+.movie-title-section .watch-button {
+  background: linear-gradient(135deg, var(--theme-rose), #ff6b9d);
+  color: white;
+  padding: 10px 25px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  border: none;
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+}
+
+.movie-title-section .watch-button:hover {
+  background: linear-gradient(135deg, #ff6b9d, var(--theme-rose));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+/* Cải thiện section headers */
+.w3l-title-grids {
+  margin-bottom: 40px;
+}
+
+.hny-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--theme-title);
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.hny-title:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(135deg, var(--theme-rose), #ff6b9d);
+  border-radius: 2px;
+}
+
+/* Responsive design cải thiện */
+@media (max-width: 1200px) {
+  .w3l-grids .w3l-populohny-grids {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .w3l-grids .w3l-populohny-grids {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 20px;
+  }
+
+  .w3l-grids .box16 figure {
+    height: 280px;
+  }
+
+  .owl-three .box16 {
+    height: 300px;
+  }
+
+  .hny-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .w3l-grids .w3l-populohny-grids {
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 15px;
+  }
+
+  .w3l-grids .box16 figure {
+    height: 250px;
+  }
+
+  .owl-three .box16 {
+    height: 280px;
+  }
+
+  .movie-title-section .title-gd {
+    font-size: 16px;
+  }
+
+  .hny-title {
+    font-size: 22px;
+  }
 }

@@ -367,20 +367,21 @@
                   <span class="fa fa-play video-icon" aria-hidden="true"></span>
                 </a>
               </div>
-              <h3>
-                <a
-                  class="title-gd"
-                  th:href="@{/movie/view/{id}(id=${movie.id})}"
-                  th:text="${movie.name}"
-                ></a>
-              </h3>
-              <p th:text="${movie.description}"></p>
-              <div class="button-center text-center mt-4">
-                <a
-                  th:href="@{/movie/view/{id}(id=${movie.id})}"
-                  class="btn watch-button"
-                  >Xem ngay</a
-                >
+              <div class="movie-title-section">
+                <h3>
+                  <a
+                    class="title-gd"
+                    th:href="@{/movie/view/{id}(id=${movie.id})}"
+                    th:text="${movie.name}"
+                  ></a>
+                </h3>
+                <div class="button-center text-center mt-3">
+                  <a
+                    th:href="@{/movie/view/{id}(id=${movie.id})}"
+                    class="btn watch-button"
+                    >Xem ngay</a
+                  >
+                </div>
               </div>
             </div>
           </div>
