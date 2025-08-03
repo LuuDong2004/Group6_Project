@@ -4,22 +4,23 @@ import group6.cinema_project.entity.Booking;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.entity.User;
-import group6.cinema_project.entity.Ticket;
 import group6.cinema_project.repository.User.BookingRepository;
 import group6.cinema_project.repository.User.MovieRepository;
 import group6.cinema_project.repository.User.ScreeningScheduleRepository;
 import group6.cinema_project.repository.User.UserRepository;
 import group6.cinema_project.repository.User.TicketRepository;
+import group6.cinema_project.service.Admin.IAdminStatisticService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
-public class AdminStatisticServiceImpl {
+public class AdminStatisticServiceImpl implements IAdminStatisticService {
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -59,7 +60,7 @@ public class AdminStatisticServiceImpl {
                         booking -> booking.getSchedule().getMovie().getName(),
                         Collectors.summingDouble(Booking::getAmount)))
                 .entrySet().stream()
-                .map(entry -> new Object[]{entry.getKey(), entry.getValue()})
+                .map(entry -> new Object[] { entry.getKey(), entry.getValue() })
                 .collect(Collectors.toList());
     }
 
@@ -68,8 +69,7 @@ public class AdminStatisticServiceImpl {
                 .filter(ticket -> ticket.getSchedule() != null)
                 .collect(Collectors.groupingBy(
                         ticket -> ticket.getSchedule().getId(),
-                        Collectors.counting()
-                ));
+                        Collectors.counting()));
     }
 
     public Map<String, Object> getUserMovieStatistics() {
@@ -106,5 +106,53 @@ public class AdminStatisticServiceImpl {
         statistics.put("topMoviesByRevenue", topMoviesByRevenue);
 
         return statistics;
+    }
+
+    @Override
+    public List<Map<String, Object>> getUserMovieStatisticsList() {
+        List<Map<String, Object>> statisticsList = new ArrayList<>();
+
+        // Lấy thống kê từ booking - nhóm theo user và movie
+        Map<String, Map<String, Object>> userMovieStats = new HashMap<>();
+
+        List<Booking> bookings = bookingRepository.findAll();
+        for (Booking booking : bookings) {
+            if (booking.getUser() != null && booking.getSchedule() != null
+                    && booking.getSchedule().getMovie() != null) {
+                String userName = booking.getUser().getUserName();
+                String movieName = booking.getSchedule().getMovie().getName();
+                String key = userName + "_" + movieName;
+
+                userMovieStats.computeIfAbsent(key, k -> {
+                    Map<String, Object> stat = new HashMap<>();
+                    stat.put("userName", userName);
+                    stat.put("movieName", movieName);
+                    stat.put("totalTickets", 0);
+                    stat.put("totalAmount", 0.0);
+                    return stat;
+                });
+
+                Map<String, Object> stat = userMovieStats.get(key);
+                stat.put("totalTickets", (Integer) stat.get("totalTickets") + 1);
+                stat.put("totalAmount", (Double) stat.get("totalAmount") + booking.getAmount());
+            }
+        }
+
+        statisticsList.addAll(userMovieStats.values());
+        return statisticsList;
+    }
+
+    @Override
+    public List<String> getMovieRevenueLabels() {
+        return getMovieRevenueStats().stream()
+                .map(stat -> (String) stat[0])
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Double> getMovieRevenueData() {
+        return getMovieRevenueStats().stream()
+                .map(stat -> (Double) stat[1])
+                .collect(Collectors.toList());
     }
 }

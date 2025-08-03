@@ -45,13 +45,18 @@ public class MovieDto {
 
     private String language;
     private String trailer;
-    
+    private String status;
+
+    // Thông tin hiển thị đã được format
+    private String ratingDisplay; // Hiển thị rating dạng "G - Mọi lứa tuổi"
+    private String genreDisplay; // Hiển thị genre dạng "Hành động, Hài kịch"
+
     // Danh sách đạo diễn với thông tin chi tiết
     private List<PersonSimpleDto> directors;
 
     // Danh sách diễn viên với thông tin chi tiết
     private List<PersonSimpleDto> actors;
-    
+
     // Danh sách review
     private List<ReviewDto> reviews;
 }
