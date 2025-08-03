@@ -364,7 +364,7 @@ public class AdminScheduleController {
      */
     private String formatDateForDisplay(LocalDate date) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", Locale.of("vi", "VN"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", new Locale("vi", "VN"));
             return date.format(formatter);
         } catch (Exception e) {
             log.warn("Error formatting date, using default format", e);
@@ -1256,20 +1256,25 @@ public class AdminScheduleController {
 
         try {
             List<ScreeningRoomDto> rooms = screeningRoomService.getScreeningRoomsByBranch(branchId);
+            log.info("Found {} rooms for branch {}", rooms.size(), branchId);
 
-            return rooms.stream()
+            List<Map<String, Object>> result = rooms.stream()
                     .map(room -> {
                         Map<String, Object> roomData = new HashMap<>();
                         roomData.put("id", room.getId());
                         roomData.put("name", room.getName());
                         roomData.put("capacity", room.getCapacity());
                         roomData.put("type", room.getType());
+                        log.debug("Room data: {}", roomData);
                         return roomData;
                     })
                     .collect(Collectors.toList());
 
+            log.info("Returning {} rooms for branch {}", result.size(), branchId);
+            return result;
+
         } catch (Exception e) {
-            log.error("Error getting rooms by branch", e);
+            log.error("Error getting rooms by branch {}: {}", branchId, e.getMessage(), e);
             return List.of();
         }
     }

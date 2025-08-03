@@ -136,7 +136,7 @@
                                     <div th:if="${booking.schedule != null && booking.schedule.movie != null}">
                                         <strong th:text="${booking.schedule.movie.name}"></strong>
                                         <br>
-                                        <small class="text-muted" th:text="${booking.schedule.movie.genre}"></small>
+                                        <small class="text-muted" th:text="${booking.schedule.movie.genreDisplay}"></small>
                                     </div>
                                 </td>
                                 <td>

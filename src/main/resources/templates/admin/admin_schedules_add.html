@@ -753,6 +753,8 @@
         const roomSelect = document.getElementById("screeningRoomId");
         const selectedBranchId = branchSelect.value;
 
+        console.log("loadRoomsByBranch called with branchId:", selectedBranchId);
+
         if (!selectedBranchId) {
           // Nếu không chọn chi nhánh, disable phòng chiếu
           roomSelect.disabled = true;
@@ -765,19 +767,33 @@
         roomSelect.disabled = false;
         roomSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
 
+        console.log("Fetching rooms for branch:", selectedBranchId);
+
         // Gọi API để lấy danh sách phòng chiếu
         fetch(`/admin/schedules/api/branches/${selectedBranchId}/rooms`)
-          .then((response) => response.json())
+          .then((response) => {
+            console.log("Response status:", response.status);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
           .then((rooms) => {
+            console.log("Received rooms:", rooms);
             roomSelect.innerHTML =
               '<option value="">-- Chọn phòng chiếu --</option>';
 
-            rooms.forEach((room) => {
-              const option = document.createElement("option");
-              option.value = room.id;
-              option.textContent = `${room.name} (Sức chứa: ${room.capacity})`;
-              roomSelect.appendChild(option);
-            });
+            if (rooms && rooms.length > 0) {
+              rooms.forEach((room) => {
+                const option = document.createElement("option");
+                option.value = room.id;
+                option.textContent = `${room.name} (Sức chứa: ${room.capacity})`;
+                roomSelect.appendChild(option);
+              });
+            } else {
+              roomSelect.innerHTML =
+                '<option value="">-- Không có phòng chiếu --</option>';
+            }
           })
           .catch((error) => {
             console.error("Lỗi khi tải danh sách phòng chiếu:", error);

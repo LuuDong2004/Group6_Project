@@ -24,12 +24,7 @@
         font-family: "Inter", sans-serif;
       }
 
-      body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-      }
+      /* Background được định nghĩa trong admin2-common.css */
 
       .sidebar-custom {
         width: 260px;
@@ -283,10 +278,78 @@
     <div class="main-content-wrapper" id="mainContentWrapper">
       <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-          <a href="/admin/branches" class="btn btn-link text-secondary me-2"
-            ><i class="fas fa-arrow-left"></i
-          ></a>
-          <h4 class="mb-0 fw-semibold text-gray-700">Quản lý Chuỗi rạp</h4>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+            Quản lý Chuỗi rạp
+          </h4>
+        </div>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="/profile"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="redirect:/admin/login"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
       </header>
       <div class="container-fluid p-4">
@@ -490,10 +553,14 @@
           const sidebar = document.getElementById("sidebar");
           const mainContentWrapper =
             document.getElementById("mainContentWrapper");
+          const header = document.querySelector(".header-custom");
           if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
           function toggleSidebar() {
             sidebar.classList.toggle("collapsed");
             mainContentWrapper.classList.toggle("expanded");
+            if (header) {
+              header.classList.toggle("expanded");
+            }
           }
           sidebarToggle.addEventListener("click", toggleSidebar);
           function checkViewport() {

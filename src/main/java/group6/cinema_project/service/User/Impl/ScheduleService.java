@@ -1,5 +1,16 @@
 package group6.cinema_project.service.User.Impl;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import group6.cinema_project.dto.BranchDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Branch;
@@ -8,16 +19,6 @@ import group6.cinema_project.repository.User.ScheduleRepository;
 import group6.cinema_project.repository.User.SeatRepository;
 import group6.cinema_project.repository.User.SeatReservationRepository;
 import group6.cinema_project.service.User.IScheduleService;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 @Service
 public class ScheduleService implements IScheduleService {
@@ -220,6 +221,24 @@ public class ScheduleService implements IScheduleService {
             dto.setEndTime(schedule.getEndTime().toLocalTime());
             dto.setEndTimeStr(dto.getEndTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
         }
+
+        // Set movie display fields if movie exists
+        if (schedule.getMovie() != null && dto.getMovie() != null) {
+            // Set rating display
+            if (schedule.getMovie().getRating() != null) {
+                dto.getMovie().setRatingDisplay(schedule.getMovie().getRating().getCode() + " - " +
+                    schedule.getMovie().getRating().getDescription());
+            }
+
+            // Set genre display
+            if (schedule.getMovie().getGenres() != null && !schedule.getMovie().getGenres().isEmpty()) {
+                String genreNames = schedule.getMovie().getGenres().stream()
+                    .map(genre -> genre.getName())
+                    .collect(java.util.stream.Collectors.joining(", "));
+                dto.getMovie().setGenreDisplay(genreNames);
+            }
+        }
+
         dto.setAvailableSeats(getAvailableSeatsForSchedule(schedule.getId()));
         return dto;
     }
