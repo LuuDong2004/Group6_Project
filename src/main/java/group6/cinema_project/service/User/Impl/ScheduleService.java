@@ -10,8 +10,11 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import group6.cinema_project.dto.BranchDto;
+import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.ScreeningSchedule;
@@ -39,6 +42,7 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ScreeningScheduleDto> getScheduleByMovieId(Integer movieId) {
         List<ScreeningSchedule> schedules = scheduleRepository.findSchedulesByMovieId(movieId);
 
@@ -52,6 +56,7 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ScreeningScheduleDto> getScheduleByMovieIdAndDate(Integer movieId, Date screeningDate) {
         // Đảm bảo screeningDate được chuẩn hóa (chỉ lưu phần ngày)
         Date normalizedDate = normalizeDateToMidnight(screeningDate);
@@ -78,13 +83,16 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
-    public List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId, Date startOfDay, Date endOfDay) {
+    @Transactional(readOnly = true)
+    public List<ScreeningScheduleDto> getScheduleByMovieIdAndBranchIdAndDate(Integer movieId, Integer branchId,
+            Date startOfDay, Date endOfDay) {
         List<ScreeningSchedule> schedules;
         if (startOfDay == null || endOfDay == null) {
             // Lấy tất cả lịch chiếu của branch (không lọc ngày)
             schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, null, null);
         } else {
-            schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, startOfDay, endOfDay);
+            schedules = scheduleRepository.findSchedulesByMovieIdAndBranchIdAndDate(movieId, branchId, startOfDay,
+                    endOfDay);
         }
         Date currentDateTime = new Date();
         // Lọc bỏ các lịch chiếu quá khứ
@@ -95,6 +103,7 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BranchDto> getDistinctBranchesByMovieId(Integer movieId) {
         List<Object> branches = scheduleRepository.findDistinctBranchesByMovieId(movieId);
         return branches.stream()
@@ -104,6 +113,7 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ScreeningScheduleDto getScheduleById(Integer scheduleId) {
         ScreeningSchedule schedule = scheduleRepository.findScheduleById(scheduleId);
 
@@ -172,7 +182,8 @@ public class ScheduleService implements IScheduleService {
      * Kiểm tra hai ngày có cùng một ngày không (bỏ qua giờ phút giây)
      */
     private boolean isSameDay(Date date1, Date date2) {
-        if (date1 == null || date2 == null) return false;
+        if (date1 == null || date2 == null)
+            return false;
 
         Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);
@@ -186,11 +197,13 @@ public class ScheduleService implements IScheduleService {
     }
 
     /**
-     * Helper method to normalize a date by setting the time to midnight (00:00:00.000)
+     * Helper method to normalize a date by setting the time to midnight
+     * (00:00:00.000)
      * This ensures we compare only the date part when working with dates
      */
     private Date normalizeDateToMidnight(Date date) {
-        if (date == null) return null;
+        if (date == null)
+            return null;
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -207,11 +220,23 @@ public class ScheduleService implements IScheduleService {
         return totalSeats - reservedSeats;
     }
 
+    /**
+     * Chuyển đổi ScreeningSchedule entity sang DTO một cách an toàn
+     * Sử dụng manual mapping để tránh vấn đề lazy loading với ModelMapper
+     */
     public ScreeningScheduleDto mapToDto(ScreeningSchedule schedule) {
-        ScreeningScheduleDto dto = modelMapper.map(schedule, ScreeningScheduleDto.class);
+        ScreeningScheduleDto dto = new ScreeningScheduleDto();
+
+        // Map các field cơ bản
+        dto.setId(schedule.getId());
+        dto.setStatus(schedule.getStatus());
+
+        // Map các field về thời gian
         if (schedule.getScreeningDate() != null) {
-            dto.setScreeningDate(schedule.getScreeningDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-            dto.setScreeningDateStr(dto.getScreeningDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dto.setScreeningDate(
+                    schedule.getScreeningDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            dto.setScreeningDateStr(
+                    dto.getScreeningDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
         if (schedule.getStartTime() != null) {
             dto.setStartTime(schedule.getStartTime().toLocalTime());
@@ -222,24 +247,84 @@ public class ScheduleService implements IScheduleService {
             dto.setEndTimeStr(dto.getEndTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
         }
 
-        // Set movie display fields if movie exists
-        if (schedule.getMovie() != null && dto.getMovie() != null) {
-            // Set rating display
-            if (schedule.getMovie().getRating() != null) {
-                dto.getMovie().setRatingDisplay(schedule.getMovie().getRating().getCode() + " - " +
-                    schedule.getMovie().getRating().getDescription());
-            }
+        // Map thông tin Movie một cách an toàn
+        if (schedule.getMovie() != null) {
+            dto.setMovieId(schedule.getMovie().getId());
+            dto.setMovieName(schedule.getMovie().getName());
+            dto.setMovieImage(schedule.getMovie().getImage());
+            dto.setMovieDuration(schedule.getMovie().getDuration());
 
-            // Set genre display
-            if (schedule.getMovie().getGenres() != null && !schedule.getMovie().getGenres().isEmpty()) {
-                String genreNames = schedule.getMovie().getGenres().stream()
-                    .map(genre -> genre.getName())
-                    .collect(java.util.stream.Collectors.joining(", "));
-                dto.getMovie().setGenreDisplay(genreNames);
-            }
+            // Tạo MovieDto để set vào DTO
+            MovieDto movieDto = convertMovieToBasicDto(schedule.getMovie());
+            dto.setMovie(movieDto);
+        }
+
+        // Map thông tin ScreeningRoom một cách an toàn
+        if (schedule.getScreeningRoom() != null) {
+            dto.setScreeningRoomId(schedule.getScreeningRoom().getId());
+            dto.setScreeningRoomName(schedule.getScreeningRoom().getName());
+            dto.setScreeningRoomCapacity(schedule.getScreeningRoom().getCapacity());
+
+            // Tạo ScreeningRoomDto để set vào DTO
+            ScreeningRoomDto roomDto = new ScreeningRoomDto();
+            roomDto.setId(schedule.getScreeningRoom().getId());
+            roomDto.setName(schedule.getScreeningRoom().getName());
+            roomDto.setCapacity(schedule.getScreeningRoom().getCapacity());
+            roomDto.setDescription(schedule.getScreeningRoom().getDescription());
+            dto.setScreeningRoom(roomDto);
+        }
+
+        // Map thông tin Branch một cách an toàn
+        if (schedule.getBranch() != null) {
+            dto.setBranchId(schedule.getBranch().getId());
+            dto.setBranchName(schedule.getBranch().getName());
+            dto.setBranchAddress(schedule.getBranch().getAddress());
+
+            // Sử dụng ModelMapper cho Branch vì nó không có lazy loading issues
+            dto.setBranch(modelMapper.map(schedule.getBranch(), BranchDto.class));
         }
 
         dto.setAvailableSeats(getAvailableSeatsForSchedule(schedule.getId()));
+        return dto;
+    }
+
+    /**
+     * Chuyển đổi Movie entity sang MovieDto một cách an toàn
+     * Tránh vấn đề lazy loading bằng cách chỉ truy cập các field cần thiết
+     */
+    private MovieDto convertMovieToBasicDto(group6.cinema_project.entity.Movie movie) {
+        MovieDto dto = new MovieDto();
+
+        // Map các field cơ bản
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        dto.setDescription(movie.getDescription());
+        dto.setDuration(movie.getDuration());
+        dto.setImage(movie.getImage());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setLanguage(movie.getLanguage());
+        dto.setTrailer(movie.getTrailer());
+        dto.setStatus(movie.getStatus());
+
+        // Xử lý Rating một cách an toàn
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        // Xử lý Genres một cách an toàn
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            java.util.Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(genre -> genre.getId())
+                    .collect(java.util.stream.Collectors.toSet());
+            dto.setGenreIds(genreIds);
+
+            String genreNames = movie.getGenres().stream()
+                    .map(genre -> genre.getName())
+                    .collect(java.util.stream.Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
+        }
+
         return dto;
     }
 }
