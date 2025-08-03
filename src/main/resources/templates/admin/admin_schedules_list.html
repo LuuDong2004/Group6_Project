@@ -723,7 +723,7 @@
           <div
             th:each="movie : ${movies}"
             class="movie-card"
-            th:data-status="${movie.status}"
+            th:data-status="${movie.status != null ? movie.status : 'UNKNOWN'}"
           >
             <div class="movie-header">
               <img
@@ -785,7 +785,7 @@
                 <div
                   th:each="schedule : ${movie.schedules}"
                   class="schedule-item"
-                  th:data-status="${schedule.status}"
+                  th:data-status="${schedule.status != null ? schedule.status.name() : 'UNKNOWN'}"
                   th:data-schedule-id="${schedule.id}"
                   th:onclick="'showScheduleDetails(' + ${schedule.id} + ')'"
                 >
@@ -815,13 +815,12 @@
                     <div class="schedule-detail">
                       <span
                         class="status-badge"
-                        th:classappend="${schedule.status == 'UPCOMING' ? 'status-upcoming' :
-                                           (schedule.status == 'ACTIVE' ? 'status-active' : 'status-ended')}"
+                        th:classappend="${schedule.status != null and schedule.status.name() == 'UPCOMING' ? 'status-upcoming' :
+                                           (schedule.status != null and schedule.status.name() == 'ACTIVE' ? 'status-active' : 'status-ended')}"
                       >
                         <i class="fas fa-circle"></i>
                         <span
-                          th:text="${schedule.status == 'UPCOMING' ? 'Sắp chiếu' :
-                                       (schedule.status == 'ACTIVE' ? 'Đang chiếu' : 'Đã chiếu')}"
+                          th:text="${schedule.status != null ? schedule.status.displayName : 'Không xác định'}"
                         >
                           Đang chiếu
                         </span>
@@ -832,7 +831,7 @@
                   <!-- Action buttons - chỉ hiển thị cho status UPCOMING -->
                   <div
                     class="schedule-actions"
-                    th:if="${schedule.status == 'UPCOMING'}"
+                    th:if="${schedule.status != null and schedule.status.name() == 'UPCOMING'}"
                   >
                     <!-- Sử dụng dữ liệu editability từ server thay vì AJAX -->
                     <button
@@ -861,8 +860,82 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/admin-common.js}"></script>
     <script>
+      /**
+       * Common JavaScript utilities cho admin interface
+       * Đã được đưa trở về từ admin-common.js để xử lý trực tiếp trong file này
+       */
+
+      /**
+       * Khởi tạo sidebar toggle functionality
+       */
+      function initializeSidebarToggle() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const mainContentWrapper =
+          document.getElementById("mainContentWrapper");
+
+        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        // Responsive behavior
+        function checkViewport() {
+          if (window.innerWidth <= 992) {
+            if (!sidebar.classList.contains("collapsed")) {
+              toggleSidebar();
+            }
+          }
+        }
+
+        checkViewport();
+        window.addEventListener("resize", checkViewport);
+      }
+
+      /**
+       * Utility function để hiển thị thông báo
+       * @param {string} message - Nội dung thông báo
+       * @param {string} type - Loại thông báo: 'success', 'error', 'warning', 'info'
+       * @param {number} duration - Thời gian hiển thị (ms), mặc định 5000ms
+       */
+      function showNotification(message, type = "info", duration = 5000) {
+        // Tạo element thông báo
+        const notification = document.createElement("div");
+        notification.className = `alert alert-${
+          type === "error" ? "danger" : type
+        } alert-dismissible fade show position-fixed`;
+        notification.style.cssText =
+          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+
+        notification.innerHTML = `
+            <i class="fas fa-${
+              type === "success"
+                ? "check-circle"
+                : type === "error"
+                ? "exclamation-circle"
+                : type === "warning"
+                ? "exclamation-triangle"
+                : "info-circle"
+            } me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Tự động xóa sau duration
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, duration);
+      }
+
       // Lấy ngày được chọn từ server
       const selectedDate = new Date(
         '[[${ selectedDate != null ? selectedDate : #dates.format(#dates.createNow(), "yyyy-MM-dd") }]]'
@@ -875,17 +948,65 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         initializeSidebarToggle();
+
+        // Cập nhật hiển thị trạng thái cho tất cả schedule items
+        updateScheduleStatusDisplay();
       });
 
-      // Moved to admin-common.js
+      /**
+       * Cập nhật hiển thị trạng thái cho tất cả schedule items
+       * Sửa lỗi hiển thị trạng thái bằng cách xử lý đúng enum values
+       */
+      function updateScheduleStatusDisplay() {
+        const scheduleItems = document.querySelectorAll(".schedule-item");
 
-      // Removed handlePastDateFilters - using Thymeleaf conditional rendering instead
+        scheduleItems.forEach((item) => {
+          const statusElement = item.querySelector(".status-badge");
+          const statusTextElement = item.querySelector(
+            ".status-badge span:last-child"
+          );
+          const scheduleStatus = item.getAttribute("data-status");
 
-      // Removed client-side filtering - using server-side filtering instead
+          if (statusElement && statusTextElement && scheduleStatus) {
+            // Xóa tất cả class trạng thái cũ
+            statusElement.classList.remove(
+              "status-upcoming",
+              "status-active",
+              "status-ended"
+            );
+
+            // Thêm class và text tương ứng với trạng thái
+            switch (scheduleStatus) {
+              case "UPCOMING":
+                statusElement.classList.add("status-upcoming");
+                statusTextElement.textContent = "Sắp chiếu";
+                break;
+              case "ACTIVE":
+                statusElement.classList.add("status-active");
+                statusTextElement.textContent = "Đang chiếu";
+                break;
+              case "ENDED":
+                statusElement.classList.add("status-ended");
+                statusTextElement.textContent = "Đã chiếu";
+                break;
+              case "CANCELLED":
+                statusElement.classList.add("status-ended");
+                statusTextElement.textContent = "Đã hủy";
+                break;
+              default:
+                statusElement.classList.add("status-ended");
+                statusTextElement.textContent = "Không xác định";
+                break;
+            }
+          }
+        });
+      }
 
       function showScheduleDetails(scheduleId) {
         // Hiển thị chi tiết lịch chiếu
-        const action = confirm("Chọn hành động:\nOK - Xem chi tiết lịch chiếu\nCancel - Xem danh sách đặt vé cho suất chiếu này");
+        const action = confirm(
+          "Chọn hành động:\nOK - Xem chi tiết lịch chiếu\nCancel - Xem danh sách đặt vé cho suất chiếu này"
+        );
         if (action) {
           // Xem chi tiết lịch chiếu
           alert("Xem chi tiết lịch chiếu ID: " + scheduleId);
@@ -927,10 +1048,6 @@
           form.submit();
         }
       }
-
-      // Không cần function checkScheduleEditability nữa vì đã có dữ liệu từ server
-      // Không cần cập nhật button state vì đã được xử lý bằng Thymeleaf
     </script>
   </body>
 </html>
-

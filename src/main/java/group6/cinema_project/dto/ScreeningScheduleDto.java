@@ -3,11 +3,11 @@ package group6.cinema_project.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotBlank;
 
 @NoArgsConstructor
 @Data
@@ -29,8 +29,8 @@ public class ScreeningScheduleDto {
     @NotNull(message = "Giờ kết thúc không được để trống")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endTime;
-    @NotBlank(message = "Trạng thái không được để trống")
-    private String status;
+    @NotNull(message = "Trạng thái không được để trống")
+    private ScheduleStatus status;
     private int availableSeats;
 
     // Nested DTOs for display

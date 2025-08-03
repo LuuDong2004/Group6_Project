@@ -4,6 +4,7 @@ package group6.cinema_project.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 
 import java.time.LocalTime;
 
@@ -18,7 +19,7 @@ public class ScheduleTimeSlotDto {
     private Integer id;
     private LocalTime startTime;
     private LocalTime endTime;
-    private String status;
+    private ScheduleStatus status;
 
     // Helper methods for display
     public String getFormattedTimeRange() {
@@ -26,9 +27,9 @@ public class ScheduleTimeSlotDto {
     }
 
     public String getStatusClass() {
-        if ("ACTIVE".equals(status)) {
+        if (status == ScheduleStatus.ACTIVE) {
             return "active";
-        } else if ("UPCOMING".equals(status)) {
+        } else if (status == ScheduleStatus.UPCOMING) {
             return "upcoming";
         } else {
             return "ended";
@@ -36,19 +37,13 @@ public class ScheduleTimeSlotDto {
     }
 
     public String getStatusDisplayText() {
-        switch (status) {
-            case "ACTIVE":
-                return "Đang chiếu";
-            case "UPCOMING":
-                return "Sắp chiếu";
-            case "ENDED":
-                return "Đã kết thúc";
-            default:
-                return "Không xác định";
+        if (status == null) {
+            return "Không xác định";
         }
+        return status.getDisplayName();
     }
 
     public boolean isEditable() {
-        return !"ACTIVE".equals(status) && !"ENDED".equals(status);
+        return status != null && status.isEditable();
     }
 }

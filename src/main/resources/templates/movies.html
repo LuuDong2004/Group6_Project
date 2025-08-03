@@ -494,6 +494,18 @@
   <script th:src="@{/assets/js/bootstrap.min.js}"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
+    // Hàm lấy ngày hiện tại theo múi giờ địa phương
+    function getCurrentDate() {
+      const today = new Date();
+      return (
+        today.getFullYear() +
+        "-" +
+        String(today.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(today.getDate()).padStart(2, "0")
+      );
+    }
+
     $(document).ready(function () {
       let isShowingAll = false;
       const movieList = $("#movie-list");
@@ -591,14 +603,8 @@
           );
           return;
         }
-        // Lấy ngày hiện tại theo định dạng yyyy-MM-dd
-        const today = new Date();
-        const currentDate =
-          today.getFullYear() +
-          "-" +
-          String(today.getMonth() + 1).padStart(2, "0") +
-          "-" +
-          String(today.getDate()).padStart(2, "0");
+        // Lấy ngày hiện tại
+        const currentDate = getCurrentDate();
 
         movies.forEach(function (movie) {
           const movieHtml = `
@@ -628,9 +634,9 @@
                                 }</small>
                             </p>
                             <div class="action-buttons">
-                                <a href="/schedule/movie/${movie.id}/date?id=${
-            movie.id
-          }&date=${currentDate}" class="btn btn-success mb-2">Đặt vé</a>
+                                <a href="/schedule/movie/${
+                                  movie.id
+                                }/date?date=${currentDate}" class="btn btn-success mb-2">Đặt vé</a>
                                 <a href="/movie/view/${
                                   movie.id
                                 }" class="btn btn-danger">Chi tiết</a>
@@ -688,11 +694,9 @@
                                 }</small>
                             </p>
                             <div class="action-buttons">
-                                <a href="/schedule/movie/${movie.id}/date?id=${
-          movie.id
-        }&date=${new Date()
-          .toISOString()
-          .slice(0, 10)}" class="btn btn-success mb-2">Đặt vé</a>
+                                <a href="/schedule/movie/${
+                                  movie.id
+                                }/date?date=${getCurrentDate()}" class="btn btn-success mb-2">Đặt vé</a>
                                 <a href="/movie/view/${
                                   movie.id
                                 }" class="btn btn-danger">Chi tiết</a>

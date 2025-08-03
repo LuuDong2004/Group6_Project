@@ -79,7 +79,8 @@ public class MovieWithSchedulesDto {
         }
 
         return schedules.stream()
-                .filter(schedule -> status.equalsIgnoreCase(schedule.getStatus()))
+                .filter(schedule -> schedule.getStatus() != null
+                        && status.equalsIgnoreCase(schedule.getStatus().getValue()))
                 .toList();
     }
 }

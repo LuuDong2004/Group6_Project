@@ -42,6 +42,7 @@ import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Branch;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.ScreeningSchedule;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 import group6.cinema_project.exception.ScheduleConflictException;
 import group6.cinema_project.service.Admin.IAdminBranchService;
 import group6.cinema_project.service.Admin.IAdminMovieService;
@@ -82,6 +83,27 @@ public class AdminScheduleController {
                 log.info("Loading all schedules");
                 schedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
             }
+
+            // Tự động cập nhật trạng thái lịch chiếu
+            schedules = schedules.stream()
+                    .map(schedule -> {
+                        ScheduleStatus calculatedStatus = calculateScheduleStatus(schedule);
+                        if (calculatedStatus != null &&
+                                (schedule.getStatus() == null || shouldUpdateStatus(schedule, calculatedStatus))) {
+                            schedule.setStatus(calculatedStatus);
+                            // Lưu trạng thái đã cập nhật vào database
+                            try {
+                                movieScheduleService.updateScheduleStatus(schedule.getId(), calculatedStatus);
+                                log.info("Đã cập nhật trạng thái lịch chiếu ID {} từ {} thành {}",
+                                        schedule.getId(), schedule.getStatus(), calculatedStatus);
+                            } catch (Exception e) {
+                                log.error("Lỗi khi cập nhật trạng thái lịch chiếu ID {}: {}",
+                                        schedule.getId(), e.getMessage());
+                            }
+                        }
+                        return schedule;
+                    })
+                    .toList();
 
             log.info("Successfully loaded {} schedules", schedules.size());
 
@@ -272,11 +294,20 @@ public class AdminScheduleController {
                             return scheduleDate.equals(targetDate);
                         })
                         .map(schedule -> {
-                            // Tự động set status cho lịch chiếu trong quá khứ
-                            LocalDate scheduleDate = schedule.getScreeningDate();
-                            LocalDate today = LocalDate.now();
-                            if (scheduleDate.isBefore(today)) {
-                                schedule.setStatus("ENDED");
+                            // Tự động cập nhật trạng thái lịch chiếu dựa trên ngày và thời gian
+                            ScheduleStatus calculatedStatus = calculateScheduleStatus(schedule);
+                            if (calculatedStatus != null &&
+                                    (schedule.getStatus() == null || shouldUpdateStatus(schedule, calculatedStatus))) {
+                                schedule.setStatus(calculatedStatus);
+                                // Lưu trạng thái đã cập nhật vào database
+                                try {
+                                    movieScheduleService.updateScheduleStatus(schedule.getId(), calculatedStatus);
+                                    log.info("Đã cập nhật trạng thái lịch chiếu ID {} từ {} thành {}",
+                                            schedule.getId(), schedule.getStatus(), calculatedStatus);
+                                } catch (Exception e) {
+                                    log.error("Lỗi khi cập nhật trạng thái lịch chiếu ID {}: {}",
+                                            schedule.getId(), e.getMessage());
+                                }
                             }
                             return schedule;
                         })
@@ -286,8 +317,8 @@ public class AdminScheduleController {
                 if (status != null && !status.isEmpty() && !status.equals("all")) {
                     filteredSchedules = filteredSchedules.stream()
                             .filter(schedule -> {
-                                String scheduleStatus = schedule.getStatus();
-                                return scheduleStatus != null && scheduleStatus.equalsIgnoreCase(status);
+                                ScheduleStatus scheduleStatus = schedule.getStatus();
+                                return scheduleStatus != null && scheduleStatus.getValue().equalsIgnoreCase(status);
                             })
                             .collect(Collectors.toList());
                 }
@@ -398,7 +429,7 @@ public class AdminScheduleController {
             }
 
             // Luôn set trạng thái là "UPCOMING" (Sắp chiếu) cho lịch chiếu mới
-            scheduleDto.setStatus("UPCOMING");
+            scheduleDto.setStatus(ScheduleStatus.UPCOMING);
 
             model.addAttribute("schedule", scheduleDto);
 
@@ -678,8 +709,26 @@ public class AdminScheduleController {
             // Lấy dữ liệu đã được nhóm sẵn
             groupedSchedules = movieScheduleService.getSchedulesByMovieIdGrouped(movieId);
 
-            // Lấy tất cả schedules để có thông tin phim (có thể optimize sau)
-            allSchedules = movieScheduleService.getSchedulesByMovieId(movieId);
+            // Lấy tất cả schedules để có thông tin phim và cập nhật trạng thái tự động
+            allSchedules = movieScheduleService.getSchedulesByMovieId(movieId).stream()
+                    .map(schedule -> {
+                        ScheduleStatus calculatedStatus = calculateScheduleStatus(schedule);
+                        if (calculatedStatus != null &&
+                                (schedule.getStatus() == null || shouldUpdateStatus(schedule, calculatedStatus))) {
+                            schedule.setStatus(calculatedStatus);
+                            // Lưu trạng thái đã cập nhật vào database
+                            try {
+                                movieScheduleService.updateScheduleStatus(schedule.getId(), calculatedStatus);
+                                log.info("Đã cập nhật trạng thái lịch chiếu ID {} từ {} thành {}",
+                                        schedule.getId(), schedule.getStatus(), calculatedStatus);
+                            } catch (Exception e) {
+                                log.error("Lỗi khi cập nhật trạng thái lịch chiếu ID {}: {}",
+                                        schedule.getId(), e.getMessage());
+                            }
+                        }
+                        return schedule;
+                    })
+                    .toList();
 
             // Xử lý filter theo status nếu có
             if (status != null && !status.trim().isEmpty()) {
@@ -760,7 +809,8 @@ public class AdminScheduleController {
 
     private ScheduleGroupedByRoomDto filterRoomGroup(ScheduleGroupedByRoomDto roomGroup, String status) {
         List<ScheduleTimeSlotDto> filteredTimeSlots = roomGroup.getTimeSlots().stream()
-                .filter(timeSlot -> status.equalsIgnoreCase(timeSlot.getStatus()))
+                .filter(timeSlot -> timeSlot.getStatus() != null
+                        && status.equalsIgnoreCase(timeSlot.getStatus().getValue()))
                 .collect(Collectors.toList());
 
         return new ScheduleGroupedByRoomDto(
@@ -795,7 +845,7 @@ public class AdminScheduleController {
             ScreeningScheduleDto baseSchedule = new ScreeningScheduleDto();
             baseSchedule.setMovieId(movieId);
             baseSchedule.setScreeningDate(screeningDate);
-            baseSchedule.setStatus(status);
+            baseSchedule.setStatus(ScheduleStatus.fromValue(status));
 
             log.info("Created base schedule: {}", baseSchedule);
 
@@ -855,13 +905,31 @@ public class AdminScheduleController {
             // Lấy tất cả lịch chiếu trong tháng
             List<ScreeningScheduleDto> allSchedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
 
-            // Filter theo tháng được chọn
+            // Filter theo tháng được chọn và cập nhật trạng thái tự động
             List<ScreeningScheduleDto> monthlySchedules = allSchedules.stream()
                     .filter(schedule -> {
                         LocalDate scheduleDate = schedule.getScreeningDate();
                         return scheduleDate != null &&
                                 !scheduleDate.isBefore(startOfMonth) &&
                                 !scheduleDate.isAfter(endOfMonth);
+                    })
+                    .map(schedule -> {
+                        // Tự động cập nhật trạng thái lịch chiếu
+                        ScheduleStatus calculatedStatus = calculateScheduleStatus(schedule);
+                        if (calculatedStatus != null &&
+                                (schedule.getStatus() == null || shouldUpdateStatus(schedule, calculatedStatus))) {
+                            schedule.setStatus(calculatedStatus);
+                            // Lưu trạng thái đã cập nhật vào database
+                            try {
+                                movieScheduleService.updateScheduleStatus(schedule.getId(), calculatedStatus);
+                                log.info("Đã cập nhật trạng thái lịch chiếu ID {} từ {} thành {}",
+                                        schedule.getId(), schedule.getStatus(), calculatedStatus);
+                            } catch (Exception e) {
+                                log.error("Lỗi khi cập nhật trạng thái lịch chiếu ID {}: {}",
+                                        schedule.getId(), e.getMessage());
+                            }
+                        }
+                        return schedule;
                     })
                     .toList();
 
@@ -882,13 +950,13 @@ public class AdminScheduleController {
 
             // Thống kê nhanh
             long playingCount = monthlySchedules.stream()
-                    .filter(s -> "ACTIVE".equals(s.getStatus()))
+                    .filter(s -> ScheduleStatus.ACTIVE.equals(s.getStatus()))
                     .count();
             long comingSoonCount = monthlySchedules.stream()
-                    .filter(s -> "UPCOMING".equals(s.getStatus()))
+                    .filter(s -> ScheduleStatus.UPCOMING.equals(s.getStatus()))
                     .count();
             long stoppedCount = monthlySchedules.stream()
-                    .filter(s -> "ENDED".equals(s.getStatus()))
+                    .filter(s -> ScheduleStatus.ENDED.equals(s.getStatus()))
                     .count();
 
             model.addAttribute("totalSchedules", monthlySchedules.size());
@@ -938,7 +1006,8 @@ public class AdminScheduleController {
             scheduleInfo.put("time", schedule.getStartTime().toString());
             scheduleInfo.put("movie", schedule.getMovieName());
             scheduleInfo.put("room", schedule.getScreeningRoomName());
-            scheduleInfo.put("status", mapStatusToFrontend(schedule.getStatus()));
+            scheduleInfo.put("status",
+                    mapStatusToFrontend(schedule.getStatus() != null ? schedule.getStatus().getValue() : "unknown"));
             scheduleInfo.put("branchName", schedule.getBranchName());
 
             schedulesByDate.computeIfAbsent(dateKey, k -> new java.util.ArrayList<>()).add(scheduleInfo);
@@ -1168,19 +1237,38 @@ public class AdminScheduleController {
             // Lấy tất cả lịch chiếu
             List<ScreeningScheduleDto> allSchedules = movieScheduleService.getAllScreeningSchedulesForDisplay();
 
-            // Filter theo tháng và status (nếu có)
+            // Filter theo tháng và cập nhật trạng thái tự động
             List<ScreeningScheduleDto> filteredSchedules = allSchedules.stream()
                     .filter(schedule -> {
                         LocalDate scheduleDate = schedule.getScreeningDate();
-                        boolean inMonth = scheduleDate != null &&
+                        return scheduleDate != null &&
                                 !scheduleDate.isBefore(startOfMonth) &&
                                 !scheduleDate.isAfter(endOfMonth);
-
+                    })
+                    .map(schedule -> {
+                        // Tự động cập nhật trạng thái lịch chiếu
+                        ScheduleStatus calculatedStatus = calculateScheduleStatus(schedule);
+                        if (calculatedStatus != null &&
+                                (schedule.getStatus() == null || shouldUpdateStatus(schedule, calculatedStatus))) {
+                            schedule.setStatus(calculatedStatus);
+                            // Lưu trạng thái đã cập nhật vào database
+                            try {
+                                movieScheduleService.updateScheduleStatus(schedule.getId(), calculatedStatus);
+                                log.info("Đã cập nhật trạng thái lịch chiếu ID {} từ {} thành {}",
+                                        schedule.getId(), schedule.getStatus(), calculatedStatus);
+                            } catch (Exception e) {
+                                log.error("Lỗi khi cập nhật trạng thái lịch chiếu ID {}: {}",
+                                        schedule.getId(), e.getMessage());
+                            }
+                        }
+                        return schedule;
+                    })
+                    .filter(schedule -> {
+                        // Filter theo status sau khi đã cập nhật
                         boolean statusMatch = (status == null || status.isEmpty() ||
                                 status.equals("all") ||
-                                status.equals(schedule.getStatus()));
-
-                        return inMonth && statusMatch;
+                                (schedule.getStatus() != null && status.equals(schedule.getStatus().getValue())));
+                        return statusMatch;
                     })
                     .toList();
 
@@ -1195,7 +1283,8 @@ public class AdminScheduleController {
                 scheduleData.put("time", schedule.getStartTime().toString());
                 scheduleData.put("movie", schedule.getMovieName());
                 scheduleData.put("room", schedule.getScreeningRoomName());
-                scheduleData.put("status", mapStatusToFrontend(schedule.getStatus()));
+                scheduleData.put("status", mapStatusToFrontend(
+                        schedule.getStatus() != null ? schedule.getStatus().getValue() : "unknown"));
                 scheduleData.put("branchName", schedule.getBranchName());
 
                 schedulesByDate.computeIfAbsent(dateKey, k -> new java.util.ArrayList<>()).add(scheduleData);
@@ -1212,9 +1301,12 @@ public class AdminScheduleController {
             // Thống kê
             Map<String, Long> stats = new java.util.HashMap<>();
             stats.put("total", (long) filteredSchedules.size());
-            stats.put("playing", filteredSchedules.stream().filter(s -> "ACTIVE".equals(s.getStatus())).count());
-            stats.put("comingSoon", filteredSchedules.stream().filter(s -> "UPCOMING".equals(s.getStatus())).count());
-            stats.put("stopped", filteredSchedules.stream().filter(s -> "ENDED".equals(s.getStatus())).count());
+            stats.put("playing",
+                    filteredSchedules.stream().filter(s -> ScheduleStatus.ACTIVE.equals(s.getStatus())).count());
+            stats.put("comingSoon",
+                    filteredSchedules.stream().filter(s -> ScheduleStatus.UPCOMING.equals(s.getStatus())).count());
+            stats.put("stopped",
+                    filteredSchedules.stream().filter(s -> ScheduleStatus.ENDED.equals(s.getStatus())).count());
             response.put("stats", stats);
 
             return response;
@@ -1227,6 +1319,68 @@ public class AdminScheduleController {
             errorResponse.put("schedules", new java.util.HashMap<>());
             return errorResponse;
         }
+    }
+
+    /**
+     * Tính toán trạng thái lịch chiếu dựa trên ngày và thời gian
+     */
+    private ScheduleStatus calculateScheduleStatus(ScreeningScheduleDto schedule) {
+        if (schedule.getScreeningDate() == null) {
+            return null;
+        }
+
+        LocalDate scheduleDate = schedule.getScreeningDate();
+        LocalTime scheduleTime = schedule.getStartTime();
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        if (scheduleDate.isBefore(today)) {
+            // Ngày đã qua → ENDED
+            return ScheduleStatus.ENDED;
+        } else if (scheduleDate.isAfter(today)) {
+            // Ngày trong tương lai → UPCOMING
+            return ScheduleStatus.UPCOMING;
+        } else if (scheduleDate.equals(today) && scheduleTime != null) {
+            // Ngày hôm nay → kiểm tra thời gian
+            LocalTime endTime = schedule.getEndTime();
+            if (endTime == null && schedule.getMovieDuration() != null) {
+                // Tính toán thời gian kết thúc nếu chưa có
+                endTime = scheduleTime.plusMinutes(schedule.getMovieDuration());
+            }
+
+            if (endTime != null && endTime.isBefore(now)) {
+                // Đã kết thúc chiếu → ENDED
+                return ScheduleStatus.ENDED;
+            } else if (scheduleTime.isBefore(now.plusMinutes(30))) {
+                // Đang chiếu hoặc sắp chiếu trong 30 phút → ACTIVE
+                return ScheduleStatus.ACTIVE;
+            } else {
+                // Chưa tới giờ chiếu → UPCOMING
+                return ScheduleStatus.UPCOMING;
+            }
+        }
+
+        return ScheduleStatus.UPCOMING; // Mặc định là UPCOMING
+    }
+
+    /**
+     * Kiểm tra xem có nên cập nhật trạng thái hay không
+     */
+    private boolean shouldUpdateStatus(ScreeningScheduleDto schedule, ScheduleStatus calculatedStatus) {
+        ScheduleStatus currentStatus = schedule.getStatus();
+
+        // Luôn cập nhật nếu status hiện tại là null
+        if (currentStatus == null) {
+            return true;
+        }
+
+        // Cập nhật nếu trạng thái tính toán khác với trạng thái hiện tại và hợp lý
+        return switch (calculatedStatus) {
+            case ENDED -> currentStatus != ScheduleStatus.ENDED && currentStatus != ScheduleStatus.CANCELLED;
+            case UPCOMING -> currentStatus != ScheduleStatus.UPCOMING && currentStatus != ScheduleStatus.CANCELLED;
+            case ACTIVE -> currentStatus == ScheduleStatus.UPCOMING; // Chỉ chuyển từ UPCOMING sang ACTIVE
+            default -> false;
+        };
     }
 
     /**
