@@ -244,7 +244,7 @@
             >
           </p>
           <a
-            th:href="@{/schedule/movie/{movieId}/date(movieId=${movie.id})}"
+            th:href="@{/schedule/movie/{movieId}/date(movieId=${movie.id},date=${#dates.format(#dates.createNow(),'yyyy-MM-dd')})}"
             class="btn btn-success"
             id="bookTicketBtn"
             >Đặt vé</a
