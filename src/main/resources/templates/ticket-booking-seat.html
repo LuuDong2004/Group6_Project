@@ -627,8 +627,8 @@
             <div class="movie-title" th:text="${movie.name}">Tên phim</div>
             <div class="movie-meta">Thời lượng: <span th:text="${movie.duration}">120 phút</span></div>
             <div class="movie-meta">Ngôn ngữ: <span th:text="${movie.language}">Tiếng Việt</span></div>
-            <div class="movie-meta">Thể loại: <span th:text="${movie.genre}">Tình cảm</span></div>
-            <div class="movie-meta">Đánh giá: <span th:text="${movie.rating}">9</span></div>
+            <div class="movie-meta">Thể loại: <span th:text="${movie.genreDisplay}">Tình cảm</span></div>
+            <div class="movie-meta">Đánh giá: <span th:text="${movie.ratingDisplay}">9</span></div>
 
             <div class="showtime-info" th:if="${schedule}">
                 <h4 style="color:#df0e62;">Thông tin suất chiếu</h4>

@@ -364,7 +364,7 @@ public class AdminScheduleController {
      */
     private String formatDateForDisplay(LocalDate date) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", Locale.of("vi", "VN"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", new Locale("vi", "VN"));
             return date.format(formatter);
         } catch (Exception e) {
             log.warn("Error formatting date, using default format", e);
@@ -404,8 +404,6 @@ public class AdminScheduleController {
 
             // Load dropdown data
             model.addAttribute("movies", movieService.getAllMoviesForDisplay());
-            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
-            model.addAttribute("movies", movieService.getAllMovie());
             model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 

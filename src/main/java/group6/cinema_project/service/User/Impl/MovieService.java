@@ -133,17 +133,23 @@ public class MovieService implements IMovieService {
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
 
-        // Xử lý Rating - chỉ lấy ID để tránh lazy loading
+        // Xử lý Rating - lấy ID và set display text
         if (movie.getRating() != null) {
             dto.setRatingId(movie.getRating().getId());
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
         }
 
-        // Xử lý Genres - chỉ lấy ID để tránh lazy loading
+        // Xử lý Genres - lấy ID và set display text
         if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
             Set<Integer> genreIds = movie.getGenres().stream()
                     .map(Genre::getId)
                     .collect(Collectors.toSet());
             dto.setGenreIds(genreIds);
+
+            String genreNames = movie.getGenres().stream()
+                    .map(Genre::getName)
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
         }
 
         dto.setLanguage(movie.getLanguage());
