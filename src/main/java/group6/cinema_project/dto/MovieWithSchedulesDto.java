@@ -16,29 +16,33 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieWithSchedulesDto {
-    
+
     // Thông tin cơ bản của phim
     private Integer id;
     private String name;
     private String image;
     private Integer duration; // thời lượng tính bằng phút
     private Date releaseDate;
-    private String rating;
-    private String genre; // thể loại phim
+    private String rating; // Giữ lại để tương thích ngược
+    private String genre; // Giữ lại để tương thích ngược
     private String language;
     private String trailer;
     private String description;
     private String status;
-    
+
+    // Các field mới để hiển thị
+    private String ratingDisplay; // Hiển thị rating dạng "G - Mọi lứa tuổi"
+    private String genreDisplay; // Hiển thị genre dạng "Hành động, Hài kịch"
+
     // Danh sách lịch chiếu của phim trong ngày được chọn
     private List<ScreeningSchedule> schedules;
-    
+
     /**
      * Constructor để tạo từ Movie entity
      */
-    public MovieWithSchedulesDto(Integer id, String name, String image, Integer duration, 
-                                Date releaseDate, String rating, String genre, String language, 
-                                String trailer, String description, String status) {
+    public MovieWithSchedulesDto(Integer id, String name, String image, Integer duration,
+            Date releaseDate, String rating, String genre, String language,
+            String trailer, String description, String status) {
         this.id = id;
         this.name = name;
         this.image = image;
@@ -51,21 +55,21 @@ public class MovieWithSchedulesDto {
         this.description = description;
         this.status = status;
     }
-    
+
     /**
      * Kiểm tra xem phim có lịch chiếu không
      */
     public boolean hasSchedules() {
         return schedules != null && !schedules.isEmpty();
     }
-    
+
     /**
      * Lấy số lượng lịch chiếu
      */
     public int getScheduleCount() {
         return schedules != null ? schedules.size() : 0;
     }
-    
+
     /**
      * Lấy danh sách lịch chiếu theo trạng thái
      */
@@ -73,7 +77,7 @@ public class MovieWithSchedulesDto {
         if (schedules == null || status == null) {
             return List.of();
         }
-        
+
         return schedules.stream()
                 .filter(schedule -> status.equalsIgnoreCase(schedule.getStatus()))
                 .toList();

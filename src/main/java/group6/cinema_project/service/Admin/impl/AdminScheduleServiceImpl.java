@@ -40,9 +40,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     private final AdminScreeningRoomRepository screeningRoomRepository;
     private final AdminBranchRepository branchRepository;
     private final group6.cinema_project.repository.User.BookingRepository bookingRepository;
-    // Removed unused field that might cause UnsupportedOperationException
-    // List<ScheduleGroupedByDateDto> groupedSchedules;
-
+ 
     @Override
     @Transactional(readOnly = true)
     public Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id) {
@@ -62,7 +60,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         // Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
         updateScreeningRoomStatus(savedSchedule.getScreeningRoom().getId());
-
         return convertToDto(savedSchedule);
     }
 
@@ -72,10 +69,7 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
         }
-        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho
-        // xóa
         validateScheduleIsNotCurrentlyShowing(id);
-
         movieScheduleRepository.deleteById(id);
     }
 
@@ -177,8 +171,21 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setMovieName(screeningSchedule.getMovie().getName());
             dto.setMovieImage(screeningSchedule.getMovie().getImage());
             dto.setMovieDuration(screeningSchedule.getMovie().getDuration());
-            dto.setMovieRating(screeningSchedule.getMovie().getRating());
-            dto.setMovieGenre(screeningSchedule.getMovie().getGenre());
+
+            // Xử lý Rating
+            if (screeningSchedule.getMovie().getRating() != null) {
+                dto.setMovieRating(screeningSchedule.getMovie().getRating().getCode() + " - " +
+                        screeningSchedule.getMovie().getRating().getDescription());
+            }
+
+            // Xử lý Genres
+            if (screeningSchedule.getMovie().getGenres() != null
+                    && !screeningSchedule.getMovie().getGenres().isEmpty()) {
+                String genreNames = screeningSchedule.getMovie().getGenres().stream()
+                        .map(genre -> genre.getName())
+                        .collect(Collectors.joining(", "));
+                dto.setMovieGenre(genreNames);
+            }
         }
         // Set screening room information
         if (screeningSchedule.getScreeningRoom() != null) {
@@ -433,8 +440,26 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         dto.setName(movie.getName());
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
-        dto.setRating(movie.getRating());
-        dto.setGenre(movie.getGenre());
+
+        // Xử lý Rating - chỉ lấy ID để tránh lazy loading
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        // Xử lý Genres - chỉ lấy ID để tránh lazy loading
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(genre -> genre.getId())
+                    .collect(Collectors.toSet());
+            dto.setGenreIds(genreIds);
+
+            String genreNames = movie.getGenres().stream()
+                    .map(genre -> genre.getName())
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
+        }
+
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());

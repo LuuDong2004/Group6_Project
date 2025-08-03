@@ -67,7 +67,7 @@ public interface AdminScheduleRepository extends JpaRepository<ScreeningSchedule
             "JOIN ss.movie m " +
             "WHERE ss.status = :status " +
             "ORDER BY m.name")
-    List<group6.cinema_project.entity.Movie> findMoviesByScheduleStatus(@Param("status") String status);
+    List<Movie> findMoviesByScheduleStatus(@Param("status") String status);
 
     /**
      * Tìm phim theo trạng thái lịch chiếu (sử dụng Native SQL - phương án dự phòng)

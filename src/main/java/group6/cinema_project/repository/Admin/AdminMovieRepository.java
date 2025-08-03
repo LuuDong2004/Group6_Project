@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
@@ -37,7 +38,7 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
          * @param searchTerm Từ khóa tìm kiếm trong thể loại phim
          * @return Danh sách phim có thể loại chứa từ khóa
          */
-        @Query("SELECT m FROM Movie m WHERE LOWER(m.genre) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+        @Query("SELECT DISTINCT m FROM Movie m JOIN m.genres g WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         List<Movie> findByGenreContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
         /**
@@ -46,7 +47,7 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
          * @param searchTerm Từ khóa tìm kiếm trong xếp hạng phim
          * @return Danh sách phim có xếp hạng chứa từ khóa
          */
-        @Query("SELECT m FROM Movie m WHERE LOWER(m.rating) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+        @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN m.rating r WHERE LOWER(r.code) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         List<Movie> findByRatingContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
         /**
@@ -94,8 +95,20 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findAllWithDirectorsAndActors();
+
+        /**
+         * Lấy một phim theo ID kèm thông tin đạo diễn và diễn viên (eager loading)
+         *
+         * @param id ID của phim
+         * @return Phim với thông tin đầy đủ về đạo diễn và diễn viên
+         */
+        @Query("SELECT DISTINCT m FROM Movie m " +
+                        "LEFT JOIN FETCH m.directors " +
+                        "LEFT JOIN FETCH m.actors " +
+                        "WHERE m.id = :id")
+        Optional<Movie> findByIdWithDirectorsAndActors(@Param("id") Integer id);
 
         /**
          * Lấy phim theo tên kèm thông tin đạo diễn và diễn viên cho tìm kiếm có lọc
@@ -107,49 +120,51 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByNameContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByDescriptionContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "WHERE LOWER(m.genre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "JOIN m.genres g " +
+                        "WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+                        "ORDER BY m.id ASC")
         List<Movie> findByGenreContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "WHERE LOWER(m.rating) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "LEFT JOIN FETCH m.rating r " +
+                        "WHERE LOWER(r.code) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+                        "ORDER BY m.id ASC")
         List<Movie> findByRatingContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.language) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByLanguageContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE YEAR(m.releaseDate) = :year " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByReleaseYearWithDirectorsAndActors(@Param("year") Integer year);
 
         @Query("SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors d " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByDirectorNameContainingIgnoreCaseWithDirectorsAndActors(
                         @Param("searchTerm") String searchTerm);
 
@@ -157,21 +172,21 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors a " +
                         "WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name")
+                        "ORDER BY m.id ASC")
         List<Movie> findByActorNameContainingIgnoreCaseWithDirectorsAndActors(@Param("searchTerm") String searchTerm);
 
         // Các phương thức phân trang cho hiển thị danh sách phim
         @Query(value = "SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m")
         Page<Movie> findAllWithDirectorsAndActorsPageable(Pageable pageable);
 
         @Query(value = "SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByNameContainingIgnoreCaseWithDirectorsAndActorsPageable(@Param("searchTerm") String searchTerm,
                         Pageable pageable);
 
@@ -179,23 +194,25 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByDescriptionContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 
         @Query(value = "SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "WHERE LOWER(m.genre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.genre) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "JOIN m.genres g " +
+                        "WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.genres g WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByGenreContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 
         @Query(value = "SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
-                        "WHERE LOWER(m.rating) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.rating) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "LEFT JOIN FETCH m.rating r " +
+                        "WHERE LOWER(r.code) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m LEFT JOIN m.rating r WHERE LOWER(r.code) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByRatingContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 
@@ -203,7 +220,7 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(m.language) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.language) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE LOWER(m.language) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByLanguageContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 
@@ -211,14 +228,14 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE YEAR(m.releaseDate) = :year " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE YEAR(m.releaseDate) = :year")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m WHERE YEAR(m.releaseDate) = :year")
         Page<Movie> findByReleaseYearWithDirectorsAndActorsPageable(@Param("year") String year, Pageable pageable);
 
         @Query(value = "SELECT DISTINCT m FROM Movie m " +
                         "LEFT JOIN FETCH m.directors d " +
                         "LEFT JOIN FETCH m.actors " +
                         "WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.directors d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.directors d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByDirectorNameContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 
@@ -226,7 +243,7 @@ public interface AdminMovieRepository extends JpaRepository<Movie, Integer> {
                         "LEFT JOIN FETCH m.directors " +
                         "LEFT JOIN FETCH m.actors a " +
                         "WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-                        "ORDER BY m.name", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.actors a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+                        "ORDER BY m.id ASC", countQuery = "SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.actors a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
         Page<Movie> findByActorNameContainingIgnoreCaseWithDirectorsAndActorsPageable(
                         @Param("searchTerm") String searchTerm, Pageable pageable);
 }

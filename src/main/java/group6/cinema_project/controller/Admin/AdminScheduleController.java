@@ -91,7 +91,7 @@ public class AdminScheduleController {
 
         try {
             // Load dropdown data for filters - convert MovieDto to MovieWithSchedulesDto
-            List<MovieDto> movieDtos = movieService.getAllMovie();
+            List<MovieDto> movieDtos = movieService.getAllMoviesForDisplay();
             List<MovieWithSchedulesDto> moviesWithSchedules = convertMovieDtosToMoviesWithSchedules(movieDtos);
             model.addAttribute("movies", moviesWithSchedules);
         } catch (Exception e) {
@@ -212,8 +212,8 @@ public class AdminScheduleController {
             movieWithSchedules.setName(movieDto.getName());
             movieWithSchedules.setImage(movieDto.getImage());
             movieWithSchedules.setDuration(movieDto.getDuration());
-            movieWithSchedules.setRating(movieDto.getRating());
-            movieWithSchedules.setGenre(movieDto.getGenre());
+            movieWithSchedules.setRatingDisplay(movieDto.getRatingDisplay()); // Sửa từ setRating thành setRatingDisplay
+            movieWithSchedules.setGenreDisplay(movieDto.getGenreDisplay()); // Sửa từ setGenre thành setGenreDisplay
             movieWithSchedules.setLanguage(movieDto.getLanguage());
             movieWithSchedules.setDescription(movieDto.getDescription());
             movieWithSchedules.setStatus(movieDto.getStatus());
@@ -232,7 +232,7 @@ public class AdminScheduleController {
 
         try {
             // Lấy tất cả phim
-            List<MovieDto> allMovies = movieService.getAllMovie();
+            List<MovieDto> allMovies = movieService.getAllMoviesForDisplay();
 
             for (MovieDto movieDto : allMovies) {
                 // Lấy lịch chiếu của phim theo ID
@@ -273,8 +273,10 @@ public class AdminScheduleController {
                     movieWithSchedules.setName(movieDto.getName());
                     movieWithSchedules.setImage(movieDto.getImage());
                     movieWithSchedules.setDuration(movieDto.getDuration());
-                    movieWithSchedules.setRating(movieDto.getRating());
-                    movieWithSchedules.setGenre(movieDto.getGenre());
+                    movieWithSchedules.setRatingDisplay(movieDto.getRatingDisplay()); // Sửa từ setRating thành
+                                                                                      // setRatingDisplay
+                    movieWithSchedules.setGenreDisplay(movieDto.getGenreDisplay()); // Sửa từ setGenre thành
+                                                                                    // setGenreDisplay
                     movieWithSchedules.setLanguage(movieDto.getLanguage());
                     movieWithSchedules.setDescription(movieDto.getDescription());
                     movieWithSchedules.setStatus(movieDto.getStatus());
@@ -375,7 +377,7 @@ public class AdminScheduleController {
             model.addAttribute("schedule", scheduleDto);
 
             // Load dropdown data
-            model.addAttribute("movies", movieService.getAllMovie());
+            model.addAttribute("movies", movieService.getAllMoviesForDisplay());
             model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
@@ -400,7 +402,7 @@ public class AdminScheduleController {
             log.warn("Validation errors in add schedule form");
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                 model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception e) {
@@ -429,7 +431,7 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                 model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
@@ -443,7 +445,7 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                 model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
@@ -480,7 +482,7 @@ public class AdminScheduleController {
             // Lấy thông tin phim hiện tại để hiển thị
             MovieDto selectedMovie = null;
             if (schedule.getMovieId() != null) {
-                Optional<MovieDto> movieOpt = movieService.getMovieById(schedule.getMovieId());
+                Optional<MovieDto> movieOpt = movieService.getMovieByIdForDisplay(schedule.getMovieId());
                 if (movieOpt.isPresent()) {
                     selectedMovie = movieOpt.get();
                     log.info("Loaded selected movie: {} (ID: {})", selectedMovie.getName(), selectedMovie.getId());
@@ -489,7 +491,7 @@ public class AdminScheduleController {
 
             model.addAttribute("schedule", schedule);
             model.addAttribute("selectedMovie", selectedMovie);
-            model.addAttribute("movies", movieService.getAllMovie());
+            model.addAttribute("movies", movieService.getAllMoviesForDisplay());
             model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
@@ -531,7 +533,7 @@ public class AdminScheduleController {
                 model.addAttribute("error", "Vui lòng kiểm tra lại thông tin đã nhập");
                 // Reload dropdown data for form
                 try {
-                    model.addAttribute("movies", movieService.getAllMovie());
+                    model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                     model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                     model.addAttribute("branches", branchService.getAllBranches());
                 } catch (Exception e) {
@@ -563,7 +565,7 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                 model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
@@ -577,7 +579,7 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
                 model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
@@ -843,9 +845,13 @@ public class AdminScheduleController {
             // Format dữ liệu cho calendar frontend
             Map<String, Object> calendarData = formatSchedulesForCalendar(monthlySchedules);
 
+            // Tạo dữ liệu calendar days cho Thymeleaf
+            List<Map<String, Object>> calendarDays = generateCalendarDays(targetYear, targetMonth, monthlySchedules);
+
             // Thêm dữ liệu vào model
             model.addAttribute("schedules", monthlySchedules);
             model.addAttribute("calendarData", calendarData);
+            model.addAttribute("calendarDays", calendarDays);
             model.addAttribute("currentYear", targetYear);
             model.addAttribute("currentMonth", targetMonth);
             model.addAttribute("startOfMonth", startOfMonth);
@@ -922,6 +928,45 @@ public class AdminScheduleController {
     }
 
     /**
+     * Helper method để tạo dữ liệu calendar days cho Thymeleaf
+     */
+    private List<Map<String, Object>> generateCalendarDays(int year, int month, List<ScreeningScheduleDto> schedules) {
+        List<Map<String, Object>> calendarDays = new ArrayList<>();
+
+        // Nhóm lịch chiếu theo ngày
+        Map<String, List<ScreeningScheduleDto>> schedulesByDate = schedules.stream()
+                .collect(Collectors.groupingBy(schedule -> schedule.getScreeningDate().toString()));
+
+        // Tạo LocalDate cho ngày đầu tiên của tháng
+        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+
+        // Tìm ngày đầu tiên cần hiển thị (có thể là tháng trước)
+        LocalDate startDate = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+
+        // Tạo 42 ngày (6 tuần x 7 ngày)
+        for (int i = 0; i < 42; i++) {
+            LocalDate currentDate = startDate.plusDays(i);
+            Map<String, Object> dayData = new HashMap<>();
+
+            dayData.put("date", currentDate);
+            dayData.put("dayNumber", currentDate.getDayOfMonth());
+            dayData.put("isCurrentMonth", currentDate.getMonth().getValue() == month);
+            dayData.put("isToday", currentDate.equals(LocalDate.now()));
+            dayData.put("isPastDate", currentDate.isBefore(LocalDate.now()));
+
+            // Lấy lịch chiếu cho ngày này
+            String dateKey = currentDate.toString();
+            List<ScreeningScheduleDto> daySchedules = schedulesByDate.getOrDefault(dateKey, new ArrayList<>());
+            dayData.put("schedules", daySchedules);
+            dayData.put("scheduleCount", daySchedules.size());
+
+            calendarDays.add(dayData);
+        }
+
+        return calendarDays;
+    }
+
+    /**
      * API endpoint để search movies cho autocomplete
      */
     @GetMapping("/api/movies/search")
@@ -939,8 +984,8 @@ public class AdminScheduleController {
                         movieData.put("id", movie.getId());
                         movieData.put("name", movie.getName());
                         movieData.put("duration", movie.getDuration());
-                        movieData.put("genre", movie.getGenre());
-                        movieData.put("rating", movie.getRating());
+                        movieData.put("genre", movie.getGenreDisplay());
+                        movieData.put("rating", movie.getRatingDisplay());
                         return movieData;
                     })
                     .collect(Collectors.toList());
@@ -968,8 +1013,8 @@ public class AdminScheduleController {
                 movieData.put("id", movie.getId());
                 movieData.put("name", movie.getName());
                 movieData.put("duration", movie.getDuration());
-                movieData.put("genre", movie.getGenre());
-                movieData.put("rating", movie.getRating());
+                movieData.put("genre", movie.getGenreDisplay());
+                movieData.put("rating", movie.getRatingDisplay());
                 return movieData;
             } else {
                 Map<String, Object> error = new HashMap<>();

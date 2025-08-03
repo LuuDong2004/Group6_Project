@@ -78,8 +78,8 @@ public class MovieController {
                     if (booking.getSchedule().getMovieGenre() != null) {
                         genre = booking.getSchedule().getMovieGenre();
                     } else if (booking.getSchedule().getMovie() != null
-                            && booking.getSchedule().getMovie().getGenre() != null) {
-                        genre = booking.getSchedule().getMovie().getGenre();
+                            && booking.getSchedule().getMovie().getGenreDisplay() != null) {
+                        genre = booking.getSchedule().getMovie().getGenreDisplay();
                     }
                     if (genre != null) {
                         String[] splitGenres = genre.split(",");
@@ -92,16 +92,20 @@ public class MovieController {
             List<MovieDto> allMovies = movieService.getAllMovie();
             List<MovieDto> recommend = new ArrayList<>();
             for (MovieDto movie : allMovies) {
-                if (movie.getGenre() != null && !watchedMovieIds.contains(movie.getId())) {
+                if (movie.getGenreDisplay() != null && !watchedMovieIds.contains(movie.getId())) {
                     for (String g : genres) {
-                        if (movie.getGenre().toLowerCase().contains(g.toLowerCase())) {
+                        if (movie.getGenreDisplay().toLowerCase().contains(g.toLowerCase())) {
                             recommend.add(movie);
                             break;
                         }
                     }
                 }
             }
-            recommend.sort((m1, m2) -> m2.getRating().compareTo(m1.getRating()));
+            recommend.sort((m1, m2) -> {
+                String rating1 = m1.getRatingDisplay() != null ? m1.getRatingDisplay() : "";
+                String rating2 = m2.getRatingDisplay() != null ? m2.getRatingDisplay() : "";
+                return rating2.compareTo(rating1);
+            });
             if (recommend.size() > 5)
                 recommend = recommend.subList(0, 5);
             if (recommend.isEmpty()) {
@@ -202,8 +206,8 @@ public class MovieController {
                     if (booking.getSchedule().getMovieGenre() != null) {
                         genre = booking.getSchedule().getMovieGenre();
                     } else if (booking.getSchedule().getMovie() != null
-                            && booking.getSchedule().getMovie().getGenre() != null) {
-                        genre = booking.getSchedule().getMovie().getGenre();
+                            && booking.getSchedule().getMovie().getGenreDisplay() != null) {
+                        genre = booking.getSchedule().getMovie().getGenreDisplay();
                     }
                     if (genre != null) {
                         String[] splitGenres = genre.split(",");
@@ -217,17 +221,21 @@ public class MovieController {
             List<MovieDto> allMovies = movieService.getAllMovie();
             List<MovieDto> recommend = new ArrayList<>();
             for (MovieDto movie : allMovies) {
-                if (movie.getGenre() != null && !watchedMovieIds.contains(movie.getId())) {
+                if (movie.getGenreDisplay() != null && !watchedMovieIds.contains(movie.getId())) {
                     for (String g : genres) {
-                        if (movie.getGenre().toLowerCase().contains(g.toLowerCase())) {
+                        if (movie.getGenreDisplay().toLowerCase().contains(g.toLowerCase())) {
                             recommend.add(movie);
                             break;
                         }
                     }
                 }
             }
-            // Sắp xếp theo rating giảm dần
-            recommend.sort((m1, m2) -> m2.getRating().compareTo(m1.getRating()));
+            // Sắp xếp theo rating giảm dần (sử dụng ratingDisplay)
+            recommend.sort((m1, m2) -> {
+                String rating1 = m1.getRatingDisplay() != null ? m1.getRatingDisplay() : "";
+                String rating2 = m2.getRatingDisplay() != null ? m2.getRatingDisplay() : "";
+                return rating2.compareTo(rating1);
+            });
             // Lấy tối đa 5 phim
             if (recommend.size() > 5)
                 recommend = recommend.subList(0, 5);

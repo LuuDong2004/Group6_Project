@@ -3,6 +3,8 @@ package group6.cinema_project.controller.Admin;
 import group6.cinema_project.service.Admin.IAdminActorService;
 import group6.cinema_project.service.Admin.IAdminDirectorService;
 import group6.cinema_project.service.Admin.IAdminMovieService;
+import group6.cinema_project.repository.Admin.AdminRatingRepository;
+import group6.cinema_project.repository.Admin.AdminGenreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +46,8 @@ public class AdminMovieController {
     private final IAdminMovieService movieService;
     private final IAdminActorService actorService;
     private final IAdminDirectorService directorService;
+    private final AdminRatingRepository ratingRepository;
+    private final AdminGenreRepository genreRepository;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/movies/";
 
@@ -97,6 +101,12 @@ public class AdminMovieController {
         // Thêm timestamp để tránh cache hình ảnh
         model.addAttribute("timestamp", System.currentTimeMillis());
 
+        // Thêm thông báo success nếu có
+        if (model.containsAttribute("successMessage")) {
+            // Force refresh timestamp khi có thông báo thành công
+            model.addAttribute("timestamp", System.currentTimeMillis() + 1000);
+        }
+
         return "admin/admin_movie_list";
     }
 
@@ -105,6 +115,11 @@ public class AdminMovieController {
         // Add all directors and actors to the model for autocomplete functionality
         model.addAttribute("allDirectors", directorService.getAllDirectors());
         model.addAttribute("allActors", actorService.getAllActors());
+
+        // Load dữ liệu Rating và Genre từ database
+        model.addAttribute("allRatings", ratingRepository.findAllOrderByCode());
+        model.addAttribute("allGenres", genreRepository.findAllOrderByName());
+
         return "admin/admin_movie_add";
     }
 
@@ -113,20 +128,21 @@ public class AdminMovieController {
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("duration") int duration,
-            @RequestParam("rating") String rating,
+            @RequestParam Integer ratingId,
             @RequestParam("releaseDate") String releaseDate,
-            @RequestParam(value = "genres", required = false) List<String> genres,
+            @RequestParam(value = "genres", required = false) List<Integer> genreIds,
             @RequestParam("image") MultipartFile image,
             @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
             @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
-            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds) {
+            @RequestParam(value = "selectedActors", required = false) List<Integer> selectedActorIds,
+            RedirectAttributes redirectAttributes) {
 
         try {
             MovieDto movie = new MovieDto();
             movie.setName(name);
             movie.setDescription(description);
             movie.setDuration(duration);
-            movie.setRating(rating);
+            movie.setRatingId(ratingId);
             movie.setLanguage("Vietnamese"); // Set default language
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -134,9 +150,8 @@ public class AdminMovieController {
             Date sqlReleaseDate = new Date(utilDate.getTime());
             movie.setReleaseDate(sqlReleaseDate);
 
-            if (genres != null && !genres.isEmpty()) {
-                String genreString = String.join(", ", genres);
-                movie.setGenre(genreString);
+            if (genreIds != null && !genreIds.isEmpty()) {
+                movie.setGenreIds(new HashSet<>(genreIds));
             }
 
             if (!image.isEmpty()) {
@@ -180,15 +195,22 @@ public class AdminMovieController {
 
             System.out.println("Movie saved successfully: " + movie.getName());
 
+            // Thêm thông báo thành công
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Phim '" + name + "' đã được thêm thành công!");
+
         } catch (ParseException e) {
             System.err.println("Error parsing date: " + e.getMessage());
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Định dạng ngày không hợp lệ");
         } catch (IOException e) {
             System.err.println("Error saving image file: " + e.getMessage());
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi tải lên hình ảnh");
         } catch (Exception e) {
             System.err.println("Error saving movie: " + e.getMessage());
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi thêm phim");
         }
 
         return "redirect:/admin/movies/list";
@@ -210,6 +232,10 @@ public class AdminMovieController {
             model.addAttribute("allDirectors", directorService.getAllDirectors());
             model.addAttribute("allActors", actorService.getAllActors());
 
+            // Load dữ liệu Rating và Genre từ database
+            model.addAttribute("allRatings", ratingRepository.findAllOrderByCode());
+            model.addAttribute("allGenres", genreRepository.findAllOrderByName());
+
             return "admin/admin_movie_edit";
         } catch (Exception e) {
             System.err.println("Error loading movie for edit: " + e.getMessage());
@@ -223,9 +249,9 @@ public class AdminMovieController {
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("duration") int duration,
-            @RequestParam("rating") String rating,
+            @RequestParam Integer ratingId,
             @RequestParam("releaseDate") String releaseDate,
-            @RequestParam(value = "genres", required = false) List<String> genres,
+            @RequestParam(value = "genres", required = false) List<Integer> genreIds,
             @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam(value = "trailerUrl", required = false) String trailerUrl,
             @RequestParam(value = "selectedDirectors", required = false) List<Integer> selectedDirectorIds,
@@ -246,7 +272,7 @@ public class AdminMovieController {
             movie.setName(name);
             movie.setDescription(description);
             movie.setDuration(duration);
-            movie.setRating(rating);
+            movie.setRatingId(ratingId);
             movie.setLanguage("Vietnamese"); // Keep default language
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -254,9 +280,8 @@ public class AdminMovieController {
             Date sqlReleaseDate = new Date(utilDate.getTime());
             movie.setReleaseDate(sqlReleaseDate);
 
-            if (genres != null && !genres.isEmpty()) {
-                String genreString = String.join(", ", genres);
-                movie.setGenre(genreString);
+            if (genreIds != null && !genreIds.isEmpty()) {
+                movie.setGenreIds(new HashSet<>(genreIds));
             }
 
             // Handle image upload (only if new image is provided)
