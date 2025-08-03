@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${blogPost.title} + ' - Admin'">
+      Chi tiết Blog - Admin
+    </title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-right: 3px solid white;
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
+        min-height: 100vh;
+        background-color: #f8fafc;
+        transition: margin-left 0.3s ease;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .text-gray-700 {
+        color: #374151 !important;
+      }
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+      }
+      .btn-secondary {
+        border-radius: 25px;
+        padding: 10px 25px;
+      }
+      .blog-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      .blog-meta {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+      }
+      .blog-content {
+        line-height: 1.8;
+        font-size: 16px;
+      }
+      .blog-content h1,
+      .blog-content h2,
+      .blog-content h3 {
+        margin-top: 30px;
+        margin-bottom: 15px;
+        color: #333;
+      }
+      .blog-content p {
+        margin-bottom: 20px;
+      }
+      .blog-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .cover-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 30px;
+      }
+      .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+      }
+      .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+      .action-buttons {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+      }
+      .alert {
+        border-radius: 15px;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Xem Blog</h4>
+        </div>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                  style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
+                   class="rounded-circle me-2">
+              <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
+              <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <div class="container-fluid p-4">
+          <div class="row">
+            <!-- Content Column -->
+            <div class="col-md-8">
+              <!-- Blog Header -->
+              <div class="blog-header">
+                <h1 class="mb-3" th:utext="${blogPost.title}"></h1>
+                <div class="blog-meta">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user me-2"></i>
+                        <span
+                          >Tác giả:
+                          <strong th:text="${blogPost.authorName}"></strong
+                        ></span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar me-2"></i>
+                        <span
+                          >Ngày tạo:
+                          <strong
+                            th:text="${#temporals.format(blogPost.createdAt, 'dd/MM/yyyy HH:mm')}"
+                          ></strong
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="col-md-6"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cover Image -->
+              <div th:if="${blogPost.coverImageUrl}" class="mb-4">
+                <img
+                  th:src="${blogPost.coverImageUrl}"
+                  class="cover-image"
+                  th:alt="${blogPost.title}"
+                />
+              </div>
+
+              <!-- Blog Content -->
+              <div class="card">
+                <div class="card-body">
+                  <div
+                    class="blog-content"
+                    th:utext="${blogPost.content}"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar Column -->
+            <div class="col-md-4">
+              <!-- Action Buttons -->
+              <div class="action-buttons">
+                <div class="card mb-4">
+                  <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                      <i class="fas fa-cog me-2"></i>Thao tác
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-grid gap-2">
+                      <a
+                        th:href="@{/admin/blogs/edit/{id}(id=${blogPost.id})}"
+                        class="btn btn-primary"
+                      >
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                      </a>
+                      <a
+                        th:href="@{/admin/blogs/delete/{id}(id=${blogPost.id})}"
+                        class="btn btn-outline-danger"
+                      >
+                        <i class="fas fa-trash me-2"></i>Xóa bài viết
+                      </a>
+                      <a
+                        th:href="@{/blogs/{id}(id=${blogPost.id})}"
+                        class="btn btn-outline-info"
+                        target="_blank"
+                      >
+                        <i class="fas fa-external-link-alt me-2"></i>Xem trên
+                        trang chủ
+                      </a>
+                      <a
+                        th:href="@{/admin/blogs/list}"
+                        class="btn btn-outline-secondary"
+                      >
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Blog Info -->
+                <div class="card">
+                  <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                      <i class="fas fa-info-circle me-2"></i>Thông tin bài viết
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">ID:</label>
+                      <p class="mb-0" th:text="${blogPost.id}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Tác giả:</label>
+                      <p class="mb-0" th:text="${blogPost.authorName}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Ngày tạo:</label>
+                      <p
+                        class="mb-0"
+                        th:text="${#temporals.format(blogPost.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
+                      ></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Tóm tắt:</label>
+                      <p
+                        class="mb-0 text-muted small"
+                        th:utext="${blogPost.summary}"
+                      ></p>
+                    </div>
+                    <div th:if="${blogPost.coverImageUrl}">
+                      <label class="form-label fw-bold">Ảnh bìa:</label>
+                      <p class="mb-0">
+                        <i class="fas fa-check-circle text-success me-1"></i>Có
+                        ảnh bìa
+                      </p>
+                    </div>
+                    <div th:unless="${blogPost.coverImageUrl}">
+                      <label class="form-label fw-bold">Ảnh bìa:</label>
+                      <p class="mb-0 text-muted">
+                        <i class="fas fa-times-circle text-warning me-1"></i
+                        >Chưa có ảnh bìa
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

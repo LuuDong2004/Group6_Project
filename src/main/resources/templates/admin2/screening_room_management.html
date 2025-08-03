@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinemaAdmin - Quản lý Phòng Chiếu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-header h5,
+        .sidebar.collapsed .sidebar-header small,
+        .sidebar.collapsed .sidebar-menu span,
+        .sidebar.collapsed .mt-auto .text-white,
+        .sidebar.collapsed .mt-auto small {
+            display: none;
+        }
+        .sidebar.collapsed .sidebar-menu .menu-item {
+            justify-content: center;
+        }
+        .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+            margin-right: 0 !important;
+        }
+        .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+            margin-right: 0 !important;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header .fa-film {
+            color: #6366f1;
+        }
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding-top: 1rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid white;
+            padding-left: calc(1.5rem - 3px);
+        }
+        .sidebar.collapsed .menu-item:hover, .sidebar.collapsed .menu-item.active {
+            border-left: none;
+            padding-left: 1.5rem;
+        }
+        .sidebar.collapsed .menu-item.active {
+            background-color: #4f46e5;
+        }
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+        .main-content-wrapper {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            padding-top: 70px;
+        }
+        .main-content-wrapper.expanded {
+            margin-left: 80px;
+        }
+        .header-custom {
+            position: fixed;
+            top: 0;
+            left: 260px;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 999;
+            transition: left 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+        .main-content-wrapper.expanded .header-custom {
+            left: 80px;
+        }
+        .screening-room-list-section * {
+            box-sizing: border-box;
+        }
+        .screening-room-list-section {
+            color: #334155;
+        }
+        .screening-room-list-section .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .screening-room-list-section .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .view-btn {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .view-btn:hover {
+            background: #bfdbfe;
+        }
+        .add-room-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .add-room-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        .screening-room-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+        .screening-room-table th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+        }
+        .screening-room-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        .screening-room-table tr:hover {
+            background: #f8fafc;
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .edit-btn {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .edit-btn:hover {
+            background: #c7d2fe;
+        }
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        .back-btn {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-maintenance {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .action-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .action-btn.disabled:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar .sidebar-header h5,
+            .sidebar .sidebar-header small,
+            .sidebar .sidebar-menu span,
+            .sidebar .mt-auto .text-white,
+            .sidebar .mt-auto small {
+                display: none;
+            }
+            .sidebar .sidebar-menu .menu-item {
+                justify-content: center;
+            }
+            .sidebar .sidebar-menu .menu-item i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            .main-content-wrapper {
+                margin-left: 80px;
+            }
+            .header-custom {
+                left: 80px;
+                padding: 0 1rem;
+            }
+            .header-custom .flex-grow-1 {
+                display: none;
+            }
+            .screening-room-list-section .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    
+    <!-- Main content -->
+    <div class="main-content-wrapper" id="mainContentWrapper">
+        <header class="header-custom shadow-sm">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+                    <i class="fas fa-bars fs-5"></i>
+                </button>
+                <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Phòng Chiếu</h4>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-secondary me-1 position-relative">
+                    <i class="fas fa-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                          style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
+                        <span class="visually-hidden">Thông báo mới</span>
+                    </span>
+                </button>
+                <button class="btn btn-link text-secondary me-2">
+                    <i class="fas fa-cog fs-5"></i>
+                </button>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
+                             class="rounded-circle me-2">
+                        <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="redirect:/admin/login"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container-fluid p-4">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <div id="screeningRoomListView" class="screening-room-list-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Phòng Chiếu - <span th:text="${branch.name}"></span></h1>
+                        <p class="text-muted mb-0">Quản lý các phòng chiếu trong chi nhánh này</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/admin/branches}" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                        <a th:href="@{/admin/screening-rooms/add(branchId=${branch.id})}" class="add-room-btn">
+                            <i class="fas fa-plus me-1"></i> Thêm Phòng Chiếu
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <form method="get" class="d-flex gap-2 mb-3">
+                        <input type="text" name="name" placeholder="Tên phòng" th:value="${name}" class="form-control" style="width: 150px;">
+                        <select name="type" class="form-select" style="width: 100px;">
+                            <option value="">Loại phòng</option>
+                            <option value="2D" th:selected="${type} == '2D'">2D</option>
+                            <option value="3D" th:selected="${type} == '3D'">3D</option>
+                            <option value="4D" th:selected="${type} == '4D'">4D</option>
+                            <option value="5D" th:selected="${type} == '5D'">5D</option>
+                            <option value="IMAX" th:selected="${type} == 'IMAX'">IMAX</option>
+                        </select>
+                        <select name="status" class="form-select" style="width: 120px;">
+                            <option value="">Trạng thái</option>
+                            <option value="ACTIVE" th:selected="${status} == 'ACTIVE'">Hoạt động</option>
+                            <option value="INACTIVE" th:selected="${status} == 'INACTIVE'">Không hoạt động</option>
+                            <option value="MAINTENANCE" th:selected="${status} == 'MAINTENANCE'">Bảo trì</option>
+                        </select>
+                        <input type="number" name="rows" placeholder="Số hàng" th:value="${rows}" class="form-control" style="width: 80px;">
+                        <input type="number" name="seatsPerRow" placeholder="Ghế/hàng" th:value="${seatsPerRow}" class="form-control" style="width: 100px;">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </form>
+                    <table class="screening-room-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên phòng</th>
+                                <th>Sức chứa</th>
+                                <th>Loại</th>
+                                <th>Trạng thái</th>
+                                <th>Số hàng</th>
+                                <th>Số ghế/hàng</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái chỉnh sửa</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="room : ${screeningRooms}">
+                                <td th:text="${room.id}"></td>
+                                <td th:text="${room.name}"></td>
+                                <td th:text="${room.capacity}"></td>
+                                <td th:text="${room.type}"></td>
+                                <td>
+                                    <span th:class="${'status-badge ' + (room.status == 'ACTIVE' ? 'status-active' : (room.status == 'MAINTENANCE' ? 'status-maintenance' : 'status-inactive'))}"
+                                          th:text="${room.status == 'ACTIVE' ? 'Hoạt động' : (room.status == 'MAINTENANCE' ? 'Bảo trì' : 'Không hoạt động')}"></span>
+                                </td>
+                                <td th:text="${room.rows}"></td>
+                                <td th:text="${room.seatsPerRow}"></td>
+                                <td th:text="${room.description}"></td>
+                                <td>
+                                    <span th:text="${room.canEdit ? 'Cho phép chỉnh sửa' : 'Không cho phép chỉnh sửa'}"></span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a th:href="@{/admin/screening-rooms/view/{id}(id=${room.id})}" class="action-btn view-btn" >
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{/admin/screening-rooms/edit/{id}(id=${room.id})}" 
+                                           class="action-btn edit-btn" 
+                                           th:classappend="${!room.canEdit} ? 'disabled'"
+                                           th:title="'Sửa'"
+                                           th:onclick="${!room.canEdit} ? 'alert(\'Không thể chỉnh sửa phòng chiếu vì có suất chiếu đang hoạt động!\'); return false;' : ''">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+<!--                                        <a th:href="@{/admin/screening-rooms/delete/{id}(id=${room.id})}" class="action-btn delete-btn" title="Xóa"-->
+<!--                                           onclick="return confirm('Bạn có chắc muốn xóa phòng chiếu này?');">-->
+<!--                                            <i class="fas fa-trash-alt"></i>-->
+<!--                                        </a>-->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(screeningRooms)}">
+                                <td colspan="10" style="text-align: center;">Không có phòng chiếu nào để hiển thị.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination controls -->
+                <div class="d-flex justify-content-center mt-4">
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${currentPage - 1},size=${pageSize})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/screening-rooms/branch/{branchId}(branchId=${branch.id},page=${currentPage + 1},size=${pageSize})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Thêm phòng chiếu -->
+    <div class="modal fade" id="addScreeningRoomModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/admin/screening-rooms/add}" method="post" th:object="${screeningRoom}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm phòng chiếu mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Tên phòng</label>
+                                    <input type="text" class="form-control" th:field="*{name}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Sức chứa</label>
+                                    <input type="number" class="form-control" th:field="*{capacity}" required min="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Loại phòng</label>
+                                    <select class="form-select" th:field="*{type}" required>
+                                        <option value="">Chọn loại phòng</option>
+                                        <option value="STANDARD">Tiêu chuẩn</option>
+                                        <option value="VIP">VIP</option>
+                                        <option value="IMAX">IMAX</option>
+                                        <option value="4DX">4DX</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" th:field="*{status}" required>
+                                        <option value="">Chọn trạng thái</option>
+                                        <option value="ACTIVE">Hoạt động</option>
+                                        <option value="INACTIVE">Không hoạt động</option>
+                                        <option value="MAINTENANCE">Bảo trì</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Số hàng ghế</label>
+                                    <input type="number" class="form-control" th:field="*{rows}" required min="1" value="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số ghế mỗi hàng</label>
+                                    <input type="number" class="form-control" th:field="*{seatsPerRow}" required min="1" value="12">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm phòng chiếu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeDashboardBehavior();
+        });
+        
+        function initializeDashboardBehavior() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContentWrapper = document.getElementById('mainContentWrapper');
+            
+            if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+            
+            function toggleSidebar() {
+                sidebar.classList.toggle('collapsed');
+                mainContentWrapper.classList.toggle('expanded');
+            }
+            
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            
+            function checkViewport() {
+                if (window.innerWidth <= 992) {
+                    if (!sidebar.classList.contains('collapsed')) {
+                        toggleSidebar();
+                    }
+                }
+            }
+            
+            checkViewport();
+            window.addEventListener('resize', checkViewport);
+        }
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    ['name', 'type', 'status', 'rows', 'seatsPerRow'].forEach(function(field) {
+        const input = document.querySelector('[name="' + field + '"]');
+        if (input) {
+            // Với input text/number: submit khi thay đổi giá trị
+            if (input.type === 'text' || input.type === 'number') {
+                input.addEventListener('input', function() {
+                    this.form.submit();
+                });
+            }
+            // Với select: submit khi chọn giá trị khác
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+        }
+    });
+});
+</script>
+</body>
+</html> 

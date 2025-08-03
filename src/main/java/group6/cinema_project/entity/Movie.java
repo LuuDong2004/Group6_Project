@@ -23,6 +23,16 @@ public class Movie {
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> reviews;
 
+<<<<<<< Updated upstream
+=======
+    private String description;
+
+    private String status;
+    
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
+>>>>>>> Stashed changes
     @ManyToMany
     @JoinTable(name = "Director_Movie",
         joinColumns = @JoinColumn(name = "movie_id"),

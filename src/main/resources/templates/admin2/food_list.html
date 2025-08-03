@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinemaAdmin - Quản lý Combo Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Copy toàn bộ style từ admin_movie_list.html vào đây */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-header h5,
+        .sidebar.collapsed .sidebar-header small,
+        .sidebar.collapsed .sidebar-menu span,
+        .sidebar.collapsed .mt-auto .text-white,
+        .sidebar.collapsed .mt-auto small {
+            display: none;
+        }
+        .sidebar.collapsed .sidebar-menu .menu-item {
+            justify-content: center;
+        }
+        .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+            margin-right: 0 !important;
+        }
+        .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+            margin-right: 0 !important;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header .fa-film {
+            color: #6366f1;
+        }
+        .sidebar-menu {
+            flex-grow: 1;
+            padding-top: 1rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid white;
+            padding-left: calc(1.5rem - 3px);
+        }
+        .sidebar.collapsed .menu-item:hover, .sidebar.collapsed .menu-item.active {
+            border-left: none;
+            padding-left: 1.5rem;
+        }
+        .sidebar.collapsed .menu-item.active {
+            background-color: #4f46e5;
+        }
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+        .main-content-wrapper {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            padding-top: 70px;
+        }
+        .main-content-wrapper.expanded {
+            margin-left: 80px;
+        }
+        .header-custom {
+            position: fixed;
+            top: 0;
+            left: 260px;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 999;
+            transition: left 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+        .main-content-wrapper.expanded .header-custom {
+            left: 80px;
+        }
+        .movie-list-section * {
+            box-sizing: border-box;
+        }
+        .movie-list-section {
+            color: #334155;
+        }
+        .movie-list-section .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .movie-list-section .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .add-movie-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .add-movie-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        .movie-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+        .movie-table th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+        }
+        .movie-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        .movie-table tr:hover {
+            background: #f8fafc;
+        }
+        .movie-poster {
+            width: 40px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .edit-btn {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .edit-btn:hover {
+            background: #c7d2fe;
+        }
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        .food-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .food-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        .food-table {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .food-table th {
+            background: #f1f5f9;
+            color: #6366f1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+        .food-table td {
+            font-size: 1rem;
+            color: #334155;
+        }
+        .no-food {
+            color: #94a3b8;
+            font-style: italic;
+            text-align: center;
+        }
+        .add-food-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .add-food-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .edit-btn {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .edit-btn:hover {
+            background: #c7d2fe;
+        }
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        .food-poster {
+            width: 40px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .view-btn {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .view-btn:hover {
+            background: #bfdbfe;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar .sidebar-header h5,
+            .sidebar .sidebar-header small,
+            .sidebar .sidebar-menu span,
+            .sidebar .mt-auto .text-white,
+            .sidebar .mt-auto small {
+                display: none;
+            }
+            .sidebar .sidebar-menu .menu-item {
+                justify-content: center;
+            }
+            .sidebar .sidebar-menu .menu-item i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            .main-content-wrapper {
+                margin-left: 80px;
+            }
+            .header-custom {
+                left: 80px;
+                padding: 0 1rem;
+            }
+            .header-custom .flex-grow-1 {
+                display: none;
+            }
+            .movie-list-section .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .food-card { padding: 1rem; }
+            .food-table th, .food-table td { font-size: 0.95rem; }
+        }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .alert ul {
+        padding-left: 1.5rem;
+    }
+
+    .alert li {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Hiệu ứng hover cho số lượng */
+    td span[title] {
+        cursor: help;
+        transition: all 0.2s ease;
+    }
+
+    td span[title]:hover {
+        transform: scale(1.1);
+    }
+</style>
+</head>
+<body>
+    
+    <!-- Sidebar content -->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <!-- Main content -->
+<div class="main-content-wrapper" id="mainContentWrapper">
+    <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-2" id="sidebarToggle"><i class="fas fa-bars fs-5"></i>
+            </button>
+            <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Combo Food</h4>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-secondary me-1 position-relative">
+                <i class="fas fa-bell fs-5"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                      style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
+                    <span class="visually-hidden">Thông báo mới</span>
+                </span>
+            </button>
+            <button class="btn btn-link text-secondary me-2">
+                <i class="fas fa-cog fs-5"></i>
+            </button>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
+                         class="rounded-circle me-2">
+                    <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
+                    <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a>
+                    </li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="redirect:/admin/login"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div class="container mt-5 mb-5">
+        <!-- Thêm form search và sort -->
+        <form method="get" action="" class="mb-3 d-flex" style="gap: 10px;">
+            <input type="text" name="search" placeholder="Tìm kiếm theo tên" th:value="${search}" class="form-control" style="width: 200px;">
+            <select name="sort" class="form-select" style="width: 150px;">
+                <option value="">Sắp xếp theo giá</option>
+                <option value="asc" th:selected="${sort} == 'asc'">Giá tăng dần</option>
+                <option value="desc" th:selected="${sort} == 'desc'">Giá giảm dần</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        </form>
+        <div class="food-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="food-title">Danh sách Combo Food</div>
+
+                <a th:href="@{/admin/foods/add}" class="add-food-btn">
+                    <i class="fas fa-plus me-1"></i> Thêm Combo Food
+                </a>
+            </div>
+            
+            <!-- Thêm thông báo cảnh báo tổng quan -->
+            <div th:if="${#lists.size(foods) > 0}" class="alert alert-info mb-3" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Hướng dẫn:</strong>
+                <ul class="mb-0 mt-2">
+                    <li><span class="text-danger fw-bold">Đỏ + ⚠️</span>: Số lượng ≤ 5 - Cần nhập thêm hàng ngay!</li>
+                    <li><span class="text-warning">Vàng + ⚠️</span>: Số lượng 6-10 - Cần theo dõi và nhập thêm sớm</li>
+                    <li><span class="text-success">Xanh</span>: Số lượng > 10 - Ổn định</li>
+                </ul>
+            </div>
+            
+            <!-- Hiển thị cảnh báo nếu có món ăn số lượng thấp -->
+            <div th:if="${#lists.size(foods.?[size <= 5]) > 0}" class="alert alert-danger mb-3" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Cảnh báo!</strong> Có 
+                <span th:text="${#lists.size(foods.?[size <= 5])}"></span> 
+                món ăn có số lượng thấp (≤5). Vui lòng kiểm tra và nhập thêm hàng!
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table food-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Combo</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Mô tả</th>
+                        <th>Hình ảnh</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="food : ${foods}">
+                        <td th:text="${food.id}"></td>
+                        <td th:text="${food.name}"></td>
+                        <td th:text="${food.price}"></td>
+                        <td>
+                            <span th:text="${food.size}" 
+                                  th:class="${food.size <= 5 ? 'text-danger fw-bold' : (food.size <= 10 ? 'text-warning' : 'text-success')}"
+                                  th:title="${food.size <= 5 ? '⚠️ Số lượng thấp! Cần nhập thêm hàng.' : (food.size <= 10 ? '⚠️ Số lượng đang thấp.' : '✅ Số lượng ổn định.')}">
+                            </span>
+                            <!-- Hiển thị icon cảnh báo khi số lượng thấp -->
+                            <i th:if="${food.size <= 5}" class="fas fa-exclamation-triangle text-danger ms-1" 
+                               title="Số lượng thấp! Cần nhập thêm hàng."></i>
+                            <i th:if="${food.size > 5 && food.size <= 10}" class="fas fa-exclamation-circle text-warning ms-1" 
+                               title="Số lượng đang thấp."></i>
+                        </td>
+                        <td th:text="${food.description}"></td>
+                        <td>
+                            <img th:src="@{${food.image}}" alt="Food Image" class="food-poster"/>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a th:href="@{/admin/foods/view/{id}(id=${food.id})}" class="action-btn view-btn" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/admin/foods/edit/{id}(id=${food.id})}" class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(foods)}">
+                        <td colspan="7" class="no-food">Không có combo nào để hiển thị.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination controls -->
+            <div class="d-flex justify-content-center mt-4">
+                <nav th:if="${totalPages > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${currentPage - 1},size=${pageSize}, search=${search}, sort=${sort})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${i},size=${pageSize}, search=${search}, sort=${sort})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/foods/list(page=${currentPage + 1},size=${pageSize}, search=${search}, sort=${sort})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sortSelect = document.querySelector('select[name="sort"]');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                let lastValue = searchInput.value;
+                searchInput.addEventListener('input', function() {
+                    if (this.value === '' && lastValue !== '') {
+                        this.form.submit();
+                    }
+                    lastValue = this.value;
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeDashboardBehavior();
+        });
+        function initializeDashboardBehavior() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContentWrapper = document.getElementById('mainContentWrapper');
+            if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+            function toggleSidebar() {
+                sidebar.classList.toggle('collapsed');
+                mainContentWrapper.classList.toggle('expanded');
+            }
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            function checkViewport() {
+                if (window.innerWidth <= 992) {
+                    if (!sidebar.classList.contains('collapsed')) {
+                        toggleSidebar();
+                    }
+                }
+            }
+            checkViewport();
+            window.addEventListener('resize', checkViewport);
+        }
+    </script>
+</div>
+</body>
+</html>

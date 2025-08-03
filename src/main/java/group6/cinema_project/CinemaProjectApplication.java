@@ -9,4 +9,8 @@ public class CinemaProjectApplication {
         SpringApplication.run(CinemaProjectApplication.class, args);
 
     }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

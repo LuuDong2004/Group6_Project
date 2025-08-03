@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đặt vé</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style-starter.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/progress.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/ticket-booking.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/seat-selection.css}">
+    <style>
+        body {
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        /* Header styles */
+        #site-header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        .navbar {
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: #df0e62 !important;
+            text-decoration: none;
+        }
+
+        .fa-play {
+            color: #df0e62;
+            margin-right: 8px;
+            font-size: 24px;
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 100px;
+        }
+
+        /* Movie info section */
+        .movie-info-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .movie-poster {
+            width: 120px;
+            border-radius: 6px;
+            margin-right: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .movie-details {
+            flex: 1;
+        }
+
+        .movie-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .movie-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .showtime-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .showtime-info h4 {
+            margin: 0 0 10px 0;
+            color: #df0e62;
+            font-size: 18px;
+        }
+
+        /* Cinema layout section */
+        .cinema-layout {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-heading {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+            border-left: 4px solid #df0e62;
+            padding-left: 10px;
+        }
+
+        /* Screen */
+        .screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 4px;
+            border-radius: 10px;
+            margin: 20px auto 40px;
+            width: 80%;
+            position: relative;
+            text-align: center;
+            padding: 10px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .screen::before {
+            content: "MÀN HÌNH";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Room selection */
+        .room-selection {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .room-selection select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .room-selection label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Seat map */
+        .seat-map {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .seats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .row-label {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            user-select: none;
+            border: 2px solid transparent;
+        }
+
+        .seat.available {
+            background-color: #4CAF50;
+            border-color: #45a049;
+        }
+
+        .seat.available:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+
+        .seat.reserved {
+            background-color: #f44336;
+            border-color: #d32f2f;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .seat.selected {
+            background-color: #2196F3;
+            border-color: #1976D2;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+
+        .seat-standard { background-color: #4CAF50; border-color: #388e3c; }
+        .seat-standard.available:hover { background-color: #388e3c; }
+        .seat-vip1 { background-color: #ff9800; border-color: #fb8c00; }
+        .seat-vip1.available:hover { background-color: #fb8c00; }
+        .seat-vip2 { background-color: #9c27b0; border-color: #7b1fa2; }
+        .seat-vip2.available:hover { background-color: #7b1fa2; }
+        .seat-couple { background-color: #e91e63; border-color: #ad1457; }
+        .seat-couple.available:hover { background-color: #ad1457; }
+        
+        /* CSS cho ghế couple đặc biệt */
+        .seat-couple {
+            width: 64px !important;
+            height: 32px !important;
+            border-radius: 8px !important;
+            position: relative;
+        }
+        .seat-couple::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ad1457;
+            transform: translateX(-50%);
+        }
+        .seat-sweetbox { background-color: #2196f3; border-color: #1565c0; }
+        .seat-sweetbox.available:hover { background-color: #1565c0; }
+
+        /* Seat legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+        }
+
+        /* Action section */
+        .action-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .selected-seats-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .selected-seats-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .seat-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .seat-tag {
+            background-color: #df0e62;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .total-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .total-details {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .total-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .total-divider {
+            height: 1px;
+            background: #ddd;
+            margin: 10px 0;
+        }
+
+        .grand-total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #df0e62;
+            margin-top: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            background-color: #df0e62;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .action-button:hover {
+            background-color: #c20a54;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .action-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #df0e62;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Alert messages */
+        .alert {
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin-top: 80px;
+            }
+
+            .movie-info-container {
+                flex-direction: column;
+            }
+
+            .movie-poster {
+                width: 100%;
+                max-width: 200px;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .seat {
+                width: 28px;
+                height: 28px;
+                font-size: 9px;
+            }
+
+            .seat-row {
+                gap: 4px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-button {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .legend {
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .seat {
+                width: 24px;
+                height: 24px;
+                font-size: 8px;
+            }
+
+            .row-label {
+                width: 25px;
+                font-size: 14px;
+            }
+
+            .navbar-brand {
+                font-size: 24px;
+            }
+        }
+
+        /* Food Selection Styles */
+        .food-button-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .select-food {
+            background-color: #4CAF50;
+            min-width: 200px;
+        }
+
+        .select-food:hover {
+            background-color: #45a049;
+        }
+
+        .food-selection {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .food-items {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .food-item {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            min-width: 320px;
+            max-width: 400px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s;
+        }
+        .food-item:hover {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+        }
+        .food-img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+            background: #f3f3f3;
+        }
+        .food-details {
+            flex: 1;
+            text-align: center;
+        }
+        .food-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .food-price {
+            color: #df0e62;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .quantity-btn {
+            background: #df0e62;
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .quantity-btn:hover {
+            background: #c20a54;
+        }
+        .quantity-control span {
+            min-width: 32px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: #f8f8f8;
+            border-radius: 6px;
+            padding: 4px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+</div>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="container">
+    <!-- Movie Information -->
+    <div th:each="movie: ${movies}" class="movie-info-container">
+        <img th:src="${movie.image}" th:alt="${movie.name}" class="movie-poster"/>
+        <div class="movie-details">
+            <div class="movie-title" th:text="${movie.name}">Tên phim</div>
+            <div class="movie-meta">Thời lượng: <span th:text="${movie.duration}">120 phút</span></div>
+            <div class="movie-meta">Ngôn ngữ: <span th:text="${movie.language}">Tiếng Việt</span></div>
+            <div class="movie-meta">Thể loại: <span th:text="${movie.genre}">Tình cảm</span></div>
+            <div class="movie-meta">Đánh giá: <span th:text="${movie.rating}">9</span></div>
+
+            <div class="showtime-info" th:if="${schedule}">
+                <h4 style="color:#df0e62;">Thông tin suất chiếu</h4>
+                <div>Rạp: <span th:text="${schedule.branch?.name}"></span></div>
+                <div>Phòng: <span th:text="${schedule.screeningRoom?.name}"></span></div>
+                <div>Ngày: <span th:text="${schedule.screeningDateStr}"></span></div>
+                <div>Giờ: <span th:text="${schedule.startTimeStr}"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seat Selection -->
+    <div class="cinema-layout">
+        <h3 class="section-heading">Chọn ghế của bạn</h3>
+
+        <!-- Room Selection -->
+        <div class="room-selection">
+            <label for="room-select">Chọn phòng:</label>
+            <select id="room-select" onchange="handleRoomChange(this.value)">
+                <option th:each="room : ${rooms}"
+                        th:value="${room.id}"
+                        th:text="${room.name}"
+                        th:selected="${room.id == schedule.screeningRoom.id}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Screen -->
+        <div class="screen">MÀN HÌNH</div>
+
+        <!-- Seat Map -->
+        <div class="seat-map">
+            <div class="seats-container" id="seats-container">
+                <!-- Seats will be dynamically generated here -->
+        </div>
+
+        <!-- Seat Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4CAF50;"></div>
+                <span>Trống</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f44336;"></div>
+                <span>Đã đặt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2196F3;"></div>
+                <span>Đang chọn</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #9c27b0;"></div>
+                <span>Đang giữ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Section -->
+    <div class="action-section">
+        <div class="selected-seats-info" id="selected-seats-info" style="display: none;">
+            <h4>Ghế đã chọn</h4>
+            <div class="seat-tags" id="selected-seat-tags">
+                <!-- Selected seat tags will be added here -->
+            </div>
+        </div>
+
+        <div class="total-section">
+            <div class="total-details">
+                <div class="total-item">
+                    <span>Ghế:</span>
+                    <span id="seats-total">0 VND</span>
+                </div>
+                <div class="total-item">
+                    <span>Đồ ăn & Thức uống:</span>
+                    <span id="food-total">0 VND</span>
+                </div>
+                <div class="total-divider"></div>
+                <div class="total-item grand-total">
+                    <span>Tổng cộng:</span>
+                    <span id="grand-total">0 VND</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Selection Button -->
+        <div class="food-button-container">
+            <button class="action-button select-food" onclick="toggleFoodSelection()">
+                <i class="fa fa-cutlery"></i> Chọn đồ ăn & thức uống
+            </button>
+        </div>
+
+        <!-- Food Selection (Hidden by default) -->
+        <div class="food-selection" id="food-selection" style="display: none;">
+            <h4>Chọn đồ ăn & thức uống</h4>
+            <div class="food-items">
+                <div th:each="food : ${foodList}" class="food-item">
+                    <img th:src="${food.image}" th:alt="${food.name}" class="food-img">
+                    <div class="food-details">
+                        <h5 th:text="${food.name}" class="food-title">Food Name</h5>
+                        <p class="food-price" th:text="${#numbers.formatInteger(food.price, 0, 'POINT')} + ' đ'">0 đ</p>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn" data-action="decrease" th:attr="data-item=${food.id}">-</button>
+                            <span th:attr="id='food-' + ${food.id} + '-quantity'">0</span>
+                            <button type="button" class="quantity-btn" data-action="increase" th:attr="data-item=${food.id}">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="action-button" id="continue-button" disabled>
+                <i class="fa fa-credit-card"></i> Tiếp tục thanh toán
+            </button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Hidden data from backend -->
+<script th:inline="javascript">
+    // Get data from backend
+    var seatsData = /*[[${seats}]]*/ [];
+    var movieId = /*[[${movieId}]]*/ 0;
+    var scheduleId = /*[[${scheduleId}]]*/ 0;
+    var roomId = /*[[${roomId}]]*/ 0;
+    var currentRoomId = /*[[${schedule.screeningRoom.id}]]*/ 0;
+    var foodListJS = /*[[${foodList}]]*/ [];
+    // Debug log
+    console.log('Seats data from backend:', seatsData);
+    console.log('Movie ID:', movieId);
+    console.log('Schedule ID:', scheduleId);
+    console.log('Room ID:', roomId);
+    console.log('Current Room ID:', currentRoomId);
+    console.log('Food list:', foodListJS);
+</script>
+
+<script>
+    // Seat Selection Management
+    class SeatBooking {
+        constructor() {
+            this.selectedSeats = [];
+            this.seatsData = window.seatsData || [];
+            this.movieId = window.movieId || 0;
+            this.scheduleId = window.scheduleId || 0;
+            this.roomId = window.roomId || 0;
+            this.currentRoomId = window.currentRoomId || 0;
+            this.init();
+        }
+
+        init() {
+            this.renderSeats();
+            this.updateUI();
+        }
+
+        async loadSeatsForRoom(roomId) {
+            try {
+                console.log(`Loading seats for room ${roomId} and schedule ${this.scheduleId}`);
+                const response = await fetch(`/seat/get-by-room?roomId=${roomId}&scheduleId=${this.scheduleId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                console.log('Seats data from API:', data);
+                this.seatsData = data;
+                this.currentRoomId = roomId;
+                this.renderSeats();
+                this.updateUI();
+            } catch (error) {
+                console.error('Error loading seats:', error);
+                this.showAlert('Error loading seats: ' + error.message, 'error');
+                // Fallback to default seats if API fails
+                this.createDefaultSeats();
+            }
+        }
+
+        renderSeats() {
+            const container = document.getElementById('seats-container');
+            if (!container) {
+                console.error('Seats container not found');
+                return;
+            }
+            console.log('Rendering seats with data:', this.seatsData);
+            if (!this.seatsData || !this.seatsData.length) {
+                console.log('No seats data, creating default seats');
+                this.createDefaultSeats();
+                return;
+            }
+            const seatsByRow = this.groupSeatsByRow(this.seatsData);
+            container.innerHTML = '';
+            Object.keys(seatsByRow).sort().forEach(rowKey => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-label';
+                rowLabel.textContent = rowKey;
+                rowDiv.appendChild(rowLabel);
+                seatsByRow[rowKey].forEach(seat => {
+                    const seatDiv = document.createElement('div');
+                    let seatTypeClass = '';
+                    if (seat.type === 'Vip2') seatTypeClass = 'seat-vip2';
+                    else if (seat.type === 'Vip1') seatTypeClass = 'seat-vip1';
+                    else if (seat.type === 'Couple') seatTypeClass = 'seat-couple';
+                    else seatTypeClass = 'seat-standard';
+                    
+                    // Xử lý đặc biệt cho ghế couple - làm cho nó rộng hơn
+                    if (seat.type === 'Couple') {
+                        seatDiv.style.width = '64px';
+                        seatDiv.style.height = '32px';
+                        seatDiv.style.borderRadius = '8px';
+                        seatDiv.style.position = 'relative';
+                    }
+                    
+                    seatDiv.className = `seat ${seatTypeClass} ${seat.status === 'RESERVED' ? 'reserved' : seat.status === 'PENDING' ? 'pending' : 'available'}`;
+                    seatDiv.textContent = seat.seatName;
+                    seatDiv.dataset.seatId = seat.seatId;
+                    seatDiv.dataset.seatName = seat.seatName;
+                    seatDiv.dataset.status = seat.status;
+                    seatDiv.dataset.price = seat.price;
+                    seatDiv.dataset.type = seat.type;
+                    seatDiv.title = `Loại: ${seat.type || 'Standard'} | Giá: ${formatPrice(seat.price || 0)}`;
+                    if (seat.status !== 'RESERVED' && seat.status !== 'PENDING') {
+                        seatDiv.addEventListener('click', () => this.toggleSeat(seat));
+                    }
+                    rowDiv.appendChild(seatDiv);
+                });
+                container.appendChild(rowDiv);
+            });
+        }
+
+        createDefaultSeats() {
+            const container = document.getElementById('seats-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Create 8 rows (A-H) with 8 seats each
+            for (let row = 0; row < 8; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                
+                // Row label
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-label';
+                rowLabel.textContent = String.fromCharCode(65 + row);
+                rowDiv.appendChild(rowLabel);
+                
+                // Seats in row
+                for (let col = 1; col <= 8; col++) {
+                    const seatDiv = document.createElement('div');
+                    const seatName = `${String.fromCharCode(65 + row)}${col}`;
+                    const seatId = row * 8 + col;
+                    
+                    seatDiv.className = 'seat available';
+                    seatDiv.textContent = seatName;
+                    seatDiv.dataset.seatId = seatId;
+                    seatDiv.dataset.seatName = seatName;
+                    seatDiv.dataset.status = 'AVAILABLE';
+                    
+                    seatDiv.addEventListener('click', () => {
+                        const seat = {
+                            seatId: seatId,
+                            seatName: seatName,
+                            status: 'AVAILABLE'
+                        };
+                        this.toggleSeat(seat);
+                    });
+                    
+                    rowDiv.appendChild(seatDiv);
+                }
+                
+                container.appendChild(rowDiv);
+            }
+        }
+
+        groupSeatsByRow(seats) {
+            const grouped = {};
+            seats.forEach(seat => {
+                const row = seat.row || 'A';
+                if (!grouped[row]) {
+                    grouped[row] = [];
+                }
+                grouped[row].push(seat);
+            });
+
+            // Sort seats within each row
+            Object.keys(grouped).forEach(row => {
+                grouped[row].sort((a, b) => {
+                    // Extract numbers from seat names for proper sorting
+                    const numA = parseInt(a.seatName.replace(/\D/g, ''));
+                    const numB = parseInt(b.seatName.replace(/\D/g, ''));
+                    return numA - numB;
+                });
+            });
+
+            return grouped;
+        }
+
+        toggleSeat(seat) {
+            if (seat.status === 'RESERVED' || seat.status === 'PENDING') {
+                return;
+            }
+            const seatElement = document.querySelector(`[data-seat-id="${seat.seatId}"]`);
+            const isSelected = this.selectedSeats.find(s => s.seatId === seat.seatId);
+            if (isSelected) {
+                this.selectedSeats = this.selectedSeats.filter(s => s.seatId !== seat.seatId);
+                seatElement.classList.remove('selected');
+                seatElement.classList.add('available');
+            } else {
+                if (this.selectedSeats.length >= 6) {
+                    this.showAlert('Bạn chỉ được chọn tối đa 6 ghế!', 'error');
+                    return;
+                }
+                // Lưu cả price khi chọn ghế
+                this.selectedSeats.push(seat);
+                seatElement.classList.remove('available');
+                seatElement.classList.add('selected');
+            }
+            this.updateUI();
+        }
+
+        updateUI() {
+            const selectedSeatsInfo = document.getElementById('selected-seats-info');
+            const selectedSeatTags = document.getElementById('selected-seat-tags');
+            const continueButton = document.getElementById('continue-button');
+
+            if (this.selectedSeats.length > 0) {
+                selectedSeatsInfo.style.display = 'block';
+
+                // Update seat tags
+                selectedSeatTags.innerHTML = '';
+                this.selectedSeats.forEach(seat => {
+                    const tag = document.createElement('span');
+                    tag.className = 'seat-tag';
+                    tag.textContent = seat.seatName;
+                    selectedSeatTags.appendChild(tag);
+                });
+
+                // Enable continue button
+                continueButton.disabled = false;
+            } else {
+                selectedSeatsInfo.style.display = 'none';
+                continueButton.disabled = true;
+            }
+
+            // Update all totals - FIX HERE
+            updateTotals();
+        }
+
+        async reserveSeats() {
+            if (this.selectedSeats.length === 0) {
+                this.showAlert('Please select at least one seat', 'error');
+                return false;
+            }
+
+            this.showLoading(true);
+
+            try {
+                for (const seat of this.selectedSeats) {
+                    const response = await fetch('/seat/reserve', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            seatId: seat.seatId,
+                            scheduleId: this.scheduleId,
+                            userId: 1 // You should get this from session/auth
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Failed to reserve seat');
+                    }
+                }
+
+                this.showAlert('Seats reserved successfully!', 'success');
+                return true;
+            } catch (error) {
+                console.error('Error reserving seats:', error);
+                this.showAlert('Error reserving seats: ' + error.message, 'error');
+                return false;
+            } finally {
+                this.showLoading(false);
+            }
+        }
+
+        showLoading(show) {
+            const overlay = document.getElementById('loading-overlay');
+            if (show) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
+
+        showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        getSelectedSeatsData() {
+            // Tính tổng động từ từng ghế
+            return {
+                seats: this.selectedSeats,
+                total: this.selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0),
+                movieId: this.movieId,
+                scheduleId: this.scheduleId,
+                roomId: this.roomId
+            };
+        }
+    }
+
+    // FIXED: Move formatPrice function outside class to make it global
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(price);
+    }
+
+    // Global functions
+    let seatBooking;
+
+    async function handleRoomChange(roomId) {
+        if (!seatBooking) {
+            console.error('Seat booking not initialized');
+            return;
+        }
+
+        // Update URL without page reload
+        const url = new URL(window.location.href);
+        url.searchParams.set('roomId', roomId);
+        window.history.pushState({}, '', url);
+
+        // Load seats for new room
+        await seatBooking.loadSeatsForRoom(roomId);
+    }
+
+    async function proceedToPayment() {
+        if (!seatBooking) {
+            console.error('Seat booking not initialized');
+            return;
+        }
+        // FIXED: Check if seats are selected before proceeding
+        if (seatBooking.selectedSeats.length === 0) {
+            seatBooking.showAlert('Please select at least one seat', 'error');
+            return;
+        }
+        const success = await seatBooking.reserveSeats();
+        if (success) {
+            // Store booking data in sessionStorage for payment page
+            const bookingData = seatBooking.getSelectedSeatsData();
+            bookingData.food = foodQuantities;
+            bookingData.foodTotal = Object.entries(foodQuantities).reduce(
+                (total, [item, quantity]) => total + quantity * foodPrices[item], 0
+            );
+            console.log('Booking data:', bookingData); // Debug log
+            sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+            // FIXED: Add error handling for redirect
+            try {
+                // Create booking first
+                const response = await fetch('/booking/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: 1, // TODO: Get from session/auth
+                        scheduleId: bookingData.scheduleId,
+                        seatIds: bookingData.seats.map(seat => seat.seatId),
+                        foodItems: bookingData.food,
+                        totalAmount: bookingData.total + bookingData.foodTotal,
+                        notes: ''
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to create booking');
+                }
+                const booking = await response.json();
+                // Chuyển sang trang payment.html với bookingId
+                window.location.href = `/payment?bookingId=${booking[0].id}`;
+            } catch (error) {
+                console.error('Error:', error);
+                seatBooking.showAlert('Error creating booking: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // Tạo map giá food từ foodList
+    let foodPrices = {};
+    if (typeof foodListJS !== 'undefined' && Array.isArray(foodListJS)) {
+        foodListJS.forEach(food => {
+            foodPrices[food.id] = food.price;
+        });
+    }
+    // Quản lý số lượng food động theo id
+    let foodQuantities = {};
+    function updateFoodQuantity(foodId, change) {
+        if (!foodQuantities[foodId] || isNaN(foodQuantities[foodId])) foodQuantities[foodId] = 0;
+        const newQuantity = Math.max(0, Number(foodQuantities[foodId]) + change);
+        foodQuantities[foodId] = newQuantity;
+        document.getElementById(`food-${foodId}-quantity`).textContent = newQuantity;
+        updateTotals();
+    }
+    // Gắn lại event cho các nút tăng/giảm sau khi render
+    function attachFoodQuantityEvents() {
+        document.querySelectorAll('.quantity-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.dataset.action;
+                const foodId = this.dataset.item;
+                updateFoodQuantity(foodId, action === 'increase' ? 1 : -1);
+            });
+        });
+    }
+
+    // FIXED: Ensure seatBooking is initialized before using it
+    function updateTotals() {
+        if (!seatBooking) {
+            console.warn('SeatBooking not initialized yet');
+            return;
+        }
+        // Tính tổng giá động từ từng ghế đã chọn
+        const seatsTotal = seatBooking.selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0);
+        const seatsElement = document.getElementById('seats-total');
+        if (seatsElement) {
+            seatsElement.textContent = formatPrice(seatsTotal);
+        }
+        let foodTotal = 0;
+        for (const [foodId, quantity] of Object.entries(foodQuantities)) {
+            const price = foodPrices[foodId] || 0;
+            foodTotal += (Number(quantity) || 0) * (Number(price) || 0);
+        }
+        const foodElement = document.getElementById('food-total');
+        if (foodElement) {
+            foodElement.textContent = formatPrice(foodTotal);
+        }
+        const grandTotal = seatsTotal + foodTotal;
+        const grandTotalElement = document.getElementById('grand-total');
+        if (grandTotalElement) {
+            grandTotalElement.textContent = formatPrice(grandTotal);
+        }
+        const continueButton = document.getElementById('continue-button');
+        if (continueButton) {
+            continueButton.disabled = seatBooking.selectedSeats.length === 0;
+        }
+    }
+
+    function toggleFoodSelection() {
+        const foodSelection = document.getElementById('food-selection');
+        const selectFoodButton = document.querySelector('.select-food');
+
+        if (foodSelection && selectFoodButton) {
+            if (foodSelection.style.display === 'none') {
+                foodSelection.style.display = 'block';
+                selectFoodButton.innerHTML = '<i class="fa fa-times"></i> Hide Food Selection';
+                selectFoodButton.style.backgroundColor = '#f44336';
+            } else {
+                foodSelection.style.display = 'none';
+                selectFoodButton.innerHTML = '<i class="fa fa-cutlery"></i> Chọn đồ ăn & thức uống';
+                selectFoodButton.style.backgroundColor = '#4CAF50';
+            }
+        }
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // FIXED: Initialize seat booking first
+        seatBooking = new SeatBooking();
+
+        // FIXED: Call updateTotals after initialization
+        setTimeout(() => {
+            updateTotals();
+        }, 100);
+
+        // Handle room change
+        window.handleRoomChange = function(roomId) {
+            console.log('Room changed to:', roomId);
+            if (seatBooking) {
+                seatBooking.loadSeatsForRoom(roomId);
+            }
+        };
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('roomId');
+            if (roomId && seatBooking) {
+                document.getElementById('room-select').value = roomId;
+                seatBooking.loadSeatsForRoom(roomId);
+            }
+        });
+
+        // Theme switcher (if exists)
+        const toggleSwitch = document.querySelector('#checkbox');
+        if (toggleSwitch) {
+            function switchTheme(e) {
+                if (e.target.checked) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme) {
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                if (currentTheme === 'dark') {
+                    toggleSwitch.checked = true;
+                }
+            }
+
+            toggleSwitch.addEventListener('change', switchTheme, false);
+        }
+
+        // Add event listeners for food quantity buttons
+        attachFoodQuantityEvents();
+
+        // FIXED: Add event listener for continue button with error handling
+        const continueButton = document.getElementById('continue-button');
+        if (continueButton) {
+            continueButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Continue button clicked');
+                proceedToPayment();
+            });
+        }
+    });
+</script>
+</body>
+</html>

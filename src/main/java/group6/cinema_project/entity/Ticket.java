@@ -15,6 +15,7 @@ public class Ticket {
     private Long invoiceId;
 
     @ManyToOne
+<<<<<<< Updated upstream
     private ScreeningSchedule screeningSchedule;
 
     // Getters and Setters
@@ -32,5 +33,23 @@ public class Ticket {
     public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
     public ScreeningSchedule getScreeningSchedule() { return screeningSchedule; }
     public void setScreeningSchedule(ScreeningSchedule screeningSchedule) { this.screeningSchedule = screeningSchedule; }
+=======
+    @JoinColumn(name = "seat_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Seat seat;
+
+    @ManyToOne
+    @JoinColumn(name = "screening_schedule_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private ScreeningSchedule schedule;
+
+    @ManyToOne
+    @JoinColumn(name = "invoice_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Invoice invoice;
+>>>>>>> Stashed changes
 
 }
