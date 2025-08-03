@@ -39,7 +39,7 @@ public class AdminCinemaChainController {
         model.addAttribute("totalPages", chainPage.getTotalPages());
         model.addAttribute("pageSize", size);
         model.addAttribute("search", search);
-        return "admin2/cinema_chain_management";
+        return "admin/admin_cinema_chain_management";
     }
 
     @PostMapping("/add")
@@ -59,7 +59,7 @@ public class AdminCinemaChainController {
             model.addAttribute("totalPages", chainPage.getTotalPages());
             model.addAttribute("pageSize", 5);
             model.addAttribute("showAddModal", true); // Để mở lại modal khi có lỗi
-            return "admin2/cinema_chain_management";
+            return "admin/admin_cinema_chain_management";
         }
         try {
             adminCinemaChainService.save(cinemaChainDto.toEntity());
@@ -79,7 +79,7 @@ public class AdminCinemaChainController {
                 return "redirect:/admin/cinema-chains";
             }
             model.addAttribute("cinemaChain", CinemaChainDto.fromEntity(chain));
-            return "admin2/cinema_chain_edit";
+            return "admin/admin_cinema_chain_edit";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/admin/cinema-chains";
@@ -90,12 +90,12 @@ public class AdminCinemaChainController {
     public String editCinemaChain(@PathVariable Integer id, @Valid @ModelAttribute("cinemaChain") CinemaChainDto cinemaChainDto, BindingResult result, Model model,RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("cinemaChain", cinemaChainDto);
-            return "admin2/cinema_chain_edit";
+            return "admin/admin_cinema_chain_edit";
         }
         if (adminCinemaChainService.isNameDuplicate(cinemaChainDto.getName(), id)) {
             result.rejectValue("name", "error.cinemaChain", "Tên chuỗi rạp đã tồn tại.");
             model.addAttribute("cinemaChain", cinemaChainDto);
-            return "admin2/cinema_chain_edit";
+            return "admin/admin_cinema_chain_edit";
         }
         try {
             CinemaChain entity = cinemaChainDto.toEntity();
@@ -129,7 +129,7 @@ public class AdminCinemaChainController {
             }
             model.addAttribute("cinemaChain", CinemaChainDto.fromEntity(chain));
             model.addAttribute("branches", chain.getBranches());
-            return "admin2/cinema_chain_view";
+            return "admin/admin_cinema_chain_view";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/admin/cinema-chains";

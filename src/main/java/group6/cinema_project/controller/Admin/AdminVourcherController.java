@@ -29,14 +29,14 @@ public class AdminVourcherController {
     public String listVouchers(Model model) {
         List<Voucher> vouchers = discountCodeRepository.findAll();
         model.addAttribute("vouchers", vouchers);
-        return "admin2/admin_voucher_list";
+        return "admin/admin_voucher_list";
     }
 
     // Add voucher (GET)
     @GetMapping("/admin/vouchers/add")
     public String addVoucherForm(Model model) {
         model.addAttribute("voucher", new Voucher());
-        return "admin2/admin_voucher_add";
+        return "admin/admin_voucher_add";
     }
 
     // Add voucher (POST)
@@ -51,7 +51,7 @@ public class AdminVourcherController {
     public String editVoucher(@PathVariable Long id, Model model) {
         Voucher voucher = discountCodeRepository.findById(id).orElseThrow();
         model.addAttribute("voucher", voucher);
-        return "admin2/admin_voucher_edit";
+        return "admin/admin_voucher_edit";
     }
 
     // Edit voucher (POST)

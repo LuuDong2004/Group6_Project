@@ -51,7 +51,7 @@ public class AdminBranchController {
         model.addAttribute("cinemaChain", cinemaChain);
         model.addAttribute("branch", new group6.cinema_project.dto.BranchDto());
         model.addAttribute("cinemaChains", adminCinemaChainService.findAll());
-        return "admin2/branch_management";
+        return "admin/admin_branch_management";
     }
 
     @PostMapping("/add")
@@ -72,7 +72,7 @@ public class AdminBranchController {
             model.addAttribute("totalPages", branchPage.getTotalPages());
             model.addAttribute("pageSize", 5);
             model.addAttribute("showAddModal", true);
-            return "admin2/branch_management";
+            return "admin/admin_branch_management";
         }
         if (branchDto.getCinemaChainId() == 0) {
             redirectAttributes.addFlashAttribute("error", "Bạn phải chọn chuỗi rạp!");
@@ -93,7 +93,7 @@ public class AdminBranchController {
         List<CinemaChain> cinemaChains = adminCinemaChainService.findAll();
         model.addAttribute("branch", branch);
         model.addAttribute("cinemaChains", cinemaChains);
-        return "admin2/branch_edit";
+        return "admin/admin_branch_edit";
     }
 
     @PostMapping("/edit/{id}")
@@ -113,7 +113,7 @@ public class AdminBranchController {
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", branchPage.getTotalPages());
             model.addAttribute("pageSize", 5);
-            return "admin2/branch_management";
+            return "admin/admin_branch_management";
         }
         branchDto.setId(id);
         adminBranchService.save(branchDto);

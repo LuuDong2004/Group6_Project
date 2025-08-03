@@ -76,6 +76,7 @@
                     <div class="mb-3">
                         <label class="form-label">Tên chi nhánh</label>
                         <input type="text" class="form-control" th:field="*{name}" required>
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mô tả</label>
@@ -114,14 +115,14 @@
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content-wrapper');
         const header = document.querySelector('.header-custom');
-
+        
         // Check if sidebar should be collapsed
         if (window.innerWidth <= 768) {
             sidebar.classList.add('collapsed');
             mainContent.classList.add('expanded');
             header.classList.add('expanded');
         }
-
+        
         // Toggle sidebar
         const toggleBtn = document.querySelector('.sidebar-toggle');
         if (toggleBtn) {
@@ -134,4 +135,4 @@
     });
 </script>
 </body>
-</html>
+</html> 

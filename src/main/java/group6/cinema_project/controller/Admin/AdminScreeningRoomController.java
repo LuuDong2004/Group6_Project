@@ -76,7 +76,7 @@ public class AdminScreeningRoomController {
             model.addAttribute("rows", rows);
             model.addAttribute("seatsPerRow", seatsPerRow);
 
-            return "admin2/screening_room_management";
+            return "admin/admin_screening_room_management";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi tải danh sách phòng chiếu: " + e.getMessage());
             return "redirect:/admin/branches";
@@ -92,7 +92,7 @@ public class AdminScreeningRoomController {
         screeningRoomDto.setSeatsPerRow(8);
         screeningRoomDto.setStatus("ACTIVE");
         model.addAttribute("screeningRoom", screeningRoomDto);
-        return "admin2/screening_room_edit";
+        return "admin/admin_screening_room_edit";
     }
 
     @PostMapping("/add")
@@ -100,7 +100,7 @@ public class AdminScreeningRoomController {
                                    RedirectAttributes redirectAttributes, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("screeningRoom", screeningRoomDto);
-            return "admin/screening_room_edit";
+            return "admin/admin_screening_room_edit";
         }
 //        if (adminScreeningRoomService.isNameDuplicate(screeningRoomDto.getName(), null)) {
 //            result.rejectValue("name", "error.screeningRoom", "Tên phòng đã tồn tại.");
@@ -143,12 +143,12 @@ public class AdminScreeningRoomController {
             model.addAttribute("activeSchedules", activeSchedules);
             model.addAttribute("cannotEdit", true);
             model.addAttribute("screeningRoom", screeningRoom);
-            return "admin2/screening_room_edit";
+            return "admin/admin_screening_room_edit";
         }
 
         model.addAttribute("screeningRoom", screeningRoom);
         model.addAttribute("canEdit", true);
-        return "admin2/screening_room_edit";
+        return "admin/admin_screening_room_edit";
     }
 
     @PostMapping("/edit/{id}")
@@ -156,7 +156,7 @@ public class AdminScreeningRoomController {
                                     RedirectAttributes redirectAttributes, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("screeningRoom", screeningRoomDto);
-            return "admin2/screening_room_edit";
+            return "admin/admin_screening_room_edit";
         }
 //        if (adminScreeningRoomService.isNameDuplicate(screeningRoomDto.getName(), id)) {
 //            result.rejectValue("name", "error.screeningRoom", "Tên phòng đã tồn tại.");
@@ -216,6 +216,6 @@ public class AdminScreeningRoomController {
         }
         model.addAttribute("screeningRoom", screeningRoom);
         model.addAttribute("readonly", true);
-        return "admin2/screening_room_edit";
+        return "admin/admin_screening_room_edit";
     }
     }

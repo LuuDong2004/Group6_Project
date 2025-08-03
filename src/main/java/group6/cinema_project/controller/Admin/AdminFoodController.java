@@ -46,13 +46,13 @@ public class AdminFoodController {
         model.addAttribute("pageSize", size);
         model.addAttribute("search", search);
         model.addAttribute("sort", sort);
-        return "admin2/food_list";
+        return "admin/admin_food_list";
     }
 
     @GetMapping("/admin/foods/add")
     public String addFoodForm(Model model) {
         model.addAttribute("food", new FoodDto());
-        return "admin2/food_add";
+        return "admin/admin_food_add";
     }
 
     @PostMapping("/admin/foods/add")
@@ -75,7 +75,7 @@ public class AdminFoodController {
                 model.addAttribute("error", "Tên món ăn đã tồn tại!");
             }
             model.addAttribute("food", foodDto);
-            return "admin2/food_add";
+            return "admin/admin_food_add";
         }
         try {
             if (!imageFile.isEmpty()) {
@@ -98,7 +98,7 @@ public class AdminFoodController {
     public String editFoodForm(@PathVariable Integer id, Model model) {
         FoodDto food = adminFoodService.getFoodById(id);
         model.addAttribute("food", food);
-        return "admin2/food_edit";
+        return "admin/admin_food_edit";
     }
 
     @PostMapping("/admin/foods/edit/{id}")
@@ -122,7 +122,7 @@ public class AdminFoodController {
                 model.addAttribute("error", "Tên món ăn đã tồn tại!");
             }
             model.addAttribute("food", foodDto);
-            return "admin2/food_edit";
+            return "admin/admin_food_edit";
         }
         try {
             if (!imageFile.isEmpty()) {
@@ -161,7 +161,7 @@ public class AdminFoodController {
                 return "redirect:/admin/foods/list";
             }
             model.addAttribute("food", food);
-            return "admin2/food_view";
+            return "admin/admin_food_view";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/admin/foods/list";
