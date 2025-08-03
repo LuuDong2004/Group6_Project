@@ -2,7 +2,6 @@ package group6.cinema_project.controller.Admin;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -56,31 +55,42 @@ public class AdminBranchController {
 
     @PostMapping("/add")
     public String addBranch(@Valid @ModelAttribute("branch") BranchDto branchDto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        boolean isDuplicate = adminBranchService.isNameDuplicate(branchDto.getName(), null);
-        if (result.hasErrors() || isDuplicate) {
-            if (isDuplicate) {
-                result.rejectValue("name", "error.branch", "Tên chi nhánh đã tồn tại.");
-                model.addAttribute("error", "Tên chi nhánh đã tồn tại!");
+        System.out.println("=== ADD BRANCH START ===");
+        System.out.println("Branch: " + branchDto.getName() + ", CinemaChain: " + branchDto.getCinemaChainId());
+        
+        try {
+            // Kiểm tra cinema chain trước tiên
+            if (branchDto.getCinemaChainId() == 0) {
+                redirectAttributes.addFlashAttribute("error", "Bạn phải chọn chuỗi rạp!");
+                return "redirect:/admin/branches";
             }
-            List<CinemaChain> cinemaChains = adminCinemaChainService.findAll();
-            Page<BranchDto> branchPage = adminBranchService.getBranchesPage(0, 5);
-            model.addAttribute("branchPage", branchPage);
-            model.addAttribute("branches", branchPage.getContent());
-            model.addAttribute("cinemaChains", cinemaChains);
-            model.addAttribute("branch", branchDto);
-            model.addAttribute("currentPage", 0);
-            model.addAttribute("totalPages", branchPage.getTotalPages());
-            model.addAttribute("pageSize", 5);
-            model.addAttribute("showAddModal", true);
-            return "admin/admin_branch_management";
-        }
-        if (branchDto.getCinemaChainId() == 0) {
-            redirectAttributes.addFlashAttribute("error", "Bạn phải chọn chuỗi rạp!");
+            
+            // Kiểm tra validation errors
+            if (result.hasErrors()) {
+                System.out.println("Validation errors - redirecting with flash message");
+                redirectAttributes.addFlashAttribute("error", "Vui lòng điền đầy đủ thông tin!");
+                return "redirect:/admin/branches";
+            }
+            
+            // Kiểm tra trùng tên
+            boolean isDuplicate = adminBranchService.isNameDuplicate(branchDto.getName(), null);
+            if (isDuplicate) {
+                System.out.println("Duplicate name found - redirecting");
+                redirectAttributes.addFlashAttribute("error", "Tên chi nhánh '" + branchDto.getName() + "' đã tồn tại!");
+                return "redirect:/admin/branches";
+            }
+            
+            // Lưu branch
+            adminBranchService.save(branchDto);
+            redirectAttributes.addFlashAttribute("success", "Thêm chi nhánh thành công!");
+            return "redirect:/admin/branches";
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/admin/branches";
         }
-        adminBranchService.save(branchDto);
-        redirectAttributes.addFlashAttribute("success", "Thêm chi nhánh thành công!");
-        return "redirect:/admin/branches";
     }
 
     @GetMapping("/edit/{id}")
@@ -98,26 +108,27 @@ public class AdminBranchController {
 
     @PostMapping("/edit/{id}")
     public String editBranch(@PathVariable Integer id, @Valid @ModelAttribute("branch") BranchDto branchDto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        boolean isDuplicate = adminBranchService.isNameDuplicate(branchDto.getName(), id);
-        if (result.hasErrors() || isDuplicate) {
-            if (isDuplicate) {
-                result.rejectValue("name", "error.branch", "Tên chi nhánh đã tồn tại.");
-                model.addAttribute("error", "Tên chi nhánh đã tồn tại!");
+        try {
+            boolean isDuplicate = adminBranchService.isNameDuplicate(branchDto.getName(), id);
+            if (result.hasErrors() || isDuplicate) {
+                if (isDuplicate) {
+                    result.rejectValue("name", "error.branch", "Tên chi nhánh đã tồn tại.");
+                    model.addAttribute("error", "Tên chi nhánh đã tồn tại!");
+                }
+                List<CinemaChain> cinemaChains = adminCinemaChainService.findAll();
+                model.addAttribute("cinemaChains", cinemaChains);
+                model.addAttribute("branch", branchDto);
+                return "admin/admin_branch_edit";
             }
-            List<CinemaChain> cinemaChains = adminCinemaChainService.findAll();
-            Page<BranchDto> branchPage = adminBranchService.getBranchesPage(0, 5);
-            model.addAttribute("branchPage", branchPage);
-            model.addAttribute("branches", branchPage.getContent());
-            model.addAttribute("cinemaChains", cinemaChains);
-            model.addAttribute("branch", branchDto);
-            model.addAttribute("currentPage", 0);
-            model.addAttribute("totalPages", branchPage.getTotalPages());
-            model.addAttribute("pageSize", 5);
-            return "admin/admin_branch_management";
+            branchDto.setId(id);
+            adminBranchService.save(branchDto);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật chi nhánh thành công!");
+            return "redirect:/admin/branches";
+        } catch (Exception e) {
+            System.err.println("Error editing branch: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            return "redirect:/admin/branches";
         }
-        branchDto.setId(id);
-        adminBranchService.save(branchDto);
-        redirectAttributes.addFlashAttribute("success", "Cập nhật chi nhánh thành công!");
-        return "redirect:/admin/branches";
     }
 }

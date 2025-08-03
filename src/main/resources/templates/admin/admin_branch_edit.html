@@ -59,13 +59,13 @@
         }
 
         .sidebar-header .brand-icon {
-            width: 40px;
-            height: 40px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding: 8px 12px;
+            gap: 10px;
         }
 
         .sidebar-header .brand-text h5 {
@@ -228,7 +228,8 @@
         /* Collapsed sidebar styles */
         .sidebar-custom.collapsed .sidebar-header .brand-text,
         .sidebar-custom.collapsed .menu-item span,
-        .sidebar-custom.collapsed .sidebar-footer .user-details {
+        .sidebar-custom.collapsed .sidebar-footer .user-details,
+        .sidebar-custom.collapsed .welcome-message {
             display: none;
         }
 
@@ -427,7 +428,7 @@
                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
                         <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        <li><a class="dropdown-item" href="admin/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>
                 </div>
             </div>

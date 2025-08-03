@@ -30,7 +30,8 @@ body {
 .sidebar-custom.collapsed .sidebar-header small,
 .sidebar-custom.collapsed .sidebar-menu span,
 .sidebar-custom.collapsed .mt-auto .text-white,
-.sidebar-custom.collapsed .mt-auto small {
+.sidebar-custom.collapsed .mt-auto small,
+.sidebar-custom.collapsed .welcome-message {
     display: none;
 }
 

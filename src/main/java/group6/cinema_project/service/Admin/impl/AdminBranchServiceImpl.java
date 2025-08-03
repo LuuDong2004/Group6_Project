@@ -100,7 +100,7 @@ public class AdminBranchServiceImpl implements IAdminBranchService {
         if (id == null) {
             return !branches.isEmpty();
         } else {
-            return branches.stream().anyMatch(b -> b.getId() != id);
+            return branches.stream().anyMatch(b -> !Integer.valueOf(b.getId()).equals(id));
         }
     }
 

@@ -34,7 +34,8 @@
         .sidebar-custom.collapsed .sidebar-header small,
         .sidebar-custom.collapsed .sidebar-menu span,
         .sidebar-custom.collapsed .mt-auto .text-white,
-        .sidebar-custom.collapsed .mt-auto small {
+        .sidebar-custom.collapsed .mt-auto small,
+        .sidebar-custom.collapsed .welcome-message {
             display: none;
         }
         .sidebar-custom.collapsed .sidebar-menu .menu-item {
@@ -50,13 +51,13 @@
             gap: 12px;
         }
         .sidebar-header .brand-icon {
-            width: 40px;
-            height: 40px;
             background: rgba(255,255,255,0.15);
             border-radius: 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding: 8px 12px;
+            gap: 10px;
         }
         .sidebar-header h5 {
             margin: 0;
@@ -153,15 +154,13 @@
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
-                         class="rounded-circle me-2">
                     <span class="d-none d-sm-inline text-gray-700 fw-medium"></span>
                 </a>
                 <ul class="dropdown-menu shadow" aria-labelledby="dropdownUser">
                     <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
                     <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    <li><a class="dropdown-item" href="admin/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                 </ul>
             </div>
         </div>
