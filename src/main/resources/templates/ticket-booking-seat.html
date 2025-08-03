@@ -1091,48 +1091,101 @@
             console.error('Seat booking not initialized');
             return;
         }
-        // FIXED: Check if seats are selected before proceeding
+
+        // Check if seats are selected before proceeding
         if (seatBooking.selectedSeats.length === 0) {
-            seatBooking.showAlert('Please select at least one seat', 'error');
+            seatBooking.showAlert('Vui lòng chọn ít nhất một ghế!', 'error');
             return;
         }
-        const success = await seatBooking.reserveSeats();
-        if (success) {
-            // Store booking data in sessionStorage for payment page
+
+        seatBooking.showLoading(true);
+
+        try {
+            // Prepare booking data
             const bookingData = seatBooking.getSelectedSeatsData();
-            bookingData.food = foodQuantities;
-            bookingData.foodTotal = Object.entries(foodQuantities).reduce(
+            const foodTotal = Object.entries(foodQuantities).reduce(
                 (total, [item, quantity]) => total + quantity * foodPrices[item], 0
             );
-            console.log('Booking data:', bookingData); // Debug log
-            sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-            // FIXED: Add error handling for redirect
-            try {
-                // Create booking first
-                const response = await fetch('/booking/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: 1, // TODO: Get from session/auth
-                        scheduleId: bookingData.scheduleId,
-                        seatIds: bookingData.seats.map(seat => seat.seatId),
-                        foodItems: bookingData.food,
-                        totalAmount: bookingData.total + bookingData.foodTotal,
-                        notes: ''
-                    })
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to create booking');
+
+            console.log('Creating booking with data:', {
+                scheduleId: bookingData.scheduleId,
+                seatIds: bookingData.seats.map(seat => seat.seatId),
+                foodItems: foodQuantities,
+                totalAmount: bookingData.total + foodTotal,
+                notes: ''
+            });
+
+            // Create booking
+            const response = await fetch('/booking/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    scheduleId: bookingData.scheduleId,
+                    seatIds: bookingData.seats.map(seat => seat.seatId),
+                    foodItems: foodQuantities,
+                    totalAmount: bookingData.total + foodTotal,
+                    notes: ''
+                })
+            });
+
+            const responseText = await response.text();
+            console.log('Response status:', response.status);
+            console.log('Response text:', responseText);
+
+            if (!response.ok) {
+                // Check if it's an authentication error
+                if (response.status === 401) {
+                    seatBooking.showAlert('Bạn cần đăng nhập để đặt vé!', 'error');
+                    setTimeout(() => {
+                        // Save current URL to return after login
+                        const currentUrl = window.location.href.trim();
+                        const loginUrl = `/login?continue=${encodeURIComponent(currentUrl)}`;
+                        window.location.href = loginUrl;
+                    }, 2000);
+                    return;
                 }
-                const booking = await response.json();
-                // Chuyển sang trang payment.html với bookingId
-                window.location.href = `/payment?bookingId=${booking[0].id}`;
-            } catch (error) {
-                console.error('Error:', error);
-                seatBooking.showAlert('Error creating booking: ' + error.message, 'error');
+
+                // Try to parse error message
+                let errorMessage = 'Không thể tạo booking';
+                try {
+                    const errorData = JSON.parse(responseText);
+                    errorMessage = errorData.message || errorData || errorMessage;
+                } catch (e) {
+                    errorMessage = responseText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
+
+            // Parse successful response
+            let booking;
+            try {
+                booking = JSON.parse(responseText);
+            } catch (e) {
+                throw new Error('Invalid response format from server');
+            }
+
+            if (!booking || !Array.isArray(booking) || booking.length === 0) {
+                throw new Error('Invalid booking data received');
+            }
+
+            seatBooking.showAlert('Đặt vé thành công!', 'success');
+
+            // Redirect to payment page
+            setTimeout(() => {
+                const bookingId = booking[0].id;
+                const paymentUrl = `/payment?bookingId=${bookingId}`;
+                console.log('Redirecting to:', paymentUrl);
+                window.location.href = paymentUrl;
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error creating booking:', error);
+            seatBooking.showAlert('Lỗi khi tạo booking: ' + error.message, 'error');
+        } finally {
+            seatBooking.showLoading(false);
         }
     }
 

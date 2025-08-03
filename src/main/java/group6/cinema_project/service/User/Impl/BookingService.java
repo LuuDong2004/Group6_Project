@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import group6.cinema_project.dto.BookedFoodDto;
 import group6.cinema_project.dto.BookingDto;
 import group6.cinema_project.dto.BookingRequest;
+import group6.cinema_project.dto.UserDto;
 import group6.cinema_project.entity.Booking;
 import group6.cinema_project.entity.BookingFood;
 import group6.cinema_project.entity.Food;
@@ -78,13 +79,25 @@ public class BookingService implements IBookingService {
         try {
             // Lấy user thực tế đang đăng nhập từ SecurityContext
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+                throw new RuntimeException("User chưa đăng nhập");
+            }
+
             String email = authentication.getName();
+            System.out.println("BookingService: Creating booking for email: " + email);
+
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
 
             // Tìm schedule theo ID
             ScreeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu với ID: " + request.getScheduleId()));
+
+            // Validate seat IDs
+            if (request.getSeatIds() == null || request.getSeatIds().isEmpty()) {
+                throw new RuntimeException("Phải chọn ít nhất một ghế");
+            }
 
             // Tạo mã booking ngẫu nhiên
             String bookingCode = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -99,6 +112,8 @@ public class BookingService implements IBookingService {
             booking.setDate(LocalDate.now());
             booking.setNotes(request.getNotes());
             booking.setVoucherCode(request.getVoucherCode());
+
+            System.out.println("BookingService: Saving booking with code: " + bookingCode);
 
 
             // Lưu booking
@@ -142,13 +157,72 @@ public class BookingService implements IBookingService {
             }
 
 
-            // Chuyển đổi sang DTO và trả về
-            BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+            // Chuyển đổi sang DTO và trả về - Manual mapping để tránh lỗi ModelMapper
+            BookingDto bookingDto = new BookingDto();
+            bookingDto.setId(booking.getId());
+            bookingDto.setCode(booking.getCode());
+            bookingDto.setAmount((int) booking.getAmount());
+            bookingDto.setStatus(booking.getStatus());
+            bookingDto.setDate(booking.getDate());
+            bookingDto.setExpiryDate(booking.getExpiryDate());
+            bookingDto.setNotes(booking.getNotes());
+            bookingDto.setVoucherCode(booking.getVoucherCode());
+
+            // Map user
+            if (booking.getUser() != null) {
+                UserDto userDto = new UserDto();
+                userDto.setId(booking.getUser().getId());
+                userDto.setUserName(booking.getUser().getUserName());
+                userDto.setEmail(booking.getUser().getEmail());
+                userDto.setPhone(booking.getUser().getPhone());
+                userDto.setRole(booking.getUser().getRole());
+                bookingDto.setUser(userDto);
+            }
+
             // Map schedule với mapToDto để set các trường chuỗi thời gian
             if (booking.getSchedule() != null) {
                 bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
             }
-            bookingDto.setVoucherCode(booking.getVoucherCode());
+
+            // Map seat names - lấy thông tin thực tế từ database
+            List<String> seatNames = new ArrayList<>();
+            for (Integer seatId : request.getSeatIds()) {
+                try {
+                    // Tìm seat name từ seatId thông qua SeatReservation
+                    List<SeatReservation> reservations = seatReservationRepository.findByBookingId(booking.getId());
+                    for (SeatReservation reservation : reservations) {
+                        if (reservation.getSeat() != null && reservation.getSeat().getId().equals(seatId)) {
+                            seatNames.add(reservation.getSeat().getName());
+                            break;
+                        }
+                    }
+                    // Fallback nếu không tìm thấy
+                    if (seatNames.size() < request.getSeatIds().indexOf(seatId) + 1) {
+                        seatNames.add("Seat-" + seatId);
+                    }
+                } catch (Exception e) {
+                    seatNames.add("Seat-" + seatId);
+                }
+            }
+            bookingDto.setSeatNames(seatNames);
+
+            // Map food list từ BookingFood đã lưu
+            List<BookedFoodDto> foodList = new ArrayList<>();
+            try {
+                List<BookingFood> bookingFoods = bookingFoodRepository.findByBookingId(booking.getId());
+                for (BookingFood bf : bookingFoods) {
+                    BookedFoodDto dto = new BookedFoodDto();
+                    dto.setName(bf.getFood().getName());
+                    dto.setImage(bf.getFood().getImage());
+                    dto.setQuantity(bf.getQuantity());
+                    dto.setPrice(bf.getPrice());
+                    foodList.add(dto);
+                }
+            } catch (Exception e) {
+                System.err.println("Error mapping food list: " + e.getMessage());
+            }
+            bookingDto.setFoodList(foodList);
+
             List<BookingDto> result = new ArrayList<>();
             result.add(bookingDto);
             return result;
@@ -163,13 +237,7 @@ public class BookingService implements IBookingService {
         try {
             List<Booking> bookings = bookingRepository.findByUserId(userId);
             return bookings.stream()
-                    .map(booking -> {
-                        BookingDto dto = modelMapper.map(booking, BookingDto.class);
-                        if (booking.getSchedule() != null) {
-                            dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
-                        }
-                        return dto;
-                    })
+                    .map(this::convertToBookingDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh sách booking: " + e.getMessage());
@@ -180,13 +248,9 @@ public class BookingService implements IBookingService {
     public List<BookingDto> getPaidBookingsByUserIdAndDateAfter(Integer userId, LocalDate fromDate) {
         try {
             List<Booking> bookings = bookingRepository.findByUserIdAndDateAfterAndStatus(userId, fromDate, "PAID");
-            return bookings.stream().map(booking -> {
-                BookingDto dto = modelMapper.map(booking, BookingDto.class);
-                if (booking.getSchedule() != null) {
-                    dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
-                }
-                return dto;
-            }).collect(Collectors.toList());
+            return bookings.stream()
+                    .map(this::convertToBookingDto)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh sách booking PAID theo thời gian: " + e.getMessage());
         }
@@ -196,13 +260,9 @@ public class BookingService implements IBookingService {
     public List<BookingDto> getPaidBookingsByUserIdAndDateAfterSortedByShowDateDesc(Integer userId, LocalDate fromDate) {
         try {
             List<Booking> bookings = bookingRepository.findByUserIdAndDateAfterAndStatus(userId, fromDate, "PAID");
-            List<BookingDto> dtos = bookings.stream().map(booking -> {
-                BookingDto dto = modelMapper.map(booking, BookingDto.class);
-                if (booking.getSchedule() != null) {
-                    dto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
-                }
-                return dto;
-            }).collect(Collectors.toList());
+            List<BookingDto> dtos = bookings.stream()
+                    .map(this::convertToBookingDto)
+                    .collect(Collectors.toList());
             // Sắp xếp theo ngày suất chiếu giảm dần
             dtos.sort((b1, b2) -> {
                 if (b1.getSchedule() != null && b2.getSchedule() != null && b1.getSchedule().getScreeningDate() != null && b2.getSchedule().getScreeningDate() != null) {
@@ -253,17 +313,41 @@ public class BookingService implements IBookingService {
     public BookingDto getBookingById(Integer bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với ID: " + bookingId));
-        BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
+
+        // Manual mapping để tránh lỗi ModelMapper
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setId(booking.getId());
+        bookingDto.setCode(booking.getCode());
+        bookingDto.setAmount((int) booking.getAmount());
+        bookingDto.setStatus(booking.getStatus());
+        bookingDto.setDate(booking.getDate());
+        bookingDto.setExpiryDate(booking.getExpiryDate());
+        bookingDto.setNotes(booking.getNotes());
+        bookingDto.setVoucherCode(booking.getVoucherCode());
+
+        // Map user
+        if (booking.getUser() != null) {
+            UserDto userDto = new UserDto();
+            userDto.setId(booking.getUser().getId());
+            userDto.setUserName(booking.getUser().getUserName());
+            userDto.setEmail(booking.getUser().getEmail());
+            userDto.setPhone(booking.getUser().getPhone());
+            userDto.setRole(booking.getUser().getRole());
+            bookingDto.setUser(userDto);
+        }
+
         // Map schedule với mapToDto để set các trường chuỗi thời gian
         if (booking.getSchedule() != null) {
             bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
         }
+
         // Map danh sách ghế
         List<SeatReservation> reservations = seatReservationRepository.findByBookingId(bookingId);
         List<String> seatNames = reservations.stream()
             .map(r -> r.getSeat().getName())
             .collect(Collectors.toList());
         bookingDto.setSeatNames(seatNames);
+
         // Map danh sách food đã đặt
         List<BookedFoodDto> foodList = bookingFoodRepository.findByBookingId(bookingId)
             .stream()
@@ -324,11 +408,8 @@ public class BookingService implements IBookingService {
 
         // Gửi email vé điện tử sau khi thanh toán thành công
         try {
-            BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
-            // Map schedule với mapToDto để set các trường chuỗi thời gian
-            if (booking.getSchedule() != null) {
-                bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));
-            }
+            BookingDto bookingDto = convertToBookingDto(booking);
+
             // Map danh sách ghế
             List<String> seatNames = reservations.stream()
                 .map(r -> r.getSeat().getName())
@@ -391,8 +472,28 @@ public class BookingService implements IBookingService {
      * Convert Booking entity to BookingDto with all related information
      */
     private BookingDto convertToBookingDto(Booking booking) {
-        BookingDto bookingDto = modelMapper.map(booking, BookingDto.class);
-        
+        // Manual mapping để tránh lỗi ModelMapper
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setId(booking.getId());
+        bookingDto.setCode(booking.getCode());
+        bookingDto.setAmount((int) booking.getAmount());
+        bookingDto.setStatus(booking.getStatus());
+        bookingDto.setDate(booking.getDate());
+        bookingDto.setExpiryDate(booking.getExpiryDate());
+        bookingDto.setNotes(booking.getNotes());
+        bookingDto.setVoucherCode(booking.getVoucherCode());
+
+        // Map user
+        if (booking.getUser() != null) {
+            UserDto userDto = new UserDto();
+            userDto.setId(booking.getUser().getId());
+            userDto.setUserName(booking.getUser().getUserName());
+            userDto.setEmail(booking.getUser().getEmail());
+            userDto.setPhone(booking.getUser().getPhone());
+            userDto.setRole(booking.getUser().getRole());
+            bookingDto.setUser(userDto);
+        }
+
         // Map schedule với mapToDto để set các trường chuỗi thời gian
         if (booking.getSchedule() != null) {
             bookingDto.setSchedule(scheduleService.mapToDto(booking.getSchedule()));

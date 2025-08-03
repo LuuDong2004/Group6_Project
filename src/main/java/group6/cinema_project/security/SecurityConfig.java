@@ -146,6 +146,7 @@ public class SecurityConfig {
                                 "/person_detail", "/test-person-links")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/booking/create", "/payment/**", "/seat/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

@@ -1,20 +1,26 @@
 package group6.cinema_project.controller.User;
 
-import group6.cinema_project.dto.BookingDto;
-import group6.cinema_project.dto.BookingRequest;
-import group6.cinema_project.service.User.IBookingService;
-import group6.cinema_project.service.User.MailService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import group6.cinema_project.repository.User.UserRepository;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import group6.cinema_project.dto.BookingDto;
+import group6.cinema_project.dto.BookingRequest;
 import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.User.UserRepository;
+import group6.cinema_project.service.User.IBookingService;
+import group6.cinema_project.service.User.MailService;
 
 @Controller
 @RequestMapping("/booking")
@@ -36,16 +42,27 @@ public class BookingController {
         try {
             // Lấy userId từ user đang đăng nhập
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
+            if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
                 return ResponseEntity.status(401).body("Bạn cần đăng nhập để đặt vé");
             }
+
             String email = authentication.getName();
+            System.out.println("Creating booking for user email: " + email);
+
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
+
             request.setUserId(user.getId());
+            System.out.println("Creating booking with request: " + request);
+
             List<BookingDto> booking = bookingService.createBooking(request);
+            System.out.println("Booking created successfully: " + booking);
+
             return ResponseEntity.ok(booking);
         } catch (Exception e) {
+            System.err.println("Error creating booking: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Lỗi khi tạo booking: " + e.getMessage());
         }
     }

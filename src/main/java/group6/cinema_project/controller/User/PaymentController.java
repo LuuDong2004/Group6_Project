@@ -1,26 +1,28 @@
 package group6.cinema_project.controller.User;
 
 
-import group6.cinema_project.dto.BookingDto;
-import group6.cinema_project.dto.TransactionSepayDto;
-import group6.cinema_project.service.User.IBookingService;
-import group6.cinema_project.service.User.IPaymentService;
-import group6.cinema_project.service.User.IVoucherService;
-
-import group6.cinema_project.service.User.MailService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
-import org.springframework.stereotype.Controller;
-
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import group6.cinema_project.dto.BookingDto;
+import group6.cinema_project.dto.TransactionSepayDto;
 import group6.cinema_project.entity.Qa.Voucher;
+import group6.cinema_project.service.User.IBookingService;
+import group6.cinema_project.service.User.IPaymentService;
+import group6.cinema_project.service.User.IVoucherService;
+import group6.cinema_project.service.User.MailService;
 
 
 @Controller
@@ -76,7 +78,14 @@ public class PaymentController {
             model.addAttribute("finalAmount", finalAmount);
             return "payment";
         } catch (Exception e) {
-            return "redirect:/error?message=" + e.getMessage();
+            String errorMessage = e.getMessage();
+            if (errorMessage != null) {
+                // Remove any CR/LF characters that could cause redirect issues
+                errorMessage = errorMessage.replaceAll("[\r\n]", " ");
+            } else {
+                errorMessage = "Unknown error";
+            }
+            return "redirect:/error?message=" + java.net.URLEncoder.encode(errorMessage, java.nio.charset.StandardCharsets.UTF_8);
         }
     }
     @GetMapping("/process")
