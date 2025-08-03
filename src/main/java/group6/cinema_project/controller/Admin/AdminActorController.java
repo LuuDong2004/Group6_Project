@@ -1,24 +1,33 @@
 package group6.cinema_project.controller.Admin;
 
-import group6.cinema_project.entity.Actor;
-
-import group6.cinema_project.service.Admin.IAdminActorService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import group6.cinema_project.entity.Actor;
+import group6.cinema_project.service.Admin.IAdminActorService;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/admin/actors")
@@ -244,6 +253,92 @@ public class AdminActorController {
             redirectAttributes.addFlashAttribute("error",
                     "Có lỗi xảy ra khi xóa diễn viên. Có thể diễn viên này đang được sử dụng trong phim.");
             return "redirect:/admin/actors/list";
+        }
+    }
+
+    @PostMapping("/api/add")
+    @ResponseBody
+    public ResponseEntity<?> addActorApi(@Valid @ModelAttribute("actor") Actor actor,
+                                        @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                                        BindingResult bindingResult) {
+        log.info("Processing AJAX add actor request for: {}", actor.getName());
+
+        if (bindingResult.hasErrors()) {
+            log.warn("Validation errors in add actor form");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ");
+            response.put("errors", bindingResult.getAllErrors());
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            // Check if actor with same name already exists
+            Actor existingActor = actorService.getActorByName(actor.getName());
+            if (existingActor != null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Diễn viên với tên này đã tồn tại");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Handle image upload if provided
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get(UPLOAD_DIR);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                java.nio.file.Path filePath = uploadPath.resolve(fileName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                actor.setImageUrl("/uploads/actors/" + fileName);
+                log.info("Successfully uploaded image for actor: {}", fileName);
+            }
+
+            actorService.addOrUpdateActor(actor);
+            log.info("Successfully added actor: {}", actor.getName());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Diễn viên '" + actor.getName() + "' đã được thêm thành công!");
+            response.put("actor", actor);
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            log.error("Error uploading image for actor", e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi tải lên hình ảnh");
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            log.error("Error adding actor", e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi thêm diễn viên");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/api/list")
+    @ResponseBody
+    public ResponseEntity<?> getActorsApi() {
+        log.info("Processing AJAX get actors list request");
+
+        try {
+            List<Actor> actors = actorService.getAllActors();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("actors", actors);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting actors list", e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi tải danh sách diễn viên");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 }

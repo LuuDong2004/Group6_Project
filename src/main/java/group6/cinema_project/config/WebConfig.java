@@ -15,6 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/assets/")
                 .setCachePeriod(3600)
                 .resourceChain(true);
+
+        // Add resource handler for uploaded files
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:src/main/resources/static/uploads/")
+                .setCachePeriod(3600);
     }
 
     @Override

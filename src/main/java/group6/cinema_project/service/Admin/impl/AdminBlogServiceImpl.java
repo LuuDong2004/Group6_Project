@@ -2,15 +2,17 @@ package group6.cinema_project.service.Admin.impl;
 
 
 
-import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.entity.BlogPost;
-import group6.cinema_project.entity.User;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import group6.cinema_project.repository.Admin.AdminBlogRepository;
-import group6.cinema_project.repository.User.UserRepository;
-import group6.cinema_project.service.Admin.IAdminBlogService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,17 +20,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import group6.cinema_project.dto.BlogPostDto;
+import group6.cinema_project.entity.BlogPost;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.Admin.AdminBlogRepository;
+import group6.cinema_project.repository.User.UserRepository;
+import group6.cinema_project.service.Admin.IAdminBlogService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation của IAdminBlogService.
@@ -45,6 +45,19 @@ public class AdminBlogServiceImpl implements IAdminBlogService {
     private final ModelMapper modelMapper;
 
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/blogs/";
+
+    @PostConstruct
+    public void init() {
+        try {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+                log.info("Created upload directory: {}", uploadPath.toAbsolutePath());
+            }
+        } catch (IOException e) {
+            log.error("Could not create upload directory: {}", e.getMessage());
+        }
+    }
 
     /**
      * Lấy tất cả blog posts cho admin
@@ -273,6 +286,22 @@ public class AdminBlogServiceImpl implements IAdminBlogService {
     public String uploadCoverImage(MultipartFile imageFile) throws IOException {
         log.info("Upload ảnh bìa: {}", imageFile.getOriginalFilename());
         try {
+            // Validate file
+            if (imageFile.isEmpty()) {
+                throw new IOException("File không được để trống");
+            }
+
+            // Check file size (5MB max)
+            if (imageFile.getSize() > 5 * 1024 * 1024) {
+                throw new IOException("File quá lớn. Kích thước tối đa là 5MB");
+            }
+
+            // Check file type
+            String contentType = imageFile.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new IOException("File phải là hình ảnh (JPG, PNG, GIF)");
+            }
+
             // Tạo thư mục upload nếu chưa tồn tại
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
@@ -282,7 +311,18 @@ public class AdminBlogServiceImpl implements IAdminBlogService {
 
             // Tạo tên file unique
             String originalFilename = imageFile.getOriginalFilename();
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                throw new IOException("Tên file không hợp lệ");
+            }
+
+            String fileExtension = "";
+            int lastDotIndex = originalFilename.lastIndexOf(".");
+            if (lastDotIndex > 0) {
+                fileExtension = originalFilename.substring(lastDotIndex);
+            } else {
+                fileExtension = ".jpg"; // Default extension
+            }
+
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
 
             // Lưu file

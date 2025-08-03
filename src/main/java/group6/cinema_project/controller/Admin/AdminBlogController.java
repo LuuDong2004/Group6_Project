@@ -1,30 +1,34 @@
 package group6.cinema_project.controller.Admin;
 
-import group6.cinema_project.dto.BlogPostDto;
-import group6.cinema_project.entity.User;
-
-import group6.cinema_project.repository.User.UserRepository;
-import group6.cinema_project.service.Admin.IAdminBlogService;
-import group6.cinema_project.config.TinyMCEConfig;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import group6.cinema_project.config.TinyMCEConfig;
+import group6.cinema_project.dto.BlogPostDto;
+import group6.cinema_project.entity.User;
+import group6.cinema_project.repository.User.UserRepository;
+import group6.cinema_project.service.Admin.IAdminBlogService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller cho admin quản lý blog posts.
@@ -109,11 +113,20 @@ public class AdminBlogController {
             Model model,
             RedirectAttributes redirectAttributes) {
         log.info("Admin: Xử lý thêm blog post với tiêu đề: {}", blogPostDto.getTitle());
+        log.info("Cover image file: {}", coverImageFile != null ? coverImageFile.getOriginalFilename() : "null");
+
+        if (bindingResult.hasErrors()) {
+            log.warn("Validation errors trong form thêm blog post");
+            model.addAttribute("tinyMCEUrl", tinyMCEConfig.getTinyMCEUrl());
+            return "admin/admin_blog_add";
+        }
 
         try {
             // Lấy user đang đăng nhập từ SecurityContextHolder
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameOrEmail = authentication.getName();
+            log.info("Current user: {}", usernameOrEmail);
+
             User currentUser = userRepository.findByUserName(usernameOrEmail)
                     .or(() -> userRepository.findByEmail(usernameOrEmail))
                     .orElse(null);

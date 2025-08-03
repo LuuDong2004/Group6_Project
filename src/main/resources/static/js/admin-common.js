@@ -95,26 +95,34 @@ function initializeFileUploadPreview(uploadAreaId, fileInputId, imagePreviewId, 
 
     function handleFileSelect(file) {
         if (file && file.type.startsWith('image/')) {
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File quá lớn. Kích thước tối đa là 5MB.');
+                fileInput.value = '';
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function (e) {
                 previewImg.src = e.target.result;
                 imagePreview.classList.remove('d-none');
                 removeImageBtn.classList.remove('d-none');
-                
+
                 // Fade-in effect
                 imagePreview.style.opacity = '0';
                 setTimeout(() => {
                     imagePreview.style.transition = 'opacity 0.3s ease';
                     imagePreview.style.opacity = '1';
                 }, 50);
-                
+
                 // Clear validation error nếu có
                 const imageLabel = document.querySelector(`label[for="${fileInputId}"]`);
                 if (imageLabel) imageLabel.classList.remove('required-error');
             };
             reader.readAsDataURL(file);
         } else {
-            console.warn('File không hợp lệ. Vui lòng chọn file hình ảnh PNG hoặc JPG.');
+            alert('File không hợp lệ. Vui lòng chọn file hình ảnh (PNG, JPG, GIF).');
+            fileInput.value = '';
         }
     }
 }
