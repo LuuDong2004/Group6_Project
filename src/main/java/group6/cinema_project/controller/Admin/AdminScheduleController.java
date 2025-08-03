@@ -404,8 +404,6 @@ public class AdminScheduleController {
 
             // Load dropdown data
             model.addAttribute("movies", movieService.getAllMoviesForDisplay());
-            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
-            model.addAttribute("movies", movieService.getAllMovie());
             model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
