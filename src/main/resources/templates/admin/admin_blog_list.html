@@ -606,13 +606,17 @@
                         >
                           <i class="fas fa-edit"></i>
                         </a>
-                        <a
-                          th:href="@{/admin/blogs/delete/{id}(id=${blog.id})}"
+                        <button
+                          type="button"
                           class="btn btn-sm btn-action-delete"
                           title="Xóa"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteBlogModal"
+                          th:data-blog-id="${blog.id}"
+                          th:data-blog-title="${blog.title}"
                         >
                           <i class="fas fa-trash"></i>
-                        </a>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -667,13 +671,125 @@
       </div>
     </div>
 
+    <!-- Modal xác nhận xóa blog -->
+    <div
+      class="modal fade"
+      id="deleteBlogModal"
+      tabindex="-1"
+      aria-labelledby="deleteBlogModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title text-danger" id="deleteBlogModalLabel">
+              <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa blog
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body pt-2">
+            <p class="mb-3">
+              Bạn có chắc chắn muốn xóa blog post
+              <strong id="blogTitleToDelete"></strong> không?
+            </p>
+            <div
+              class="alert alert-warning d-flex align-items-center"
+              role="alert"
+            >
+              <i class="fas fa-info-circle me-2"></i>
+              <small
+                >Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến
+                blog post sẽ bị xóa vĩnh viễn.</small
+              >
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times me-1"></i>Hủy bỏ
+            </button>
+            <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+              <i class="fas fa-trash me-1"></i>Xóa blog
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/admin-common.js}"></script>
     <script>
       // Khởi tạo các chức năng cần thiết
       document.addEventListener("DOMContentLoaded", function () {
         initializeSidebarToggle();
+        initializeDeleteModal();
       });
+
+      /**
+       * Khởi tạo modal xóa blog
+       */
+      function initializeDeleteModal() {
+        const deleteBlogModal = document.getElementById("deleteBlogModal");
+        if (!deleteBlogModal) return;
+
+        deleteBlogModal.addEventListener("show.bs.modal", function (event) {
+          const button = event.relatedTarget;
+          const blogId = button.getAttribute("data-blog-id");
+          const blogTitle = button.getAttribute("data-blog-title");
+
+          const blogTitleElement =
+            deleteBlogModal.querySelector("#blogTitleToDelete");
+          const confirmDeleteBtn =
+            deleteBlogModal.querySelector("#confirmDeleteBtn");
+
+          if (blogTitleElement && confirmDeleteBtn) {
+            blogTitleElement.textContent = blogTitle || "blog post này";
+
+            // Xóa event listener cũ nếu có
+            const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+            confirmDeleteBtn.parentNode.replaceChild(
+              newConfirmBtn,
+              confirmDeleteBtn
+            );
+
+            // Thêm event listener mới
+            newConfirmBtn.addEventListener("click", function () {
+              deleteBlog(blogId);
+            });
+          }
+        });
+      }
+
+      /**
+       * Xóa blog post
+       */
+      function deleteBlog(blogId) {
+        // Tạo form để submit POST request
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/admin/blogs/delete/" + blogId;
+
+        // Thêm CSRF token nếu cần
+        const csrfToken = document.querySelector('meta[name="_csrf"]');
+        if (csrfToken) {
+          const csrfInput = document.createElement("input");
+          csrfInput.type = "hidden";
+          csrfInput.name = "_csrf";
+          csrfInput.value = csrfToken.getAttribute("content");
+          form.appendChild(csrfInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      }
     </script>
   </body>
 </html>
