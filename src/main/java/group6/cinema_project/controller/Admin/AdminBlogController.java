@@ -69,6 +69,7 @@ public class AdminBlogController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", blogPostPage.getTotalPages());
             model.addAttribute("totalElements", blogPostPage.getTotalElements());
+            model.addAttribute("pageSize", size);
             model.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
 
             log.info("Đã tải {} blog posts cho trang {}", blogPostPage.getContent().size(), page);

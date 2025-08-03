@@ -541,7 +541,7 @@
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>STT</th>
                     <th>Ảnh bìa</th>
                     <th>Tiêu đề</th>
                     <th>Tóm tắt</th>
@@ -563,8 +563,11 @@
                       </a>
                     </td>
                   </tr>
-                  <tr th:each="blog : ${blogPosts}">
-                    <td th:text="${blog.id}" class="fw-bold"></td>
+                  <tr th:each="blog, iterStat : ${blogPosts}">
+                    <td
+                      th:text="${(currentPage * pageSize) + iterStat.index + 1}"
+                      class="fw-bold"
+                    ></td>
                     <td>
                       <img
                         th:if="${blog.coverImageUrl}"
