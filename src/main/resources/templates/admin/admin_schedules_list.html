@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -26,7 +26,7 @@
         background-color: #f8fafc;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 320px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -40,19 +40,19 @@
         overflow-y: auto;
       }
 
-      .sidebar.collapsed {
+      .sidebar-custom.collapsed {
         width: 80px;
       }
 
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
 
-      .sidebar.collapsed .sidebar-menu .menu-item {
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
 
@@ -197,6 +197,8 @@
         gap: 0.5rem;
         min-width: 150px;
         justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
       }
 
       .filter-btn:hover {
@@ -332,10 +334,72 @@
         border-radius: 15px;
         padding: 1rem;
         cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
       }
 
       .schedule-item:hover {
         border-color: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
+      }
+
+      .schedule-item:hover .schedule-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .schedule-actions {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        display: flex;
+        gap: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .action-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .edit-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .edit-btn:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+      }
+
+      .delete-btn {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .delete-btn:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+
+      .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
       }
 
       .schedule-time {
@@ -391,7 +455,7 @@
 
       /* Responsive */
       @media (max-width: 992px) {
-        .sidebar {
+        .sidebar-custom {
           transform: translateX(-100%);
           width: 320px;
         }
@@ -429,78 +493,8 @@
     </style>
   </head>
   <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-film text-primary"></i>
-          </div>
-          <div>
-            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Hệ thống quản lý</small>
-          </div>
-        </div>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item active">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-users"></i>
-          <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i>
-          <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
-        </a>
-      </nav>
-
-      <div
-        class="mt-auto p-4 border-top border-white-50"
-        style="border-color: rgba(255, 255, 255, 0.1) !important"
-      >
-        <div class="d-flex align-items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="User Avatar"
-            width="40"
-            height="40"
-            class="rounded-circle me-3"
-          />
-          <div>
-            <div class="text-white fw-semibold">Admin User</div>
-            <small class="text-white-50">admin@cinema.com</small>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <div class="main-content-wrapper" id="mainContentWrapper">
       <header class="header-custom shadow-sm">
@@ -637,29 +631,46 @@
               </h1>
               <p class="date-subtitle">Lịch chiếu phim chi tiết trong ngày</p>
             </div>
-            <!-- Button thêm lịch chiếu chỉ hiển thị cho ngày hiện tại và tương lai -->
           </div>
         </div>
 
-        <!-- Filter Buttons -->
+        <!-- Filter Buttons - Using server-side filtering -->
         <div class="filter-container">
           <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">
+            <a
+              th:href="@{/admin/schedules/list/date(date=${selectedDate})}"
+              class="filter-btn"
+              th:classappend="${status == null or status == 'all' ? 'active' : ''}"
+            >
               <i class="fas fa-th"></i>
               <span>Tất cả</span>
-            </button>
-            <button class="filter-btn upcoming" data-filter="upcoming">
+            </a>
+            <a
+              th:if="${not isPastDate}"
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='upcoming')}"
+              class="filter-btn upcoming"
+              th:classappend="${status == 'upcoming' ? 'active' : ''}"
+            >
               <i class="fas fa-clock"></i>
               <span>Sắp chiếu</span>
-            </button>
-            <button class="filter-btn playing" data-filter="active">
+            </a>
+            <a
+              th:if="${not isPastDate}"
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='active')}"
+              class="filter-btn playing"
+              th:classappend="${status == 'active' ? 'active' : ''}"
+            >
               <i class="fas fa-play-circle"></i>
               <span>Đang chiếu</span>
-            </button>
-            <button class="filter-btn ended" data-filter="ended">
+            </a>
+            <a
+              th:href="@{/admin/schedules/list/date(date=${selectedDate}, status='ended')}"
+              class="filter-btn ended"
+              th:classappend="${status == 'ended' ? 'active' : ''}"
+            >
               <i class="fas fa-stop-circle"></i>
               <span>Đã chiếu</span>
-            </button>
+            </a>
           </div>
         </div>
 
@@ -678,17 +689,31 @@
             <p class="text-muted" th:if="${not isPastDate}">
               Vui lòng chọn ngày khác hoặc thêm lịch chiếu mới.
             </p>
+            <!-- Button thêm lịch chiếu - hiển thị cho ngày hiện tại và tương lai, ẩn cho ngày quá khứ -->
+            <div
+              th:if="${selectedDate != null and not isPastDate}"
+              class="mt-4"
+            >
+              <a
+                th:href="@{/admin/schedules/add(date=${selectedDate})}"
+                class="btn btn-primary btn-lg"
+                style="border-radius: 15px; font-weight: 600"
+              >
+                <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
+              </a>
+            </div>
           </div>
 
-          <!-- Thêm button thêm lịch chiếu ở cuối danh sách nếu có phim và không phải ngày quá khứ -->
+          <!-- Button thêm lịch chiếu ở cuối danh sách - hiển thị cho ngày hiện tại và tương lai, ẩn cho ngày quá khứ -->
           <div
             th:if="${movies != null and not #lists.isEmpty(movies)}"
             class="text-center mt-4"
           >
             <a
               th:href="@{/admin/schedules/add(date=${selectedDate})}"
-              class="btn btn-outline-primary btn-lg"
+              class="btn btn-primary btn-lg"
               th:if="${selectedDate != null and not isPastDate}"
+              style="border-radius: 15px; font-weight: 600"
             >
               <i class="fas fa-plus me-2"></i>Thêm lịch chiếu
             </a>
@@ -702,7 +727,7 @@
           >
             <div class="movie-header">
               <img
-                th:src="${movie.image}"
+                th:src="${movie.image} + '?t=' + ${timestamp}"
                 th:alt="${movie.name}"
                 class="movie-poster"
                 onerror="this.src='https://via.placeholder.com/120x180?text=No+Image'"
@@ -716,11 +741,17 @@
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-star text-warning"></i>
-                    <span th:text="${movie.rating}">8.5</span>
+                    <span
+                      th:text="${movie.ratingDisplay != null ? movie.ratingDisplay : 'N/A'}"
+                      >8.5</span
+                    >
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-tags text-info"></i>
-                    <span th:text="${movie.genre}">Hành động</span>
+                    <span
+                      th:text="${movie.genreDisplay != null ? movie.genreDisplay : 'N/A'}"
+                      >Hành động</span
+                    >
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-language text-success"></i>
@@ -755,6 +786,7 @@
                   th:each="schedule : ${movie.schedules}"
                   class="schedule-item"
                   th:data-status="${schedule.status}"
+                  th:data-schedule-id="${schedule.id}"
                   th:onclick="'showScheduleDetails(' + ${schedule.id} + ')'"
                 >
                   <div
@@ -796,6 +828,30 @@
                       </span>
                     </div>
                   </div>
+
+                  <!-- Action buttons - chỉ hiển thị cho status UPCOMING -->
+                  <div
+                    class="schedule-actions"
+                    th:if="${schedule.status == 'UPCOMING'}"
+                  >
+                    <!-- Sử dụng dữ liệu editability từ server thay vì AJAX -->
+                    <button
+                      class="action-btn edit-btn"
+                      th:onclick="'editScheduleDirectly(' + ${schedule.id} + ', event)'"
+                      th:disabled="${editabilityMap[schedule.id] != null ? !editabilityMap[schedule.id]['canEdit'] : true}"
+                      th:title="${editabilityMap[schedule.id] != null ? (editabilityMap[schedule.id]['canEdit'] ? 'Chỉnh sửa lịch chiếu' : 'Không thể chỉnh sửa: ' + editabilityMap[schedule.id]['reason']) : 'Không thể chỉnh sửa'}"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="action-btn delete-btn"
+                      th:onclick="'deleteScheduleDirectly(' + ${schedule.id} + ', event)'"
+                      th:disabled="${editabilityMap[schedule.id] != null ? !editabilityMap[schedule.id]['canDelete'] : true}"
+                      th:title="${editabilityMap[schedule.id] != null ? (editabilityMap[schedule.id]['canDelete'] ? 'Xóa lịch chiếu' : 'Không thể xóa: ' + editabilityMap[schedule.id]['reason']) : 'Không thể xóa'}"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -805,6 +861,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
       // Lấy ngày được chọn từ server
       const selectedDate = new Date(
@@ -817,113 +874,14 @@
       const isPastDate = selectedDate < today;
 
       document.addEventListener("DOMContentLoaded", function () {
-        initializeDashboardBehavior();
-        initializeFilters();
-        handlePastDateFilters();
+        initializeSidebarToggle();
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      // Moved to admin-common.js
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+      // Removed handlePastDateFilters - using Thymeleaf conditional rendering instead
 
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-        }
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              toggleSidebar();
-            }
-          }
-        }
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
-      function handlePastDateFilters() {
-        if (isPastDate) {
-          // Ẩn button "Sắp chiếu" và "Đang chiếu" cho ngày quá khứ
-          const upcomingBtn = document.querySelector(
-            '.filter-btn[data-filter="upcoming"]'
-          );
-          const activeBtn = document.querySelector(
-            '.filter-btn[data-filter="active"]'
-          );
-
-          if (upcomingBtn) {
-            upcomingBtn.style.display = "none";
-          }
-          if (activeBtn) {
-            activeBtn.style.display = "none";
-          }
-
-          // Nếu button hiện tại đang active là upcoming hoặc active, chuyển về "all"
-          const currentActive = document.querySelector(".filter-btn.active");
-          if (
-            currentActive &&
-            (currentActive.dataset.filter === "upcoming" ||
-              currentActive.dataset.filter === "active")
-          ) {
-            currentActive.classList.remove("active");
-            document
-              .querySelector('.filter-btn[data-filter="all"]')
-              .classList.add("active");
-          }
-        }
-      }
-
-      function initializeFilters() {
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        const movieCards = document.querySelectorAll(".movie-card");
-
-        filterButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            // Xóa active class từ tất cả buttons
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            // Thêm active class cho button được click
-            button.classList.add("active");
-
-            const filter = button.dataset.filter;
-            filterMovies(filter);
-          });
-        });
-      }
-
-      function filterMovies(filter) {
-        const movieCards = document.querySelectorAll(".movie-card");
-
-        movieCards.forEach((card) => {
-          if (filter === "all") {
-            card.style.display = "block";
-          } else {
-            // Kiểm tra xem movie có schedule với status tương ứng không
-            const scheduleItems = card.querySelectorAll(".schedule-item");
-            let hasMatchingSchedule = false;
-
-            scheduleItems.forEach((item) => {
-              const status = item.dataset.status;
-              if (
-                (filter === "upcoming" && status === "UPCOMING") ||
-                (filter === "active" && status === "ACTIVE") ||
-                (filter === "ended" &&
-                  (status === "ENDED" || status === "CANCELLED"))
-              ) {
-                hasMatchingSchedule = true;
-              }
-            });
-
-            card.style.display = hasMatchingSchedule ? "block" : "none";
-          }
-        });
-      }
+      // Removed client-side filtering - using server-side filtering instead
 
       function showScheduleDetails(scheduleId) {
         // Hiển thị chi tiết lịch chiếu
@@ -937,6 +895,42 @@
           window.location.href = `/admin/bookings/schedule/${scheduleId}`;
         }
       }
+
+      // Hàm chỉnh sửa lịch chiếu đơn giản (không cần AJAX check)
+      function editScheduleDirectly(scheduleId, event) {
+        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
+        // Chuyển đến trang chỉnh sửa trực tiếp vì đã check ở server
+        window.location.href = `/admin/schedules/edit/${scheduleId}`;
+      }
+
+      // Hàm xóa lịch chiếu đơn giản (không cần AJAX check)
+      function deleteScheduleDirectly(scheduleId, event) {
+        event.stopPropagation(); // Ngăn không cho trigger showScheduleDetails
+
+        if (confirm("Bạn có chắc chắn muốn xóa lịch chiếu này không?")) {
+          // Tạo form để submit POST request
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = `/admin/schedules/delete/${scheduleId}`;
+
+          // Thêm CSRF token nếu cần
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const csrfInput = document.createElement("input");
+            csrfInput.type = "hidden";
+            csrfInput.name = "_csrf";
+            csrfInput.value = csrfToken.getAttribute("content");
+            form.appendChild(csrfInput);
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      }
+
+      // Không cần function checkScheduleEditability nữa vì đã có dữ liệu từ server
+      // Không cần cập nhật button state vì đã được xử lý bằng Thymeleaf
     </script>
   </body>
 </html>
+

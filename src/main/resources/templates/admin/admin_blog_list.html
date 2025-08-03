@@ -19,9 +19,13 @@
         background-color: #f8fafc;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 260px;
-        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
         color: white;
         position: fixed;
         top: 0;
@@ -31,6 +35,33 @@
         flex-direction: column;
         transition: width 0.3s ease;
         z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .sidebar-custom.collapsed {
+        width: 80px;
+      }
+
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
+        display: none;
+      }
+
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar-custom.collapsed
+        .sidebar-header
+        .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+
+      .sidebar-custom.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
       }
 
       .sidebar-header {
@@ -50,21 +81,30 @@
       .menu-item {
         display: flex;
         align-items: center;
-        padding: 0.75rem 1.5rem;
+        padding: 1rem 1.5rem;
         color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
       }
 
-      .menu-item:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
-      }
-
+      .menu-item:hover,
       .menu-item.active {
-        background-color: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
         color: white;
-        border-right: 3px solid white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+        text-decoration: none;
+      }
+
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem; /* Reset padding for collapsed state */
+      }
+
+      .sidebar-custom.collapsed .menu-item.active {
+        background-color: #4f46e5; /* More prominent active state for collapsed */
       }
 
       .menu-item i {
@@ -73,11 +113,82 @@
         text-align: center;
       }
 
-      .main-content {
+      .sidebar-custom.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+
+      .main-content-wrapper {
         margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
         min-height: 100vh;
-        padding: 2rem;
         background-color: #f8fafc;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar-custom {
+          width: 80px;
+        }
+
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
+          display: none;
+        }
+
+        .sidebar-custom .sidebar-menu .menu-item {
+          justify-content: center;
+        }
+
+        .sidebar-custom .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
+        }
+
+        .main-content-wrapper {
+          margin-left: 80px;
+        }
+
+        .header-custom {
+          left: 80px;
+          padding: 0 1rem;
+        }
+
+        .main-content-wrapper.expanded {
+          margin-left: 80px;
+        }
       }
       .card {
         border: none;
@@ -107,6 +218,9 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         color: #6c757d;
+        line-height: 1.4;
+        font-size: 0.875rem;
+        padding: 2px 0;
       }
       .cover-image {
         width: 60px;
@@ -140,380 +254,441 @@
         border-radius: 15px;
         border: none;
       }
+
+      /* Custom button styles */
+      .btn-primary-custom {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary-custom:hover {
+        background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+      }
+
+      .btn-outline-primary-custom {
+        border: 2px solid #6366f1;
+        color: #6366f1;
+        background: transparent;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-outline-primary-custom:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-color: #6366f1;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+      }
+
+      .btn-action-view {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .btn-action-view:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        color: white;
+      }
+
+      .btn-action-edit {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .btn-action-edit:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        color: white;
+      }
+
+      .btn-action-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .btn-action-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        color: white;
+      }
+
+      .badge-custom {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+      }
+
+      .badge-count {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+      }
     </style>
   </head>
   <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-film text-primary"></i>
-          </div>
-          <div>
-            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Hệ thống quản lý</small>
-          </div>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+            Quản lý Blog
+          </h4>
         </div>
-      </div>
 
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a th:href="@{/admin/blogs/list}" class="menu-item active">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Header -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 class="mb-1">
-            <i class="fas fa-blog me-2 text-primary"></i>Quản lý Blog
-          </h2>
-          <p class="text-muted">Quản lý các bài viết blog và review phim</p>
-        </div>
-        <a th:href="@{/admin/blogs/add}" class="btn btn-secondary">
-          <i class="fas fa-plus me-2"></i>Thêm Blog Mới
-        </a>
-      </div>
-
-      <!-- Alerts -->
-      <div
-        th:if="${successMessage}"
-        class="alert alert-success alert-dismissible fade show"
-        role="alert"
-      >
-        <i class="fas fa-check-circle me-2"></i>
-        <span th:text="${successMessage}"></span>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-        ></button>
-      </div>
-
-      <div
-        th:if="${errorMessage}"
-        class="alert alert-danger alert-dismissible fade show"
-        role="alert"
-      >
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span th:text="${errorMessage}"></span>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-        ></button>
-      </div>
-
-      <div
-        th:if="${error}"
-        class="alert alert-danger alert-dismissible fade show"
-        role="alert"
-      >
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span th:text="${error}"></span>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-        ></button>
-      </div>
-
-      <!-- Search and Filter -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <form th:action="@{/admin/blogs/list}" method="get" class="row g-3">
-            <div class="col-md-8">
-              <div class="input-group">
-                <span class="input-group-text bg-light border-end-0">
-                  <i class="fas fa-search text-muted"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control search-box border-start-0"
-                  name="searchTerm"
-                  th:value="${searchTerm}"
-                  placeholder="Tìm kiếm theo tiêu đề hoặc nội dung..."
-                />
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="d-flex gap-2">
-                <button
-                  type="submit"
-                  class="btn btn-outline-secondary flex-fill"
-                >
-                  <i class="fas fa-search me-2"></i>Tìm kiếm
-                </button>
-                <a
-                  th:href="@{/admin/blogs/list}"
-                  class="btn btn-outline-secondary"
-                >
-                  <i class="fas fa-redo me-2"></i>Reset
-                </a>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Blog Posts Table -->
-      <div class="card">
-        <div class="card-header bg-transparent">
-          <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-              <i class="fas fa-list me-2"></i>Danh sách Blog Posts
-            </h5>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
             <span
-              class="badge bg-secondary rounded-pill"
-              th:text="${totalElements} + ' bài viết'"
-            ></span>
-          </div>
-        </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Ảnh bìa</th>
-                  <th>Tiêu đề</th>
-                  <th>Tóm tắt</th>
-                  <th>Tác giả</th>
-                  <th>Ngày tạo</th>
-                  <th class="text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr th:if="${#lists.isEmpty(blogPosts)}">
-                  <td colspan="7" class="text-center py-5">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <p class="text-muted mb-0">Không có blog posts nào</p>
-                    <a
-                      th:href="@{/admin/blogs/add}"
-                      class="btn btn-secondary mt-3"
-                    >
-                      <i class="fas fa-plus me-2"></i>Thêm Blog Đầu Tiên
-                    </a>
-                  </td>
-                </tr>
-                <tr th:each="blog : ${blogPosts}">
-                  <td th:text="${blog.id}" class="fw-bold"></td>
-                  <td>
-                    <img
-                      th:if="${blog.coverImageUrl}"
-                      th:src="${blog.coverImageUrl}"
-                      class="cover-image"
-                      alt="Cover Image"
-                    />
-                    <span th:unless="${blog.coverImageUrl}" class="text-muted">
-                      <i class="fas fa-image"></i>
-                    </span>
-                  </td>
-                  <td>
-                    <div
-                      class="blog-title fw-semibold"
-                      th:text="${blog.title}"
-                      th:title="${blog.title}"
-                    ></div>
-                  </td>
-                  <td>
-                    <div
-                      class="blog-summary small"
-                      th:text="${blog.summary}"
-                      th:title="${blog.summary}"
-                    ></div>
-                  </td>
-                  <td>
-                    <span
-                      class="badge bg-secondary"
-                      th:text="${blog.authorName}"
-                    ></span>
-                  </td>
-                  <td>
-                    <small
-                      class="text-muted"
-                      th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}"
-                    ></small>
-                  </td>
-                  <td class="text-center">
-                    <div class="btn-group" role="group">
-                      <a
-                        th:href="@{/admin/blogs/view/{id}(id=${blog.id})}"
-                        class="btn btn-sm btn-outline-secondary"
-                        title="Xem chi tiết"
-                      >
-                        <i class="fas fa-eye"></i>
-                      </a>
-                      <a
-                        th:href="@{/admin/blogs/edit/{id}(id=${blog.id})}"
-                        class="btn btn-sm btn-outline-secondary"
-                        title="Chỉnh sửa"
-                      >
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary delete-blog-btn"
-                        title="Xóa"
-                        th:data-blog-id="${blog.id}"
-                        th:data-blog-title="${blog.title}"
-                      >
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="card-footer bg-transparent" th:if="${totalPages > 1}">
-          <nav aria-label="Blog pagination">
-            <ul class="pagination justify-content-center mb-0">
-              <li
-                class="page-item"
-                th:classappend="${currentPage == 0} ? 'disabled'"
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
               >
-                <a
-                  class="page-link"
-                  th:href="@{/admin/blogs/list(page=${currentPage - 1}, searchTerm=${searchTerm})}"
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
                 >
-                  <i class="fas fa-chevron-left"></i>
-                </a>
               </li>
-
-              <li
-                th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
-                class="page-item"
-                th:classappend="${pageNum == currentPage} ? 'active'"
-              >
-                <a
-                  class="page-link"
-                  th:href="@{/admin/blogs/list(page=${pageNum}, searchTerm=${searchTerm})}"
-                  th:text="${pageNum + 1}"
-                ></a>
-              </li>
-
-              <li
-                class="page-item"
-                th:classappend="${currentPage == totalPages - 1} ? 'disabled'"
-              >
-                <a
-                  class="page-link"
-                  th:href="@{/admin/blogs/list(page=${currentPage + 1}, searchTerm=${searchTerm})}"
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
                 >
-                  <i class="fas fa-chevron-right"></i>
-                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
               </li>
             </ul>
-          </nav>
+          </div>
         </div>
-      </div>
-    </div>
+      </header>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-exclamation-triangle text-warning me-2"></i>Xác
-              nhận xóa
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 class="mb-1">
+              <i class="fas fa-blog me-2 text-primary"></i>Quản lý Blog
+            </h2>
+            <p class="text-muted">Quản lý các bài viết blog và review phim</p>
           </div>
-          <div class="modal-body">
-            <p>
-              Bạn có chắc chắn muốn xóa blog post "<span id="blogTitle"></span
-              >"?
-            </p>
-            <p class="text-danger small">
-              <i class="fas fa-warning me-1"></i>Hành động này không thể hoàn
-              tác!
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Hủy
-            </button>
-            <form id="deleteForm" method="post" style="display: inline">
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash me-2"></i>Xóa
-              </button>
+          <a th:href="@{/admin/blogs/add}" class="btn btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>Thêm Blog Mới
+          </a>
+        </div>
+
+        <!-- Alerts -->
+        <div
+          th:if="${successMessage}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${successMessage}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+          ></button>
+        </div>
+
+        <div
+          th:if="${errorMessage}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${errorMessage}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+          ></button>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+          ></button>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <form th:action="@{/admin/blogs/list}" method="get" class="row g-3">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control search-box border-start-0"
+                    name="searchTerm"
+                    th:value="${searchTerm}"
+                    placeholder="Tìm kiếm theo tiêu đề hoặc nội dung..."
+                  />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex gap-2">
+                  <button
+                    type="submit"
+                    class="btn btn-outline-primary-custom flex-fill"
+                  >
+                    <i class="fas fa-search me-2"></i>Tìm kiếm
+                  </button>
+                  <a
+                    th:href="@{/admin/blogs/list}"
+                    class="btn btn-outline-primary-custom"
+                  >
+                    <i class="fas fa-redo me-2"></i>Reset
+                  </a>
+                </div>
+              </div>
             </form>
+          </div>
+        </div>
+
+        <!-- Blog Posts Table -->
+        <div class="card">
+          <div class="card-header bg-transparent">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Danh sách Blog Posts
+              </h5>
+              <span
+                class="badge badge-count rounded-pill"
+                th:text="${totalElements} + ' bài viết'"
+              ></span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Ảnh bìa</th>
+                    <th>Tiêu đề</th>
+                    <th>Tóm tắt</th>
+                    <th>Tác giả</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:if="${#lists.isEmpty(blogPosts)}">
+                    <td colspan="7" class="text-center py-5">
+                      <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                      <p class="text-muted mb-0">Không có blog posts nào</p>
+                      <a
+                        th:href="@{/admin/blogs/add}"
+                        class="btn btn-primary-custom mt-3"
+                      >
+                        <i class="fas fa-plus me-2"></i>Thêm Blog Đầu Tiên
+                      </a>
+                    </td>
+                  </tr>
+                  <tr th:each="blog : ${blogPosts}">
+                    <td th:text="${blog.id}" class="fw-bold"></td>
+                    <td>
+                      <img
+                        th:if="${blog.coverImageUrl}"
+                        th:src="${blog.coverImageUrl}"
+                        class="cover-image"
+                        alt="Cover Image"
+                      />
+                      <span
+                        th:unless="${blog.coverImageUrl}"
+                        class="text-muted"
+                      >
+                        <i class="fas fa-image"></i>
+                      </span>
+                    </td>
+                    <td>
+                      <div
+                        class="blog-title fw-semibold"
+                        th:utext="${blog.title}"
+                        th:title="${blog.title}"
+                      ></div>
+                    </td>
+                    <td>
+                      <div
+                        class="blog-summary small"
+                        th:utext="${blog.summary}"
+                        th:title="${blog.summary}"
+                      ></div>
+                    </td>
+                    <td>
+                      <span
+                        class="badge badge-custom"
+                        th:text="${blog.authorName}"
+                      ></span>
+                    </td>
+                    <td>
+                      <small
+                        class="text-muted"
+                        th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}"
+                      ></small>
+                    </td>
+                    <td class="text-center">
+                      <div class="btn-group" role="group">
+                        <a
+                          th:href="@{/admin/blogs/view/{id}(id=${blog.id})}"
+                          class="btn btn-sm btn-action-view"
+                          title="Xem chi tiết"
+                        >
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a
+                          th:href="@{/admin/blogs/edit/{id}(id=${blog.id})}"
+                          class="btn btn-sm btn-action-edit"
+                          title="Chỉnh sửa"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <a
+                          th:href="@{/admin/blogs/delete/{id}(id=${blog.id})}"
+                          class="btn btn-sm btn-action-delete"
+                          title="Xóa"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="card-footer bg-transparent" th:if="${totalPages > 1}">
+            <nav aria-label="Blog pagination">
+              <ul class="pagination justify-content-center mb-0">
+                <li
+                  class="page-item"
+                  th:classappend="${currentPage == 0} ? 'disabled'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/blogs/list(page=${currentPage - 1}, searchTerm=${searchTerm})}"
+                  >
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                </li>
+
+                <li
+                  th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                  class="page-item"
+                  th:classappend="${pageNum == currentPage} ? 'active'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/blogs/list(page=${pageNum}, searchTerm=${searchTerm})}"
+                    th:text="${pageNum + 1}"
+                  ></a>
+                </li>
+
+                <li
+                  class="page-item"
+                  th:classappend="${currentPage == totalPages - 1} ? 'disabled'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/blogs/list(page=${currentPage + 1}, searchTerm=${searchTerm})}"
+                  >
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
-      // Xử lý sự kiện click cho nút xóa blog
+      // Khởi tạo các chức năng cần thiết
       document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll(".delete-blog-btn");
-        deleteButtons.forEach(function (button) {
-          button.addEventListener("click", function () {
-            const blogId = this.getAttribute("data-blog-id");
-            const blogTitle = this.getAttribute("data-blog-title");
-            confirmDelete(blogId, blogTitle);
-          });
-        });
+        initializeSidebarToggle();
       });
-
-      function confirmDelete(blogId, blogTitle) {
-        document.getElementById("blogTitle").textContent = blogTitle;
-        document.getElementById("deleteForm").action =
-          "/admin/blogs/delete/" + blogId;
-        new bootstrap.Modal(document.getElementById("deleteModal")).show();
-      }
-
-      // Tự động ẩn thông báo sau 5 giây
-      setTimeout(function () {
-        const alerts = document.querySelectorAll(".alert");
-        alerts.forEach(function (alert) {
-          const bsAlert = new bootstrap.Alert(alert);
-          bsAlert.close();
-        });
-      }, 5000);
     </script>
   </body>
 </html>

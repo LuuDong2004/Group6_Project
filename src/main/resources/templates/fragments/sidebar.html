@@ -2,7 +2,7 @@
 <html lang="en">
 <div th:fragment="sidebar">
     <body>
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar-custom" id="sidebar">
         <div class="sidebar-header">
             <div class="d-flex align-items-center">
                 <div class="bg-white rounded-circle p-2 me-3">
@@ -28,31 +28,22 @@
                 <i class="fas fa-code-branch me-2"></i>
                 <span>Chi nhánh</span>
             </a>
-            <a href="/admin/schedules/list" class="menu-item">
-                <i class="fas fa-calendar-alt me-2"></i>
-                <span>Lịch chiếu</span>
-            </a>
-            <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Lịch chiếu tháng</span>
-            </a>
+             <a th:href="@{/admin/schedules/calendar}" class="menu-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Quản lý lịch chiếu</span>
+        </a>
             <a th:href="@{/admin/movies/list}" class="menu-item active">
                 <i class="fas fa-film"></i>
                 <span>Phim</span>
             </a>
-            <a href="/admin/foods/list" class="menu-item">
-                <i class="fas fa-hamburger me-2"></i>
-                <span>Combo Food</span>
-            </a>
-            <a th:href="@{/admin/directors/list}" class="menu-item">
+             <a th:href="@{/admin/directors/list}" class="menu-item">
                 <i class="fas fa-user-friends"></i>
                 <span>Diễn viên & Đạo diễn</span>
             </a>
-            <a th:href="@{/admin/schedules/list}" class="menu-item">
-                <i class="fas fa-list"></i>
-                <span>Danh sách lịch chiếu</span>
-            </a>
-
+            <a href="/admin/foods/list" class="menu-item">
+                <i class="fas fa-hamburger me-2"></i>
+                <span>Combo Food</span>
+            </a>       
             <a th:href="@{/admin/blogs/list}" class="menu-item">
                 <i class="fas fa-blog"></i>
                 <span>Blog</span>

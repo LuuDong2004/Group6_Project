@@ -2,8 +2,8 @@ package group6.cinema_project.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +21,13 @@ public class ScreeningScheduleDto {
     @NotNull(message = "Chi nhánh không được để trống")
     private Integer branchId;
     @NotNull(message = "Ngày chiếu không được để trống")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate screeningDate;
     @NotNull(message = "Giờ bắt đầu không được để trống")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
     @NotNull(message = "Giờ kết thúc không được để trống")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endTime;
     @NotBlank(message = "Trạng thái không được để trống")
     private String status;
@@ -51,4 +54,3 @@ public class ScreeningScheduleDto {
     private String endTimeStr;
     private String screeningDateStr;
 }
-

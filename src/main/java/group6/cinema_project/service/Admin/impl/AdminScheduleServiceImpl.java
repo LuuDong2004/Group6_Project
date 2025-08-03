@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,14 +40,13 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
     private final AdminMovieRepository movieRepository;
     private final AdminScreeningRoomRepository screeningRoomRepository;
     private final AdminBranchRepository branchRepository;
-    // Removed unused field that might cause UnsupportedOperationException
-    // List<ScheduleGroupedByDateDto> groupedSchedules;
+    private final group6.cinema_project.repository.User.BookingRepository bookingRepository;
 
     @Override
     @Transactional(readOnly = true)
     public Optional<ScreeningScheduleDto> getScreeningScheduleById(Integer id) {
         return movieScheduleRepository.findById(id)
-                .map(this::convertToDto);
+                .map(this::convertToDtoWithRelatedData);
     }
 
     @Override
@@ -58,10 +58,9 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         ScreeningSchedule screeningSchedule = convertToEntity(screeningScheduleDto);
         ScreeningSchedule savedSchedule = movieScheduleRepository.save(screeningSchedule);
-        
+
         // Tự động cập nhật trạng thái phòng chiếu thành ACTIVE khi có suất chiếu
         updateScreeningRoomStatus(savedSchedule.getScreeningRoom().getId());
-        
         return convertToDto(savedSchedule);
     }
 
@@ -71,19 +70,19 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         if (!movieScheduleRepository.existsById(id)) {
             throw new IllegalArgumentException("Cannot delete. Screening schedule not found with ID: " + id);
         }
-        
+
         // Lấy thông tin phòng trước khi xóa
         ScreeningSchedule schedule = movieScheduleRepository.findById(id).orElse(null);
         Integer roomId = null;
         if (schedule != null) {
             roomId = schedule.getScreeningRoom().getId();
         }
-        
-        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho xóa
-        validateScheduleIsNotCurrentlyShowing(id);
 
+        // kiểm tra xem lịch chiếu có đang chiếu hay không nếu đang chiếu sẽ không cho
+        // xóa
+        validateScheduleIsNotCurrentlyShowing(id);
         movieScheduleRepository.deleteById(id);
-        
+
         // Cập nhật trạng thái phòng sau khi xóa lịch chiếu
         if (roomId != null) {
             updateScreeningRoomStatus(roomId);
@@ -118,9 +117,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Convert ScreeningSchedule entity to DTO without related entity data
-     */
     private ScreeningScheduleDto convertToDto(ScreeningSchedule screeningSchedule) {
         ScreeningScheduleDto dto = new ScreeningScheduleDto();
         dto.setId(screeningSchedule.getId());
@@ -134,13 +130,13 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setBranchId(screeningSchedule.getBranch().getId());
         }
         if (screeningSchedule.getScreeningDate() != null) {
-            // Xử lý cả java.util.Date và java.sql.Date
+
             java.util.Date date = screeningSchedule.getScreeningDate();
             if (date instanceof java.sql.Date) {
-                // Nếu là java.sql.Date, sử dụng toLocalDate() trực tiếp
+
                 dto.setScreeningDate(((java.sql.Date) date).toLocalDate());
             } else {
-                // Nếu là java.util.Date, convert qua Instant
+
                 dto.setScreeningDate(date.toInstant()
                         .atZone(java.time.ZoneId.systemDefault()).toLocalDate());
             }
@@ -184,11 +180,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         return entity;
     }
 
-    /**
-     * Convert ScreeningSchedule entity to DTO with related entity data for display
-     * This method manually maps only the required fields to avoid unwanted
-     * relationship loading
-     */
     private ScreeningScheduleDto convertToDtoWithRelatedData(ScreeningSchedule screeningSchedule) {
         ScreeningScheduleDto dto = convertToDto(screeningSchedule);
         // Set movie information
@@ -196,8 +187,21 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setMovieName(screeningSchedule.getMovie().getName());
             dto.setMovieImage(screeningSchedule.getMovie().getImage());
             dto.setMovieDuration(screeningSchedule.getMovie().getDuration());
-            dto.setMovieRating(screeningSchedule.getMovie().getRating());
-            dto.setMovieGenre(screeningSchedule.getMovie().getGenre());
+
+            // Xử lý Rating
+            if (screeningSchedule.getMovie().getRating() != null) {
+                dto.setMovieRating(screeningSchedule.getMovie().getRating().getCode() + " - " +
+                        screeningSchedule.getMovie().getRating().getDescription());
+            }
+
+            // Xử lý Genres
+            if (screeningSchedule.getMovie().getGenres() != null
+                    && !screeningSchedule.getMovie().getGenres().isEmpty()) {
+                String genreNames = screeningSchedule.getMovie().getGenres().stream()
+                        .map(genre -> genre.getName())
+                        .collect(Collectors.joining(", "));
+                dto.setMovieGenre(genreNames);
+            }
         }
         // Set screening room information
         if (screeningSchedule.getScreeningRoom() != null) {
@@ -212,9 +216,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         return dto;
     }
 
-    /**
-     * Calculate and set the correct end time based on movie duration
-     */
     private void calculateAndSetEndTime(ScreeningScheduleDto screeningScheduleDto) {
         if (screeningScheduleDto.getMovieId() != null && screeningScheduleDto.getStartTime() != null) {
             Optional<Movie> movieOpt = movieRepository.findById(screeningScheduleDto.getMovieId());
@@ -455,8 +456,26 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         dto.setName(movie.getName());
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
-        dto.setRating(movie.getRating());
-        dto.setGenre(movie.getGenre());
+
+        // Xử lý Rating - chỉ lấy ID để tránh lazy loading
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        // Xử lý Genres - chỉ lấy ID để tránh lazy loading
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(genre -> genre.getId())
+                    .collect(Collectors.toSet());
+            dto.setGenreIds(genreIds);
+
+            String genreNames = movie.getGenres().stream()
+                    .map(genre -> genre.getName())
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
+        }
+
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());
@@ -773,35 +792,40 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
 
         return savedSchedules;
     }
-    
+
     /**
      * Tự động cập nhật trạng thái phòng chiếu dựa trên lịch chiếu
+     * Cập nhật thành ACTIVE khi có suất chiếu, INACTIVE khi không có
+     *
      * @param roomId ID của phòng chiếu
      */
     private void updateScreeningRoomStatus(int roomId) {
         try {
             ScreeningRoom room = screeningRoomRepository.findById(roomId).orElse(null);
-            if (room == null) return;
-            
+            if (room == null)
+                return;
+
             // Kiểm tra xem phòng có lịch chiếu ACTIVE hoặc UPCOMING không
             Date currentDate = new Date();
             java.sql.Time currentTime = new java.sql.Time(System.currentTimeMillis());
-            
+
             Integer hasActiveSchedules = screeningRoomRepository.hasActiveSchedules(roomId, currentDate, currentTime);
-            
+
             if (hasActiveSchedules != null && hasActiveSchedules == 1) {
                 // Có lịch chiếu → Chuyển thành ACTIVE
                 if (!"ACTIVE".equals(room.getStatus())) {
                     room.setStatus("ACTIVE");
                     screeningRoomRepository.save(room);
-                    System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành ACTIVE");
+                    System.out
+                            .println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành ACTIVE");
                 }
             } else {
                 // Không có lịch chiếu → Chuyển thành INACTIVE
                 if (!"INACTIVE".equals(room.getStatus())) {
                     room.setStatus("INACTIVE");
                     screeningRoomRepository.save(room);
-                    System.out.println("Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành INACTIVE");
+                    System.out.println(
+                            "Đã tự động cập nhật trạng thái phòng chiếu " + room.getName() + " thành INACTIVE");
                 }
             }
         } catch (Exception e) {
@@ -841,6 +865,124 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Kiểm tra xem lịch chiếu có thể chỉnh sửa hay không
+     * Điều kiện: Status phải là UPCOMING và không có booking nào
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return true nếu có thể chỉnh sửa, false nếu không thể
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canEditSchedule(Integer scheduleId) {
+        try {
+            // Kiểm tra lịch chiếu có tồn tại không
+            Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(scheduleId);
+            if (scheduleOpt.isEmpty()) {
+                return false;
+            }
+
+            ScreeningSchedule schedule = scheduleOpt.get();
+
+            // Chỉ cho phép chỉnh sửa lịch chiếu có status UPCOMING
+            if (!"UPCOMING".equalsIgnoreCase(schedule.getStatus())) {
+                return false;
+            }
+
+            // Kiểm tra xem lịch chiếu có booking nào không
+            boolean hasBookings = bookingRepository.existsByScheduleId(scheduleId);
+            if (hasBookings) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi kiểm tra khả năng chỉnh sửa lịch chiếu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem lịch chiếu có thể xóa hay không
+     * Điều kiện: Status phải là UPCOMING và không có booking nào
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return true nếu có thể xóa, false nếu không thể
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canDeleteSchedule(Integer scheduleId) {
+        // Logic giống với canEditSchedule
+        return canEditSchedule(scheduleId);
+    }
+
+    /**
+     * Lấy thông tin chi tiết về khả năng chỉnh sửa/xóa lịch chiếu
+     *
+     * @param scheduleId ID của lịch chiếu
+     * @return Map chứa thông tin chi tiết
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getScheduleEditabilityInfo(Integer scheduleId) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // Kiểm tra lịch chiếu có tồn tại không
+            Optional<ScreeningSchedule> scheduleOpt = movieScheduleRepository.findById(scheduleId);
+            if (scheduleOpt.isEmpty()) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                result.put("reason", "Lịch chiếu không tồn tại");
+                return result;
+            }
+
+            ScreeningSchedule schedule = scheduleOpt.get();
+            String status = schedule.getStatus();
+
+            // Kiểm tra status
+            boolean isUpcoming = "UPCOMING".equalsIgnoreCase(status);
+            if (!isUpcoming) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                if ("ACTIVE".equalsIgnoreCase(status)) {
+                    result.put("reason", "Không thể sửa/xóa lịch chiếu đang chiếu");
+                } else if ("ENDED".equalsIgnoreCase(status)) {
+                    result.put("reason", "Không thể sửa/xóa lịch chiếu đã kết thúc");
+                } else {
+                    result.put("reason", "Trạng thái lịch chiếu không cho phép chỉnh sửa");
+                }
+                return result;
+            }
+
+            // Kiểm tra booking
+            boolean hasBookings = bookingRepository.existsByScheduleId(scheduleId);
+            long bookingCount = bookingRepository.countByScheduleId(scheduleId);
+
+            if (hasBookings) {
+                result.put("canEdit", false);
+                result.put("canDelete", false);
+                result.put("reason", "Lịch chiếu đã có " + bookingCount + " booking, không thể chỉnh sửa");
+                result.put("bookingCount", bookingCount);
+            } else {
+                result.put("canEdit", true);
+                result.put("canDelete", true);
+                result.put("reason", "Có thể chỉnh sửa/xóa");
+                result.put("bookingCount", 0);
+            }
+
+            result.put("status", status);
+
+        } catch (Exception e) {
+            result.put("canEdit", false);
+            result.put("canDelete", false);
+            result.put("reason", "Lỗi hệ thống: " + e.getMessage());
+            System.err.println("Lỗi khi lấy thông tin khả năng chỉnh sửa lịch chiếu: " + e.getMessage());
+        }
+
+        return result;
     }
 
 }

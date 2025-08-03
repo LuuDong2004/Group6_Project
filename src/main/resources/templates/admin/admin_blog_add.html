@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -21,7 +21,7 @@
         background-color: #f8fafc;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 260px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -32,7 +32,7 @@
         display: flex;
         flex-direction: column;
         transition: width 0.3s ease;
-        z-index: 1000;
+        z-index: 1000; overflow-y: auto;
       }
 
       .sidebar-header {
@@ -75,11 +75,27 @@
         text-align: center;
       }
 
-      .main-content {
+      .main-content-wrapper {
         margin-left: 260px;
         min-height: 100vh;
-        padding: 2rem;
         background-color: #f8fafc;
+        transition: margin-left 0.3s ease;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .text-gray-700 {
+        color: #374151 !important;
       }
       .card {
         border: none;
@@ -162,54 +178,46 @@
     </style>
   </head>
   <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-film text-primary"></i>
-          </div>
-          <div>
-            <h5 class="mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Hệ thống quản lý</small>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Thêm Blog Mới</h4>
+        </div>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                  style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
+                   class="rounded-circle me-2">
+              <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
+              <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+            </ul>
           </div>
         </div>
-      </div>
+      </header>
 
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a th:href="@{/admin/blogs/list}" class="menu-item active">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
+      <div class="container-fluid p-4">
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -264,9 +272,7 @@
                           <i class="fas fa-exclamation-circle me-1"></i>
                           <span th:errors="*{title}"></span>
                         </div>
-                        <div class="char-counter mt-1">
-                          <span id="titleCounter">0</span>/255 ký tự
-                        </div>
+
                       </div>
                     </div>
 
@@ -336,7 +342,6 @@
                         id="coverImageFile"
                         name="coverImageFile"
                         accept="image/*"
-                        onchange="previewImage(this)"
                       />
                       <div class="text-center">
                         <i
@@ -349,16 +354,7 @@
                       </div>
                     </div>
 
-                    <div id="imagePreview" class="image-preview">
-                      <img id="previewImg" src="" alt="Preview" />
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger mt-2 w-100"
-                        onclick="removeImage()"
-                      >
-                        <i class="fas fa-trash me-1"></i>Xóa ảnh
-                      </button>
-                    </div>
+
 
                     <div
                       th:if="${#fields.hasErrors('coverImageUrl')}"
@@ -412,66 +408,16 @@
         language: "vi",
       });
 
-      // Character counter for title
-      document.getElementById("title").addEventListener("input", function () {
-        const counter = document.getElementById("titleCounter");
-        counter.textContent = this.value.length;
-
-        if (this.value.length > 255) {
-          counter.parentElement.classList.add("text-danger");
-        } else {
-          counter.parentElement.classList.remove("text-danger");
-        }
-      });
-
-      // Image preview
-      function previewImage(input) {
-        if (input.files && input.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            document.getElementById("previewImg").src = e.target.result;
-            document.getElementById("imagePreview").style.display = "block";
-          };
-          reader.readAsDataURL(input.files[0]);
-        }
-      }
-
-      // Remove image
-      function removeImage() {
-        document.getElementById("coverImageFile").value = "";
-        document.getElementById("imagePreview").style.display = "none";
-        document.getElementById("previewImg").src = "";
-      }
-
-      // Form validation
+      // Form submission handler để save TinyMCE content
       document
         .getElementById("blogForm")
         .addEventListener("submit", function (e) {
-          // Get content from TinyMCE
+          // Lưu nội dung từ TinyMCE vào textarea trước khi submit
           tinymce.triggerSave();
-
-          const title = document.getElementById("title").value.trim();
-          const content = tinymce.get("content").getContent();
-
-          if (!title) {
-            e.preventDefault();
-            alert("Vui lòng nhập tiêu đề bài viết");
-            return;
-          }
-
-          if (!content || content.length < 10) {
-            e.preventDefault();
-            alert("Vui lòng nhập nội dung bài viết (ít nhất 10 ký tự)");
-            return;
-          }
         });
-
-      // Initialize character counter
-      document.addEventListener("DOMContentLoaded", function () {
-        const titleInput = document.getElementById("title");
-        const counter = document.getElementById("titleCounter");
-        counter.textContent = titleInput.value.length;
-      });
     </script>
+        </div>
+      </div>
   </body>
 </html>
+

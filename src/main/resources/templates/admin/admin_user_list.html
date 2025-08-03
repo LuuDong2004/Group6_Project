@@ -1,470 +1,507 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaAdmin - Quản lý Người dùng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+      /* CSS cho sidebar-custom để tương thích với fragment sidebar mới */
+      .sidebar-custom {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+      .sidebar-custom.collapsed {
+        width: 80px;
+      }
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
+        display: none;
+      }
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+      .sidebar-custom.collapsed
+        .sidebar-header
+        .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar-custom.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-header .fa-users {
+        color: #6366f1;
+      }
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+      .sidebar.collapsed .menu-item:hover,
+      .sidebar.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem;
+      }
+      .sidebar.collapsed .menu-item.active {
+        background-color: #4f46e5;
+      }
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+      .sidebar.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+      .user-list-section * {
+        box-sizing: border-box;
+      }
+      .user-list-section {
+        color: #334155;
+      }
+      .user-list-section .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+      .user-list-section .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .add-user-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .add-user-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+      .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+      }
+      .user-table th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        text-transform: uppercase;
+      }
+      .user-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 14px;
+      }
+      .user-table tr:hover {
+        background: #f8fafc;
+      }
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-size: 13px;
+      }
+      .edit-btn {
+        background: #e0e7ff;
+        color: #4338ca;
+      }
+      .edit-btn:hover {
+        background: #c7d2fe;
+      }
+      .delete-btn {
+        background: #fee2e2;
+        color: #ef4444;
+      }
+      .delete-btn:hover {
+        background: #fecaca;
+      }
+      .role-badge {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        color: white;
+      }
+      .role-admin {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+      }
+      .role-staff {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+      }
+      .role-user {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+      }
+      @media (max-width: 768px) {
         .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease;
-            z-index: 1000;
+          width: 80px;
         }
-        .sidebar.collapsed {
-            width: 80px;
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .sidebar-menu span,
+        .sidebar .mt-auto .text-white,
+        .sidebar .mt-auto small {
+          display: none;
         }
-        .sidebar.collapsed .sidebar-header h5,
-        .sidebar.collapsed .sidebar-header small,
-        .sidebar.collapsed .sidebar-menu span,
-        .sidebar.collapsed .mt-auto .text-white,
-        .sidebar.collapsed .mt-auto small {
-            display: none;
+        .sidebar .sidebar-menu .menu-item {
+          justify-content: center;
         }
-        .sidebar.collapsed .sidebar-menu .menu-item {
-            justify-content: center;
-        }
-        .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
-            margin-right: 0 !important;
-        }
-        .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
-            margin-right: 0 !important;
-        }
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-header .fa-users {
-            color: #6366f1;
-        }
-        .sidebar-menu {
-            flex-grow: 1;
-            padding-top: 1rem;
-        }
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .menu-item:hover, .menu-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 3px solid white;
-            padding-left: calc(1.5rem - 3px);
-        }
-        .sidebar.collapsed .menu-item:hover, .sidebar.collapsed .menu-item.active {
-            border-left: none;
-            padding-left: 1.5rem;
-        }
-        .sidebar.collapsed .menu-item.active {
-            background-color: #4f46e5;
-        }
-        .menu-item i {
-            width: 20px;
-            margin-right: 0.75rem;
-            text-align: center;
-        }
-        .sidebar.collapsed .menu-item i {
-            margin-right: 0;
-            font-size: 1.25rem;
+        .sidebar .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
         }
         .main-content-wrapper {
-            margin-left: 260px;
-            transition: margin-left 0.3s ease;
-            padding-top: 70px;
-        }
-        .main-content-wrapper.expanded {
-            margin-left: 80px;
+          margin-left: 80px;
         }
         .header-custom {
-            position: fixed;
-            top: 0;
-            left: 260px;
-            right: 0;
-            height: 70px;
-            background-color: white;
-            border-bottom: 1px solid #e5e7eb;
-            z-index: 999;
-            transition: left 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
+          left: 80px;
+          padding: 0 1rem;
         }
-        .main-content-wrapper.expanded .header-custom {
-            left: 80px;
-        }
-        .user-list-section * {
-            box-sizing: border-box;
-        }
-        .user-list-section {
-            color: #334155;
+        .header-custom .flex-grow-1 {
+          display: none;
         }
         .user-list-section .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
         }
-        .user-list-section .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        .add-user-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .add-user-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
-        }
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
-        }
-        .user-table th {
-            background: #f8fafc;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-            text-transform: uppercase;
-        }
-        .user-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-            font-size: 14px;
-        }
-        .user-table tr:hover {
-            background: #f8fafc;
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-        .actions {
-            display: flex;
-            gap: 6px;
-        }
-        .action-btn {
-            width: 28px;
-            height: 28px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-size: 13px;
-        }
-        .edit-btn {
-            background: #e0e7ff;
-            color: #4338ca;
-        }
-        .edit-btn:hover {
-            background: #c7d2fe;
-        }
-        .delete-btn {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-        .delete-btn:hover {
-            background: #fecaca;
-        }
-        .role-badge {
-            font-size: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 20px;
-            font-weight: 600;
-            color: white;
-        }
-        .role-admin { background: linear-gradient(135deg, #dc3545, #c82333); }
-        .role-staff { background: linear-gradient(135deg, #ffc107, #e0a800); }
-        .role-user { background: linear-gradient(135deg, #007bff, #0056b3); }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 80px;
-            }
-            .sidebar .sidebar-header h5,
-            .sidebar .sidebar-header small,
-            .sidebar .sidebar-menu span,
-            .sidebar .mt-auto .text-white,
-            .sidebar .mt-auto small {
-                display: none;
-            }
-            .sidebar .sidebar-menu .menu-item {
-                justify-content: center;
-            }
-            .sidebar .sidebar-menu .menu-item i {
-                margin-right: 0;
-                font-size: 1.25rem;
-            }
-            .main-content-wrapper {
-                margin-left: 80px;
-            }
-            .header-custom {
-                left: 80px;
-                padding: 0 1rem;
-            }
-            .header-custom .flex-grow-1 {
-                display: none;
-            }
-            .user-list-section .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
+  </head>
+  <body>
+    <!-- Sử dụng fragment sidebar mới -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-            <div class="bg-white rounded-circle p-2 me-3">
-                <i class="fas fa-users"></i></div>
-            <div>
-                <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-                <small class="text-white-50">Quản lý Người dùng</small>
-            </div>
-        </div>
-    </div>
-    <nav class="sidebar-menu">
-        <a href="/admin" class="menu-item active">
-            <i class="fas fa-home"></i>
-            <span>Bảng điều khiển</span>
-        </a>
-        <a href="/admin/movies/list" class="menu-item">
-            <i class="fas fa-film"></i>
-            <span>Phim</span>
-        </a>
-        <a href="/admin/foods/list" class="menu-item">
-            <i class="fas fa-hamburger"></i>
-            <span>Combo Food</span>
-        </a>
-        <a href="/admin/schedules/list" class="menu-item">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Lịch chiếu</span>
-        </a>
-        <a href="/admin/users/list" class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>Quản lý người dùng</span>
-        </a>
-        <a href="/admin/users/management" class="menu-item">
-            <i class="fas fa-user-cog"></i>
-            <span>Phần quyền</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-ticket-alt"></i>
-            <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-chart-pie"></i>
-            <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span>Cài đặt</span>
-        </a>
-    </nav>
-    <div class="mt-auto p-4 border-top border-white-50" style="border-color: rgba(255,255,255,0.1) !important;">
-        <div class="d-flex align-items-center">
-            <img src="https://via.placeholder.com/40" alt="User Avatar" width="40" height="40"
-                 class="rounded-circle me-3">
-            <div>
-                <div class="text-white fw-semibold">Admin User</div>
-                <small class="text-white-50">admin@cinema.com</small>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="main-content-wrapper" id="mainContentWrapper">
-    <header class="header-custom shadow-sm">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-link text-secondary me-2" id="sidebarToggle"><i class="fas fa-bars fs-5"></i>
-            </button>
-            <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">Quản lý Người dùng</h4>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+            Quản lý Người dùng
+          </h4>
         </div>
         <div class="d-flex align-items-center">
-            <button class="btn btn-link text-secondary me-1 position-relative">
-                <i class="fas fa-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                      style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
-                    <span class="visually-hidden">Thông báo mới</span>
-                </span>
-            </button>
-            <button class="btn btn-link text-secondary me-2">
-                <i class="fas fa-cog fs-5"></i>
-            </button>
-            <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32"
-                         class="rounded-circle me-2">
-                    <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
-                    <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item text-danger" href="/login"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a>
-                    </li>
-                </ul>
-            </div>
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <button class="btn btn-link text-secondary me-2">
+            <i class="fas fa-cog fs-5"></i>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="/profile"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a class="dropdown-item text-danger" href="/login"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
-    </header>
-    <div class="container-fluid p-4">
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </header>
+      <div class="container-fluid p-4">
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
         <div id="userListView" class="user-list-section">
-            <div class="page-header">
-                <h1 class="page-title">Danh sách Người dùng</h1>
-                <a th:href="@{/admin/users/add}" class="add-user-btn">
-                    <i class="fas fa-plus me-1"></i> Thêm Người dùng
-                </a>
-            </div>
-            <div class="table-container">
-                <table class="user-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Người dùng</th>
-                        <th>Email</th>
-                        <th>Điện thoại</th>
-                        <th>Vai trò</th>
-                        <th>Địa chỉ</th>
-                        <th>Ngày sinh</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="user : ${users}">
-                        <td th:text="${user.id}"></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar me-3" th:text="${user.userName.substring(0,1).toUpperCase()}">U</div>
-                                <div>
-                                    <div class="fw-semibold" th:text="${user.userName}">User Name</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td th:text="${user.email}"></td>
-                        <td th:text="${user.phone}"></td>
-                        <td>
-                            <span th:classappend="${user.role.name() == 'ADMIN'} ? 'role-badge role-admin' : (${user.role.name() == 'STAFF'} ? 'role-badge role-staff' : 'role-badge role-user')"
-                                  th:text="${user.role.name() == 'ADMIN'} ? 'Quản trị viên' : (${user.role.name() == 'STAFF'} ? 'Nhân viên' : 'Người dùng')">
-                                Role
-                            </span>
-                        </td>
-                        <td th:text="${user.address}"></td>
-                        <td th:text="${user.dateOfBirth}"></td>
-                        <td>
-                            <div class="actions">
-                                <a th:href="@{/admin/users/view/{id}(id=${user.id})}" class="action-btn edit-btn" title="Xem chi tiết">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="action-btn delete-btn" title="Xóa"
-                                   onclick="return confirm('Bạn có chắc muốn xóa người dùng này?');">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(users)}">
-                        <td colspan="8" style="text-align: center;">Không có người dùng nào để hiển thị.</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+          <div class="page-header">
+            <h1 class="page-title">Danh sách Người dùng</h1>
+            <a th:href="@{/admin/users/add}" class="add-user-btn">
+              <i class="fas fa-plus me-1"></i> Thêm Người dùng
+            </a>
+          </div>
+          <div class="table-container">
+            <table class="user-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Người dùng</th>
+                  <th>Email</th>
+                  <th>Điện thoại</th>
+                  <th>Vai trò</th>
+                  <th>Địa chỉ</th>
+                  <th>Ngày sinh</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="user : ${users}">
+                  <td th:text="${user.id}"></td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div
+                        class="user-avatar me-3"
+                        th:text="${user.userName.substring(0,1).toUpperCase()}"
+                      >
+                        U
+                      </div>
+                      <div>
+                        <div class="fw-semibold" th:text="${user.userName}">
+                          User Name
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td th:text="${user.email}"></td>
+                  <td th:text="${user.phone}"></td>
+                  <td>
+                    <span
+                      th:classappend="${user.role.name() == 'ADMIN'} ? 'role-badge role-admin' : (${user.role.name() == 'STAFF'} ? 'role-badge role-staff' : 'role-badge role-user')"
+                      th:text="${user.role.name() == 'ADMIN'} ? 'Quản trị viên' : (${user.role.name() == 'STAFF'} ? 'Nhân viên' : 'Người dùng')"
+                    >
+                      Role
+                    </span>
+                  </td>
+                  <td th:text="${user.address}"></td>
+                  <td th:text="${user.dateOfBirth}"></td>
+                  <td>
+                    <div class="actions">
+                      <a
+                        th:href="@{/admin/users/view/{id}(id=${user.id})}"
+                        class="action-btn edit-btn"
+                        title="Xem chi tiết"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a
+                        th:href="@{/admin/users/delete/{id}(id=${user.id})}"
+                        class="action-btn delete-btn"
+                        title="Xóa"
+                        onclick="return confirm('Bạn có chắc muốn xóa người dùng này?');"
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(users)}">
+                  <td colspan="8" style="text-align: center">
+                    Không có người dùng nào để hiển thị.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeDashboardBehavior();
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          initializeDashboardBehavior();
         });
         function initializeDashboardBehavior() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const mainContentWrapper = document.getElementById('mainContentWrapper');
-            if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
-            function toggleSidebar() {
-                sidebar.classList.toggle('collapsed');
-                mainContentWrapper.classList.toggle('expanded');
+          const sidebarToggle = document.getElementById("sidebarToggle");
+          const sidebar = document.getElementById("sidebar");
+          const mainContentWrapper =
+            document.getElementById("mainContentWrapper");
+          if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+          function toggleSidebar() {
+            sidebar.classList.toggle("collapsed");
+            mainContentWrapper.classList.toggle("expanded");
+          }
+          sidebarToggle.addEventListener("click", toggleSidebar);
+          function checkViewport() {
+            if (window.innerWidth <= 992) {
+              if (!sidebar.classList.contains("collapsed")) {
+                toggleSidebar();
+              }
             }
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            function checkViewport() {
-                if (window.innerWidth <= 992) {
-                    if (!sidebar.classList.contains('collapsed')) {
-                        toggleSidebar();
-                    }
-                }
-            }
-            checkViewport();
-            window.addEventListener('resize', checkViewport);
+          }
+          checkViewport();
+          window.addEventListener("resize", checkViewport);
         }
-    </script>
-</div>
-</body>
-</html> 
+      </script>
+    </div>
+  </body>
+</html>

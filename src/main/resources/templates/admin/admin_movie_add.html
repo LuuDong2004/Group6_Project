@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -23,81 +23,8 @@
   </head>
 
   <body>
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-film"></i>
-          </div>
-          <div>
-            <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Quản lý Phim</small>
-          </div>
-        </div>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item active">
-          <i class="fas fa-film"></i>
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a th:href="@{/admin/blogs/list}" class="menu-item">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-users"></i>
-          <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i>
-          <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
-        </a>
-      </nav>
-
-      <div
-        class="mt-auto p-4 border-top border-white-50"
-        style="border-color: rgba(255, 255, 255, 0.1) !important"
-      >
-        <div class="d-flex align-items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="User Avatar"
-            width="40"
-            height="40"
-            class="rounded-circle me-3"
-          />
-          <div>
-            <div class="text-white fw-semibold">Admin User</div>
-            <small class="text-white-50">admin@cinema.com</small>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <div class="main-content-wrapper" id="mainContentWrapper">
       <header class="header-custom shadow-sm">
@@ -259,18 +186,15 @@
                         <select
                           class="form-select"
                           id="rating"
-                          name="rating"
+                          name="ratingId"
                           required
                         >
-                          <option value="0">Chọn rating</option>
-                          <option value="G">G - Mọi lứa tuổi</option>
-                          <option value="K">
-                            K - Dành cho trẻ em dưới 13 tuổi
-                          </option>
-                          <option value="T13">T13 - Từ 13 tuổi trở lên</option>
-                          <option value="T16">T16 - Từ 16 tuổi trở lên</option>
-                          <option value="T18">T18 - Từ 18 tuổi trở lên</option>
-                          <option value="C">C - Cấm chiếu</option>
+                          <option value="">Chọn rating</option>
+                          <option
+                            th:each="rating : ${allRatings}"
+                            th:value="${rating.id}"
+                            th:text="${rating.code + ' - ' + rating.description}"
+                          ></option>
                         </select>
                       </div>
                       <div class="col-md-4 mb-3">
@@ -301,127 +225,19 @@
                       Chọn tất cả thể loại phù hợp cho phim này
                     </p>
                     <div id="genreContainerForm">
-                      <div>
+                      <div th:each="genre : ${allGenres}">
                         <input
                           type="checkbox"
-                          id="genre_action"
+                          th:id="'genre_' + ${genre.id}"
                           name="genres"
-                          value="Hành động"
-                          class="d-none"
-                        />
-                        <label for="genre_action" class="selectable-tag-form"
-                          >Hành động</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_comedy"
-                          name="genres"
-                          value="Hài kịch"
-                          class="d-none"
-                        />
-                        <label for="genre_comedy" class="selectable-tag-form"
-                          >Hài kịch</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_horror"
-                          name="genres"
-                          value="Kinh dị"
-                          class="d-none"
-                        />
-                        <label for="genre_horror" class="selectable-tag-form"
-                          >Kinh dị</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_romance"
-                          name="genres"
-                          value="Lãng mạn"
-                          class="d-none"
-                        />
-                        <label for="genre_romance" class="selectable-tag-form"
-                          >Lãng mạn</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_scifi"
-                          name="genres"
-                          value="Khoa học viễn tưởng"
-                          class="d-none"
-                        />
-                        <label for="genre_scifi" class="selectable-tag-form"
-                          >Khoa học viễn tưởng</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_thriller"
-                          name="genres"
-                          value="Tâm lý"
-                          class="d-none"
-                        />
-                        <label for="genre_thriller" class="selectable-tag-form"
-                          >Tâm lý</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_adventure"
-                          name="genres"
-                          value="Phiêu lưu"
-                          class="d-none"
-                        />
-                        <label for="genre_adventure" class="selectable-tag-form"
-                          >Phiêu lưu</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_animation"
-                          name="genres"
-                          value="Hoạt hình"
-                          class="d-none"
-                        />
-                        <label for="genre_animation" class="selectable-tag-form"
-                          >Hoạt hình</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_drama"
-                          name="genres"
-                          value="Chính kịch"
-                          class="d-none"
-                        />
-                        <label for="genre_drama" class="selectable-tag-form"
-                          >Chính kịch</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_documentary"
-                          name="genres"
-                          value="Tài liệu"
+                          th:value="${genre.id}"
                           class="d-none"
                         />
                         <label
-                          for="genre_documentary"
+                          th:for="'genre_' + ${genre.id}"
                           class="selectable-tag-form"
-                          >Tài liệu</label
-                        >
+                          th:text="${genre.name}"
+                        ></label>
                       </div>
                     </div>
                   </div>
@@ -607,7 +423,10 @@
                 <i class="fas fa-save me-2"></i>
                 Lưu nháp
               </button>
-              <a th:href="@{/admin/movies}" class="btn btn-outline-danger me-2">
+              <a
+                th:href="@{/admin/movies/list}"
+                class="btn btn-outline-danger me-2"
+              >
                 <i class="fas fa-times me-2"></i>
                 Hủy
               </a>
@@ -621,6 +440,7 @@
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -631,10 +451,16 @@
         }
 
         // Initialize sidebar behavior
-        initializeDashboardBehavior();
+        initializeSidebarToggle();
 
         // Initialize file upload (image preview)
-        initializeFileUpload();
+        initializeFileUploadPreview(
+          "uploadArea",
+          "image",
+          "imagePreview",
+          "previewImg",
+          "removeImageBtn"
+        );
 
         // Initialize selectable tags (genres and formats) visual state
         initializeSelectableTagsVisuals();
@@ -642,134 +468,24 @@
         // Initialize autocomplete multi-select for directors and actors
         initializeAutocomplete();
 
-        // Add form validation on submit
+        // Simplified form validation using HTML5 + custom genre validation
         const movieForm = document.getElementById("movieForm");
         if (movieForm) {
           movieForm.addEventListener("submit", function (event) {
-            let isValid = true;
-
-            // Validate genres first
+            // Chỉ validate genres vì HTML5 sẽ handle required fields
             if (!validateGenres()) {
-              isValid = false;
-            }
-
-            // Validate all required fields
-            if (!validateAllRequiredFields()) {
-              isValid = false;
-            }
-
-            if (!isValid) {
-              event.preventDefault(); // Prevent form submission
+              event.preventDefault();
               return false;
             }
           });
         }
 
-        // Initialize required field validation
-        initializeRequiredFieldValidation();
+        // HTML5 validation sẽ handle required fields tự động
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      // Moved to admin-common.js
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-          console.error(
-            "Sidebar toggle, sidebar, or main content wrapper not found."
-          );
-          return;
-        }
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-        }
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              toggleSidebar();
-            }
-          }
-        }
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
-      function initializeFileUpload() {
-        const uploadArea = document.getElementById("uploadArea");
-        const fileInput = document.getElementById("image");
-        const imagePreview = document.getElementById("imagePreview");
-        const previewImg = document.getElementById("previewImg");
-        const removeImageBtn = document.getElementById("removeImageBtn");
-
-        if (
-          !uploadArea ||
-          !fileInput ||
-          !imagePreview ||
-          !previewImg ||
-          !removeImageBtn
-        ) {
-          console.error(
-            "One or more file upload elements are missing for file upload."
-          );
-          return;
-        }
-
-        uploadArea.addEventListener("click", () => fileInput.click());
-        uploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadArea.classList.add("dragover");
-        });
-        uploadArea.addEventListener("dragleave", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-        });
-        uploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-          const files = e.dataTransfer.files;
-          if (files.length > 0) handleFileSelect(files[0]);
-        });
-        fileInput.addEventListener("change", (e) => {
-          if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
-        });
-
-        function handleFileSelect(file) {
-          if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              previewImg.src = e.target.result;
-              imagePreview.classList.remove("d-none");
-              removeImageBtn.classList.remove("d-none");
-              imagePreview.style.opacity = "0";
-              setTimeout(() => {
-                imagePreview.style.transition = "opacity 0.3s ease";
-                imagePreview.style.opacity = "1";
-              }, 50);
-            };
-            reader.readAsDataURL(file);
-          } else {
-            console.warn(
-              "Invalid file type or no file selected. Please select a PNG or JPG image."
-            );
-            if (previewImg) previewImg.src = "";
-            if (imagePreview) imagePreview.classList.add("d-none");
-            if (removeImageBtn) removeImageBtn.classList.add("d-none");
-            if (fileInput) fileInput.value = "";
-          }
-        }
-
-        removeImageBtn.addEventListener("click", function () {
-          if (previewImg) previewImg.src = "";
-          if (imagePreview) imagePreview.classList.add("d-none");
-          this.classList.add("d-none");
-          if (fileInput) fileInput.value = "";
-        });
-      }
+      // Moved to admin-common.js
 
       // New function to handle visual state of selectable tags (checkboxes)
       function initializeSelectableTagsVisuals() {
@@ -824,84 +540,7 @@
         return true;
       }
 
-      // Function to validate required fields and change label color
-      function initializeRequiredFieldValidation() {
-        const requiredFields = document.querySelectorAll(
-          "input[required], textarea[required], select[required]"
-        );
-
-        requiredFields.forEach((field) => {
-          // Find the associated label
-          const label = document.querySelector(`label[for="${field.id}"]`);
-
-          // Add validation on blur (when user leaves the field)
-          field.addEventListener("blur", function () {
-            validateRequiredField(field, label);
-          });
-
-          // Add validation on input (real-time as user types)
-          field.addEventListener("input", function () {
-            validateRequiredField(field, label);
-          });
-
-          // Add validation on change (for select boxes)
-          if (field.tagName === "SELECT") {
-            field.addEventListener("change", function () {
-              validateRequiredField(field, label);
-            });
-          }
-        });
-      }
-
-      function validateRequiredField(field, label) {
-        if (!label) return;
-
-        let isEmpty = false;
-
-        if (field.type === "file") {
-          isEmpty = !field.files || field.files.length === 0;
-        } else if (field.tagName === "SELECT") {
-          isEmpty = !field.value || field.value === "0" || field.value === "";
-        } else {
-          isEmpty = !field.value.trim();
-        }
-
-        if (isEmpty) {
-          label.classList.add("required-error");
-        } else {
-          label.classList.remove("required-error");
-        }
-      }
-
-      // Function to validate all required fields at once (for submit)
-      function validateAllRequiredFields() {
-        const requiredFields = document.querySelectorAll(
-          "input[required], textarea[required], select[required]"
-        );
-        let allValid = true;
-
-        requiredFields.forEach((field) => {
-          const label = document.querySelector(`label[for="${field.id}"]`);
-
-          let isEmpty = false;
-          if (field.type === "file") {
-            isEmpty = !field.files || field.files.length === 0;
-          } else if (field.tagName === "SELECT") {
-            isEmpty = !field.value || field.value === "0" || field.value === "";
-          } else {
-            isEmpty = !field.value.trim();
-          }
-
-          if (isEmpty) {
-            if (label) label.classList.add("required-error");
-            allValid = false;
-          } else {
-            if (label) label.classList.remove("required-error");
-          }
-        });
-
-        return allValid;
-      }
+      // Removed complex validation functions - using HTML5 validation instead
 
       // Autocomplete Multi-Select Functionality
       function initializeAutocomplete() {
@@ -1088,3 +727,4 @@
     </script>
   </body>
 </html>
+

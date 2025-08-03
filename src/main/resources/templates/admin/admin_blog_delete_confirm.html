@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận xóa Blog - Admin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS cho Admin Dashboard */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .sidebar-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar-custom .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 12px 20px;
+        margin: 4px 0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-custom .nav-link:hover,
+      .sidebar-custom .nav-link.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+      }
+
+      .main-content {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin: 20px;
+        padding: 30px;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+      }
+
+      .confirmation-card {
+        max-width: 600px;
+        margin: 0 auto;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .confirmation-header {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 25px;
+        text-align: center;
+      }
+
+      .confirmation-body {
+        padding: 30px;
+        text-align: center;
+      }
+
+      .blog-info {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #dc3545;
+      }
+
+      .warning-icon {
+        font-size: 4rem;
+        color: #ffc107;
+        margin-bottom: 20px;
+      }
+
+      .btn-group-custom {
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .btn-custom {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-danger-custom {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: none;
+        color: white;
+      }
+
+      .btn-danger-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+      }
+
+      .btn-secondary-custom {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        border: none;
+        color: white;
+      }
+
+      .btn-secondary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(9, 132, 227, 0.4);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+          <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+          <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+              <h2 class="mb-0">
+                <i class="fas fa-exclamation-triangle me-3"></i>Xác nhận xóa Blog
+              </h2>
+              <p class="mb-0 mt-2 opacity-75">
+                Xác nhận việc xóa bài viết blog khỏi hệ thống
+              </p>
+            </div>
+
+            <!-- Confirmation Card -->
+            <div class="card confirmation-card">
+              <div class="confirmation-header">
+                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                <h3 class="mb-0">Cảnh báo!</h3>
+                <p class="mb-0 mt-2">Bạn đang thực hiện hành động không thể hoàn tác</p>
+              </div>
+
+              <div class="confirmation-body">
+                <h4 class="text-danger mb-4">
+                  Bạn có chắc chắn muốn xóa blog post này?
+                </h4>
+
+                <!-- Blog Info -->
+                <div class="blog-info" th:if="${blogPost}">
+                  <div class="row">
+                    <div class="col-md-3" th:if="${blogPost.coverImageUrl}">
+                      <img
+                        th:src="${blogPost.coverImageUrl}"
+                        class="img-fluid rounded"
+                        alt="Cover Image"
+                        style="max-height: 100px; object-fit: cover;"
+                      />
+                    </div>
+                    <div th:class="${blogPost.coverImageUrl} ? 'col-md-9' : 'col-md-12'">
+                      <h5 class="text-start mb-2" th:text="${blogPost.title}"></h5>
+                      <p class="text-muted text-start mb-1">
+                        <i class="fas fa-user me-2"></i>
+                        <span th:text="${blogPost.authorName}"></span>
+                      </p>
+                      <p class="text-muted text-start mb-0">
+                        <i class="fas fa-calendar me-2"></i>
+                        <span th:text="${#temporals.format(blogPost.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="alert alert-danger" role="alert">
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  <strong>Lưu ý:</strong> Hành động này sẽ xóa vĩnh viễn bài viết và không thể khôi phục!
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center btn-group-custom">
+                  <a
+                    th:href="@{/admin/blogs/list}"
+                    class="btn btn-secondary-custom btn-custom"
+                  >
+                    <i class="fas fa-arrow-left me-2"></i>Hủy bỏ
+                  </a>
+                  
+                  <form th:action="@{/admin/blogs/delete/{id}(id=${blogPost.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger-custom btn-custom">
+                      <i class="fas fa-trash me-2"></i>Xác nhận xóa
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+

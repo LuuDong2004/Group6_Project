@@ -1,48 +1,56 @@
-
 package group6.cinema_project.controller.Admin;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.dto.MovieWithSchedulesDto;
 import group6.cinema_project.dto.ScheduleGroupedByDateDto;
 import group6.cinema_project.dto.ScheduleGroupedByRoomDto;
 import group6.cinema_project.dto.ScheduleTimeSlotDto;
+import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
+import group6.cinema_project.entity.Branch;
+import group6.cinema_project.entity.ScreeningRoom;
+import group6.cinema_project.entity.ScreeningSchedule;
 import group6.cinema_project.exception.ScheduleConflictException;
-
 import group6.cinema_project.service.Admin.IAdminBranchService;
 import group6.cinema_project.service.Admin.IAdminMovieService;
 import group6.cinema_project.service.Admin.IAdminRoomService;
 import group6.cinema_project.service.Admin.IAdminScheduleService;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.ScreeningRoom;
-import group6.cinema_project.entity.Branch;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.web.bind.annotation.PostMapping;
-
-/**
- * Controller for handling admin schedule management operations.
- * Handles the display of movie schedules in the admin interface.
- */
 @Controller
 @RequestMapping("/admin/schedules")
 @RequiredArgsConstructor
@@ -54,10 +62,6 @@ public class AdminScheduleController {
     private final IAdminRoomService screeningRoomService;
     private final IAdminBranchService branchService;
 
-    /**
-     * Display the schedule list page with optional filtering
-     */
-
     @GetMapping("/list")
     public String listSchedules(Model model,
             @RequestParam(value = "movieId", required = false) Integer movieId,
@@ -68,11 +72,8 @@ public class AdminScheduleController {
                 movieId, screeningDate, screeningRoomId);
 
         try {
-            // Load schedule data
             List<ScreeningScheduleDto> schedules;
 
-            // If any filter parameters are provided, use filtered search; otherwise get all
-            // schedules
             if (movieId != null || screeningDate != null || screeningRoomId != null) {
                 log.info("Using filtered search for schedules");
                 schedules = movieScheduleService.getFilteredScreeningSchedulesForDisplay(
@@ -84,8 +85,25 @@ public class AdminScheduleController {
 
             log.info("Successfully loaded {} schedules", schedules.size());
 
-            // Add schedules to model
             model.addAttribute("schedules", schedules);
+
+            Map<Integer, Map<String, Object>> editabilityMap = new HashMap<>();
+            for (ScreeningScheduleDto schedule : schedules) {
+                try {
+                    Map<String, Object> editabilityInfo = movieScheduleService
+                            .getScheduleEditabilityInfo(schedule.getId());
+                    editabilityMap.put(schedule.getId(), editabilityInfo);
+                } catch (Exception e) {
+                    log.warn("Error getting editability info for schedule {}: {}", schedule.getId(), e.getMessage());
+                    // Provide default values if error occurs
+                    Map<String, Object> defaultInfo = new HashMap<>();
+                    defaultInfo.put("canEdit", false);
+                    defaultInfo.put("canDelete", false);
+                    defaultInfo.put("reason", "Lỗi hệ thống");
+                    editabilityMap.put(schedule.getId(), defaultInfo);
+                }
+            }
+            model.addAttribute("editabilityMap", editabilityMap);
 
             // Add success message if filtering was applied
             if (movieId != null || screeningDate != null || screeningRoomId != null) {
@@ -101,7 +119,7 @@ public class AdminScheduleController {
 
         try {
             // Load dropdown data for filters - convert MovieDto to MovieWithSchedulesDto
-            List<MovieDto> movieDtos = movieService.getAllMovie();
+            List<MovieDto> movieDtos = movieService.getAllMoviesForDisplay();
             List<MovieWithSchedulesDto> moviesWithSchedules = convertMovieDtosToMoviesWithSchedules(movieDtos);
             model.addAttribute("movies", moviesWithSchedules);
         } catch (Exception e) {
@@ -125,6 +143,9 @@ public class AdminScheduleController {
         model.addAttribute("selectedScreeningDate", screeningDate);
         model.addAttribute("selectedScreeningRoomId", screeningRoomId);
 
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
+
         return "admin/admin_schedules_list";
     }
 
@@ -147,11 +168,9 @@ public class AdminScheduleController {
 
             // Chuyển đổi LocalDate thành Date để tương thích với service
             Date startOfDay = Date.from(selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endOfDay = Date.from(selectedDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
             // Lấy danh sách phim có lịch chiếu trong ngày
-            List<MovieWithSchedulesDto> moviesWithSchedules = getMoviesWithSchedulesByDate(startOfDay, endOfDay,
-                    status);
+            List<MovieWithSchedulesDto> moviesWithSchedules = getMoviesWithSchedulesByDate(startOfDay, status);
 
             // Format ngày để hiển thị
             String formattedDate = formatDateForDisplay(selectedDate);
@@ -159,8 +178,30 @@ public class AdminScheduleController {
             // Kiểm tra xem ngày có phải là quá khứ không
             boolean isPastDate = selectedDate.isBefore(LocalDate.now());
 
+            // Pre-calculate editability info for all schedules to avoid AJAX calls
+            Map<Integer, Map<String, Object>> editabilityMap = new HashMap<>();
+            for (MovieWithSchedulesDto movie : moviesWithSchedules) {
+                for (ScreeningSchedule schedule : movie.getSchedules()) {
+                    try {
+                        Map<String, Object> editabilityInfo = movieScheduleService
+                                .getScheduleEditabilityInfo(schedule.getId());
+                        editabilityMap.put(schedule.getId(), editabilityInfo);
+                    } catch (Exception e) {
+                        log.warn("Error getting editability info for schedule {}: {}", schedule.getId(),
+                                e.getMessage());
+                        // Provide default values if error occurs
+                        Map<String, Object> defaultInfo = new HashMap<>();
+                        defaultInfo.put("canEdit", false);
+                        defaultInfo.put("canDelete", false);
+                        defaultInfo.put("reason", "Lỗi hệ thống");
+                        editabilityMap.put(schedule.getId(), defaultInfo);
+                    }
+                }
+            }
+
             // Thêm dữ liệu vào model
             model.addAttribute("movies", moviesWithSchedules);
+            model.addAttribute("editabilityMap", editabilityMap);
             model.addAttribute("selectedDate", selectedDate);
             model.addAttribute("selectedDateFormatted", formattedDate);
             model.addAttribute("selectedStatus", status);
@@ -179,6 +220,9 @@ public class AdminScheduleController {
             model.addAttribute("isPastDate", finalSelectedDate.isBefore(LocalDate.now()));
         }
 
+        // Thêm timestamp để tránh cache hình ảnh
+        model.addAttribute("timestamp", System.currentTimeMillis());
+
         return "admin/admin_schedules_list";
     }
 
@@ -194,8 +238,8 @@ public class AdminScheduleController {
             movieWithSchedules.setName(movieDto.getName());
             movieWithSchedules.setImage(movieDto.getImage());
             movieWithSchedules.setDuration(movieDto.getDuration());
-            movieWithSchedules.setRating(movieDto.getRating());
-            movieWithSchedules.setGenre(movieDto.getGenre());
+            movieWithSchedules.setRatingDisplay(movieDto.getRatingDisplay()); // Sửa từ setRating thành setRatingDisplay
+            movieWithSchedules.setGenreDisplay(movieDto.getGenreDisplay()); // Sửa từ setGenre thành setGenreDisplay
             movieWithSchedules.setLanguage(movieDto.getLanguage());
             movieWithSchedules.setDescription(movieDto.getDescription());
             movieWithSchedules.setStatus(movieDto.getStatus());
@@ -209,12 +253,12 @@ public class AdminScheduleController {
     /**
      * Phương thức hỗ trợ để lấy danh sách phim với lịch chiếu theo ngày
      */
-    private List<MovieWithSchedulesDto> getMoviesWithSchedulesByDate(Date startOfDay, Date endOfDay, String status) {
+    private List<MovieWithSchedulesDto> getMoviesWithSchedulesByDate(Date startOfDay, String status) {
         List<MovieWithSchedulesDto> result = new ArrayList<>();
 
         try {
             // Lấy tất cả phim
-            List<MovieDto> allMovies = movieService.getAllMovie();
+            List<MovieDto> allMovies = movieService.getAllMoviesForDisplay();
 
             for (MovieDto movieDto : allMovies) {
                 // Lấy lịch chiếu của phim theo ID
@@ -255,8 +299,10 @@ public class AdminScheduleController {
                     movieWithSchedules.setName(movieDto.getName());
                     movieWithSchedules.setImage(movieDto.getImage());
                     movieWithSchedules.setDuration(movieDto.getDuration());
-                    movieWithSchedules.setRating(movieDto.getRating());
-                    movieWithSchedules.setGenre(movieDto.getGenre());
+                    movieWithSchedules.setRatingDisplay(movieDto.getRatingDisplay()); // Sửa từ setRating thành
+                                                                                      // setRatingDisplay
+                    movieWithSchedules.setGenreDisplay(movieDto.getGenreDisplay()); // Sửa từ setGenre thành
+                                                                                    // setGenreDisplay
                     movieWithSchedules.setLanguage(movieDto.getLanguage());
                     movieWithSchedules.setDescription(movieDto.getDescription());
                     movieWithSchedules.setStatus(movieDto.getStatus());
@@ -318,7 +364,7 @@ public class AdminScheduleController {
      */
     private String formatDateForDisplay(LocalDate date) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", new Locale("vi", "VN"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy", Locale.of("vi", "VN"));
             return date.format(formatter);
         } catch (Exception e) {
             log.warn("Error formatting date, using default format", e);
@@ -357,6 +403,8 @@ public class AdminScheduleController {
             model.addAttribute("schedule", scheduleDto);
 
             // Load dropdown data
+            model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("movies", movieService.getAllMovie());
             model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
@@ -382,8 +430,8 @@ public class AdminScheduleController {
             log.warn("Validation errors in add schedule form");
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception e) {
                 log.error("Error reloading dropdown data", e);
@@ -411,13 +459,13 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
             }
-            return "admin/admin_schedule_add";
+            return "admin/admin_schedules_add";
 
         } catch (Exception e) {
             log.error("Error adding schedule", e);
@@ -425,8 +473,8 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -450,9 +498,29 @@ public class AdminScheduleController {
                 return "redirect:/admin/schedules/list";
             }
 
-            model.addAttribute("schedule", scheduleOpt.get());
-            model.addAttribute("movies", movieService.getAllMovie());
-            model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+            ScreeningScheduleDto schedule = scheduleOpt.get();
+
+            // Debug log để kiểm tra dữ liệu
+            log.info(
+                    "Schedule data for edit - ID: {}, Date: {}, StartTime: {}, EndTime: {}, MovieId: {}, RoomId: {}, BranchId: {}, Status: {}",
+                    schedule.getId(), schedule.getScreeningDate(), schedule.getStartTime(),
+                    schedule.getEndTime(), schedule.getMovieId(), schedule.getScreeningRoomId(),
+                    schedule.getBranchId(), schedule.getStatus());
+
+            // Lấy thông tin phim hiện tại để hiển thị
+            MovieDto selectedMovie = null;
+            if (schedule.getMovieId() != null) {
+                Optional<MovieDto> movieOpt = movieService.getMovieByIdForDisplay(schedule.getMovieId());
+                if (movieOpt.isPresent()) {
+                    selectedMovie = movieOpt.get();
+                    log.info("Loaded selected movie: {} (ID: {})", selectedMovie.getName(), selectedMovie.getId());
+                }
+            }
+
+            model.addAttribute("schedule", schedule);
+            model.addAttribute("selectedMovie", selectedMovie);
+            model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+            model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
             model.addAttribute("branches", branchService.getAllBranches());
 
             log.info("Successfully loaded edit schedule form for ID: {}", id);
@@ -476,23 +544,32 @@ public class AdminScheduleController {
             RedirectAttributes redirectAttributes) {
         log.info("Processing edit schedule request for ID: {}", id);
 
-        // Set the ID to ensure we're updating the correct record
-        scheduleDto.setId(id);
-
-        if (bindingResult.hasErrors()) {
-            log.warn("Validation errors in edit schedule form for ID: {}", id);
-            // Reload dropdown data for form
-            try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
-                model.addAttribute("branches", branchService.getAllBranches());
-            } catch (Exception e) {
-                log.error("Error reloading dropdown data", e);
-            }
-            return "admin/admin_schedule_edit";
-        }
-
         try {
+            // Kiểm tra khả năng chỉnh sửa trước khi xử lý
+            if (!movieScheduleService.canEditSchedule(id)) {
+                Map<String, Object> editabilityInfo = movieScheduleService.getScheduleEditabilityInfo(id);
+                String reason = (String) editabilityInfo.get("reason");
+                redirectAttributes.addFlashAttribute("error", "Không thể chỉnh sửa lịch chiếu: " + reason);
+                return "redirect:/admin/schedules/list";
+            }
+
+            // Set the ID to ensure we're updating the correct record
+            scheduleDto.setId(id);
+
+            if (bindingResult.hasErrors()) {
+                log.warn("Validation errors in edit schedule form for ID: {}", id);
+                model.addAttribute("error", "Vui lòng kiểm tra lại thông tin đã nhập");
+                // Reload dropdown data for form
+                try {
+                    model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                    model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
+                    model.addAttribute("branches", branchService.getAllBranches());
+                } catch (Exception e) {
+                    log.error("Error reloading dropdown data", e);
+                }
+                return "admin/admin_schedule_edit";
+            }
+
             ScreeningScheduleDto updatedSchedule = movieScheduleService
                     .saveOrUpdateScreeningScheduleWithValidation(scheduleDto);
             log.info("Successfully updated schedule with ID: {}", updatedSchedule.getId());
@@ -508,7 +585,7 @@ public class AdminScheduleController {
             log.warn("Cannot update a movie schedule is currently playing");
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/admin/schedules/list";
-        } catch (group6.cinema_project.exception.ScheduleConflictException e) {
+        } catch (ScheduleConflictException e) {
             log.warn("Schedule conflict detected during update: {}", e.getDetailedMessage());
 
             // Add specific conflict error to binding result
@@ -516,8 +593,8 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -530,8 +607,8 @@ public class AdminScheduleController {
 
             // Reload dropdown data for form
             try {
-                model.addAttribute("movies", movieService.getAllMovie());
-                model.addAttribute("screeningRooms", screeningRoomService.getActiveScreeningRooms());
+                model.addAttribute("movies", movieService.getAllMoviesForDisplay());
+                model.addAttribute("screeningRooms", screeningRoomService.getAllScreeningRooms());
                 model.addAttribute("branches", branchService.getAllBranches());
             } catch (Exception ex) {
                 log.error("Error reloading dropdown data", ex);
@@ -548,6 +625,14 @@ public class AdminScheduleController {
         log.info("Processing delete schedule request for ID: {}", id);
 
         try {
+            // Kiểm tra khả năng xóa trước khi xử lý
+            if (!movieScheduleService.canDeleteSchedule(id)) {
+                Map<String, Object> editabilityInfo = movieScheduleService.getScheduleEditabilityInfo(id);
+                String reason = (String) editabilityInfo.get("reason");
+                redirectAttributes.addFlashAttribute("error", "Không thể xóa lịch chiếu: " + reason);
+                return "redirect:/admin/schedules/list";
+            }
+
             // Lấy thông tin lịch chiếu trước khi xóa để biết ngày
             Optional<ScreeningScheduleDto> scheduleOpt = movieScheduleService.getScreeningScheduleById(id);
             String redirectUrl = "redirect:/admin/schedules/list"; // default fallback
@@ -601,22 +686,19 @@ public class AdminScheduleController {
             // Xử lý filter theo status nếu có
             if (status != null && !status.trim().isEmpty()) {
                 switch (status.toUpperCase()) {
-                    case "UPCOMING":
+                    case "UPCOMING" -> {
                         statusText = "Sắp chiếu";
                         defaultBackUrl = "/admin/schedules/list/comingsoon";
-                        break;
-                    case "ACTIVE":
-                    case "PLAYING":
+                    }
+                    case "ACTIVE", "PLAYING" -> {
                         statusText = "Đang chiếu";
                         defaultBackUrl = "/admin/schedules/list/playing";
-                        break;
-                    case "ENDED":
+                    }
+                    case "ENDED" -> {
                         statusText = "Đã kết thúc";
                         defaultBackUrl = "/admin/schedules/list/stopped";
-                        break;
-                    default:
-                        statusText = "Tất cả";
-                        break;
+                    }
+                    default -> statusText = "Tất cả";
                 }
 
                 // Filter grouped schedules by status
@@ -653,7 +735,7 @@ public class AdminScheduleController {
                     totalSchedules, firstSchedule.getMovieName(), statusText);
             return "admin/admin_detail_schedules_list";
 
-        } catch (Exception e) {
+        } catch (ScheduleConflictException | IllegalStateException e) {
             log.error("Lỗi khi tải chi tiết lịch chiếu cho phim ID: {} với trạng thái: {}", movieId, status, e);
             model.addAttribute("error", "Lỗi khi tải chi tiết lịch chiếu: " + e.getMessage());
             return "redirect:" + (backUrl != null ? backUrl : defaultBackUrl);
@@ -723,7 +805,7 @@ public class AdminScheduleController {
             ObjectMapper objectMapper = new ObjectMapper();
             List<Map<String, Object>> timeSlots = objectMapper.readValue(
                     timeSlotsJson,
-                    new TypeReference<List<Map<String, Object>>>() {
+                    new TypeReference<>() {
                     });
 
             log.info("Parsed {} time slots from JSON", timeSlots.size());
@@ -783,14 +865,18 @@ public class AdminScheduleController {
                                 !scheduleDate.isBefore(startOfMonth) &&
                                 !scheduleDate.isAfter(endOfMonth);
                     })
-                    .collect(java.util.stream.Collectors.toList());
+                    .toList();
 
             // Format dữ liệu cho calendar frontend
             Map<String, Object> calendarData = formatSchedulesForCalendar(monthlySchedules);
 
+            // Tạo dữ liệu calendar days cho Thymeleaf
+            List<Map<String, Object>> calendarDays = generateCalendarDays(targetYear, targetMonth, monthlySchedules);
+
             // Thêm dữ liệu vào model
             model.addAttribute("schedules", monthlySchedules);
             model.addAttribute("calendarData", calendarData);
+            model.addAttribute("calendarDays", calendarDays);
             model.addAttribute("currentYear", targetYear);
             model.addAttribute("currentMonth", targetMonth);
             model.addAttribute("startOfMonth", startOfMonth);
@@ -812,7 +898,6 @@ public class AdminScheduleController {
             model.addAttribute("comingSoonCount", comingSoonCount);
             model.addAttribute("stoppedCount", stoppedCount);
 
-            // Thêm tên tháng tiếng Việt
             String[] monthNames = {
                     "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
                     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
@@ -868,6 +953,45 @@ public class AdminScheduleController {
     }
 
     /**
+     * Helper method để tạo dữ liệu calendar days cho Thymeleaf
+     */
+    private List<Map<String, Object>> generateCalendarDays(int year, int month, List<ScreeningScheduleDto> schedules) {
+        List<Map<String, Object>> calendarDays = new ArrayList<>();
+
+        // Nhóm lịch chiếu theo ngày
+        Map<String, List<ScreeningScheduleDto>> schedulesByDate = schedules.stream()
+                .collect(Collectors.groupingBy(schedule -> schedule.getScreeningDate().toString()));
+
+        // Tạo LocalDate cho ngày đầu tiên của tháng
+        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+
+        // Tìm ngày đầu tiên cần hiển thị (có thể là tháng trước)
+        LocalDate startDate = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+
+        // Tạo 42 ngày (6 tuần x 7 ngày)
+        for (int i = 0; i < 42; i++) {
+            LocalDate currentDate = startDate.plusDays(i);
+            Map<String, Object> dayData = new HashMap<>();
+
+            dayData.put("date", currentDate);
+            dayData.put("dayNumber", currentDate.getDayOfMonth());
+            dayData.put("isCurrentMonth", currentDate.getMonth().getValue() == month);
+            dayData.put("isToday", currentDate.equals(LocalDate.now()));
+            dayData.put("isPastDate", currentDate.isBefore(LocalDate.now()));
+
+            // Lấy lịch chiếu cho ngày này
+            String dateKey = currentDate.toString();
+            List<ScreeningScheduleDto> daySchedules = schedulesByDate.getOrDefault(dateKey, new ArrayList<>());
+            dayData.put("schedules", daySchedules);
+            dayData.put("scheduleCount", daySchedules.size());
+
+            calendarDays.add(dayData);
+        }
+
+        return calendarDays;
+    }
+
+    /**
      * API endpoint để search movies cho autocomplete
      */
     @GetMapping("/api/movies/search")
@@ -885,8 +1009,8 @@ public class AdminScheduleController {
                         movieData.put("id", movie.getId());
                         movieData.put("name", movie.getName());
                         movieData.put("duration", movie.getDuration());
-                        movieData.put("genre", movie.getGenre());
-                        movieData.put("rating", movie.getRating());
+                        movieData.put("genre", movie.getGenreDisplay());
+                        movieData.put("rating", movie.getRatingDisplay());
                         return movieData;
                     })
                     .collect(Collectors.toList());
@@ -914,8 +1038,8 @@ public class AdminScheduleController {
                 movieData.put("id", movie.getId());
                 movieData.put("name", movie.getName());
                 movieData.put("duration", movie.getDuration());
-                movieData.put("genre", movie.getGenre());
-                movieData.put("rating", movie.getRating());
+                movieData.put("genre", movie.getGenreDisplay());
+                movieData.put("rating", movie.getRatingDisplay());
                 return movieData;
             } else {
                 Map<String, Object> error = new HashMap<>();
@@ -950,9 +1074,9 @@ public class AdminScheduleController {
             // Parse screeningRoomId an toàn từ String hoặc Integer
             Integer screeningRoomId = null;
             Object roomIdObj = conflictData.get("screeningRoomId");
-            if (roomIdObj instanceof String) {
+            if (roomIdObj instanceof String s) {
                 try {
-                    screeningRoomId = Integer.parseInt((String) roomIdObj);
+                    screeningRoomId = Integer.parseInt(s);
                 } catch (NumberFormatException e) {
                     log.warn("Invalid screeningRoomId format: {}", roomIdObj);
                 }
@@ -963,9 +1087,9 @@ public class AdminScheduleController {
             // Parse movieId an toàn từ String hoặc Integer
             Integer movieId = null;
             Object movieIdObj = conflictData.get("movieId");
-            if (movieIdObj instanceof String) {
+            if (movieIdObj instanceof String s) {
                 try {
-                    movieId = Integer.parseInt((String) movieIdObj);
+                    movieId = Integer.parseInt(s);
                 } catch (NumberFormatException e) {
                     log.warn("Invalid movieId format: {}", movieIdObj);
                 }
@@ -983,9 +1107,9 @@ public class AdminScheduleController {
             // Parse excludeId nếu có (cho edit mode)
             Integer excludeId = null;
             Object excludeIdObj = conflictData.get("excludeId");
-            if (excludeIdObj instanceof String) {
+            if (excludeIdObj instanceof String s) {
                 try {
-                    excludeId = Integer.parseInt((String) excludeIdObj);
+                    excludeId = Integer.parseInt(s);
                 } catch (NumberFormatException e) {
                     log.warn("Invalid excludeId format: {}", excludeIdObj);
                 }
@@ -1060,7 +1184,7 @@ public class AdminScheduleController {
 
                         return inMonth && statusMatch;
                     })
-                    .collect(java.util.stream.Collectors.toList());
+                    .toList();
 
             // Nhóm lịch chiếu theo ngày
             Map<String, List<Map<String, Object>>> schedulesByDate = new java.util.HashMap<>();
@@ -1114,15 +1238,62 @@ public class AdminScheduleController {
         if (backendStatus == null)
             return "unknown";
 
-        switch (backendStatus.toUpperCase()) {
-            case "ACTIVE":
-                return "playing";
-            case "UPCOMING":
-                return "coming-soon";
-            case "ENDED":
-                return "stopped";
-            default:
-                return "unknown";
+        return switch (backendStatus.toUpperCase()) {
+            case "ACTIVE" -> "playing";
+            case "UPCOMING" -> "coming-soon";
+            case "ENDED" -> "stopped";
+            default -> "unknown";
+        };
+    }
+
+    /**
+     * API endpoint để lấy danh sách phòng chiếu theo chi nhánh
+     */
+    @GetMapping("/api/branches/{branchId}/rooms")
+    @ResponseBody
+    public List<Map<String, Object>> getRoomsByBranch(@PathVariable("branchId") Integer branchId) {
+        log.info("API request for rooms by branch ID: {}", branchId);
+
+        try {
+            List<ScreeningRoomDto> rooms = screeningRoomService.getScreeningRoomsByBranch(branchId);
+
+            return rooms.stream()
+                    .map(room -> {
+                        Map<String, Object> roomData = new HashMap<>();
+                        roomData.put("id", room.getId());
+                        roomData.put("name", room.getName());
+                        roomData.put("capacity", room.getCapacity());
+                        roomData.put("type", room.getType());
+                        return roomData;
+                    })
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error getting rooms by branch", e);
+            return List.of();
+        }
+    }
+
+    /**
+     * API endpoint để kiểm tra khả năng chỉnh sửa/xóa lịch chiếu
+     */
+    @GetMapping("/api/check-editability/{id}")
+    @ResponseBody
+    public Map<String, Object> checkScheduleEditability(@PathVariable("id") Integer scheduleId) {
+        log.info("Checking editability for schedule ID: {}", scheduleId);
+
+        try {
+            Map<String, Object> result = movieScheduleService.getScheduleEditabilityInfo(scheduleId);
+            result.put("success", true);
+            return result;
+        } catch (Exception e) {
+            log.error("Error checking schedule editability for ID: {}", scheduleId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("canEdit", false);
+            errorResponse.put("canDelete", false);
+            errorResponse.put("reason", "Lỗi hệ thống: " + e.getMessage());
+            return errorResponse;
         }
     }
 

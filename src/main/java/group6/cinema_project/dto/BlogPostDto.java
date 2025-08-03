@@ -91,7 +91,7 @@ public class BlogPostDto {
      * @param createdAt     Thời gian tạo
      */
     public BlogPostDto(Long id, String title, String content, String coverImageUrl,
-                       int authorId, String authorName, LocalDateTime createdAt) {
+            int authorId, String authorName, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.content = content;

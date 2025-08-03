@@ -9,6 +9,9 @@ import java.util.Optional;
 public interface IAdminMovieService {
     Optional<MovieDto> getMovieById(Integer id);
 
+    // Phương thức lấy thông tin phim để hiển thị (có ratingDisplay và genreDisplay)
+    Optional<MovieDto> getMovieByIdForDisplay(Integer id);
+
     MovieDto saveOrUpdate(MovieDto movieDto);
 
     void deleteMovie(Integer id);

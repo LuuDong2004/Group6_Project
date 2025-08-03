@@ -36,12 +36,12 @@ public class MovieDto {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date releaseDate;
 
-    private String rating; // double => string
+    // ID của Rating entity
+    private Integer ratingId;
 
-    // Giữ genre là String để khớp với Entity, việc xử lý nhiều thể loại sẽ thực
-    // hiện ở front-end hoặc service
-    @NotBlank(message = "Phim phải có ít nhất một thể loại.")
-    private String genre;
+    // Danh sách ID của Genre entities
+    @NotNull(message = "Phim phải có ít nhất một thể loại.")
+    private Set<Integer> genreIds;
 
     private String language;
     private String trailer;
@@ -52,4 +52,8 @@ public class MovieDto {
 
     // Danh sách tên các diễn viên, không phải đối tượng Actor
     private Set<String> actors;
+
+    // Các field tạm thời để hiển thị trong template (sẽ được set từ service)
+    private String ratingDisplay; // Hiển thị rating dạng "G - Mọi lứa tuổi"
+    private String genreDisplay; // Hiển thị genre dạng "Hành động, Hài kịch"
 }

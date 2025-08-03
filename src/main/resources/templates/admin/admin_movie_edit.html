@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -248,7 +248,7 @@
         border-color: #cbd5e1;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 260px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -262,27 +262,27 @@
         z-index: 1000;
       }
 
-      .sidebar.collapsed {
+      .sidebar-custom.collapsed {
         width: 80px;
       }
 
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
 
-      .sidebar.collapsed .sidebar-menu .menu-item {
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
 
-      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+      .sidebar-custom.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
         margin-right: 0 !important;
       }
 
-      .sidebar.collapsed .mt-auto img.rounded-circle.me-3 {
+      .sidebar-custom.collapsed .mt-auto img.rounded-circle.me-3 {
         margin-right: 0 !important;
       }
 
@@ -317,13 +317,13 @@
         padding-left: calc(1.5rem - 3px);
       }
 
-      .sidebar.collapsed .menu-item:hover,
-      .sidebar.collapsed .menu-item.active {
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
         border-left: none;
         padding-left: 1.5rem;
       }
 
-      .sidebar.collapsed .menu-item.active {
+      .sidebar-custom.collapsed .menu-item.active {
         background-color: #4f46e5;
       }
 
@@ -333,7 +333,7 @@
         text-align: center;
       }
 
-      .sidebar.collapsed .menu-item i {
+      .sidebar-custom.collapsed .menu-item i {
         margin-right: 0;
         font-size: 1.25rem;
       }
@@ -371,29 +371,29 @@
       /* Responsive adjustments */
       @media (max-width: 992px) {
         /* Changed breakpoint to 992px for better consistency with common Bootstrap/admin layouts */
-        .sidebar {
+        .sidebar-custom {
           width: 80px;
         }
 
-        .sidebar .sidebar-header h5,
-        .sidebar .sidebar-header small,
-        .sidebar .sidebar-menu span,
-        .sidebar .mt-auto .text-white,
-        .sidebar .mt-auto small {
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
           display: none;
         }
 
-        .sidebar .sidebar-menu .menu-item {
+        .sidebar-custom .sidebar-menu .menu-item {
           justify-content: center;
         }
-        .sidebar .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+        .sidebar-custom .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
           margin-right: 0 !important;
         }
-        .sidebar .mt-auto img.rounded-circle.me-3 {
+        .sidebar-custom .mt-auto img.rounded-circle.me-3 {
           margin-right: 0 !important;
         }
 
-        .sidebar .sidebar-menu .menu-item i {
+        .sidebar-custom .sidebar-menu .menu-item i {
           margin-right: 0;
           font-size: 1.25rem;
         }
@@ -505,94 +505,8 @@
   </head>
 
   <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="d-flex align-items-center">
-          <div class="bg-white rounded-circle p-2 me-3">
-            <i class="fas fa-film text-indigo-600"></i>
-            <!-- Changed icon color for branding -->
-          </div>
-          <div>
-            <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-            <small class="text-white-50">Quản lý Phim</small>
-          </div>
-        </div>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a th:href="@{/admin/dashboard}" class="menu-item">
-          <!-- Added th:href for navigation -->
-          <i class="fas fa-home"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a th:href="@{/admin/movies/list}" class="menu-item active">
-          <i class="fas fa-film"></i>
-          <!-- Added th:href -->
-          <span>Phim</span>
-        </a>
-        <a th:href="@{/admin/directors/list}" class="menu-item">
-          <i class="fas fa-user-friends"></i>
-          <span>Diễn viên & Đạo diễn</span>
-        </a>
-        <a th:href="@{/admin/schedules/list}" class="menu-item">
-          <i class="fas fa-list"></i>
-          <span>Danh sách lịch chiếu</span>
-        </a>
-        <a th:href="@{/admin/schedules/calendar}" class="menu-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Lịch chiếu tháng</span>
-        </a>
-        <a th:href="@{/admin/blogs/list}" class="menu-item">
-          <i class="fas fa-blog"></i>
-          <span>Blog</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-ticket-alt"></i>
-          <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-users"></i>
-          <span>Người dùng</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-chart-pie"></i> <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
-        </a>
-      </nav>
-
-      <div
-        class="mt-auto p-4 border-top border-white-50"
-        style="border-color: rgba(255, 255, 255, 0.1) !important"
-      >
-        <div class="d-flex align-items-center">
-          <img
-            th:src="${userAvatarUrl != null ? userAvatarUrl : 'https://placehold.co/40x40/6366F1/FFFFFF?text=A'}"
-            alt="User Avatar"
-            width="40"
-            height="40"
-            class="rounded-circle me-3"
-            onerror="this.onerror=null; this.src='https://placehold.co/40x40/6366F1/FFFFFF?text=A';"
-          />
-          <div>
-            <div
-              class="text-white fw-semibold"
-              th:text="${userName != null ? userName : 'Admin User'}"
-            >
-              Admin User
-            </div>
-            <small
-              class="text-white-50"
-              th:text="${userEmail != null ? userEmail : 'admin@cinema.com'}"
-              >admin@cinema.com</small
-            >
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <!-- Main Content Wrapper -->
     <div class="main-content-wrapper" id="mainContentWrapper">
@@ -762,19 +676,19 @@
                       <select
                         class="form-select"
                         id="rating"
-                        th:field="*{rating}"
+                        th:field="*{ratingId}"
                         required
                       >
                         <option value="">Chọn rating</option>
-                        <!-- Default empty value for select validation -->
-                        <option value="G">G - Mọi lứa tuổi</option>
-                        <option value="K">
-                          K - Dành cho trẻ em dưới 13 tuổi
+                        <!-- Load ratings từ database -->
+                        <option
+                          th:each="rating : ${allRatings}"
+                          th:value="${rating.id}"
+                          th:text="${rating.code + ' - ' + rating.description}"
+                          th:selected="${rating.id == movie.ratingId}"
+                        >
+                          G - Mọi lứa tuổi
                         </option>
-                        <option value="T13">T13 - Từ 13 tuổi trở lên</option>
-                        <option value="T16">T16 - Từ 16 tuổi trở lên</option>
-                        <option value="T18">T18 - Từ 18 tuổi trở lên</option>
-                        <option value="C">C - Cấm chiếu</option>
                       </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -807,138 +721,23 @@
                     Chọn tất cả thể loại phù hợp cho phim này
                   </p>
                   <div id="genreContainerForm">
-                    <!-- Example for one genre, repeat for others -->
-                    <div>
+                    <!-- Load genres từ database -->
+                    <div th:each="genre : ${allGenres}">
                       <input
                         type="checkbox"
-                        id="genre_action"
+                        th:id="'genre_' + ${genre.id}"
                         name="genres"
-                        value="Hành động"
+                        th:value="${genre.id}"
                         class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hành động')}"
+                        th:checked="${movie.genreIds != null && movie.genreIds.contains(genre.id)}"
                       />
-                      <label for="genre_action" class="selectable-tag-form"
-                        >Hành động</label
+                      <label
+                        th:for="'genre_' + ${genre.id}"
+                        class="selectable-tag-form"
+                        th:text="${genre.name}"
+                        >Thể loại</label
                       >
                     </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_comedy"
-                        name="genres"
-                        value="Hài kịch"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hài kịch')}"
-                      />
-                      <label for="genre_comedy" class="selectable-tag-form"
-                        >Hài kịch</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_horror"
-                        name="genres"
-                        value="Kinh dị"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Kinh dị')}"
-                      />
-                      <label for="genre_horror" class="selectable-tag-form"
-                        >Kinh dị</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_romance"
-                        name="genres"
-                        value="Lãng mạn"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Lãng mạn')}"
-                      />
-                      <label for="genre_romance" class="selectable-tag-form"
-                        >Lãng mạn</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_scifi"
-                        name="genres"
-                        value="Khoa học viễn tưởng"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Khoa học viễn tưởng')}"
-                      />
-                      <label for="genre_scifi" class="selectable-tag-form"
-                        >Khoa học viễn tưởng</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_thriller"
-                        name="genres"
-                        value="Tâm lý"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Tâm lý')}"
-                      />
-                      <label for="genre_thriller" class="selectable-tag-form"
-                        >Tâm lý</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_adventure"
-                        name="genres"
-                        value="Phiêu lưu"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Phiêu lưu')}"
-                      />
-                      <label for="genre_adventure" class="selectable-tag-form"
-                        >Phiêu lưu</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_animation"
-                        name="genres"
-                        value="Hoạt hình"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hoạt hình')}"
-                      />
-                      <label for="genre_animation" class="selectable-tag-form"
-                        >Hoạt hình</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_drama"
-                        name="genres"
-                        value="Chính kịch"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Chính kịch')}"
-                      />
-                      <label for="genre_drama" class="selectable-tag-form"
-                        >Chính kịch</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_documentary"
-                        name="genres"
-                        value="Tài liệu"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Tài liệu')}"
-                      />
-                      <label for="genre_documentary" class="selectable-tag-form"
-                        >Tài liệu</label
-                      >
-                    </div>
-                    <!-- Add other genres similarly -->
                   </div>
                   <div
                     id="genreError"
@@ -1153,6 +952,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
 
     <!-- Pass existing directors and actors data to JavaScript -->
     <script th:inline="javascript">
@@ -1212,8 +1012,14 @@
           // headerTitle.textContent = 'Chỉnh Sửa Phim';
         }
 
-        initializeDashboardBehavior();
-        initializeFileUpload();
+        initializeSidebarToggle();
+        initializeFileUploadPreview(
+          "uploadArea",
+          "image",
+          "imagePreview",
+          "previewImg",
+          "removeImageBtn"
+        );
         initializeSelectableTagsVisuals();
 
         // Initialize autocomplete multi-select for directors and actors
@@ -1222,22 +1028,9 @@
         const movieForm = document.getElementById("movieForm");
         if (movieForm) {
           movieForm.addEventListener("submit", function (event) {
-            let isValid = true;
-
-            // Validate genres first
+            // Chỉ validate genres vì HTML5 sẽ handle required fields
             if (!validateGenres()) {
-              isValid = false;
-            }
-
-            // Validate all other required fields (excluding file input if it's not required for edit)
-            if (!validateAllRequiredFields()) {
-              isValid = false;
-            }
-
-            if (!isValid) {
-              event.preventDefault(); // Prevent form submission
-              // Optionally, show a general error message
-              console.warn("Form validation failed. Please check the fields.");
+              event.preventDefault();
               return false;
             }
             // Add a loading state to the submit button
@@ -1253,158 +1046,9 @@
         initializeRequiredFieldValidation();
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      // Moved to admin-common.js
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) {
-          console.error(
-            "Sidebar toggle, sidebar, or main content wrapper not found."
-          );
-          return;
-        }
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-          // Store preference (optional)
-          // localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        }
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          // Collapse sidebar by default on smaller screens if not already explicitly expanded by user
-          if (window.innerWidth <= 992) {
-            // Consistent with CSS media query
-            if (!sidebar.classList.contains("collapsed")) {
-              // sidebar.classList.add('collapsed'); // Auto-collapse
-              // mainContentWrapper.classList.add('expanded');
-            }
-          } else {
-            // On larger screens, restore based on preference or default to expanded
-            // if (localStorage.getItem('sidebarCollapsed') === 'false' && sidebar.classList.contains('collapsed')) {
-            //    toggleSidebar();
-            // }
-          }
-        }
-        checkViewport(); // Initial check
-        window.addEventListener("resize", checkViewport); // Check on resize
-      }
-
-      function initializeFileUpload() {
-        const uploadArea = document.getElementById("uploadArea");
-        const fileInput = document.getElementById("image"); // Name is 'image' in HTML
-        const imagePreviewDiv = document.getElementById("imagePreview");
-        const previewImg = document.getElementById("previewImg");
-        const removeImageBtn = document.getElementById("removeImageBtn");
-
-        if (
-          !uploadArea ||
-          !fileInput ||
-          !imagePreviewDiv ||
-          !previewImg ||
-          !removeImageBtn
-        ) {
-          console.error(
-            "One or more file upload elements are missing for file upload."
-          );
-          return;
-        }
-
-        // Initial state check for existing image (set by Thymeleaf)
-        if (
-          previewImg.src &&
-          previewImg.src !== window.location.href &&
-          !previewImg.src.includes("placehold.co")
-        ) {
-          // Check if a real image is loaded
-          imagePreviewDiv.classList.remove("d-none");
-          removeImageBtn.classList.remove("d-none");
-          // Fade in effect for initially loaded image
-          imagePreviewDiv.style.opacity = "0";
-          setTimeout(() => {
-            imagePreviewDiv.style.transition = "opacity 0.3s ease";
-            imagePreviewDiv.style.opacity = "1";
-          }, 50);
-        } else {
-          // Ensure placeholder or no image state is clean
-          if (
-            previewImg.src.includes("placehold.co") ||
-            !previewImg.src ||
-            previewImg.src === window.location.href
-          ) {
-            // Keep imagePreviewDiv visible if placeholder is used, hide remove button
-            if (previewImg.src.includes("placehold.co")) {
-              imagePreviewDiv.classList.remove("d-none");
-            } else {
-              imagePreviewDiv.classList.add("d-none");
-            }
-            removeImageBtn.classList.add("d-none");
-          }
-        }
-
-        uploadArea.addEventListener("click", () => fileInput.click());
-        uploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadArea.classList.add("dragover");
-        });
-        uploadArea.addEventListener("dragleave", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-        });
-        uploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-          const files = e.dataTransfer.files;
-          if (files.length > 0) handleFileSelect(files[0]);
-        });
-        fileInput.addEventListener("change", (e) => {
-          if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
-        });
-
-        function handleFileSelect(file) {
-          if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              previewImg.src = e.target.result;
-              imagePreviewDiv.classList.remove("d-none");
-              removeImageBtn.classList.remove("d-none");
-              // Fade-in effect for new preview
-              imagePreviewDiv.style.opacity = "0";
-              setTimeout(() => {
-                imagePreviewDiv.style.transition = "opacity 0.3s ease";
-                imagePreviewDiv.style.opacity = "1";
-              }, 50);
-              // If image field had validation error, clear it
-              const imageLabel = document.querySelector('label[for="image"]');
-              if (imageLabel) imageLabel.classList.remove("required-error");
-            };
-            reader.readAsDataURL(file);
-          } else {
-            console.warn(
-              "Invalid file type or no file selected. Please select a PNG or JPG image."
-            );
-            // Reset to placeholder or hide if no valid file
-            previewImg.src =
-              "https://placehold.co/300x450/E2E8F0/475569?text=Poster";
-            // imagePreviewDiv.classList.add('d-none'); // Or keep placeholder visible
-            removeImageBtn.classList.add("d-none");
-            fileInput.value = ""; // Clear the file input
-          }
-        }
-
-        removeImageBtn.addEventListener("click", function () {
-          previewImg.src =
-            "https://placehold.co/300x450/E2E8F0/475569?text=Poster"; // Reset to placeholder
-          // imagePreviewDiv.classList.add('d-none'); // Or keep placeholder visible
-          this.classList.add("d-none"); // Hide remove button
-          fileInput.value = ""; // Clear the actual file input
-          // Note: Backend will need logic to handle image removal if 'image' is empty on submit.
-          // If image was 'required', this would trigger validation error unless 'required' is removed for edit.
-        });
-      }
+      // Moved to admin-common.js
 
       function initializeSelectableTagsVisuals() {
         document.querySelectorAll(".selectable-tag-form").forEach((label) => {
@@ -1504,70 +1148,7 @@
         });
       }
 
-      function validateRequiredField(field, label) {
-        if (!label) return;
-
-        let isEmpty = false;
-        if (field.type === "file") {
-          // File input is not required for edit, so this specific check might be less relevant here
-          isEmpty = !field.files || field.files.length === 0;
-        } else if (field.tagName === "SELECT") {
-          isEmpty = !field.value || field.value === ""; // Changed '0' to empty string for default "Chọn rating" option
-        } else {
-          isEmpty = !field.value.trim();
-        }
-
-        if (isEmpty && field.hasAttribute("required")) {
-          // Only apply error if field is actually required
-          label.classList.add("required-error");
-        } else {
-          label.classList.remove("required-error");
-        }
-      }
-
-      function validateAllRequiredFields() {
-        const requiredFields = document.querySelectorAll(
-          "input[required], textarea[required], select[required]"
-        );
-        let allValid = true;
-        let firstInvalidField = null;
-
-        requiredFields.forEach((field) => {
-          const label = document.querySelector(`label[for="${field.id}"]`);
-          let isEmpty = false;
-
-          // Skip file input validation if it's not strictly required for edit
-          // The 'image' input does not have 'required' anymore in this edit form.
-          // So it won't be picked by querySelectorAll('input[required], ...') if 'required' is removed.
-          // If it were to be included and optional:
-          // if (field.id === 'image' && !field.hasAttribute('required')) { return; /* skip */ }
-
-          if (field.tagName === "SELECT") {
-            isEmpty = !field.value || field.value === ""; // Default option has value ""
-          } else {
-            isEmpty = !field.value.trim();
-          }
-
-          if (isEmpty) {
-            if (label) label.classList.add("required-error");
-            allValid = false;
-            if (!firstInvalidField) {
-              firstInvalidField = field;
-            }
-          } else {
-            if (label) label.classList.remove("required-error");
-          }
-        });
-
-        if (firstInvalidField) {
-          firstInvalidField.focus();
-          firstInvalidField.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-        return allValid;
-      }
+      // Removed complex validation functions - using HTML5 validation instead
 
       // Autocomplete Multi-Select Functionality
       function initializeAutocomplete() {
@@ -1792,3 +1373,4 @@
     </script>
   </body>
 </html>
+
