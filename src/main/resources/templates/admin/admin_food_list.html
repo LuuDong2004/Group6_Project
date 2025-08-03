@@ -579,27 +579,12 @@
               <span class="visually-hidden">Thông báo mới</span>
             </span>
           </button>
-          <button class="btn btn-link text-secondary me-2">
-            <i class="fas fa-cog fs-5"></i>
-          </button>
           <div class="dropdown">
-            <a
-              href="#"
-              class="d-flex align-items-center text-decoration-none dropdown-toggle"
-              id="dropdownUser"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <img
-                src="https://via.placeholder.com/32"
-                alt="User Avatar"
-                width="32"
-                height="32"
-                class="rounded-circle me-2"
-              />
-              <span class="d-none d-sm-inline text-gray-700 fw-medium"
-                >Admin User</span
-              >
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-link text-secondary me-2">
+                <i class="fas fa-cog fs-5"></i>
+              </button>
             </a>
             <ul
               class="dropdown-menu dropdown-menu-end text-small shadow border-0"
@@ -621,7 +606,7 @@
               <li>
                 <a
                   class="dropdown-item text-danger"
-                  href="redirect:/admin/login"
+                  href="/admin/logout"
                   ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
                 >
               </li>
