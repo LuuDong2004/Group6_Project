@@ -128,41 +128,33 @@
         color: #495057;
         margin-bottom: 8px;
       }
-      .image-preview {
-        max-width: 200px;
-        max-height: 150px;
-        border-radius: 10px;
-        border: 2px dashed #dee2e6;
-        padding: 10px;
-        display: none;
-      }
-      .image-preview img {
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-      }
-      .file-input-wrapper {
-        position: relative;
-        overflow: hidden;
-        display: inline-block;
-        cursor: pointer;
+      .upload-area {
         border: 2px dashed #667eea;
         border-radius: 10px;
         padding: 20px;
         text-align: center;
-        transition: all 0.3s ease;
-      }
-      .file-input-wrapper:hover {
-        background-color: rgba(102, 126, 234, 0.05);
-      }
-      .file-input-wrapper input[type="file"] {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
         cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+      }
+      .upload-area:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+        border-color: #4f46e5;
+      }
+      .upload-area.dragover {
+        background-color: rgba(102, 126, 234, 0.1);
+        border-color: #4f46e5;
+      }
+      #imagePreview img {
+        max-width: 100%;
+        max-height: 200px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+      #removeImageBtn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
       }
       .required {
         color: #dc3545;
@@ -336,25 +328,52 @@
                     </h5>
                   </div>
                   <div class="card-body">
-                    <div class="file-input-wrapper mb-3">
-                      <input
-                        type="file"
-                        id="coverImageFile"
-                        name="coverImageFile"
-                        accept="image/*"
-                      />
-                      <div class="text-center">
-                        <i
-                          class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"
-                        ></i>
-                        <p class="mb-1">Nhấp để chọn ảnh</p>
-                        <small class="text-muted"
-                          >JPG, PNG, GIF (tối đa 5MB)</small
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold" for="coverImageFile">
+                        Ảnh bìa <span class="required">*</span>
+                      </label>
+                      <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                        <h6>Kéo & Thả ảnh vào đây</h6>
+                        <p class="mb-1">
+                          hoặc <span class="text-primary">chọn tệp</span>
+                        </p>
+                        <small>PNG, JPG, GIF tối đa 5MB</small>
+                        <input
+                          type="file"
+                          id="coverImageFile"
+                          name="coverImageFile"
+                          class="d-none"
+                          accept="image/png, image/jpeg, image/gif"
+                          required
+                        />
+                      </div>
+
+                      <!-- Image Preview -->
+                      <div
+                        id="imagePreview"
+                        class="mt-3 d-none text-center position-relative"
+                        style="
+                          max-width: 200px;
+                          margin-left: auto;
+                          margin-right: auto;
+                        "
+                      >
+                        <img
+                          id="previewImg"
+                          class="img-fluid rounded"
+                          alt="Xem trước ảnh bìa"
+                        />
+                        <button
+                          type="button"
+                          id="removeImageBtn"
+                          class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 d-none"
+                          title="Xóa ảnh"
                         >
+                          <i class="fas fa-times"></i>
+                        </button>
                       </div>
                     </div>
-
-
 
                     <div
                       th:if="${#fields.hasErrors('coverImageUrl')}"
@@ -373,51 +392,64 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
-      // Initialize TinyMCE
-      tinymce.init({
-        selector: "#content",
-        height: 400,
-        menubar: false,
-        plugins: [
-          "advlist",
-          "autolink",
-          "lists",
-          "link",
-          "image",
-          "charmap",
-          "preview",
-          "anchor",
-          "searchreplace",
-          "visualblocks",
-          "code",
-          "fullscreen",
-          "insertdatetime",
-          "media",
-          "table",
-          "help",
-          "wordcount",
-        ],
-        toolbar:
-          "undo redo | blocks | " +
-          "bold italic forecolor | alignleft aligncenter " +
-          "alignright alignjustify | bullist numlist outdent indent | " +
-          "removeformat | help",
-        content_style:
-          "body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }",
-        language: "vi",
-      });
-
-      // Form submission handler để save TinyMCE content
-      document
-        .getElementById("blogForm")
-        .addEventListener("submit", function (e) {
-          // Lưu nội dung từ TinyMCE vào textarea trước khi submit
-          tinymce.triggerSave();
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize TinyMCE
+        tinymce.init({
+          selector: "#content",
+          height: 400,
+          menubar: false,
+          plugins: [
+            "advlist",
+            "autolink",
+            "lists",
+            "link",
+            "image",
+            "charmap",
+            "preview",
+            "anchor",
+            "searchreplace",
+            "visualblocks",
+            "code",
+            "fullscreen",
+            "insertdatetime",
+            "media",
+            "table",
+            "help",
+            "wordcount",
+          ],
+          toolbar:
+            "undo redo | blocks | " +
+            "bold italic forecolor | alignleft aligncenter " +
+            "alignright alignjustify | bullist numlist outdent indent | " +
+            "removeformat | help",
+          content_style:
+            "body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }",
+          language: "vi",
         });
+
+        // Form submission handler để save TinyMCE content
+        document
+          .getElementById("blogForm")
+          .addEventListener("submit", function (e) {
+            // Lưu nội dung từ TinyMCE vào textarea trước khi submit
+            tinymce.triggerSave();
+          });
+
+        // Khởi tạo sidebar toggle
+        initializeSidebarToggle();
+
+        // Khởi tạo file upload preview
+        initializeFileUploadPreview(
+          "uploadArea",
+          "coverImageFile",
+          "imagePreview",
+          "previewImg",
+          "removeImageBtn"
+        );
+      });
     </script>
-        </div>
-      </div>
   </body>
 </html>
 
