@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -26,7 +26,7 @@
         background-color: #f8fafc;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 280px; /* Giảm width vì không cần filters */
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -41,19 +41,19 @@
         overflow-y: auto;
       }
 
-      .sidebar.collapsed {
+      .sidebar-custom.collapsed {
         width: 80px;
       }
 
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
 
-      .sidebar.collapsed .sidebar-menu .menu-item {
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
 
@@ -266,12 +266,24 @@
         border-radius: 8px;
         border: 1px solid transparent;
         cursor: pointer;
+        user-select: none; /* Ngăn chọn text khi click */
       }
 
       .calendar-day:hover {
         background: #f8fafc;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         border-color: rgba(79, 70, 229, 0.2);
+        transform: translateY(-1px); /* Hiệu ứng nâng lên khi hover */
+      }
+
+      .calendar-day-clickable {
+        cursor: pointer !important;
+        pointer-events: auto; /* Đảm bảo có thể click */
+      }
+
+      .calendar-day-clickable:active {
+        transform: translateY(0); /* Hiệu ứng nhấn xuống khi click */
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       }
 
       .calendar-day.other-month {
@@ -332,7 +344,7 @@
 
       /* Responsive */
       @media (max-width: 1200px) {
-        .sidebar {
+        .sidebar-custom {
           width: 280px;
         }
         .main-content-wrapper {
@@ -344,7 +356,7 @@
       }
 
       @media (max-width: 992px) {
-        .sidebar {
+        .sidebar-custom {
           transform: translateX(-100%);
           width: 320px;
         }
@@ -493,19 +505,54 @@
         <!-- Calendar Header -->
         <div class="calendar-header">
           <div class="month-navigation">
-            <button class="month-nav-btn" id="prevMonth">
-              <i class="fas fa-chevron-left"></i>
-            </button>
+            <!-- Form để chuyển tháng trước -->
+            <form
+              th:action="@{/admin/schedules/calendar}"
+              method="get"
+              style="display: inline"
+            >
+              <input
+                type="hidden"
+                name="year"
+                th:value="${currentMonth == 1 ? currentYear - 1 : currentYear}"
+              />
+              <input
+                type="hidden"
+                name="month"
+                th:value="${currentMonth == 1 ? 12 : currentMonth - 1}"
+              />
+              <button type="submit" class="month-nav-btn">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+            </form>
+
             <h2
               class="current-month"
-              id="currentMonth"
               th:text="${currentMonthName + ', ' + currentYear}"
             >
               Tháng 12, 2024
             </h2>
-            <button class="month-nav-btn" id="nextMonth">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+
+            <!-- Form để chuyển tháng sau -->
+            <form
+              th:action="@{/admin/schedules/calendar}"
+              method="get"
+              style="display: inline"
+            >
+              <input
+                type="hidden"
+                name="year"
+                th:value="${currentMonth == 12 ? currentYear + 1 : currentYear}"
+              />
+              <input
+                type="hidden"
+                name="month"
+                th:value="${currentMonth == 12 ? 1 : currentMonth + 1}"
+              />
+              <button type="submit" class="month-nav-btn">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </form>
           </div>
 
           <div class="calendar-controls">
@@ -536,302 +583,87 @@
 
           <!-- Calendar Days -->
           <div class="calendar-days" id="calendarDays">
-            <!-- Days sẽ được generate bằng JavaScript -->
+            <!-- Days được render bằng Thymeleaf -->
+            <div
+              th:each="day : ${calendarDays}"
+              th:class="|calendar-day calendar-day-clickable ${day.isCurrentMonth ? '' : 'other-month'} ${day.isToday ? 'today' : ''} ${day.isPastDate ? 'past-date' : ''}|"
+              th:data-date="${day.date}"
+              style="cursor: pointer"
+            >
+              <!-- Số ngày -->
+              <div class="day-number" th:text="${day.dayNumber}">1</div>
+
+              <!-- Hiển thị số lượng suất chiếu -->
+              <div
+                th:if="${day.scheduleCount > 0}"
+                class="schedule-count"
+                th:text="${day.scheduleCount + ' suất chiếu'}"
+              >
+                2 suất chiếu
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        initializeDashboardBehavior();
-        initializeCalendar();
-        initializeFilters();
+        initializeSidebarToggle();
+        initializeCalendarClickEvents();
       });
 
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
+      function initializeCalendarClickEvents() {
+        console.log("Initializing calendar click events...");
 
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-        }
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              toggleSidebar();
-            }
-          }
-        }
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
-      // Calendar functionality
-      let currentDate = new Date();
-      let currentFilter = "all";
-      let scheduleData = {}; // Dữ liệu lịch chiếu từ server
-
-      // Lấy dữ liệu từ server
-      const calendarDataFromServer = /*[[${calendarData}]]*/ {};
-      console.log("Calendar data from server:", calendarDataFromServer);
-      console.log(
-        "Type of calendarDataFromServer:",
-        typeof calendarDataFromServer
-      );
-
-      // Kiểm tra và xử lý dữ liệu từ server
-      if (
-        calendarDataFromServer &&
-        typeof calendarDataFromServer === "object" &&
-        calendarDataFromServer.schedulesByDate &&
-        Object.keys(calendarDataFromServer.schedulesByDate).length > 0
-      ) {
-        scheduleData = calendarDataFromServer.schedulesByDate;
-        console.log(
-          "Successfully loaded schedule data from server:",
-          scheduleData
+        // Tìm tất cả các ô ngày có thể click
+        const calendarDays = document.querySelectorAll(
+          ".calendar-day-clickable"
         );
-        console.log(
-          "Number of dates with schedules:",
-          Object.keys(scheduleData).length
-        );
-      } else {
-        console.log("No valid schedule data from server, will load from API");
-        scheduleData = {};
-      }
+        console.log("Found calendar days:", calendarDays.length);
 
-      // Lấy thông tin tháng hiện tại từ server
-      const serverYear = /*[[${currentYear}]]*/ new Date().getFullYear();
-      const serverMonth = /*[[${currentMonth}]]*/ new Date().getMonth() + 1;
-      currentDate = new Date(serverYear, serverMonth - 1, 1);
+        // Gắn event listener cho từng ô ngày
+        calendarDays.forEach(function (dayElement) {
+          dayElement.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-      function initializeCalendar() {
-        // Đảm bảo hiển thị dữ liệu ngay khi load trang
-        console.log("Initializing calendar with schedule data:", scheduleData);
+            const date = this.getAttribute("data-date");
+            console.log("Clicked on date:", date);
 
-        // Kiểm tra xem có dữ liệu từ server không
-        const hasServerData =
-          scheduleData && Object.keys(scheduleData).length > 0;
-        console.log("Has server data:", hasServerData);
-
-        if (hasServerData) {
-          // Nếu có dữ liệu từ server, hiển thị ngay
-          updateCalendarDisplay();
-        } else {
-          // Nếu không có dữ liệu từ server, load từ API
-          console.log("No server data, loading from API...");
-          loadCalendarData();
-        }
-
-        document.getElementById("prevMonth").addEventListener("click", () => {
-          currentDate.setMonth(currentDate.getMonth() - 1);
-          loadCalendarData();
-        });
-
-        document.getElementById("nextMonth").addEventListener("click", () => {
-          currentDate.setMonth(currentDate.getMonth() + 1);
-          loadCalendarData();
-        });
-      }
-
-      function updateCalendarDisplay() {
-        updateMonthHeader();
-        generateCalendarDays();
-      }
-
-      // Function để load dữ liệu calendar từ server
-      function loadCalendarData() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1;
-
-        console.log(`Loading calendar data for ${year}-${month}`);
-
-        // Hiển thị loading state
-        const calendarDays = document.getElementById("calendarDays");
-        calendarDays.innerHTML =
-          '<div class="text-center p-4">Đang tải dữ liệu...</div>';
-
-        // Tạo URL để lấy dữ liệu
-        let url = `/admin/schedules/api/calendar-data?year=${year}&month=${month}`;
-
-        fetch(url)
-          .then((response) => {
-            console.log("API response status:", response.status);
-            return response.json();
-          })
-          .then((data) => {
-            console.log("API response data:", data);
-            if (data.success) {
-              scheduleData = data.schedules;
-              console.log("Updated scheduleData:", scheduleData);
-              updateCalendarDisplay();
-              updateStats(data.stats);
+            if (date) {
+              // Chuyển hướng đến trang danh sách lịch chiếu theo ngày
+              const url = "/admin/schedules/list/date?date=" + date;
+              console.log("Redirecting to:", url);
+              window.location.href = url;
             } else {
-              console.error("Error loading calendar data:", data.error);
-              calendarDays.innerHTML =
-                '<div class="text-center p-4 text-danger">Lỗi khi tải dữ liệu</div>';
+              console.error("No date attribute found on clicked element");
             }
-          })
-          .catch((error) => {
-            console.error("Error fetching calendar data:", error);
-            calendarDays.innerHTML =
-              '<div class="text-center p-4 text-danger">Lỗi kết nối</div>';
           });
-      }
-
-      // Function để cập nhật thống kê - không cần nữa vì đã xóa stats section
-      function updateStats(stats) {
-        // Không làm gì cả
-      }
-
-      function updateMonthHeader() {
-        const monthNames = [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-          "Tháng 7",
-          "Tháng 8",
-          "Tháng 9",
-          "Tháng 10",
-          "Tháng 11",
-          "Tháng 12",
-        ];
-
-        const monthHeader = document.getElementById("currentMonth");
-        monthHeader.textContent = `${
-          monthNames[currentDate.getMonth()]
-        }, ${currentDate.getFullYear()}`;
-      }
-
-      function generateCalendarDays() {
-        console.log(
-          "Generating calendar days with scheduleData:",
-          scheduleData
-        );
-        const calendarDays = document.getElementById("calendarDays");
-        calendarDays.innerHTML = "";
-
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-
-        console.log(`Generating calendar for ${year}-${month + 1}`);
-
-        // Ngày đầu tiên của tháng
-        const firstDay = new Date(year, month, 1);
-        // Ngày cuối cùng của tháng
-        const lastDay = new Date(year, month + 1, 0);
-
-        // Ngày bắt đầu hiển thị (có thể là tháng trước)
-        const startDate = new Date(firstDay);
-        startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-        // Tạo 42 ô (6 tuần x 7 ngày)
-        for (let i = 0; i < 42; i++) {
-          const cellDate = new Date(startDate);
-          cellDate.setDate(startDate.getDate() + i);
-
-          const dayElement = createDayElement(cellDate, month);
-          calendarDays.appendChild(dayElement);
-        }
-
-        console.log("Finished generating calendar days");
-      }
-
-      function createDayElement(date, currentMonth) {
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "calendar-day";
-
-        const isCurrentMonth = date.getMonth() === currentMonth;
-        const isToday = isDateToday(date);
-        const isPastDate = isDateInPast(date);
-
-        if (!isCurrentMonth) {
-          dayDiv.classList.add("other-month");
-        }
-
-        if (isToday) {
-          dayDiv.classList.add("today");
-        }
-
-        if (isPastDate) {
-          dayDiv.classList.add("past-date");
-        }
-
-        // Thêm click event để chuyển đến trang phù hợp
-        dayDiv.addEventListener("click", () => {
-          const dateString = formatDateKey(date);
-          const schedules = scheduleData[dateString] || [];
-
-          console.log(`Clicked on date: ${dateString}, schedules:`, schedules);
-
-          // Luôn chuyển đến trang xem chi tiết để hiển thị thông báo khi không có lịch chiếu
-          window.location.href = `/admin/schedules/list/date?date=${dateString}`;
         });
 
-        // Thêm cursor pointer để hiển thị có thể click
-        dayDiv.style.cursor = "pointer";
+        // Event delegation để xử lý click trên container
+        const calendarContainer = document.getElementById("calendarDays");
+        if (calendarContainer) {
+          calendarContainer.addEventListener("click", function (e) {
+            // Tìm element cha gần nhất có class calendar-day-clickable
+            const clickedElement = e.target.closest(".calendar-day-clickable");
+            if (clickedElement) {
+              const date = clickedElement.getAttribute("data-date");
+              console.log("Event delegation - Clicked on date:", date);
 
-        // Số ngày
-        const dayNumber = document.createElement("div");
-        dayNumber.className = "day-number";
-        dayNumber.textContent = date.getDate();
-        dayDiv.appendChild(dayNumber);
-
-        // Hiển thị số lượng suất chiếu cho ngày này
-        const dateKey = formatDateKey(date);
-        const schedules = scheduleData[dateKey] || [];
-
-        console.log(`Date: ${dateKey}, schedules count: ${schedules.length}`);
-
-        if (schedules.length > 0) {
-          const countDiv = document.createElement("div");
-          countDiv.className = "schedule-count";
-          countDiv.textContent = `${schedules.length} suất chiếu`;
-          dayDiv.appendChild(countDiv);
+              if (date) {
+                const url = "/admin/schedules/list/date?date=" + date;
+                console.log("Event delegation - Redirecting to:", url);
+                window.location.href = url;
+              }
+            }
+          });
+        } else {
+          console.error("Calendar container not found");
         }
-
-        return dayDiv;
-      }
-
-      function isDateToday(date) {
-        const today = new Date();
-        return (
-          date.getDate() === today.getDate() &&
-          date.getMonth() === today.getMonth() &&
-          date.getFullYear() === today.getFullYear()
-        );
-      }
-
-      function isDateInPast(date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time để so sánh chỉ ngày
-        const compareDate = new Date(date);
-        compareDate.setHours(0, 0, 0, 0);
-        return compareDate < today;
-      }
-
-      function formatDateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      }
-
-      function initializeFilters() {
-        // Không cần filter nữa vì đã xóa filter section
       }
     </script>
   </body>

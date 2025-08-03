@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -248,7 +248,7 @@
         border-color: #cbd5e1;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 260px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -262,27 +262,27 @@
         z-index: 1000;
       }
 
-      .sidebar.collapsed {
+      .sidebar-custom.collapsed {
         width: 80px;
       }
 
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
 
-      .sidebar.collapsed .sidebar-menu .menu-item {
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
 
-      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+      .sidebar-custom.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
         margin-right: 0 !important;
       }
 
-      .sidebar.collapsed .mt-auto img.rounded-circle.me-3 {
+      .sidebar-custom.collapsed .mt-auto img.rounded-circle.me-3 {
         margin-right: 0 !important;
       }
 
@@ -317,13 +317,13 @@
         padding-left: calc(1.5rem - 3px);
       }
 
-      .sidebar.collapsed .menu-item:hover,
-      .sidebar.collapsed .menu-item.active {
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
         border-left: none;
         padding-left: 1.5rem;
       }
 
-      .sidebar.collapsed .menu-item.active {
+      .sidebar-custom.collapsed .menu-item.active {
         background-color: #4f46e5;
       }
 
@@ -333,7 +333,7 @@
         text-align: center;
       }
 
-      .sidebar.collapsed .menu-item i {
+      .sidebar-custom.collapsed .menu-item i {
         margin-right: 0;
         font-size: 1.25rem;
       }
@@ -371,29 +371,29 @@
       /* Responsive adjustments */
       @media (max-width: 992px) {
         /* Changed breakpoint to 992px for better consistency with common Bootstrap/admin layouts */
-        .sidebar {
+        .sidebar-custom {
           width: 80px;
         }
 
-        .sidebar .sidebar-header h5,
-        .sidebar .sidebar-header small,
-        .sidebar .sidebar-menu span,
-        .sidebar .mt-auto .text-white,
-        .sidebar .mt-auto small {
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
           display: none;
         }
 
-        .sidebar .sidebar-menu .menu-item {
+        .sidebar-custom .sidebar-menu .menu-item {
           justify-content: center;
         }
-        .sidebar .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+        .sidebar-custom .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
           margin-right: 0 !important;
         }
-        .sidebar .mt-auto img.rounded-circle.me-3 {
+        .sidebar-custom .mt-auto img.rounded-circle.me-3 {
           margin-right: 0 !important;
         }
 
-        .sidebar .sidebar-menu .menu-item i {
+        .sidebar-custom .sidebar-menu .menu-item i {
           margin-right: 0;
           font-size: 1.25rem;
         }
@@ -676,19 +676,19 @@
                       <select
                         class="form-select"
                         id="rating"
-                        th:field="*{rating}"
+                        th:field="*{ratingId}"
                         required
                       >
                         <option value="">Chọn rating</option>
-                        <!-- Default empty value for select validation -->
-                        <option value="G">G - Mọi lứa tuổi</option>
-                        <option value="K">
-                          K - Dành cho trẻ em dưới 13 tuổi
+                        <!-- Load ratings từ database -->
+                        <option
+                          th:each="rating : ${allRatings}"
+                          th:value="${rating.id}"
+                          th:text="${rating.code + ' - ' + rating.description}"
+                          th:selected="${rating.id == movie.ratingId}"
+                        >
+                          G - Mọi lứa tuổi
                         </option>
-                        <option value="T13">T13 - Từ 13 tuổi trở lên</option>
-                        <option value="T16">T16 - Từ 16 tuổi trở lên</option>
-                        <option value="T18">T18 - Từ 18 tuổi trở lên</option>
-                        <option value="C">C - Cấm chiếu</option>
                       </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -721,138 +721,23 @@
                     Chọn tất cả thể loại phù hợp cho phim này
                   </p>
                   <div id="genreContainerForm">
-                    <!-- Example for one genre, repeat for others -->
-                    <div>
+                    <!-- Load genres từ database -->
+                    <div th:each="genre : ${allGenres}">
                       <input
                         type="checkbox"
-                        id="genre_action"
+                        th:id="'genre_' + ${genre.id}"
                         name="genres"
-                        value="Hành động"
+                        th:value="${genre.id}"
                         class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hành động')}"
+                        th:checked="${movie.genreIds != null && movie.genreIds.contains(genre.id)}"
                       />
-                      <label for="genre_action" class="selectable-tag-form"
-                        >Hành động</label
+                      <label
+                        th:for="'genre_' + ${genre.id}"
+                        class="selectable-tag-form"
+                        th:text="${genre.name}"
+                        >Thể loại</label
                       >
                     </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_comedy"
-                        name="genres"
-                        value="Hài kịch"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hài kịch')}"
-                      />
-                      <label for="genre_comedy" class="selectable-tag-form"
-                        >Hài kịch</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_horror"
-                        name="genres"
-                        value="Kinh dị"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Kinh dị')}"
-                      />
-                      <label for="genre_horror" class="selectable-tag-form"
-                        >Kinh dị</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_romance"
-                        name="genres"
-                        value="Lãng mạn"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Lãng mạn')}"
-                      />
-                      <label for="genre_romance" class="selectable-tag-form"
-                        >Lãng mạn</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_scifi"
-                        name="genres"
-                        value="Khoa học viễn tưởng"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Khoa học viễn tưởng')}"
-                      />
-                      <label for="genre_scifi" class="selectable-tag-form"
-                        >Khoa học viễn tưởng</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_thriller"
-                        name="genres"
-                        value="Tâm lý"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Tâm lý')}"
-                      />
-                      <label for="genre_thriller" class="selectable-tag-form"
-                        >Tâm lý</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_adventure"
-                        name="genres"
-                        value="Phiêu lưu"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Phiêu lưu')}"
-                      />
-                      <label for="genre_adventure" class="selectable-tag-form"
-                        >Phiêu lưu</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_animation"
-                        name="genres"
-                        value="Hoạt hình"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Hoạt hình')}"
-                      />
-                      <label for="genre_animation" class="selectable-tag-form"
-                        >Hoạt hình</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_drama"
-                        name="genres"
-                        value="Chính kịch"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Chính kịch')}"
-                      />
-                      <label for="genre_drama" class="selectable-tag-form"
-                        >Chính kịch</label
-                      >
-                    </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="genre_documentary"
-                        name="genres"
-                        value="Tài liệu"
-                        class="d-none"
-                        th:checked="${movie.genre != null && #strings.contains(movie.genre, 'Tài liệu')}"
-                      />
-                      <label for="genre_documentary" class="selectable-tag-form"
-                        >Tài liệu</label
-                      >
-                    </div>
-                    <!-- Add other genres similarly -->
                   </div>
                   <div
                     id="genreError"
@@ -1488,3 +1373,4 @@
     </script>
   </body>
 </html>
+

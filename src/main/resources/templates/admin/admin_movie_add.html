@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -186,18 +186,15 @@
                         <select
                           class="form-select"
                           id="rating"
-                          name="rating"
+                          name="ratingId"
                           required
                         >
-                          <option value="0">Chọn rating</option>
-                          <option value="G">G - Mọi lứa tuổi</option>
-                          <option value="K">
-                            K - Dành cho trẻ em dưới 13 tuổi
-                          </option>
-                          <option value="T13">T13 - Từ 13 tuổi trở lên</option>
-                          <option value="T16">T16 - Từ 16 tuổi trở lên</option>
-                          <option value="T18">T18 - Từ 18 tuổi trở lên</option>
-                          <option value="C">C - Cấm chiếu</option>
+                          <option value="">Chọn rating</option>
+                          <option
+                            th:each="rating : ${allRatings}"
+                            th:value="${rating.id}"
+                            th:text="${rating.code + ' - ' + rating.description}"
+                          ></option>
                         </select>
                       </div>
                       <div class="col-md-4 mb-3">
@@ -228,127 +225,19 @@
                       Chọn tất cả thể loại phù hợp cho phim này
                     </p>
                     <div id="genreContainerForm">
-                      <div>
+                      <div th:each="genre : ${allGenres}">
                         <input
                           type="checkbox"
-                          id="genre_action"
+                          th:id="'genre_' + ${genre.id}"
                           name="genres"
-                          value="Hành động"
-                          class="d-none"
-                        />
-                        <label for="genre_action" class="selectable-tag-form"
-                          >Hành động</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_comedy"
-                          name="genres"
-                          value="Hài kịch"
-                          class="d-none"
-                        />
-                        <label for="genre_comedy" class="selectable-tag-form"
-                          >Hài kịch</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_horror"
-                          name="genres"
-                          value="Kinh dị"
-                          class="d-none"
-                        />
-                        <label for="genre_horror" class="selectable-tag-form"
-                          >Kinh dị</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_romance"
-                          name="genres"
-                          value="Lãng mạn"
-                          class="d-none"
-                        />
-                        <label for="genre_romance" class="selectable-tag-form"
-                          >Lãng mạn</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_scifi"
-                          name="genres"
-                          value="Khoa học viễn tưởng"
-                          class="d-none"
-                        />
-                        <label for="genre_scifi" class="selectable-tag-form"
-                          >Khoa học viễn tưởng</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_thriller"
-                          name="genres"
-                          value="Tâm lý"
-                          class="d-none"
-                        />
-                        <label for="genre_thriller" class="selectable-tag-form"
-                          >Tâm lý</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_adventure"
-                          name="genres"
-                          value="Phiêu lưu"
-                          class="d-none"
-                        />
-                        <label for="genre_adventure" class="selectable-tag-form"
-                          >Phiêu lưu</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_animation"
-                          name="genres"
-                          value="Hoạt hình"
-                          class="d-none"
-                        />
-                        <label for="genre_animation" class="selectable-tag-form"
-                          >Hoạt hình</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_drama"
-                          name="genres"
-                          value="Chính kịch"
-                          class="d-none"
-                        />
-                        <label for="genre_drama" class="selectable-tag-form"
-                          >Chính kịch</label
-                        >
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          id="genre_documentary"
-                          name="genres"
-                          value="Tài liệu"
+                          th:value="${genre.id}"
                           class="d-none"
                         />
                         <label
-                          for="genre_documentary"
+                          th:for="'genre_' + ${genre.id}"
                           class="selectable-tag-form"
-                          >Tài liệu</label
-                        >
+                          th:text="${genre.name}"
+                        ></label>
                       </div>
                     </div>
                   </div>
@@ -838,3 +727,4 @@
     </script>
   </body>
 </html>
+

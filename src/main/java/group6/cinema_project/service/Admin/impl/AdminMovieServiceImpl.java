@@ -3,12 +3,16 @@ package group6.cinema_project.service.Admin.impl;
 import group6.cinema_project.repository.Admin.AdminActorRepository;
 import group6.cinema_project.repository.Admin.AdminDirectorRepository;
 import group6.cinema_project.repository.Admin.AdminMovieRepository;
+import group6.cinema_project.repository.Admin.AdminRatingRepository;
+import group6.cinema_project.repository.Admin.AdminGenreRepository;
 import group6.cinema_project.service.Admin.IAdminMovieService;
 import org.springframework.stereotype.Service;
 import group6.cinema_project.dto.MovieDto;
 import group6.cinema_project.entity.Actor;
 import group6.cinema_project.entity.Director;
 import group6.cinema_project.entity.Movie;
+import group6.cinema_project.entity.Genre;
+import group6.cinema_project.entity.Rating;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +32,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminMovieServiceImpl implements IAdminMovieService {
     private final AdminMovieRepository adminMovieRepository;
-    private final AdminActorRepository actorRepository; // Thêm repo này
+    private final AdminActorRepository actorRepository; 
     private final AdminDirectorRepository directorRepository;
+    private final AdminRatingRepository ratingRepository;
+    private final AdminGenreRepository genreRepository;
 
     private final ModelMapper modelMapper;
 
@@ -37,13 +43,38 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
     @Transactional(readOnly = true)
     public Optional<MovieDto> getMovieById(Integer id) {
         return adminMovieRepository.findById(id)
-                .map(movie -> modelMapper.map(movie, MovieDto.class));
+                .map(this::convertToBasicDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<MovieDto> getMovieByIdForDisplay(Integer id) {
+        return adminMovieRepository.findByIdWithDirectorsAndActors(id)
+                .map(this::convertToDisplayDto);
     }
 
     @Override
     @Transactional
     public MovieDto saveOrUpdate(MovieDto movieDto) {
         Movie movie = modelMapper.map(movieDto, Movie.class);
+
+        // Xử lý Rating
+        if (movieDto.getRatingId() != null) {
+            Rating rating = ratingRepository.findById(movieDto.getRatingId()).orElse(null);
+            movie.setRating(rating);
+        }
+
+        // Xử lý Genres
+        if (movieDto.getGenreIds() != null && !movieDto.getGenreIds().isEmpty()) {
+            Set<Genre> genres = new HashSet<>();
+            for (Integer genreId : movieDto.getGenreIds()) {
+                Genre genre = genreRepository.findById(genreId).orElse(null);
+                if (genre != null) {
+                    genres.add(genre);
+                }
+            }
+            movie.setGenres(genres);
+        }
 
         // Xử lý directors
         if (movieDto.getDirectors() != null && !movieDto.getDirectors().isEmpty()) {
@@ -92,7 +123,7 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
         }
 
         Movie savedMovie = adminMovieRepository.save(movie);
-        return modelMapper.map(savedMovie, MovieDto.class);
+        return convertToBasicDto(savedMovie);
     }
 
     @Override
@@ -182,36 +213,34 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Convert Movie entity to DTO without triggering relationship loading
-     * This method manually maps only the basic fields to avoid ModelMapper cascade
-     * issues
-     */
+
     private MovieDto convertToBasicDto(Movie movie) {
         MovieDto dto = new MovieDto();
 
-        // Map only basic fields that exist in Movie entity
         dto.setId(movie.getId());
         dto.setName(movie.getName());
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
-        dto.setRating(movie.getRating());
-        dto.setGenre(movie.getGenre());
+
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+        }
+
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+            dto.setGenreIds(genreIds);
+        }
+
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer()); // Note: entity has 'trailer', DTO has 'trailer'
 
-        // Don't map any relationships or collections to avoid cascade loading
-        // Directors and actors will remain empty, which is fine for dropdown purposes
-
         return dto;
     }
 
-    /**
-     * Convert Movie entity to DTO with directors and actors for display purposes
-     * This method assumes directors and actors are already loaded (via JOIN FETCH)
-     */
     private MovieDto convertToDisplayDto(Movie movie) {
         MovieDto dto = new MovieDto();
 
@@ -220,8 +249,20 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
         dto.setName(movie.getName());
         dto.setDescription(movie.getDescription());
         dto.setDuration(movie.getDuration());
-        dto.setRating(movie.getRating());
-        dto.setGenre(movie.getGenre());
+
+        // Xử lý Rating - lấy ID
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+        }
+
+        // Xử lý Genres - lấy ID
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+            dto.setGenreIds(genreIds);
+        }
+
         dto.setLanguage(movie.getLanguage());
         dto.setImage(movie.getImage());
         dto.setReleaseDate(movie.getReleaseDate());
@@ -240,6 +281,18 @@ public class AdminMovieServiceImpl implements IAdminMovieService {
                     .map(Actor::getName)
                     .collect(Collectors.toSet());
             dto.setActors(actorNames);
+        }
+
+        // Set thông tin hiển thị cho Rating và Genre
+        if (movie.getRating() != null) {
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            String genreNames = movie.getGenres().stream()
+                    .map(Genre::getName)
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
         }
 
         return dto;

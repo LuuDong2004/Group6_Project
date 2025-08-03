@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
@@ -26,7 +26,7 @@
         background-color: #f8fafc;
       }
 
-      .sidebar {
+      .sidebar-custom {
         width: 320px;
         background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
@@ -40,19 +40,19 @@
         overflow-y: auto;
       }
 
-      .sidebar.collapsed {
+      .sidebar-custom.collapsed {
         width: 80px;
       }
 
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
 
-      .sidebar.collapsed .sidebar-menu .menu-item {
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
 
@@ -455,7 +455,7 @@
 
       /* Responsive */
       @media (max-width: 992px) {
-        .sidebar {
+        .sidebar-custom {
           transform: translateX(-100%);
           width: 320px;
         }
@@ -741,11 +741,17 @@
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-star text-warning"></i>
-                    <span th:text="${movie.rating}">8.5</span>
+                    <span
+                      th:text="${movie.ratingDisplay != null ? movie.ratingDisplay : 'N/A'}"
+                      >8.5</span
+                    >
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-tags text-info"></i>
-                    <span th:text="${movie.genre}">Hành động</span>
+                    <span
+                      th:text="${movie.genreDisplay != null ? movie.genreDisplay : 'N/A'}"
+                      >Hành động</span
+                    >
                   </div>
                   <div class="movie-detail-item">
                     <i class="fas fa-language text-success"></i>
@@ -920,3 +926,4 @@
     </script>
   </body>
 </html>
+

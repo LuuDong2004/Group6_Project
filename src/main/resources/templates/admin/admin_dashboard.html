@@ -23,9 +23,13 @@
         background-color: #f8fafc;
         color: #334155;
       }
-      .sidebar {
+      .sidebar-custom {
         width: 260px;
-        background: linear-gradient(135deg, #d91c37 0%, #0d2fe4 100%);
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
         color: white;
         position: fixed;
         top: 0;
@@ -35,37 +39,47 @@
         flex-direction: column;
         transition: width 0.3s ease;
         z-index: 1000;
+        overflow-y: auto;
       }
-      .sidebar.collapsed {
+
+      .sidebar-custom.collapsed {
         width: 80px;
       }
-      .sidebar.collapsed .sidebar-header h5,
-      .sidebar.collapsed .sidebar-header small,
-      .sidebar.collapsed .sidebar-menu span,
-      .sidebar.collapsed .mt-auto .text-white,
-      .sidebar.collapsed .mt-auto small {
+
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
         display: none;
       }
-      .sidebar.collapsed .sidebar-menu .menu-item {
+
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
         justify-content: center;
       }
-      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+
+      .sidebar-custom.collapsed
+        .sidebar-header
+        .bg-white.rounded-circle.p-2.me-3 {
         margin-right: 0 !important;
       }
-      .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+
+      .sidebar-custom.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
         margin-right: 0 !important;
       }
       .sidebar-header {
         padding: 1.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
+
       .sidebar-header .fa-film {
-        color: #d91c37;
+        color: #6366f1;
       }
       .sidebar-menu {
         flex-grow: 1;
         padding-top: 1rem;
       }
+
       .menu-item {
         display: flex;
         align-items: center;
@@ -74,27 +88,32 @@
         text-decoration: none;
         transition: background-color 0.2s ease, color 0.2s ease;
       }
+
       .menu-item:hover,
       .menu-item.active {
         background-color: rgba(255, 255, 255, 0.1);
         color: white;
         border-left: 3px solid white;
         padding-left: calc(1.5rem - 3px);
+        text-decoration: none;
       }
-      .sidebar.collapsed .menu-item:hover,
-      .sidebar.collapsed .menu-item.active {
+
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
         border-left: none;
-        padding-left: 1.5rem;
+        padding-left: 1.5rem; /* Reset padding for collapsed state */
       }
-      .sidebar.collapsed .menu-item.active {
-        background-color: #d91c37;
+
+      .sidebar-custom.collapsed .menu-item.active {
+        background-color: #4f46e5; /* More prominent active state for collapsed */
       }
       .menu-item i {
         width: 20px;
         margin-right: 0.75rem;
         text-align: center;
       }
-      .sidebar.collapsed .menu-item i {
+
+      .sidebar-custom.collapsed .menu-item i {
         margin-right: 0;
         font-size: 1.25rem;
       }
@@ -209,20 +228,23 @@
         font-size: 1.1rem;
       }
       @media (max-width: 768px) {
-        .sidebar {
+        .sidebar-custom {
           width: 80px;
         }
-        .sidebar .sidebar-header h5,
-        .sidebar .sidebar-header small,
-        .sidebar .sidebar-menu span,
-        .sidebar .mt-auto .text-white,
-        .sidebar .mt-auto small {
+
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
           display: none;
         }
-        .sidebar .sidebar-menu .menu-item {
+
+        .sidebar-custom .sidebar-menu .menu-item {
           justify-content: center;
         }
-        .sidebar .sidebar-menu .menu-item i {
+
+        .sidebar-custom .sidebar-menu .menu-item i {
           margin-right: 0;
           font-size: 1.25rem;
         }
@@ -416,37 +438,12 @@
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
+      // Khởi tạo các chức năng cần thiết
       document.addEventListener("DOMContentLoaded", function () {
-        initializeDashboardBehavior();
+        initializeSidebarToggle();
       });
-
-      function initializeDashboardBehavior() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper =
-          document.getElementById("mainContentWrapper");
-
-        if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("collapsed");
-          mainContentWrapper.classList.toggle("expanded");
-        }
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              toggleSidebar();
-            }
-          }
-        }
-
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
     </script>
   </body>
 </html>

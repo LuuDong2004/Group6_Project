@@ -1,541 +1,763 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaAdmin - Quản lý Phân quyền</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: "Inter", sans-serif;
-            background-color: #f8fafc;
-            color: #334155;
+      * {
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+
+      .sidebar-custom {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .sidebar-custom.collapsed {
+        width: 80px;
+      }
+
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
+        display: none;
+      }
+
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar-custom.collapsed
+        .sidebar-header
+        .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+
+      .sidebar-custom.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+        text-decoration: none;
+      }
+
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem; /* Reset padding for collapsed state */
+      }
+
+      .sidebar-custom.collapsed .menu-item.active {
+        background-color: #4f46e5; /* More prominent active state for collapsed */
+      }
+
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .sidebar-custom.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        min-height: 100vh;
+        background-color: #f8fafc;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar-custom {
+          width: 80px;
         }
-        .form-section {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
+
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
+          display: none;
         }
-        .form-section .card-header {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-            color: white;
+
+        .sidebar-custom .sidebar-menu .menu-item {
+          justify-content: center;
         }
-        .table-container {
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+        .sidebar-custom .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
         }
-        .table th {
-            background-color: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-            color: #475569;
-            font-weight: 600;
-        }
-        .badge-role {
-            font-size: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
-        }
-        .badge-admin {
-            background-color: #dc2626;
-            color: white;
-        }
-        .badge-staff {
-            background-color: #2563eb;
-            color: white;
-        }
-        .badge-user {
-            background-color: #059669;
-            color: white;
-        }
-        .btn-role-change {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-        }
-        /* Sidebar styles - copy từ file gốc */
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease;
-            z-index: 1000;
-        }
-        /* ... Copy tất cả CSS khác từ file gốc ... */
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-menu {
-            flex-grow: 1;
-            padding-top: 1rem;
-        }
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .menu-item:hover,
-        .menu-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 3px solid white;
-            padding-left: calc(1.5rem - 3px);
-        }
+
         .main-content-wrapper {
-            margin-left: 260px;
-            transition: margin-left 0.3s ease;
-            padding-top: 70px;
+          margin-left: 80px;
         }
+
         .main-content-wrapper.expanded {
-            margin-left: 80px;
+          margin-left: 80px;
         }
-        .header-custom {
-            position: fixed;
-            top: 0;
-            left: 260px;
-            right: 0;
-            height: 70px;
-            background-color: white;
-            border-bottom: 1px solid #e5e7eb;
-            z-index: 999;
-            transition: left 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-        }
-        .main-content-wrapper.expanded .header-custom {
-            left: 80px;
-        }
+      }
+      .form-section {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+      }
+      .form-section .card-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          #6366f1 0%,
+          #8b5cf6 100%
+        ) !important;
+        color: white;
+      }
+      .table-container {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .table th {
+        background-color: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        color: #475569;
+        font-weight: 600;
+      }
+      .badge-role {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+      }
+      .badge-admin {
+        background-color: #dc2626;
+        color: white;
+      }
+      .badge-staff {
+        background-color: #2563eb;
+        color: white;
+      }
+      .badge-user {
+        background-color: #059669;
+        color: white;
+      }
+      .btn-role-change {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+      }
+      /* Sidebar styles - copy từ file gốc */
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+      }
+      /* ... Copy tất cả CSS khác từ file gốc ... */
+      .sidebar.collapsed {
+        width: 80px;
+      }
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-menu {
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
     </style>
-</head>
-<body>
-<!-- Sidebar - copy từ file gốc -->
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="d-flex align-items-center">
-            <div class="bg-white rounded-circle p-2 me-3">
-                <i class="fas fa-user-cog"></i>
-            </div>
-            <div>
-                <h5 class="text-white mb-0 fw-bold">CinemaAdmin</h5>
-                <small class="text-white-50">Quản lý Phân quyền</small>
-            </div>
-        </div>
-    </div>
-    <nav class="sidebar-menu">
-        <a href="/admin" class="menu-item">
-            <i class="fas fa-home"></i>
-            <span>Bảng điều khiển</span>
-        </a>
-        <a href="/admin/movies/list" class="menu-item">
-            <i class="fas fa-film"></i>
-            <span>Phim</span>
-        </a>
-        <a href="/admin/foods/list" class="menu-item">
-            <i class="fas fa-hamburger"></i>
-            <span>Combo Food</span>
-        </a>
-        <a href="/admin/schedules/list" class="menu-item">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Lịch chiếu</span>
-        </a>
-        <a href="/admin/users/list" class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>Quản lý người dùng</span>
-        </a>
-        <a href="/admin/users/management" class="menu-item active">
-            <i class="fas fa-user-cog"></i>
-            <span>Phân quyền</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-ticket-alt"></i>
-            <span>Đặt vé</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-chart-pie"></i>
-            <span>Phân tích</span>
-        </a>
-        <a href="#" class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span>Cài đặt</span>
-        </a>
-    </nav>
-    <div class="mt-auto p-4 border-top border-white-50" style="border-color: rgba(255,255,255,0.1) !important;">
-        <div class="d-flex align-items-center">
-            <img src="https://via.placeholder.com/40" alt="User Avatar" width="40" height="40" class="rounded-circle me-3">
-            <div>
-                <div class="text-white fw-semibold">Admin User</div>
-                <small class="text-white-50">admin@cinema.com</small>
-            </div>
-        </div>
-    </div>
-</div>
+  </head>
+  <body>
+    <!-- Sidebar content -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-<div class="main-content-wrapper" id="mainContentWrapper">
-    <header class="header-custom shadow-sm">
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-            <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
-                <i class="fas fa-bars fs-5"></i>
-            </button>
-            <h4 class="mb-0 fw-semibold text-gray-700">Quản lý Phân quyền</h4>
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700">Quản lý Phân quyền</h4>
         </div>
         <div class="d-flex align-items-center">
-            <button class="btn btn-link text-secondary me-1 position-relative">
-                <i class="fas fa-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="font-size: 0.5rem; width:10px; height:10px; display:flex; align-items:center; justify-content:center;">
-                    <span class="visually-hidden">Thông báo mới</span>
-                </span>
-            </button>
-            <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://via.placeholder.com/32" alt="User Avatar" width="32" height="32" class="rounded-circle me-2">
-                    <span class="d-none d-sm-inline text-gray-700 fw-medium">Admin User</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0" aria-labelledby="dropdownUser">
-                    <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="/login"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                </ul>
-            </div>
+          <button class="btn btn-link text-secondary me-1 position-relative">
+            <i class="fas fa-bell fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+              style="
+                font-size: 0.5rem;
+                width: 10px;
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span class="visually-hidden">Thông báo mới</span>
+            </span>
+          </button>
+          <div class="dropdown">
+            <a
+              href="#"
+              class="d-flex align-items-center text-decoration-none dropdown-toggle"
+              id="dropdownUser"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://via.placeholder.com/32"
+                alt="User Avatar"
+                width="32"
+                height="32"
+                class="rounded-circle me-2"
+              />
+              <span class="d-none d-sm-inline text-gray-700 fw-medium"
+                >Admin User</span
+              >
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end text-small shadow border-0"
+              aria-labelledby="dropdownUser"
+            >
+              <li>
+                <a class="dropdown-item" href="/profile"
+                  ><i class="fas fa-user-circle me-2 text-muted"></i>Hồ sơ</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><i class="fas fa-sliders-h me-2 text-muted"></i>Cài đặt</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item text-danger" href="/login"
+                  ><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
-    </header>
+      </header>
 
-    <div class="container-fluid p-4">
+      <div class="container-fluid p-4">
         <!-- Search Section -->
         <div class="form-section">
-            <div class="card-header p-3">
-                <h5 class="mb-0 fw-semibold">
-                    <i class="fas fa-search me-2"></i>
-                    Tìm kiếm người dùng
-                </h5>
-            </div>
-            <div class="card-body p-3 p-md-4">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" class="form-control" id="searchInput" placeholder="Nhập email để tìm kiếm...">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-primary me-2" onclick="searchUsers()">
-                            <i class="fas fa-search me-2"></i>Tìm kiếm
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="loadAllUsers()">
-                            <i class="fas fa-refresh me-2"></i>Tất cả
-                        </button>
-                    </div>
+          <div class="card-header p-3">
+            <h5 class="mb-0 fw-semibold">
+              <i class="fas fa-search me-2"></i>
+              Tìm kiếm người dùng
+            </h5>
+          </div>
+          <div class="card-body p-3 p-md-4">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="searchInput"
+                    placeholder="Nhập email để tìm kiếm..."
+                  />
                 </div>
+              </div>
+              <div class="col-md-4">
+                <button
+                  type="button"
+                  class="btn btn-primary me-2"
+                  onclick="searchUsers()"
+                >
+                  <i class="fas fa-search me-2"></i>Tìm kiếm
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="loadAllUsers()"
+                >
+                  <i class="fas fa-refresh me-2"></i>Tất cả
+                </button>
+              </div>
             </div>
+          </div>
         </div>
 
         <!-- Users Table -->
         <div class="table-container">
-            <div class="card-header p-3">
-                <h5 class="mb-0 fw-semibold">
-                    <i class="fas fa-users me-2"></i>
-                    Danh sách người dùng
-                </h5>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="usersTable">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên người dùng</th>
-                        <th>Email</th>
-                        <th>Vai trò hiện tại</th>
-                        <th>Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                    <!-- Data will be loaded dynamically -->
-                    </tbody>
-                </table>
-            </div>
+          <div class="card-header p-3">
+            <h5 class="mb-0 fw-semibold">
+              <i class="fas fa-users me-2"></i>
+              Danh sách người dùng
+            </h5>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0" id="usersTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên người dùng</th>
+                  <th>Email</th>
+                  <th>Vai trò hiện tại</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Data will be loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Alert messages -->
         <div id="alertContainer"></div>
+      </div>
     </div>
-</div>
 
-<!-- Modal Change Role -->
-<div class="modal fade" id="changeRoleModal" tabindex="-1" aria-labelledby="changeRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <!-- Modal Change Role -->
+    <div
+      class="modal fade"
+      id="changeRoleModal"
+      tabindex="-1"
+      aria-labelledby="changeRoleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="changeRoleModalLabel">
-                    <i class="fas fa-user-cog me-2"></i>Thay đổi vai trò
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="changeRoleForm">
-                    <input type="hidden" id="selectedUserId">
+          <div class="modal-header">
+            <h5 class="modal-title" id="changeRoleModalLabel">
+              <i class="fas fa-user-cog me-2"></i>Thay đổi vai trò
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="changeRoleForm">
+              <input type="hidden" id="selectedUserId" />
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Người dùng:</label>
-                        <input type="text" class="form-control" id="selectedUserInfo" readonly>
-                    </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Người dùng:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="selectedUserInfo"
+                  readonly
+                />
+              </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Vai trò hiện tại:</label>
-                        <input type="text" class="form-control" id="currentRole" readonly>
-                    </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Vai trò hiện tại:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="currentRole"
+                  readonly
+                />
+              </div>
 
-                    <div class="mb-3">
-                        <label for="newRole" class="form-label fw-semibold">Vai trò mới:</label>
-                        <select class="form-select" id="newRole" required>
-                            <option value="">Chọn vai trò...</option>
-                            <option value="USER">Người dùng</option>
-                            <option value="STAFF">Nhân viên</option>
-                            <option value="ADMIN">Quản trị viên</option>
-                        </select>
-                    </div>
+              <div class="mb-3">
+                <label for="newRole" class="form-label fw-semibold"
+                  >Vai trò mới:</label
+                >
+                <select class="form-select" id="newRole" required>
+                  <option value="">Chọn vai trò...</option>
+                  <option value="USER">Người dùng</option>
+                  <option value="STAFF">Nhân viên</option>
+                  <option value="ADMIN">Quản trị viên</option>
+                </select>
+              </div>
 
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Lưu ý:</strong> Thay đổi vai trò sẽ ảnh hưởng đến quyền truy cập của người dùng trong hệ thống.
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="confirmChangeRole()">
-                    <i class="fas fa-save me-2"></i>Lưu thay đổi
-                </button>
-            </div>
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Lưu ý:</strong> Thay đổi vai trò sẽ ảnh hưởng đến quyền
+                truy cập của người dùng trong hệ thống.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="confirmChangeRole()"
+            >
+              <i class="fas fa-save me-2"></i>Lưu thay đổi
+            </button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let currentUsers = [];
-    let availableRoles = [];
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      let currentUsers = [];
+      let availableRoles = [];
 
-    document.addEventListener("DOMContentLoaded", function () {
+      document.addEventListener("DOMContentLoaded", function () {
         initializeDashboardBehavior();
         loadAllUsers();
-    });
+      });
 
-    function initializeDashboardBehavior() {
+      function initializeDashboardBehavior() {
         const sidebarToggle = document.getElementById("sidebarToggle");
         const sidebar = document.getElementById("sidebar");
-        const mainContentWrapper = document.getElementById("mainContentWrapper");
+        const mainContentWrapper =
+          document.getElementById("mainContentWrapper");
 
         if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
 
         function toggleSidebar() {
-            sidebar.classList.toggle("collapsed");
-            mainContentWrapper.classList.toggle("expanded");
+          sidebar.classList.toggle("collapsed");
+          mainContentWrapper.classList.toggle("expanded");
         }
 
         sidebarToggle.addEventListener("click", toggleSidebar);
 
         // Enter key search
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchUsers();
+        document
+          .getElementById("searchInput")
+          .addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              searchUsers();
             }
-        });
-    }
+          });
+      }
 
-    function loadAllUsers() {
-        fetch('/admin/users/api/roles')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentUsers = data.users;
-                    availableRoles = data.availableRoles;
-                    displayUsers(currentUsers);
-                } else {
-                    showAlert('danger', 'Lỗi tải dữ liệu: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('danger', 'Có lỗi xảy ra khi tải dữ liệu!');
-            });
-    }
+      function loadAllUsers() {
+        fetch("/admin/users/api/roles")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              currentUsers = data.users;
+              availableRoles = data.availableRoles;
+              displayUsers(currentUsers);
+            } else {
+              showAlert("danger", "Lỗi tải dữ liệu: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showAlert("danger", "Có lỗi xảy ra khi tải dữ liệu!");
+          });
+      }
 
-    function searchUsers() {
-        const searchTerm = document.getElementById('searchInput').value.trim();
+      function searchUsers() {
+        const searchTerm = document.getElementById("searchInput").value.trim();
 
         if (!searchTerm) {
-            loadAllUsers();
-            return;
+          loadAllUsers();
+          return;
         }
 
         fetch(`/admin/users/api/roles?search=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentUsers = data.users;
-                    displayUsers(currentUsers);
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              currentUsers = data.users;
+              displayUsers(currentUsers);
 
-                    if (currentUsers.length === 0) {
-                        showAlert('info', 'Không tìm thấy người dùng nào!');
-                    }
-                } else {
-                    showAlert('danger', 'Lỗi tìm kiếm: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('danger', 'Có lỗi xảy ra khi tìm kiếm!');
-            });
-    }
+              if (currentUsers.length === 0) {
+                showAlert("info", "Không tìm thấy người dùng nào!");
+              }
+            } else {
+              showAlert("danger", "Lỗi tìm kiếm: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showAlert("danger", "Có lỗi xảy ra khi tìm kiếm!");
+          });
+      }
 
-    function displayUsers(users) {
-        const tbody = document.getElementById('usersTableBody');
-        tbody.innerHTML = '';
+      function displayUsers(users) {
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
 
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
+        users.forEach((user) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
                 <td>${user.id}</td>
                 <td>${user.userName}</td>
                 <td>${user.email}</td>
                 <td>
-                    <span class="badge badge-role ${getRoleBadgeClass(user.role)}">
+                    <span class="badge badge-role ${getRoleBadgeClass(
+                      user.role
+                    )}">
                         ${user.roleDisplay}
                     </span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-outline-primary btn-role-change"
-                            onclick="openChangeRoleModal(${user.id}, '${user.userName}', '${user.email}', '${user.role}', '${user.roleDisplay}')">
+                            onclick="openChangeRoleModal(${user.id}, '${
+            user.userName
+          }', '${user.email}', '${user.role}', '${user.roleDisplay}')">
                         <i class="fas fa-edit me-1"></i>Đổi quyền
                     </button>
                 </td>
             `;
-            tbody.appendChild(row);
+          tbody.appendChild(row);
         });
-    }
+      }
 
-    function getRoleBadgeClass(role) {
+      function getRoleBadgeClass(role) {
         switch (role) {
-            case 'ADMIN':
-                return 'badge-admin';
-            case 'STAFF':
-                return 'badge-staff';
-            case 'USER':
-                return 'badge-user';
-            default:
-                return 'badge-secondary';
+          case "ADMIN":
+            return "badge-admin";
+          case "STAFF":
+            return "badge-staff";
+          case "USER":
+            return "badge-user";
+          default:
+            return "badge-secondary";
         }
-    }
+      }
 
-    function openChangeRoleModal(userId, userName, email, currentRole, currentRoleDisplay) {
-        document.getElementById('selectedUserId').value = userId;
-        document.getElementById('selectedUserInfo').value = `${userName} (${email})`;
-        document.getElementById('currentRole').value = currentRoleDisplay;
+      function openChangeRoleModal(
+        userId,
+        userName,
+        email,
+        currentRole,
+        currentRoleDisplay
+      ) {
+        document.getElementById("selectedUserId").value = userId;
+        document.getElementById(
+          "selectedUserInfo"
+        ).value = `${userName} (${email})`;
+        document.getElementById("currentRole").value = currentRoleDisplay;
 
         // Reset select
-        const newRoleSelect = document.getElementById('newRole');
-        newRoleSelect.value = '';
+        const newRoleSelect = document.getElementById("newRole");
+        newRoleSelect.value = "";
 
         // Remove current role from options temporarily
-        Array.from(newRoleSelect.options).forEach(option => {
-            option.style.display = option.value === currentRole ? 'none' : 'block';
+        Array.from(newRoleSelect.options).forEach((option) => {
+          option.style.display =
+            option.value === currentRole ? "none" : "block";
         });
 
-        const modal = new bootstrap.Modal(document.getElementById('changeRoleModal'));
+        const modal = new bootstrap.Modal(
+          document.getElementById("changeRoleModal")
+        );
         modal.show();
-    }
+      }
 
-    function confirmChangeRole() {
-        const userId = document.getElementById('selectedUserId').value;
-        const newRole = document.getElementById('newRole').value;
+      function confirmChangeRole() {
+        const userId = document.getElementById("selectedUserId").value;
+        const newRole = document.getElementById("newRole").value;
 
         if (!newRole) {
-            showAlert('warning', 'Vui lòng chọn vai trò mới!');
-            return;
+          showAlert("warning", "Vui lòng chọn vai trò mới!");
+          return;
         }
 
-        const confirmBtn = document.querySelector('#changeRoleModal .btn-primary');
+        const confirmBtn = document.querySelector(
+          "#changeRoleModal .btn-primary"
+        );
         const originalText = confirmBtn.innerHTML;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        confirmBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
         confirmBtn.disabled = true;
 
         fetch(`/admin/users/${userId}/role`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ role: newRole })
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ role: newRole }),
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', data.message);
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              showAlert("success", data.message);
 
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('changeRoleModal'));
-                    modal.hide();
+              // Close modal
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("changeRoleModal")
+              );
+              modal.hide();
 
-                    // Reload users
-                    loadAllUsers();
+              // Reload users
+              loadAllUsers();
+            } else {
+              showAlert("danger", "Lỗi: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showAlert("danger", "Có lỗi xảy ra khi thay đổi vai trò!");
+          })
+          .finally(() => {
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+          });
+      }
 
-                } else {
-                    showAlert('danger', 'Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('danger', 'Có lỗi xảy ra khi thay đổi vai trò!');
-            })
-            .finally(() => {
-                confirmBtn.innerHTML = originalText;
-                confirmBtn.disabled = false;
-            });
-    }
+      function showAlert(type, message) {
+        const alertContainer = document.getElementById("alertContainer");
 
-    function showAlert(type, message) {
-        const alertContainer = document.getElementById('alertContainer');
-
-        const alertDiv = document.createElement('div');
+        const alertDiv = document.createElement("div");
         alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
 
-        let icon = '';
+        let icon = "";
         switch (type) {
-            case 'success':
-                icon = 'fas fa-check-circle';
-                break;
-            case 'danger':
-                icon = 'fas fa-exclamation-circle';
-                break;
-            case 'warning':
-                icon = 'fas fa-exclamation-triangle';
-                break;
-            case 'info':
-                icon = 'fas fa-info-circle';
-                break;
+          case "success":
+            icon = "fas fa-check-circle";
+            break;
+          case "danger":
+            icon = "fas fa-exclamation-circle";
+            break;
+          case "warning":
+            icon = "fas fa-exclamation-triangle";
+            break;
+          case "info":
+            icon = "fas fa-info-circle";
+            break;
         }
 
         alertDiv.innerHTML = `
@@ -548,11 +770,11 @@
 
         // Auto remove after 5 seconds
         setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
+          if (alertDiv.parentNode) {
+            alertDiv.remove();
+          }
         }, 5000);
-    }
-</script>
-</body>
+      }
+    </script>
+  </body>
 </html>

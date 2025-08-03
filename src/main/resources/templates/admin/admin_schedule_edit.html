@@ -31,25 +31,63 @@
         padding: 0;
       }
 
-      .sidebar {
+      .sidebar-custom {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
+        color: white;
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
-        width: 280px;
-        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
         z-index: 1000;
         overflow-y: auto;
       }
 
+      .sidebar-custom.collapsed {
+        width: 80px;
+      }
+
+      .sidebar-custom.collapsed .sidebar-header h5,
+      .sidebar-custom.collapsed .sidebar-header small,
+      .sidebar-custom.collapsed .sidebar-menu span,
+      .sidebar-custom.collapsed .mt-auto .text-white,
+      .sidebar-custom.collapsed .mt-auto small {
+        display: none;
+      }
+
+      .sidebar-custom.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar-custom.collapsed
+        .sidebar-header
+        .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+
+      .sidebar-custom.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+
       .sidebar-header {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
 
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+
       .sidebar-menu {
-        padding: 1rem 0;
+        flex-grow: 1;
+        padding-top: 1rem;
       }
 
       .menu-item {
@@ -66,20 +104,86 @@
       .menu-item.active {
         background: rgba(255, 255, 255, 0.1);
         color: white;
-        border-left-color: #3498db;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
         text-decoration: none;
+      }
+
+      .sidebar-custom.collapsed .menu-item:hover,
+      .sidebar-custom.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem; /* Reset padding for collapsed state */
+      }
+
+      .sidebar-custom.collapsed .menu-item.active {
+        background-color: #4f46e5; /* More prominent active state for collapsed */
       }
 
       .menu-item i {
         width: 20px;
-        margin-right: 12px;
-        font-size: 16px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .sidebar-custom.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        min-height: 100vh;
+        background-color: #f8fafc;
+      }
+
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+
+      .header-custom {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
       }
 
       .main-content {
-        margin-left: 280px;
         padding: 2rem;
-        min-height: 100vh;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar-custom {
+          width: 80px;
+        }
+
+        .sidebar-custom .sidebar-header h5,
+        .sidebar-custom .sidebar-header small,
+        .sidebar-custom .sidebar-menu span,
+        .sidebar-custom .mt-auto .text-white,
+        .sidebar-custom .mt-auto small {
+          display: none;
+        }
+
+        .sidebar-custom .sidebar-menu .menu-item {
+          justify-content: center;
+        }
+
+        .sidebar-custom .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
+        }
+
+        .main-content-wrapper {
+          margin-left: 80px;
+        }
+
+        .main-content-wrapper.expanded {
+          margin-left: 80px;
+        }
       }
 
       .content-header {
@@ -238,321 +342,337 @@
     <!-- Sidebar content -->
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Header -->
-      <div class="content-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h1 class="h3 mb-0 text-gray-800 fw-bold">
-              <i class="fas fa-edit me-2 text-primary"></i>
-              Chỉnh Sửa Lịch Chiếu
-            </h1>
-            <p class="text-muted mb-0">Cập nhật thông tin lịch chiếu</p>
-          </div>
-          <div>
-            <a
-              th:href="@{/admin/schedules/list}"
-              class="btn btn-secondary me-2"
-            >
-              <i class="fas fa-list me-2"></i>Danh sách
-            </a>
-            <a
-              th:href="@{/admin/schedules/calendar}"
-              class="btn btn-outline-primary"
-            >
-              <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Container -->
-      <div class="form-container">
-        <!-- Hiển thị thông báo lỗi -->
-        <div th:if="${error}" class="alert alert-danger" role="alert">
-          <i class="fas fa-exclamation-circle me-2"></i>
-          <span th:text="${error}"></span>
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-secondary me-2" id="sidebarToggle">
+            <i class="fas fa-bars fs-5"></i>
+          </button>
+          <h4 class="mb-0 fw-semibold text-gray-700" id="main-header-title">
+            Chỉnh Sửa Lịch Chiếu
+          </h4>
         </div>
 
-        <form
-          th:action="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
-          th:object="${schedule}"
-          method="post"
-          id="scheduleForm"
-        >
-          <div class="row">
-            <!-- Ngày chiếu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="screeningDate" class="form-label">
-                  <i class="fas fa-calendar me-2"></i>Ngày chiếu
-                </label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="screeningDate"
-                  th:field="*{screeningDate}"
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('screeningDate')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{screeningDate}"></span>
-                </div>
-              </div>
-            </div>
+        <div class="d-flex align-items-center">
+          <a th:href="@{/admin/schedules/list}" class="btn btn-secondary me-2">
+            <i class="fas fa-list me-2"></i>Danh sách
+          </a>
+          <a
+            th:href="@{/admin/schedules/calendar}"
+            class="btn btn-outline-primary"
+          >
+            <i class="fas fa-calendar-alt me-2"></i>Lịch tháng
+          </a>
+        </div>
+      </header>
 
-            <!-- Trạng thái -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="status" class="form-label">
-                  <i class="fas fa-info-circle me-2"></i>Trạng thái
-                </label>
-                <select
-                  class="form-control"
-                  id="status"
-                  th:field="*{status}"
-                  required
-                >
-                  <option value="">-- Chọn trạng thái --</option>
-                  <option value="UPCOMING">Sắp chiếu</option>
-                  <option value="ACTIVE">Đang chiếu</option>
-                  <option value="COMPLETED">Đã hoàn thành</option>
-                  <option value="CANCELLED">Đã hủy</option>
-                </select>
-                <div
-                  th:if="${#fields.hasErrors('status')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{status}"></span>
-                </div>
-              </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Content Header -->
+        <div class="content-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-0 text-gray-800 fw-bold">
+                <i class="fas fa-edit me-2 text-primary"></i>
+                Chỉnh Sửa Lịch Chiếu
+              </h1>
+              <p class="text-muted mb-0">Cập nhật thông tin lịch chiếu</p>
             </div>
           </div>
+        </div>
 
-          <div class="row">
-            <!-- Chọn phim với dropdown -->
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="movieId" class="form-label">
-                  <i class="fas fa-film me-2"></i>Chọn phim
-                </label>
+        <!-- Form Container -->
+        <div class="form-container">
+          <!-- Hiển thị thông báo lỗi -->
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+          </div>
 
-                <!-- Hiển thị phim hiện tại nếu đang edit -->
-                <div th:if="${selectedMovie != null}" class="mb-3">
+          <form
+            th:action="@{/admin/schedules/edit/{id}(id=${schedule.id})}"
+            th:object="${schedule}"
+            method="post"
+            id="scheduleForm"
+          >
+            <div class="row">
+              <!-- Ngày chiếu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="screeningDate" class="form-label">
+                    <i class="fas fa-calendar me-2"></i>Ngày chiếu
+                  </label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="screeningDate"
+                    th:field="*{screeningDate}"
+                    required
+                  />
                   <div
-                    class="alert alert-info d-flex justify-content-between align-items-start"
+                    th:if="${#fields.hasErrors('screeningDate')}"
+                    class="invalid-feedback d-block"
                   >
-                    <div>
-                      <i class="fas fa-film me-2"></i>
-                      <strong th:text="${selectedMovie.name}">Tên phim</strong>
-                      <small class="d-block text-muted mt-1">
-                        <span
-                          th:text="${selectedMovie.duration + ' phút • ' + selectedMovie.genre + ' • Rating: ' + selectedMovie.rating}"
-                        >
-                          Thông tin phim
-                        </span>
-                      </small>
-                    </div>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-primary"
-                      onclick="toggleMovieSelection()"
-                      title="Thay đổi phim"
-                    >
-                      <i class="fas fa-edit"></i> Thay đổi
-                    </button>
+                    <span th:errors="*{screeningDate}"></span>
                   </div>
                 </div>
+              </div>
 
-                <!-- Dropdown chọn phim (ẩn khi đã có phim được chọn) -->
-                <div
-                  id="movieSelectionDiv"
-                  th:style="${selectedMovie != null} ? 'display: none;' : ''"
-                >
+              <!-- Trạng thái -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="status" class="form-label">
+                    <i class="fas fa-info-circle me-2"></i>Trạng thái
+                  </label>
                   <select
                     class="form-control"
-                    id="movieId"
-                    th:field="*{movieId}"
+                    id="status"
+                    th:field="*{status}"
                     required
-                    onchange="updateMovieInfo()"
                   >
-                    <option value="">-- Chọn phim --</option>
-                    <option
-                      th:each="movie : ${movies}"
-                      th:value="${movie.id}"
-                      th:text="${movie.name + ' (' + movie.duration + ' phút - ' + movie.genre + ')'}"
-                      th:selected="${movie.id == schedule.movieId}"
-                      th:data-duration="${movie.duration}"
-                      th:data-genre="${movie.genre}"
-                      th:data-rating="${movie.rating}"
+                    <option value="">-- Chọn trạng thái --</option>
+                    <option value="UPCOMING">Sắp chiếu</option>
+                    <option value="ACTIVE">Đang chiếu</option>
+                    <option value="COMPLETED">Đã hoàn thành</option>
+                    <option value="CANCELLED">Đã hủy</option>
+                  </select>
+                  <div
+                    th:if="${#fields.hasErrors('status')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{status}"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Chọn phim với dropdown -->
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="movieId" class="form-label">
+                    <i class="fas fa-film me-2"></i>Chọn phim
+                  </label>
+
+                  <!-- Hiển thị phim hiện tại nếu đang edit -->
+                  <div th:if="${selectedMovie != null}" class="mb-3">
+                    <div
+                      class="alert alert-info d-flex justify-content-between align-items-start"
                     >
-                      Tên phim (thời lượng - thể loại)
+                      <div>
+                        <i class="fas fa-film me-2"></i>
+                        <strong th:text="${selectedMovie.name}"
+                          >Tên phim</strong
+                        >
+                        <small class="d-block text-muted mt-1">
+                          <span
+                            th:text="${selectedMovie.duration + ' phút • ' + (selectedMovie.genreDisplay != null ? selectedMovie.genreDisplay : 'N/A') + ' • Rating: ' + (selectedMovie.ratingDisplay != null ? selectedMovie.ratingDisplay : 'N/A')}"
+                          >
+                            Thông tin phim
+                          </span>
+                        </small>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="toggleMovieSelection()"
+                        title="Thay đổi phim"
+                      >
+                        <i class="fas fa-edit"></i> Thay đổi
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Dropdown chọn phim (ẩn khi đã có phim được chọn) -->
+                  <div
+                    id="movieSelectionDiv"
+                    th:style="${selectedMovie != null} ? 'display: none;' : ''"
+                  >
+                    <select
+                      class="form-control"
+                      id="movieId"
+                      th:field="*{movieId}"
+                      required
+                      onchange="updateMovieInfo()"
+                    >
+                      <option value="">-- Chọn phim --</option>
+                      <option
+                        th:each="movie : ${movies}"
+                        th:value="${movie.id}"
+                        th:text="${movie.name + ' (' + movie.duration + ' phút - ' + (movie.genreDisplay != null ? movie.genreDisplay : 'N/A') + ')'}"
+                        th:selected="${movie.id == schedule.movieId}"
+                        th:data-duration="${movie.duration}"
+                        th:data-genre="${movie.genreDisplay}"
+                        th:data-rating="${movie.ratingDisplay}"
+                      >
+                        Tên phim (thời lượng - thể loại)
+                      </option>
+                    </select>
+                    <small class="form-text text-muted">
+                      Chọn phim từ danh sách có sẵn
+                    </small>
+                  </div>
+
+                  <div
+                    th:if="${#fields.hasErrors('movieId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{movieId}"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Chọn chi nhánh -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="branchId" class="form-label">
+                    <i class="fas fa-building me-2"></i>Chi nhánh
+                  </label>
+                  <select
+                    class="form-control"
+                    id="branchId"
+                    th:field="*{branchId}"
+                    required
+                    onchange="loadRoomsByBranch()"
+                  >
+                    <option value="">-- Chọn chi nhánh --</option>
+                    <option
+                      th:each="branch : ${branches}"
+                      th:value="${branch.id}"
+                      th:text="${branch.name + ' - ' + branch.address}"
+                    >
+                      Chi nhánh 1 - Địa chỉ
                     </option>
                   </select>
-                  <small class="form-text text-muted">
-                    Chọn phim từ danh sách có sẵn
-                  </small>
-                </div>
-
-                <div
-                  th:if="${#fields.hasErrors('movieId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{movieId}"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <!-- Chọn chi nhánh -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="branchId" class="form-label">
-                  <i class="fas fa-building me-2"></i>Chi nhánh
-                </label>
-                <select
-                  class="form-control"
-                  id="branchId"
-                  th:field="*{branchId}"
-                  required
-                  onchange="loadRoomsByBranch()"
-                >
-                  <option value="">-- Chọn chi nhánh --</option>
-                  <option
-                    th:each="branch : ${branches}"
-                    th:value="${branch.id}"
-                    th:text="${branch.name + ' - ' + branch.address}"
-                  >
-                    Chi nhánh 1 - Địa chỉ
-                  </option>
-                </select>
-                <div
-                  th:if="${#fields.hasErrors('branchId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{branchId}"></span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Chọn phòng chiếu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="screeningRoomId" class="form-label">
-                  <i class="fas fa-door-open me-2"></i>Phòng chiếu
-                </label>
-                <select
-                  class="form-control"
-                  id="screeningRoomId"
-                  th:field="*{screeningRoomId}"
-                  th:attr="data-current-room-id=${schedule.screeningRoomId}"
-                  required
-                  disabled
-                >
-                  <option value="">-- Chọn chi nhánh trước --</option>
-                </select>
-                <div
-                  th:if="${#fields.hasErrors('screeningRoomId')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{screeningRoomId}"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <!-- Thời gian bắt đầu -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="startTime" class="form-label">
-                  <i class="fas fa-play me-2"></i>Thời gian bắt đầu
-                </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="startTime"
-                  th:field="*{startTime}"
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('startTime')}"
-                  class="invalid-feedback d-block"
-                >
-                  <!-- Kiểm tra nếu lỗi là xung đột lịch chiếu -->
                   <div
-                    th:if="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
-                    class="alert alert-warning"
-                    style="margin-top: 10px"
+                    th:if="${#fields.hasErrors('branchId')}"
+                    class="invalid-feedback d-block"
                   >
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <span th:text="${#fields.errors('startTime')[0]}"></span>
+                    <span th:errors="*{branchId}"></span>
                   </div>
-                  <!-- Hiển thị lỗi thường -->
-                  <span
-                    th:unless="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
-                    th:errors="*{startTime}"
-                  ></span>
+                </div>
+              </div>
+
+              <!-- Chọn phòng chiếu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="screeningRoomId" class="form-label">
+                    <i class="fas fa-door-open me-2"></i>Phòng chiếu
+                  </label>
+                  <select
+                    class="form-control"
+                    id="screeningRoomId"
+                    th:field="*{screeningRoomId}"
+                    th:attr="data-current-room-id=${schedule.screeningRoomId}"
+                    required
+                    disabled
+                  >
+                    <option value="">-- Chọn chi nhánh trước --</option>
+                  </select>
+                  <div
+                    th:if="${#fields.hasErrors('screeningRoomId')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{screeningRoomId}"></span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Thời gian kết thúc -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="endTime" class="form-label">
-                  <i class="fas fa-clock me-2"></i>Thời gian kết thúc
-                </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="endTime"
-                  th:field="*{endTime}"
-                  required
-                />
-                <div
-                  th:if="${#fields.hasErrors('endTime')}"
-                  class="invalid-feedback d-block"
-                >
-                  <span th:errors="*{endTime}"></span>
+            <div class="row">
+              <!-- Thời gian bắt đầu -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="startTime" class="form-label">
+                    <i class="fas fa-play me-2"></i>Thời gian bắt đầu
+                  </label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="startTime"
+                    th:field="*{startTime}"
+                    required
+                  />
+                  <div
+                    th:if="${#fields.hasErrors('startTime')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <!-- Kiểm tra nếu lỗi là xung đột lịch chiếu -->
+                    <div
+                      th:if="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
+                      class="alert alert-warning"
+                      style="margin-top: 10px"
+                    >
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      <span th:text="${#fields.errors('startTime')[0]}"></span>
+                    </div>
+                    <!-- Hiển thị lỗi thường -->
+                    <span
+                      th:unless="${#strings.contains(#fields.errors('startTime')[0], 'xung đột')}"
+                      th:errors="*{startTime}"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Thời gian kết thúc -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="endTime" class="form-label">
+                    <i class="fas fa-clock me-2"></i>Thời gian kết thúc
+                  </label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="endTime"
+                    th:field="*{endTime}"
+                    required
+                  />
+                  <div
+                    th:if="${#fields.hasErrors('endTime')}"
+                    class="invalid-feedback d-block"
+                  >
+                    <span th:errors="*{endTime}"></span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Cảnh báo xung đột lịch chiếu -->
-          <div class="conflict-warning" id="conflictWarning">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <span id="conflictMessage"></span>
-          </div>
+            <!-- Cảnh báo xung đột lịch chiếu -->
+            <div class="conflict-warning" id="conflictWarning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <span id="conflictMessage"></span>
+            </div>
 
-          <!-- Nút submit -->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="d-flex justify-content-end gap-3">
-                <a
-                  th:href="@{/admin/schedules/list/date(date=${schedule.screeningDate})}"
-                  class="btn btn-secondary"
-                >
-                  <i class="fas fa-times me-2"></i>Hủy
-                </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                  <i class="fas fa-save me-2"></i>Cập nhật lịch chiếu
-                </button>
+            <!-- Nút submit -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="d-flex justify-content-end gap-3">
+                  <a
+                    th:href="@{/admin/schedules/list/date(date=${schedule.screeningDate})}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-times me-2"></i>Hủy
+                  </a>
+                  <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save me-2"></i>Cập nhật lịch chiếu
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
+      // Khởi tạo các chức năng cần thiết
       document.addEventListener("DOMContentLoaded", function () {
+        initializeSidebarToggle();
         initializeFormValidation();
         initializeBranchRoomLogic();
       });

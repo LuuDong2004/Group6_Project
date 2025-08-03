@@ -1,215 +1,526 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaAdmin - Quản lý Chuỗi rạp</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Sử dụng CSS chung cho admin2 -->
+    <link rel="stylesheet" th:href="@{/css/admin2-common.css}" />
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .sidebar { width: 260px; background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%); color: white; position: fixed; top: 0; left: 0; height: 100vh; display: flex; flex-direction: column; transition: width 0.3s ease; z-index: 1000; }
-        .sidebar.collapsed { width: 80px; }
-        .sidebar.collapsed .sidebar-header h5,
-        .sidebar.collapsed .sidebar-header small,
-        .sidebar.collapsed .sidebar-menu span,
-        .sidebar.collapsed .mt-auto .text-white,
-        .sidebar.collapsed .mt-auto small { display: none; }
-        .sidebar.collapsed .sidebar-menu .menu-item { justify-content: center; }
-        .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 { margin-right: 0 !important; }
-        .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 { margin-right: 0 !important; }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .sidebar-header .fa-film { color: #6366f1; }
-        .sidebar-menu { display: flex; flex-direction: column; flex-grow: 1; padding-top: 1rem; }
-        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: background-color 0.2s ease, color 0.2s ease; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(255, 255, 255, 0.1); color: white; border-left: 3px solid white; padding-left: calc(1.5rem - 3px); }
-        .sidebar.collapsed .menu-item:hover, .sidebar.collapsed .menu-item.active { border-left: none; padding-left: 1.5rem; }
-        .sidebar.collapsed .menu-item.active { background-color: #4f46e5; }
-        .menu-item i { width: 20px; margin-right: 0.75rem; text-align: center; }
-        .sidebar.collapsed .menu-item i { margin-right: 0; font-size: 1.25rem; }
-        .main-content-wrapper { margin-left: 260px; transition: margin-left 0.3s ease; padding-top: 70px; }
-        .main-content-wrapper.expanded { margin-left: 80px; }
-        .header-custom { position: fixed; top: 0; left: 260px; right: 0; height: 70px; background-color: white; border-bottom: 1px solid #e5e7eb; z-index: 999; transition: left 0.3s ease; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
-        .main-content-wrapper.expanded .header-custom { left: 80px; }
-        .chain-list-section * { box-sizing: border-box; }
-        .chain-list-section { color: #334155; }
-        .chain-list-section .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .chain-list-section .page-title { font-size: 24px; font-weight: 700; color: #1e293b; }
-        .add-chain-btn { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        .add-chain-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
-        .table-container { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow-x: auto; }
-        .chain-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .chain-table th { background: #f8fafc; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 1px solid #e2e8f0; text-transform: uppercase; }
-        .chain-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 14px; }
-        .chain-table tr:hover { background: #f8fafc; }
-        .actions { display: flex; gap: 6px; }
-        .action-btn { width: 28px; height: 28px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 13px; }
-        .edit-btn { background: #e0e7ff; color: #4338ca; }
-        .edit-btn:hover { background: #c7d2fe; }
-        .delete-btn { background: #fee2e2; color: #ef4444; }
-        .delete-btn:hover { background: #fecaca; }
-        .view-btn {
-            background: #dbeafe;
-            color: #2563eb;
+      * {
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+
+      .sidebar-custom {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          #4f46e5 0%,
+          #7c3aed 100%
+        ); /* Indigo to Purple gradient */
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+      .sidebar.collapsed {
+        width: 80px;
+      }
+      .sidebar.collapsed .sidebar-header h5,
+      .sidebar.collapsed .sidebar-header small,
+      .sidebar.collapsed .sidebar-menu span,
+      .sidebar.collapsed .mt-auto .text-white,
+      .sidebar.collapsed .mt-auto small {
+        display: none;
+      }
+      .sidebar.collapsed .sidebar-menu .menu-item {
+        justify-content: center;
+      }
+      .sidebar.collapsed .sidebar-header .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar.collapsed .mt-auto .bg-white.rounded-circle.p-2.me-3 {
+        margin-right: 0 !important;
+      }
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-header .fa-film {
+        color: #6366f1;
+      }
+      .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding-top: 1rem;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      .menu-item:hover,
+      .menu-item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: calc(1.5rem - 3px);
+      }
+      .sidebar.collapsed .menu-item:hover,
+      .sidebar.collapsed .menu-item.active {
+        border-left: none;
+        padding-left: 1.5rem;
+      }
+      .sidebar.collapsed .menu-item.active {
+        background-color: #4f46e5;
+      }
+      .menu-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+      .sidebar.collapsed .menu-item i {
+        margin-right: 0;
+        font-size: 1.25rem;
+      }
+      .main-content-wrapper {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        padding-top: 70px;
+      }
+      .main-content-wrapper.expanded {
+        margin-left: 80px;
+      }
+      .header-custom {
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        height: 70px;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        transition: left 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+      }
+      .main-content-wrapper.expanded .header-custom {
+        left: 80px;
+      }
+      .chain-list-section * {
+        box-sizing: border-box;
+      }
+      .chain-list-section {
+        color: #334155;
+      }
+      .chain-list-section .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+      .chain-list-section .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .add-chain-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .add-chain-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+      .chain-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+      }
+      .chain-table th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        text-transform: uppercase;
+      }
+      .chain-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 14px;
+      }
+      .chain-table tr:hover {
+        background: #f8fafc;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-size: 13px;
+      }
+      .edit-btn {
+        background: #e0e7ff;
+        color: #4338ca;
+      }
+      .edit-btn:hover {
+        background: #c7d2fe;
+      }
+      .delete-btn {
+        background: #fee2e2;
+        color: #ef4444;
+      }
+      .delete-btn:hover {
+        background: #fecaca;
+      }
+      .view-btn {
+        background: #dbeafe;
+        color: #2563eb;
+      }
+      .view-btn:hover {
+        background: #bfdbfe;
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 80px;
         }
-        .view-btn:hover {
-            background: #bfdbfe;
+        .sidebar .sidebar-header h5,
+        .sidebar .sidebar-header small,
+        .sidebar .sidebar-menu span,
+        .sidebar .mt-auto .text-white,
+        .sidebar .mt-auto small {
+          display: none;
         }
-        @media (max-width: 768px) { .sidebar { width: 80px; } .sidebar .sidebar-header h5, .sidebar .sidebar-header small, .sidebar .sidebar-menu span, .sidebar .mt-auto .text-white, .sidebar .mt-auto small { display: none; } .sidebar .sidebar-menu .menu-item { justify-content: center; } .sidebar .sidebar-menu .menu-item i { margin-right: 0; font-size: 1.25rem; } .main-content-wrapper { margin-left: 80px; } .header-custom { left: 80px; padding: 0 1rem; } .header-custom .flex-grow-1 { display: none; } .chain-list-section .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
+        .sidebar .sidebar-menu .menu-item {
+          justify-content: center;
+        }
+        .sidebar .sidebar-menu .menu-item i {
+          margin-right: 0;
+          font-size: 1.25rem;
+        }
+        .main-content-wrapper {
+          margin-left: 80px;
+        }
+        .header-custom {
+          left: 80px;
+          padding: 0 1rem;
+        }
+        .header-custom .flex-grow-1 {
+          display: none;
+        }
+        .chain-list-section .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+      }
     </style>
-</head>
-<body>
-<div th:replace="~{fragments/sidebar :: sidebar}"></div>
-<div class="main-content-wrapper" id="mainContentWrapper">
-    <header class="header-custom shadow-sm">
+  </head>
+  <body>
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="main-content-wrapper" id="mainContentWrapper">
+      <header class="header-custom shadow-sm">
         <div class="d-flex align-items-center">
-            <a href="/admin/branches" class="btn btn-link text-secondary me-2"><i class="fas fa-arrow-left"></i></a>
-            <h4 class="mb-0 fw-semibold text-gray-700">Quản lý Chuỗi rạp</h4>
+          <a href="/admin/branches" class="btn btn-link text-secondary me-2"
+            ><i class="fas fa-arrow-left"></i
+          ></a>
+          <h4 class="mb-0 fw-semibold text-gray-700">Quản lý Chuỗi rạp</h4>
         </div>
-    </header>
-    <div class="container-fluid p-4">
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </header>
+      <div class="container-fluid p-4">
+        <div
+          th:if="${success}"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div
+          th:if="${error}"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
         <div id="chainListView" class="chain-list-section">
-            <div class="page-header">
-                <h1 class="page-title">Danh sách Chuỗi rạp</h1>
-                <button class="add-chain-btn" data-bs-toggle="modal" data-bs-target="#addChainModal">
-                    <i class="fas fa-plus me-1"></i> Thêm Chuỗi rạp
-                </button>
-            </div>
-            <!-- Form search -->
-            <form method="get" action="" class="mb-3 d-flex" style="gap: 10px;">
-                <input type="text" name="search" placeholder="Tìm kiếm theo tên chuỗi rạp" th:value="${search}" class="form-control" style="width: 250px;">
-                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-            </form>
-            <div class="table-container mb-4">
-                <table class="chain-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên chuỗi rạp</th>
-                        <th>Mô tả</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="chain : ${cinemaChains}">
-                        <td th:text="${chain.id}"></td>
-                        <td th:text="${chain.name}"></td>
-                        <td th:text="${chain.description}"></td>
-                        <td>
-                            <div class="actions">
-                                <a th:href="@{/admin/cinema-chains/view/{id}(id=${chain.id})}" class="action-btn view-btn" title="Xem chi tiết">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a th:href="@{/admin/cinema-chains/edit/{id}(id=${chain.id})}" class="action-btn edit-btn" title="Sửa"><i class="fas fa-pencil-alt"></i></a>
-<!--                                <a th:href="@{/admin/cinema-chains/delete/{id}(id=${chain.id})}" class="action-btn delete-btn" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa chuỗi rạp này?');"><i class="fas fa-trash-alt"></i></a>-->
-                            </div>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(cinemaChains)}">
-                        <td colspan="4" class="text-center">Không có chuỗi rạp nào để hiển thị.</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination controls -->
-            <div class="d-flex justify-content-center mt-4">
-                <nav th:if="${totalPages > 1}">
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage - 1},size=${pageSize},search=${search})}">Trước</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${i},size=${pageSize},search=${search})}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/cinema-chains(page=${currentPage + 1},size=${pageSize},search=${search})}">Sau</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+          <div class="page-header">
+            <h1 class="page-title">Danh sách Chuỗi rạp</h1>
+            <button
+              class="add-chain-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#addChainModal"
+            >
+              <i class="fas fa-plus me-1"></i> Thêm Chuỗi rạp
+            </button>
+          </div>
+          <!-- Form search -->
+          <form method="get" action="" class="mb-3 d-flex" style="gap: 10px">
+            <input
+              type="text"
+              name="search"
+              placeholder="Tìm kiếm theo tên chuỗi rạp"
+              th:value="${search}"
+              class="form-control"
+              style="width: 250px"
+            />
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+          </form>
+          <div class="table-container mb-4">
+            <table class="chain-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên chuỗi rạp</th>
+                  <th>Mô tả</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="chain : ${cinemaChains}">
+                  <td th:text="${chain.id}"></td>
+                  <td th:text="${chain.name}"></td>
+                  <td th:text="${chain.description}"></td>
+                  <td>
+                    <div class="actions">
+                      <a
+                        th:href="@{/admin/cinema-chains/view/{id}(id=${chain.id})}"
+                        class="action-btn view-btn"
+                        title="Xem chi tiết"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a
+                        th:href="@{/admin/cinema-chains/edit/{id}(id=${chain.id})}"
+                        class="action-btn edit-btn"
+                        title="Sửa"
+                        ><i class="fas fa-pencil-alt"></i
+                      ></a>
+                      <!--                                <a th:href="@{/admin/cinema-chains/delete/{id}(id=${chain.id})}" class="action-btn delete-btn" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa chuỗi rạp này?');"><i class="fas fa-trash-alt"></i></a>-->
+                    </div>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(cinemaChains)}">
+                  <td colspan="4" class="text-center">
+                    Không có chuỗi rạp nào để hiển thị.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination controls -->
+          <div class="d-flex justify-content-center mt-4">
+            <nav th:if="${totalPages > 1}">
+              <ul class="pagination">
+                <li
+                  class="page-item"
+                  th:classappend="${currentPage == 0} ? 'disabled'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/cinema-chains(page=${currentPage - 1},size=${pageSize},search=${search})}"
+                    >Trước</a
+                  >
+                </li>
+                <li
+                  class="page-item"
+                  th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                  th:classappend="${i == currentPage} ? 'active'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/cinema-chains(page=${i},size=${pageSize},search=${search})}"
+                    th:text="${i + 1}"
+                  ></a>
+                </li>
+                <li
+                  class="page-item"
+                  th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'"
+                >
+                  <a
+                    class="page-link"
+                    th:href="@{/admin/cinema-chains(page=${currentPage + 1},size=${pageSize},search=${search})}"
+                    >Sau</a
+                  >
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
-    </div>
-    <!-- Modal Thêm Chuỗi rạp -->
-    <div class="modal fade" id="addChainModal" tabindex="-1">
+      </div>
+      <!-- Modal Thêm Chuỗi rạp -->
+      <div class="modal fade" id="addChainModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <form th:action="@{/admin/cinema-chains/add}" method="post" th:object="${cinemaChain}">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Thêm chuỗi rạp mới</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Tên chuỗi rạp</label>
-                            <input type="text" class="form-control" th:field="*{name}" required>
-                            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Mô tả</label>
-                            <textarea class="form-control" th:field="*{description}" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Thêm chuỗi rạp</button>
-                    </div>
-                </form>
-            </div>
+          <div class="modal-content">
+            <form
+              th:action="@{/admin/cinema-chains/add}"
+              method="post"
+              th:object="${cinemaChain}"
+            >
+              <div class="modal-header">
+                <h5 class="modal-title">Thêm chuỗi rạp mới</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Tên chuỗi rạp</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    th:field="*{name}"
+                    required
+                  />
+                  <div
+                    th:if="${#fields.hasErrors('name')}"
+                    th:errors="*{name}"
+                    class="text-danger"
+                  ></div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Mô tả</label>
+                  <textarea
+                    class="form-control"
+                    th:field="*{description}"
+                    rows="2"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Hủy
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Thêm chuỗi rạp
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeDashboardBehavior();
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          initializeDashboardBehavior();
         });
         function initializeDashboardBehavior() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const mainContentWrapper = document.getElementById('mainContentWrapper');
-            if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
-            function toggleSidebar() {
-                sidebar.classList.toggle('collapsed');
-                mainContentWrapper.classList.toggle('expanded');
+          const sidebarToggle = document.getElementById("sidebarToggle");
+          const sidebar = document.getElementById("sidebar");
+          const mainContentWrapper =
+            document.getElementById("mainContentWrapper");
+          if (!sidebarToggle || !sidebar || !mainContentWrapper) return;
+          function toggleSidebar() {
+            sidebar.classList.toggle("collapsed");
+            mainContentWrapper.classList.toggle("expanded");
+          }
+          sidebarToggle.addEventListener("click", toggleSidebar);
+          function checkViewport() {
+            if (window.innerWidth <= 992) {
+              if (!sidebar.classList.contains("collapsed")) {
+                toggleSidebar();
+              }
             }
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            function checkViewport() {
-                if (window.innerWidth <= 992) {
-                    if (!sidebar.classList.contains('collapsed')) {
-                        toggleSidebar();
-                    }
-                }
-            }
-            checkViewport();
-            window.addEventListener('resize', checkViewport);
+          }
+          checkViewport();
+          window.addEventListener("resize", checkViewport);
         }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput) {
-                let lastValue = searchInput.value;
-                searchInput.addEventListener('input', function() {
-                    if (this.value === '' && lastValue !== '') {
-                        this.form.submit();
-                    }
-                    lastValue = this.value;
-                });
-            }
+      </script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const searchInput = document.querySelector('input[name="search"]');
+          if (searchInput) {
+            let lastValue = searchInput.value;
+            searchInput.addEventListener("input", function () {
+              if (this.value === "" && lastValue !== "") {
+                this.form.submit();
+              }
+              lastValue = this.value;
+            });
+          }
         });
-    </script>
-</div>
-</body>
-</html> 
+      </script>
+    </div>
+  </body>
+</html>

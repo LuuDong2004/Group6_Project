@@ -107,9 +107,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Convert ScreeningSchedule entity to DTO without related entity data
-     */
     private ScreeningScheduleDto convertToDto(ScreeningSchedule screeningSchedule) {
         ScreeningScheduleDto dto = new ScreeningScheduleDto();
         dto.setId(screeningSchedule.getId());
@@ -123,13 +120,13 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
             dto.setBranchId(screeningSchedule.getBranch().getId());
         }
         if (screeningSchedule.getScreeningDate() != null) {
-            // Xử lý cả java.util.Date và java.sql.Date
+            
             java.util.Date date = screeningSchedule.getScreeningDate();
             if (date instanceof java.sql.Date) {
-                // Nếu là java.sql.Date, sử dụng toLocalDate() trực tiếp
+              
                 dto.setScreeningDate(((java.sql.Date) date).toLocalDate());
             } else {
-                // Nếu là java.util.Date, convert qua Instant
+             
                 dto.setScreeningDate(date.toInstant()
                         .atZone(java.time.ZoneId.systemDefault()).toLocalDate());
             }
@@ -173,11 +170,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         return entity;
     }
 
-    /**
-     * Convert ScreeningSchedule entity to DTO with related entity data for display
-     * This method manually maps only the required fields to avoid unwanted
-     * relationship loading
-     */
     private ScreeningScheduleDto convertToDtoWithRelatedData(ScreeningSchedule screeningSchedule) {
         ScreeningScheduleDto dto = convertToDto(screeningSchedule);
         // Set movie information
@@ -201,9 +193,6 @@ public class AdminScheduleServiceImpl implements IAdminScheduleService {
         return dto;
     }
 
-    /**
-     * Calculate and set the correct end time based on movie duration
-     */
     private void calculateAndSetEndTime(ScreeningScheduleDto screeningScheduleDto) {
         if (screeningScheduleDto.getMovieId() != null && screeningScheduleDto.getStartTime() != null) {
             Optional<Movie> movieOpt = movieRepository.findById(screeningScheduleDto.getMovieId());
