@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${person != null ? person.name : 'Chi tiết'}">Chi tiết</title>
+    <link rel="stylesheet" th:href="@{/assets/css/style-starter.css}">
+    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        .person-detail-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .person-detail-main {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .person-detail-image {
+            flex: 0 0 300px;
+        }
+        .person-detail-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .person-detail-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        .person-detail-info h1 {
+            color: #e67e22;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        .person-detail-info p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .person-detail-info b {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+        .person-type-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .actor-badge {
+            background: #3498db;
+            color: white;
+        }
+        .director-badge {
+            background: #e67e22;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .person-detail-main {
+                flex-direction: column;
+            }
+            .person-detail-image {
+                flex: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- header -->
+    <header id="site-header" class="w3l-header fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+            <div class="container">
+                <h1><a class="navbar-brand" th:href="@{/}"><span class="fa fa-play icon-log" aria-hidden="true"></span> MyShowz </a></h1>
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa icon-expand fa-bars"></span>
+                    <span class="fa icon-close fa-times"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}">Home</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" th:href="@{/movie/view}">Movies</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/movie_theater}">Movie Theater</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/contact}">Contact</a>
+                        </li>
+                    </ul>
+                    <div class="Login_SignUp" id="login" style="font-size: 2rem ; display: inline-block; position: relative;">
+                        <a class="nav-link" th:href="@{/login}"><i class="fa fa-user-circle-o"></i></a>
+                    </div>
+                    <div class="mobile-position">
+                        <nav class="navigation">
+                            <div class="theme-switch-wrapper">
+                                <label class="theme-switch" for="checkbox">
+                                    <input type="checkbox" id="checkbox">
+                                    <div class="mode-container">
+                                        <i class="gg-sun"></i>
+                                        <i class="gg-moon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- breadcrumbs -->
+    <div class="w3l-breadcrumbs">
+        <nav id="breadcrumbs" class="breadcrumbs">
+            <div class="container page-wrapper">
+                <a th:href="@{/}">Home</a> » 
+                <a th:href="@{/movie/view}">Movies</a> » 
+                <span class="breadcrumb_last" th:text="${person != null ? person.name : 'Chi tiết'}">Chi tiết</span>
+            </div>
+        </nav>
+    </div>
+
+    <div class="person-detail-container" th:if="${person != null}">
+        <div class="person-detail-main">
+            <div class="person-detail-image">
+                <img th:if="${person.imageUrl != null and !person.imageUrl.isEmpty()}" 
+                     th:src="@{${person.imageUrl}}" 
+                     th:alt="${person.name}" 
+                     alt="Person Image">
+                <img th:if="${person.imageUrl == null or person.imageUrl.isEmpty()}" 
+                     src="/assets/images/a1.jpg" 
+                     th:alt="${person.name}" 
+                     alt="Default Person Image">
+            </div>
+            <div class="person-detail-info">
+                <div th:if="${personType == 'actor'}" class="person-type-badge actor-badge">Diễn viên</div>
+                <div th:if="${personType == 'director'}" class="person-type-badge director-badge">Đạo diễn</div>
+                
+                <h1 th:text="${person.name}">Tên</h1>
+                
+                <p th:if="${person.description != null and !person.description.isEmpty()}">
+                    <b>Mô tả:</b> <span th:text="${person.description}">Mô tả</span>
+                </p>
+                
+                <p th:if="${person.description == null or person.description.isEmpty()}">
+                    <b>Mô tả:</b> <span style="color: #ccc;">Chưa có mô tả</span>
+                </p>
+                
+                <div style="margin-top: 30px;">
+                    <a th:href="@{/movie/view}" class="btn btn-primary">Quay lại danh sách phim</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${person == null}" class="text-center" style="padding: 50px; color: #ccc;">
+        <h2>Không tìm thấy thông tin</h2>
+        <p>Không tìm thấy thông tin diễn viên/đạo diễn này.</p>
+        <a th:href="@{/movie/view}" class="btn btn-primary">Quay lại danh sách phim</a>
+    </div>
+
+    <script th:src="@{/assets/js/theme-change.js}"></script>
+</body>
+</html> 

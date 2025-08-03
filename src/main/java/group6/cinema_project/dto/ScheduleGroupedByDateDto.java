@@ -10,9 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * DTO representing schedules grouped by date
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -38,5 +38,12 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query("SELECT m FROM Movie m LEFT JOIN m.rating r ORDER BY r.code DESC")
     List<Movie> findTop8ByOrderByRatingDesc(Pageable pageable);
 
+    
+    @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.actors LEFT JOIN FETCH m.directors ORDER BY m.rating DESC")
+    List<Movie> findTop8ByOrderByRatingDesc();
+    
+    @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.actors LEFT JOIN FETCH m.directors ORDER BY m.releaseDate DESC")
     List<Movie> findTop8ByOrderByReleaseDateDesc();
+
+
 }

@@ -5,7 +5,6 @@ import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Genre;
 
 import group6.cinema_project.service.User.IMovieService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.PageRequest;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 public class MovieService implements IMovieService {
     @Autowired
     private MovieRepository movieReponsitory;
-    @Autowired
-    private ModelMapper modelMapper;
 
     // public MovieService() {
     // }
@@ -67,11 +64,26 @@ public class MovieService implements IMovieService {
                 .collect(Collectors.toList());
     }
 
-    public List<MovieDto> findMovieById(Integer moiveId) {
-        List<Movie> movies = movieReponsitory.findMovieById(moiveId);
+    @Override
+    public List<MovieDto> findMovieById(Integer movieId) {
+        List<Movie> movies = movieReponsitory.findMovieById(movieId);
         return movies.stream()
                 .map(this::convertToBasicDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public MovieDto getMovieById(Integer movieId) {
+        return movieReponsitory.findById(movieId)
+                .map(this::convertToBasicDto)
+                .orElse(null);
+    }
+
+    @Override
+    public MovieDto getMovieDetail(Integer movieId) {
+        return movieReponsitory.findById(movieId)
+                .map(this::convertToBasicDto)
+                .orElse(null);
     }
 
     public List<MovieDto> getTopMoviesToday() {

@@ -10,9 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
 import java.util.Set;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -47,13 +47,16 @@ public class MovieDto {
     private String trailer;
     private String status;
 
-    // Danh sách tên các đạo diễn, không phải đối tượng Director
-    private Set<String> directors;
-
-    // Danh sách tên các diễn viên, không phải đối tượng Actor
-    private Set<String> actors;
-
-    // Các field tạm thời để hiển thị trong template (sẽ được set từ service)
+    // Thông tin hiển thị đã được format
     private String ratingDisplay; // Hiển thị rating dạng "G - Mọi lứa tuổi"
     private String genreDisplay; // Hiển thị genre dạng "Hành động, Hài kịch"
+
+    // Danh sách đạo diễn với thông tin chi tiết
+    private List<PersonSimpleDto> directors;
+
+    // Danh sách diễn viên với thông tin chi tiết
+    private List<PersonSimpleDto> actors;
+
+    // Danh sách review
+    private List<ReviewDto> reviews;
 }
