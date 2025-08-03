@@ -40,9 +40,9 @@ import group6.cinema_project.dto.ScheduleTimeSlotDto;
 import group6.cinema_project.dto.ScreeningRoomDto;
 import group6.cinema_project.dto.ScreeningScheduleDto;
 import group6.cinema_project.entity.Branch;
+import group6.cinema_project.entity.Enum.ScheduleStatus;
 import group6.cinema_project.entity.ScreeningRoom;
 import group6.cinema_project.entity.ScreeningSchedule;
-import group6.cinema_project.entity.Enum.ScheduleStatus;
 import group6.cinema_project.exception.ScheduleConflictException;
 import group6.cinema_project.service.Admin.IAdminBranchService;
 import group6.cinema_project.service.Admin.IAdminMovieService;
@@ -1417,6 +1417,7 @@ public class AdminScheduleController {
                         roomData.put("name", room.getName());
                         roomData.put("capacity", room.getCapacity());
                         roomData.put("type", room.getType());
+                        roomData.put("status", room.getStatus());
                         log.debug("Room data: {}", roomData);
                         return roomData;
                     })

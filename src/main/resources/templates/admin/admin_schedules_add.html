@@ -805,12 +805,20 @@
               '<option value="">-- Chọn phòng chiếu --</option>';
 
             if (rooms && rooms.length > 0) {
-              rooms.forEach((room) => {
-                const option = document.createElement("option");
-                option.value = room.id;
-                option.textContent = `${room.name} (Sức chứa: ${room.capacity})`;
-                roomSelect.appendChild(option);
-              });
+              // Filter ra những phòng đang bảo trì
+              const availableRooms = rooms.filter(room => room.status !== 'MAINTENANCE');
+              
+              if (availableRooms.length > 0) {
+                availableRooms.forEach((room) => {
+                  const option = document.createElement("option");
+                  option.value = room.id;
+                  option.textContent = `${room.name} (Sức chứa: ${room.capacity})`;
+                  roomSelect.appendChild(option);
+                });
+              } else {
+                roomSelect.innerHTML =
+                  '<option value="">-- Tất cả phòng đang bảo trì --</option>';
+              }
             } else {
               roomSelect.innerHTML =
                 '<option value="">-- Không có phòng chiếu --</option>';
