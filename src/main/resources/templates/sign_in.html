@@ -6,7 +6,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Login - Cinema Booking</title>
+	<title>Đăng nhập - Đặt vé xem phim</title>
 	<link rel="stylesheet" type="text/css" th:href="@{/assets/css/as-alert-message.min.css}">
 	<link rel="stylesheet" type="text/css"
 		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
@@ -153,46 +153,46 @@
 	<!-- Register Form -->
 	<div class="form-container sign-up-container">
 		<form th:action="@{/register}" th:object="${user}" method="post">
-			<h1>Create Account</h1>
+			<h1>Tạo tài khoản</h1>
 			<span>Đăng ký tài khoản để đặt vé xem phim</span>
 
 			<!-- Hiển thị thông báo lỗi -->
 			<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
 			<!-- Form fields - cần điều chỉnh theo UserRegistrationDto -->
-			<input th:field="*{userName}" type="text" placeholder="Username" required />
+			<input th:field="*{userName}" type="text" placeholder="Tên đăng nhập" required />
 			<span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" class="error"></span>
 
 			<input th:field="*{email}" type="email" placeholder="Email" required />
 			<span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
 
-			<input th:field="*{dateOfBirth}" type="date" placeholder="Date of Birth" />
+			<input th:field="*{dateOfBirth}" type="date" placeholder="Ngày sinh" />
 			<span th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" class="error"></span>
-			<input th:field="*{phone}" type="tel" placeholder="Phone" required />
+			<input th:field="*{phone}" type="tel" placeholder="Số điện thoại" required />
 			<span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
-			<input th:field="*{address}" type="text" placeholder="Address" required />
+			<input th:field="*{address}" type="text" placeholder="Địa chỉ" required />
 			<span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="error"></span>
-			<input th:field="*{password}" type="password" placeholder="Password" required />
+			<input th:field="*{password}" type="password" placeholder="Mật khẩu" required />
 			<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
-			<input th:field="*{confirmPassword}" type="password" placeholder="Confirm Password" required />
+			<input th:field="*{confirmPassword}" type="password" placeholder="Xác nhận mật khẩu" required />
 			<span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
 
-			<button type="submit">Sign Up</button>
+			<button type="submit">Đăng ký</button>
 		</form>
 	</div>
 
 	<!-- Login Form -->
 	<div class="form-container sign-in-container">
 		<form th:action="@{/login}" method="post" style="color: var(--theme-title);">
-			<h1>Sign in</h1>
+			<h1>Đăng nhập</h1>
 			<span>Đăng nhập để đặt vé xem phim</span>
 
 			<div class="social-container">
-				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
+<!--				<a href="#" class="social" style="color: var(&#45;&#45;theme-title);"><i class="fab fa-facebook-f"></i></a>-->
 				<a href="/oauth2/authorization/google" class="social" style="color: var(--theme-title);"><i class="fab fa-google-plus-g"></i></a>
-				<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-linkedin-in"></i></a>
+<!--				<a href="#" class="social" style="color: var(&#45;&#45;theme-title);"><i class="fab fa-linkedin-in"></i></a>-->
 			</div>
-			<span>or use your account</span>
+			<span>hoặc sử dụng tài khoản của bạn</span>
 
 			<!-- Hiển thị thông báo lỗi và thành công -->
 			<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -201,26 +201,26 @@
 
 			<!-- Spring Security sử dụng email và password mặc định -->
 			<input name="email" type="text" placeholder="Email" required />
-			<input name="password" type="password" placeholder="Password" required />
+			<input name="password" type="password" placeholder="Mật khẩu" required />
 
 
-			<a href="/forgot-password">Forgot your password?</a>
+			<a href="/forgot-password">Quên mật khẩu?</a>
 
-			<button type="submit">Sign In</button>
+			<button type="submit">Đăng nhập</button>
 		</form>
 	</div>
 
 	<div class="overlay-container">
 		<div class="overlay">
 			<div class="overlay-panel overlay-left">
-				<h1>Welcome Back!</h1>
+				<h1>Chào mừng trở lại!</h1>
 				<p>Đăng nhập để tiếp tục đặt vé xem phim</p>
-				<button class="ghost" id="signIn">Sign In</button>
+				<button class="ghost" id="signIn">Đăng nhập</button>
 			</div>
 			<div class="overlay-panel overlay-right">
-				<h1>Hello, Friend!</h1>
+				<h1>Xin chào, bạn!</h1>
 				<p>Đăng ký tài khoản và đặt vé xem phim ngay hôm nay!</p>
-				<button class="ghost" id="signUp">Sign Up</button>
+				<button class="ghost" id="signUp">Đăng ký</button>
 			</div>
 		</div>
 	</div>
