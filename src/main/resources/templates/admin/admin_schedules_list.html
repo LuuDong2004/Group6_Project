@@ -953,12 +953,7 @@
         updateScheduleStatusDisplay();
       });
 
-      /**
-       * Cập nhật hiển thị trạng thái cho tất cả schedule items
-       * Sửa lỗi hiển thị trạng thái bằng cách xử lý đúng enum values
-       */
-      function updateScheduleStatusDisplay() {
-        const scheduleItems = document.querySelectorAll(".schedule-item");
+   
 
         scheduleItems.forEach((item) => {
           const statusElement = item.querySelector(".status-badge");
@@ -1000,8 +995,7 @@
             }
           }
         });
-      }
-
+      
       function showScheduleDetails(scheduleId) {
         // Hiển thị chi tiết lịch chiếu
         const action = confirm(
