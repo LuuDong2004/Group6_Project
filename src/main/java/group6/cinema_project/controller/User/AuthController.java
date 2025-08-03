@@ -88,18 +88,25 @@ public class AuthController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
+        // Validation bổ sung cho password matching
+        if (!registrationDto.isPasswordsMatching()) {
+            result.rejectValue("confirmPassword", "error.confirmPassword", "Mật khẩu xác nhận không khớp!");
+        }
+
         // Kiểm tra validation errors
         if (result.hasErrors()) {
+            model.addAttribute("loginUser", new UserLoginDto());
             return "sign_in";
         }
 
         try {
             userService.registerUser(registrationDto);
             redirectAttributes.addFlashAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-            return "redirect:/users/login";
+            return "redirect:/login";
 
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("loginUser", new UserLoginDto());
             return "sign_in";
         }
     }

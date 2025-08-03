@@ -352,7 +352,10 @@
       <div id="dashboardView" class="dashboard-section">
         <!-- Welcome Section -->
         <div class="welcome-section">
-          <h1 class="welcome-title">Chào mừng, Admin!</h1>
+          <div class="welcome-message" th:if="${currentUser != null}"
+               style="color: Black; margin-right: 15px; font-size: 0.9rem; display: inline-flex; align-items: center; white-space: nowrap; max-width: 1000px; overflow: hidden; text-overflow: ellipsis;">
+            <h1 class="welcome-title">Chào mừng, <strong th:text="${currentUser.userName}"></strong></h1>
+          </div>
           <p class="welcome-subtitle">
             Quản lý hệ thống rạp chiếu phim của bạn
           </p>

@@ -52,22 +52,22 @@ public class UserServiceImpl implements IUserService {
     public UserDto registerUser(UserRegistrationDto registrationDto) {
         // Validate password matching
         if (!registrationDto.isPasswordsMatching()) {
-            throw new IllegalArgumentException("Passwords do not match");
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp!");
         }
 
         // Check if userName already exists
 //        if (isUsernameExists(registrationDto.getUserName())) {
-//            throw new IllegalArgumentException("Username already exists");
+//            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại!");
 //        }
 
         // Check if email already exists
         if (isEmailExists(registrationDto.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Email đã được sử dụng!");
         }
 
         // Check if phone already exists
         if (isPhoneExists(registrationDto.getPhone())) {
-            throw new IllegalArgumentException("Phone number already exists");
+            throw new IllegalArgumentException("Số điện thoại đã được sử dụng!");
         }
 
         // Create new user entity
@@ -91,14 +91,14 @@ public class UserServiceImpl implements IUserService {
         Optional<User> userOpt = userRepository.findByEmail(loginDto.getEmail());
 
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new IllegalArgumentException("Email hoặc mật khẩu không đúng!");
         }
 
         User user = userOpt.get();
 
         // In production, use password hashing comparison
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new IllegalArgumentException("Email hoặc mật khẩu không đúng!");
         }
 
 

@@ -20,6 +20,41 @@
 			margin-top: 2px;
 			display: block;
 		}
+		
+		.alert {
+			padding: 12px 16px;
+			margin: 10px 0;
+			border-radius: 8px;
+			font-size: 0.95em;
+			font-weight: 500;
+			width: 100%;
+			box-sizing: border-box;
+			position: relative;
+			animation: slideIn 0.3s ease-in-out;
+		}
+		
+		.alert-success {
+			background-color: #d4edda;
+			border: 1px solid #c3e6cb;
+			color: #155724;
+		}
+		
+		.alert-danger {
+			background-color: #f8d7da;
+			border: 1px solid #f5c6cb;
+			color: #721c24;
+		}
+		
+		@keyframes slideIn {
+			from {
+				opacity: 0;
+				transform: translateY(-10px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
 		.admin-link {
 			position: fixed;
 			top: 20px;
@@ -48,18 +83,18 @@
 			margin-right: 8px;
 		}
 		.container_signup_signin {
-			max-width: 900px;
+			max-width: 700px;
 			margin: 40px auto;
 			box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 			border-radius: 18px;
 			background: #fff;
 			display: flex;
 			flex-direction: row;
-			min-height: 540px;
+			min-height: 660px;
 		}
 		.form-container {
 			flex: 1;
-			padding: 40px 32px 32px 32px;
+			/*padding: 40px 32px 32px 32px;*/
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -135,7 +170,7 @@
 			<span th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" class="error"></span>
 			<input th:field="*{phone}" type="tel" placeholder="Phone" required />
 			<span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
-			<input th:field="*{address}" type="text" placeholder="Address" />
+			<input th:field="*{address}" type="text" placeholder="Address" required />
 			<span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="error"></span>
 			<input th:field="*{password}" type="password" placeholder="Password" required />
 			<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
