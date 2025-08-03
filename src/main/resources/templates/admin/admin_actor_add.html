@@ -311,9 +311,8 @@
         </div>
 
         <form
-          th:action="@{/admin/actors/add}"
+          id="actorForm"
           th:object="${actor}"
-          method="post"
           enctype="multipart/form-data"
         >
           <div class="card border-0 shadow-sm rounded-3">
@@ -328,9 +327,17 @@
 
                   <div
                     id="imagePreviewContainer"
-                    class="image-preview-container mx-auto mb-3 d-none"
+                    class="image-preview-container mx-auto mb-3 d-none position-relative"
                   >
                     <img id="previewImg" src="#" alt="Xem trước ảnh" />
+                    <button
+                      type="button"
+                      id="removeImageBtn"
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 d-none"
+                      title="Xóa ảnh"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
                   </div>
 
                   <div class="upload-area" id="uploadArea">
@@ -395,7 +402,7 @@
               <a th:href="@{/admin/actors/list}" class="btn btn-secondary"
                 >Hủy</a
               >
-              <button type="submit" class="btn save-btn ms-2">
+              <button type="button" id="saveActorBtn" class="btn save-btn ms-2">
                 <i class="fas fa-save me-2"></i>Lưu lại
               </button>
             </div>
@@ -410,9 +417,20 @@
       document.addEventListener("DOMContentLoaded", function () {
         initializeSidebarToggle();
         initializeImageUpload();
+        initializeFormSubmit();
       });
 
+      function initializeSidebarToggle() {
+        const sidebar = document.querySelector('.sidebar-custom');
+        const mainContent = document.getElementById('mainContentWrapper');
+        const sidebarToggle = document.getElementById('sidebarToggle');
 
+        if (!sidebar || !mainContent || !sidebarToggle) return;
+
+        function toggleSidebar() {
+          sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('expanded');
+        }
 
         sidebarToggle.addEventListener("click", toggleSidebar);
 
@@ -435,31 +453,46 @@
       function initializeImageUpload() {
         const uploadArea = document.getElementById("uploadArea");
         const fileInput = document.getElementById("image");
-        const imagePreviewContainer = document.getElementById(
-          "imagePreviewContainer"
-        );
+        const imagePreviewContainer = document.getElementById("imagePreviewContainer");
         const previewImg = document.getElementById("previewImg");
 
-        if (!uploadArea || !fileInput || !imagePreviewContainer || !previewImg)
+        if (!uploadArea || !fileInput || !imagePreviewContainer || !previewImg) {
+          console.log("Missing elements for image upload");
           return;
+        }
 
-        const showPreview = (file) => {
+        let showPreview = (file) => {
           const reader = new FileReader();
           reader.onload = function (e) {
             previewImg.src = e.target.result;
             imagePreviewContainer.classList.remove("d-none");
+            uploadArea.style.display = 'none'; // Hide upload area when image is selected
+
+            // Show remove button
+            const removeBtn = document.getElementById('removeImageBtn');
+            if (removeBtn) {
+              removeBtn.classList.remove('d-none');
+            }
           };
           reader.readAsDataURL(file);
         };
 
+        // Click to select file
         uploadArea.addEventListener("click", () => fileInput.click());
 
+        // File input change event
         fileInput.addEventListener("change", (e) => {
           if (e.target.files.length > 0) {
-            showPreview(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file.type.startsWith('image/')) {
+              showPreview(file);
+            } else {
+              alert('Vui lòng chọn file ảnh (PNG, JPG)');
+            }
           }
         });
 
+        // Drag and drop events
         uploadArea.addEventListener("dragover", (e) => {
           e.preventDefault();
           uploadArea.classList.add("dragover");
@@ -475,10 +508,124 @@
           uploadArea.classList.remove("dragover");
           const files = e.dataTransfer.files;
           if (files.length > 0) {
-            fileInput.files = files; // Assign dropped files to the input
-            showPreview(files[0]);
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+              fileInput.files = files;
+              showPreview(file);
+            } else {
+              alert('Vui lòng chọn file ảnh (PNG, JPG)');
+            }
           }
         });
+
+        // Add remove image functionality
+        const removeBtn = document.getElementById('removeImageBtn');
+
+        if (removeBtn) {
+          removeBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            previewImg.src = '#';
+            imagePreviewContainer.classList.add('d-none');
+            removeBtn.classList.add('d-none');
+            uploadArea.style.display = 'block';
+          });
+        }
+      }
+
+      function initializeFormSubmit() {
+        const saveBtn = document.getElementById('saveActorBtn');
+        const form = document.getElementById('actorForm');
+
+        if (saveBtn && form) {
+          saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Disable button to prevent double submission
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...';
+
+            // Create FormData object
+            const formData = new FormData();
+
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const imageFile = document.getElementById('image').files[0];
+
+            // Validate required fields
+            if (!name) {
+              showAlert('Vui lòng nhập tên diễn viên!', 'error');
+              resetButton();
+              return;
+            }
+
+            // Add data to FormData
+            formData.append('name', name);
+            formData.append('description', description);
+            if (imageFile) {
+              formData.append('imageFile', imageFile);
+            }
+
+            // Send AJAX request
+            fetch('/admin/actors/api/add', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert(data.message, 'success');
+                // Redirect to list page with refresh parameter after short delay
+                setTimeout(() => {
+                  window.location.href = '/admin/actors/list?refresh=true';
+                }, 1500);
+              } else {
+                showAlert(data.message || 'Có lỗi xảy ra khi thêm diễn viên', 'error');
+                resetButton();
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showAlert('Có lỗi xảy ra khi thêm diễn viên', 'error');
+              resetButton();
+            });
+          });
+        }
+
+        function resetButton() {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Lưu lại';
+        }
+
+        function showAlert(message, type) {
+          // Remove existing alerts
+          const existingAlerts = document.querySelectorAll('.alert-custom');
+          existingAlerts.forEach(alert => alert.remove());
+
+          // Create new alert
+          const alertDiv = document.createElement('div');
+          alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show alert-custom`;
+          alertDiv.style.position = 'fixed';
+          alertDiv.style.top = '20px';
+          alertDiv.style.right = '20px';
+          alertDiv.style.zIndex = '9999';
+          alertDiv.style.minWidth = '300px';
+
+          alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+
+          document.body.appendChild(alertDiv);
+
+          // Auto remove after 5 seconds
+          setTimeout(() => {
+            if (alertDiv.parentNode) {
+              alertDiv.remove();
+            }
+          }, 5000);
+        }
       }
     </script>
   </body>

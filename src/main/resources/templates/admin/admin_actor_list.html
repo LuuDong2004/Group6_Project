@@ -460,6 +460,17 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         initializeSidebarToggle();
+
+        // Check if we need to refresh the list (when coming back from add page)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('refresh') === 'true') {
+          // Remove the refresh parameter from URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+
+          // Refresh the actor list
+          refreshActorList();
+        }
       });
 
       // Actor management functions
@@ -481,6 +492,76 @@
           document.body.appendChild(form);
           form.submit();
         }
+      }
+
+      // Function to refresh actor list via AJAX
+      function refreshActorList() {
+        fetch('/admin/actors/api/list')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              updateActorTable(data.actors);
+            }
+          })
+          .catch(error => {
+            console.error('Error refreshing actor list:', error);
+          });
+      }
+
+      // Function to update the actor table with new data
+      function updateActorTable(actors) {
+        const tbody = document.querySelector('table tbody');
+        if (!tbody) return;
+
+        if (actors.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="text-center py-4 text-muted">
+                <i class="fas fa-video fa-2x mb-2"></i>
+                <br />
+                Không có diễn viên nào được tìm thấy
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        let html = '';
+        actors.forEach(actor => {
+          const imageHtml = actor.imageUrl && actor.imageUrl.trim() !== ''
+            ? `<img src="${actor.imageUrl}" class="rounded-circle profile-img" alt="${actor.name}"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+               <div class="profile-img-placeholder d-none">${actor.name.charAt(0).toUpperCase()}</div>`
+            : `<div class="profile-img-placeholder">${actor.name.charAt(0).toUpperCase()}</div>`;
+
+          const description = actor.description && actor.description.trim() !== ''
+            ? (actor.description.length > 100 ? actor.description.substring(0, 100) + '...' : actor.description)
+            : 'Diễn viên tài năng';
+
+          html += `
+            <tr>
+              <td class="fw-bold px-4">#A${actor.id}</td>
+              <td class="px-4">${imageHtml}</td>
+              <td class="px-4">${actor.name}</td>
+              <td class="text-muted px-4">
+                <span title="${actor.description || 'Diễn viên tài năng'}">${description}</span>
+              </td>
+              <td class="text-end px-4">
+                <button class="btn btn-sm btn-outline-primary me-2"
+                        onclick="editActor(${actor.id})" title="Chỉnh sửa">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger"
+                        onclick="deleteActor(${actor.id}, '${actor.name}')"
+                        title="Xóa">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
       }
     </script>
   </body>
