@@ -1,6 +1,9 @@
 // Movie Detail Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Reset form state when page loads (to prevent issues when navigating between movies)
+    resetCommentForm();
+
     // Show comment form button
     const showCommentFormBtn = document.getElementById('showCommentFormBtn');
     const addCommentSection = document.getElementById('addCommentSection');
@@ -9,6 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
         showCommentFormBtn.addEventListener('click', function() {
             addCommentSection.style.display = 'block';
             showCommentFormBtn.style.display = 'none';
+
+            // Clear any previous messages when opening form
+            const commentMsg = document.getElementById('commentMsg');
+            const commentWarnMsg = document.getElementById('commentWarnMsg');
+            if (commentMsg) commentMsg.textContent = '';
+            if (commentWarnMsg) commentWarnMsg.textContent = '';
         });
     }
 
@@ -46,7 +55,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         commentMsg.textContent = data.message;
                         commentWarnMsg.textContent = '';
+
+                        // Reset form completely
                         userComment.value = '';
+                        userRating.value = '5';
+
+                        // Hide form and show button again
+                        addCommentSection.style.display = 'none';
+                        showCommentFormBtn.style.display = 'block';
 
                         // Reload trang để hiển thị review mới
                         setTimeout(() => {
@@ -79,4 +95,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-}); 
+
+    // Function to reset comment form state
+    function resetCommentForm() {
+        const showCommentFormBtn = document.getElementById('showCommentFormBtn');
+        const addCommentSection = document.getElementById('addCommentSection');
+        const userComment = document.getElementById('userComment');
+        const userRating = document.getElementById('userRating');
+        const commentMsg = document.getElementById('commentMsg');
+        const commentWarnMsg = document.getElementById('commentWarnMsg');
+
+        // Hide comment form and show button
+        if (addCommentSection) {
+            addCommentSection.style.display = 'none';
+        }
+        if (showCommentFormBtn) {
+            showCommentFormBtn.style.display = 'block';
+        }
+
+        // Clear form inputs
+        if (userComment) {
+            userComment.value = '';
+        }
+        if (userRating) {
+            userRating.value = '5'; // Reset to default rating
+        }
+
+        // Clear messages
+        if (commentMsg) {
+            commentMsg.textContent = '';
+        }
+        if (commentWarnMsg) {
+            commentWarnMsg.textContent = '';
+        }
+    }
+});

@@ -6,11 +6,12 @@
             <div class="brand">
                 <div class="brand-icon">
                     <i class="fas fa-film text-white"></i>
+                    <div class="welcome-message" th:if="${currentUser != null}"
+                         style="color: White; margin-right: 15px; font-size: 0.9rem; display: inline-flex; align-items: center; white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                        <span>Xin chào: <strong th:text="${currentUser.userName}"></strong></span>
+                    </div>
                 </div>
-                <div class="brand-text">
-                    <h5>CinemaAdmin</h5>
-                    <small>Dashboard</small>
-                </div>
+
             </div>
         </div>
         <nav class="sidebar-menu">
@@ -87,10 +88,7 @@
                 <div class="user-avatar">
                     <i class="fas fa-user text-white"></i>
                 </div>
-                <div class="user-details">
-                    <h6>Admin User</h6>
-                    <small></small>
-                </div>
+
             </div>
         </div>
     </div>

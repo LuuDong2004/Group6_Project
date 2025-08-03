@@ -1,22 +1,21 @@
 package group6.cinema_project.service.User.Impl;
 
-import group6.cinema_project.dto.MovieDto;
-import group6.cinema_project.dto.PersonSimpleDto;
-import group6.cinema_project.entity.Movie;
-import group6.cinema_project.entity.Genre;
-
-import group6.cinema_project.service.User.IMovieService;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
-import org.springframework.stereotype.Service;
-import group6.cinema_project.repository.User.MovieRepository;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
+import group6.cinema_project.dto.ReviewDto;
+import group6.cinema_project.entity.Genre;
+import group6.cinema_project.entity.Movie;
+import group6.cinema_project.repository.User.MovieRepository;
+import group6.cinema_project.service.User.IMovieService;
 
 @Service
 public class MovieService implements IMovieService {
@@ -225,6 +224,22 @@ public class MovieService implements IMovieService {
                     .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
                     .collect(Collectors.toList());
             dto.setActors(actors);
+        }
+
+        // Xử lý Reviews - chuyển đổi thành ReviewDto
+        if (movie.getReviews() != null && !movie.getReviews().isEmpty()) {
+            List<ReviewDto> reviews = movie.getReviews().stream()
+                    .map(review -> {
+                        ReviewDto reviewDto = new ReviewDto();
+                        reviewDto.setId(review.getId());
+                        reviewDto.setUser("User " + review.getUserId()); // Có thể cải thiện để lấy tên thật
+                        reviewDto.setComment(review.getComment());
+                        reviewDto.setRating(review.getRating());
+                        reviewDto.setDate(review.getDate());
+                        return reviewDto;
+                    })
+                    .collect(Collectors.toList());
+            dto.setReviews(reviews);
         }
 
         return dto;

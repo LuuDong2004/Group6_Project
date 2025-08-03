@@ -1,14 +1,13 @@
 package group6.cinema_project.repository.User;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 import group6.cinema_project.entity.Movie;
 
@@ -47,7 +46,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     List<Movie> findTop8ByOrderByReleaseDateDesc();
 
     /**
-     * Lấy một phim theo ID kèm thông tin genres, directors và actors (eager
+     * Lấy một phim theo ID kèm thông tin genres, directors, actors và reviews (eager
      * loading)
      * Sử dụng cho movie detail page
      */
@@ -56,6 +55,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             "LEFT JOIN FETCH m.rating " +
             "LEFT JOIN FETCH m.directors " +
             "LEFT JOIN FETCH m.actors " +
+            "LEFT JOIN FETCH m.reviews " +
             "WHERE m.id = :id")
     Optional<Movie> findByIdWithAllRelations(@Param("id") Integer id);
 
