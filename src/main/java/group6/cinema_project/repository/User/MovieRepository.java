@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 import group6.cinema_project.entity.Movie;
 
 @Repository
@@ -38,12 +40,23 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query("SELECT m FROM Movie m LEFT JOIN m.rating r ORDER BY r.code DESC")
     List<Movie> findTop8ByOrderByRatingDesc(Pageable pageable);
 
-    
     @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.actors LEFT JOIN FETCH m.directors ORDER BY m.rating DESC")
     List<Movie> findTop8ByOrderByRatingDesc();
-    
+
     @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.actors LEFT JOIN FETCH m.directors ORDER BY m.releaseDate DESC")
     List<Movie> findTop8ByOrderByReleaseDateDesc();
 
+    /**
+     * Lấy một phim theo ID kèm thông tin genres, directors và actors (eager
+     * loading)
+     * Sử dụng cho movie detail page
+     */
+    @Query("SELECT DISTINCT m FROM Movie m " +
+            "LEFT JOIN FETCH m.genres " +
+            "LEFT JOIN FETCH m.rating " +
+            "LEFT JOIN FETCH m.directors " +
+            "LEFT JOIN FETCH m.actors " +
+            "WHERE m.id = :id")
+    Optional<Movie> findByIdWithAllRelations(@Param("id") Integer id);
 
 }

@@ -41,7 +41,8 @@
         display: flex;
         flex-direction: column;
         transition: width 0.3s ease, transform 0.3s ease;
-        z-index: 1000; overflow-y: auto;
+        z-index: 1000;
+        overflow-y: auto;
       }
 
       .sidebar-custom.collapsed {
@@ -351,6 +352,15 @@
                     />
                   </div>
 
+                  <!-- Nút xóa ảnh -->
+                  <button
+                    type="button"
+                    id="removeImageBtn"
+                    class="btn btn-outline-danger btn-sm mt-2 d-none"
+                  >
+                    <i class="fas fa-trash me-1"></i>Xóa ảnh
+                  </button>
+
                   <!-- Hidden field for image URL -->
                   <input type="hidden" th:field="*{imageUrl}" id="imageUrl" />
                 </div>
@@ -405,82 +415,22 @@
       </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>`n    <script th:src="@{/js/admin-common.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Khởi tạo sidebar toggle
         initializeSidebarToggle();
-        initializeImageUpload();
-      });
 
-      
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              sidebar.classList.add("collapsed");
-            }
-          } else {
-            if (sidebar.classList.contains("collapsed")) {
-              sidebar.classList.remove("collapsed");
-            }
-          }
-        }
-
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
-      function initializeImageUpload() {
-        const uploadArea = document.getElementById("uploadArea");
-        const fileInput = document.getElementById("image");
-        const imagePreviewContainer = document.getElementById(
-          "imagePreviewContainer"
+        // Khởi tạo file upload preview với các ID tương ứng
+        initializeFileUploadPreview(
+          "uploadArea", // ID của upload area
+          "image", // ID của file input
+          "imagePreviewContainer", // ID của image preview container
+          "previewImg", // ID của preview image element
+          "removeImageBtn" // ID của remove image button
         );
-        const previewImg = document.getElementById("previewImg");
-
-        if (!uploadArea || !fileInput || !imagePreviewContainer || !previewImg)
-          return;
-
-        const showPreview = (file) => {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            previewImg.src = e.target.result;
-            imagePreviewContainer.classList.remove("d-none");
-          };
-          reader.readAsDataURL(file);
-        };
-
-        uploadArea.addEventListener("click", () => fileInput.click());
-
-        fileInput.addEventListener("change", (e) => {
-          if (e.target.files.length > 0) {
-            showPreview(e.target.files[0]);
-          }
-        });
-
-        uploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadArea.classList.add("dragover");
-        });
-
-        uploadArea.addEventListener("dragleave", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-        });
-
-        uploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("dragover");
-          const files = e.dataTransfer.files;
-          if (files.length > 0) {
-            fileInput.files = files; // Assign dropped files to the input
-            showPreview(files[0]);
-          }
-        });
-      }
+      });
     </script>
   </body>
 </html>
-

@@ -42,6 +42,25 @@
         font-size: 0.95rem;
         color: #aaa;
       }
+
+      /* Style cho link diễn viên và đạo diễn */
+      .person-link {
+        color: #3498db !important;
+        text-decoration: none !important;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+      }
+
+      .person-link:hover {
+        color: #2980b9 !important;
+        text-decoration: underline !important;
+      }
+
+      .person-link:visited {
+        color: #3498db !important;
+      }
     </style>
   </head>
   <body>
@@ -141,10 +160,7 @@
         </div>
         <div class="movie-detail-info">
           <h1 id="movieTitle" th:text="${movie.name}">Movie Name</h1>
-          <p>
-            <b>Thể loại:</b>
-            <span id="movieGenre" th:text="${movie.genre}">Genre</span>
-          </p>
+
           <p>
             <b>Đạo diễn:</b>
             <span id="movieDirector">
@@ -153,8 +169,10 @@
                 th:each="director,iter : ${movie.directors}"
               >
                 <a
+                  class="person-link"
                   th:href="@{'/person_detail?type=director&id=' + ${director.id}}"
                   th:text="${director.name}"
+                  title="Xem thông tin đạo diễn"
                 ></a
                 ><span th:if="${!iter.last}">, </span>
               </span>
@@ -172,8 +190,10 @@
                 th:each="actor,iter : ${movie.actors}"
               >
                 <a
+                  class="person-link"
                   th:href="@{'/person_detail?type=actor&id=' + ${actor.id}}"
                   th:text="${actor.name}"
+                  title="Xem thông tin diễn viên"
                 ></a
                 ><span th:if="${!iter.last}">, </span>
               </span>

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>CinemaAdmin - Quản lý Đạo diễn</title>
 
     <link
@@ -469,26 +470,6 @@
         initializeSidebarToggle();
       });
 
-
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        function checkViewport() {
-          if (window.innerWidth <= 992) {
-            if (!sidebar.classList.contains("collapsed")) {
-              sidebar.classList.add("collapsed");
-            }
-          } else {
-            if (sidebar.classList.contains("collapsed")) {
-              sidebar.classList.remove("collapsed");
-            }
-          }
-        }
-
-        checkViewport();
-        window.addEventListener("resize", checkViewport);
-      }
-
       // Director management functions
       function editDirector(directorId) {
         window.location.href = "/admin/directors/edit/" + directorId;
@@ -503,18 +484,7 @@
           form.method = "POST";
           form.action = "/admin/directors/delete/" + directorId;
 
-          // Add CSRF token if needed (Spring Security)
-          const csrfToken = document.querySelector('meta[name="_csrf"]');
-          const csrfHeader = document.querySelector(
-            'meta[name="_csrf_header"]'
-          );
-          if (csrfToken && csrfHeader) {
-            const csrfInput = document.createElement("input");
-            csrfInput.type = "hidden";
-            csrfInput.name = "_token";
-            csrfInput.value = csrfToken.getAttribute("content");
-            form.appendChild(csrfInput);
-          }
+          // CSRF đã được tắt trong Spring Security config
 
           document.body.appendChild(form);
           form.submit();

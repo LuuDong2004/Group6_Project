@@ -1,6 +1,7 @@
 package group6.cinema_project.service.User.Impl;
 
 import group6.cinema_project.dto.MovieDto;
+import group6.cinema_project.dto.PersonSimpleDto;
 import group6.cinema_project.entity.Movie;
 import group6.cinema_project.entity.Genre;
 
@@ -81,8 +82,8 @@ public class MovieService implements IMovieService {
 
     @Override
     public MovieDto getMovieDetail(Integer movieId) {
-        return movieReponsitory.findById(movieId)
-                .map(this::convertToBasicDto)
+        return movieReponsitory.findByIdWithAllRelations(movieId)
+                .map(this::convertToDetailDto)
                 .orElse(null);
     }
 
@@ -169,6 +170,62 @@ public class MovieService implements IMovieService {
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setTrailer(movie.getTrailer());
         dto.setStatus(movie.getStatus());
+
+        return dto;
+    }
+
+    /**
+     * Chuyển đổi Movie entity sang DTO với đầy đủ thông tin cho movie detail page
+     * Bao gồm genres, rating, directors, actors với eager loading
+     */
+    private MovieDto convertToDetailDto(Movie movie) {
+        MovieDto dto = new MovieDto();
+
+        // Map các field cơ bản
+        dto.setId(movie.getId());
+        dto.setName(movie.getName());
+        dto.setDescription(movie.getDescription());
+        dto.setDuration(movie.getDuration());
+        dto.setLanguage(movie.getLanguage());
+        dto.setImage(movie.getImage());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setTrailer(movie.getTrailer());
+        dto.setStatus(movie.getStatus());
+
+        // Xử lý Rating - lấy ID và set display text
+        if (movie.getRating() != null) {
+            dto.setRatingId(movie.getRating().getId());
+            dto.setRatingDisplay(movie.getRating().getCode() + " - " + movie.getRating().getDescription());
+        }
+
+        // Xử lý Genres - lấy ID và set display text
+        if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+            Set<Integer> genreIds = movie.getGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+            dto.setGenreIds(genreIds);
+
+            String genreNames = movie.getGenres().stream()
+                    .map(Genre::getName)
+                    .collect(Collectors.joining(", "));
+            dto.setGenreDisplay(genreNames);
+        }
+
+        // Xử lý Directors - chuyển đổi thành PersonSimpleDto
+        if (movie.getDirectors() != null && !movie.getDirectors().isEmpty()) {
+            List<PersonSimpleDto> directors = movie.getDirectors().stream()
+                    .map(director -> new PersonSimpleDto(director.getId(), director.getName(), director.getImageUrl()))
+                    .collect(Collectors.toList());
+            dto.setDirectors(directors);
+        }
+
+        // Xử lý Actors - chuyển đổi thành PersonSimpleDto
+        if (movie.getActors() != null && !movie.getActors().isEmpty()) {
+            List<PersonSimpleDto> actors = movie.getActors().stream()
+                    .map(actor -> new PersonSimpleDto(actor.getId(), actor.getName(), actor.getImageUrl()))
+                    .collect(Collectors.toList());
+            dto.setActors(actors);
+        }
 
         return dto;
     }
